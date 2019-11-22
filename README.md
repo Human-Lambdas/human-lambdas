@@ -15,7 +15,7 @@ you can access the api at `0.0.0.0:8000`
 The admin can be accessed at `0.0.0.0:8000/admin`
 
 ## Registration
-Registration is accessed at `/users/register` and the payload you need to `POST` should include the following: 
+To register a user you have to `POST` to `/users/register` with the following payload: 
 ```
 {'name': <str>, 'email': <str>, 'password': <str>, 'organization': <str>, 'is_admin': <bool>}
 ```
