@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'user_handler',
     'workflow_handler',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework_simplejwt'
 ]
 
 MIDDLEWARE = [
@@ -139,7 +139,10 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
          DEFAULT_PERMISSION,
-    ]
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
 }
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -157,4 +160,20 @@ REST_AUTH_SERIALIZERS = {
 }
 REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "user_handler.serializers.UserCreateSerializer",
+}
+
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+        },
+    }
 }

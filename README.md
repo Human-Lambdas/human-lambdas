@@ -20,15 +20,27 @@ To register a user you have to `POST` to `/users/register` with the following pa
 {'name': <str>, 'email': <str>, 'password': <str>, 'organization': <str>, 'is_admin': <bool>}
 ```
 
-## Login
-To login you need to `POST` to `/users/login` with the following payload: 
+## JWT 
+To get the `access` and `refresh` token you need to `POST` to `/users/token` with the following payload: 
 ```
 {'email': <str>, 'password': <str>,}
 ```
-and if the information is correct it will return a `token` in the following message: 
+and if the information is correct it will return two tokens in the following message: 
 ```
-{'email': <str>, 'token': <str>}
+{'refresh': <str>, 'access': <str>}
 ```
+
+To refresh and get the new access token you will `POST` the following to `/users/token/refresh`:
+
+```
+{'refresh': <str> }
+``` 
+
+And it will respond with the `access` token: 
+
+```
+{'access': <str> }
+``` 
 
 
 ## General information about setting up postgreSQL

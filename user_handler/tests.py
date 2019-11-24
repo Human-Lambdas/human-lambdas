@@ -1,9 +1,12 @@
+import logging
+
 from django.test import TestCase
 from rest_framework.test import APITestCase
-from rest_framework.authtoken.models import Token
 from rest_framework import status
 
 from .models import User, Organization
+
+logger = logging.getLogger(__file__)
 
 
 class TestUsers(TestCase):
@@ -25,18 +28,27 @@ class TestUsers(TestCase):
         self.assertEquals(organization.user.all()[0], user)
 
 
-class TestAPILogin(APITestCase):
+class TestAPIjwt(APITestCase):
 
     def setUp(self):
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.set_password("fooword")
         user.save()
-        self.token, _ = Token.objects.get_or_create(user=user)
+        response = self.client.post('/users/token/', {'email': "foo@bar.com", "password": "fooword"})
+        self.access_token = response.data["access"]
+        self.refresh = response.data["refresh"]
 
-    def test_login(self):
-        response = self.client.post('/users/login/', {'email': "foo@bar.com", "password": "fooword"})
+    def test_token(self):
+        response = self.client.post('/users/token/', {'email': "foo@bar.com", "password": "fooword"})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
-        self.assertEqual(response.data['token'], self.token.key)
+
+    def test_authorization(self):
+        headers = {
+            "Authorization": "Bearer {}".format(self.access_token)
+        }
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.access_token)
+        response = self.client.get('/users/hello/', headers=headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
 
 class TestAPIRegistration(APITestCase):
