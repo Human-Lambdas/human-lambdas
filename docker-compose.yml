@@ -21,7 +21,7 @@ services:
 #   I used the name postgres-data but you can changed it to something else.
     volumes:
       - ./initdb/:/docker-entrypoint-initdb.d/
-      - ./postgres-data:/var/lib/postgresql/data
+#      - ./postgres-data:/var/lib/postgresql/data
   web:
     build: .
     container_name: hlambda_api

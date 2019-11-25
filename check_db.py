@@ -1,6 +1,5 @@
 import socket
 import time
-import argparse
 import os
 
 """ Check if port is open, avoid docker-compose race condition """
