@@ -32,7 +32,6 @@ services:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       SECRET_KEY: ${SECRET_KEY}
-#    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
