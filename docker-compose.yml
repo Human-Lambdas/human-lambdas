@@ -4,6 +4,7 @@ services:
   db:
 #   Use the Docker Image postgres. This will pull the newest release.
     image: postgres:10
+#    build: ./initdb
     restart: always
 #   Give the container the name my_postgres. You can changes to something else.
     container_name: hlambda_postgres
@@ -19,8 +20,8 @@ services:
 #   Set a volume some that database is not lost after shutting down the container.
 #   I used the name postgres-data but you can changed it to something else.
     volumes:
+      - ./initdb/:/docker-entrypoint-initdb.d/
       - ./postgres-data:/var/lib/postgresql/data
-      - ./docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
   web:
     build: .
     container_name: hlambda_api
@@ -31,7 +32,7 @@ services:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       SECRET_KEY: ${SECRET_KEY}
-    command: python manage.py runserver 0.0.0.0:8000
+#    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
