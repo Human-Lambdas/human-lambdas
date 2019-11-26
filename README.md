@@ -19,6 +19,10 @@ you can access the api at `0.0.0.0:8000`
 
 The admin can be accessed at `0.0.0.0:8000/admin`
 
+On windows, the api must be accessed at `localhost:8000`
+
+The admin must be accessed at `localhost:8000/admin`
+
 ## Registration
 To register a user you have to `POST` to `/users/register` with the following payload: 
 ```
