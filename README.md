@@ -2,7 +2,7 @@
 # Human Lambdas REST API
 Backend to accessing and utilizing Human Lambdas platform. 
 
-## Running API locally
+## Running API locally with Docker-Compose
 You will need to install `docker` and `docker-compose` to be able to run the API locally. 
 Once you have installed them all you have to do is to run the following command:
 ```
@@ -42,8 +42,19 @@ And it will respond with the `access` token:
 {'access': <str> }
 ``` 
 
+## A
 
-## General information about setting up postgreSQL
+## Running Tests
+
+To run the test locally you can do so by running the following command:
+
+```
+python manage.py test
+```
+
+
+
+## General information about setting up postgreSQL (not needed)
 Setting up a user and a database in postgreSQL:
 ```
 CREATE DATABASE yourdbname;
