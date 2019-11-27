@@ -81,3 +81,31 @@ And it will respond with the `access` token:
 ```
 {'access': <str> }
 ``` 
+
+## Create Workflow
+
+The endpoint for creating a workflow is `/workflow/create` and the data it requires is the following: 
+
+```
+{
+    'name': <str>, 
+    'description': <str>, 
+    'inputs': 
+        [
+            {
+                "key": <str>, 
+                "name": <str>, 
+                "format": <data-type>,
+            }, ...
+        ], 
+     'outputs': 
+        [
+            {
+                "key": <str>, 
+                "name": <str>, 
+                "format": {"type": <output-type>, "<output-type>": [<str>, ...]},  
+            }, ...
+        ]
+}
+```
+Here `<data-type>` is a choice between `image` or `text`; and `<output-type>` is a choice between `binary`, `single-class`, `multi-class` or `freetext`.
