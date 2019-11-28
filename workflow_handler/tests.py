@@ -9,31 +9,35 @@ from .models import Workflow, Task
 
 class TestModelWorkflow(TestCase):
 
+    presetDescription = "bajs is good for you"
+    presetTaskName = "bajs_task"
+    presetInputData = {"foo":"bar"}
+    presetWorkflowName = "bajs"
+
     def setUp(self):
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.save()
-        organization = Organization(name="fooinc")
+        organization = Organization(name="fooInc")
         organization.save()
         organization.user.add(user)
-        workflow = Workflow(name='bajs',
-                          description="bajs is good for you",
+        workflow = Workflow(name=self.presetWorkflowName,
+                          description=self.presetDescription,
                           inputs={} ,
                           outputs={},
                           created_by=user,
                           organization=organization)
         workflow.save()
-        Task(name="bajs_task", workflow=workflow, input_data={"foo":"bar"}, output_data={}).save()
+        Task(name=self.presetTaskName, workflow=workflow, input_data=self.presetInputData, output_data={}).save()
 
     def test_workflow_data(self):
-        description = "bajs is good for you"
-        workflow = Workflow.objects.get(name="bajs")
-        self.assertEqual(workflow.description, description)
+        workflow = Workflow.objects.get(name=self.presetWorkflowName)
+        self.assertEqual(workflow.description, self.presetDescription)
         self.assertEqual(workflow.inputs, {})
 
     def test_task_data(self):
-        task = Task.objects.get(name="bajs_task")
-        workflow = Workflow.objects.get(name="bajs")
-        self.assertEqual(task.input_data, {"foo":"bar"})
+        task = Task.objects.get(name=self.presetTaskName)
+        workflow = Workflow.objects.get(name=self.presetWorkflowName)
+        self.assertEqual(task.input_data, self.presetInputData)
         self.assertEqual(task.workflow, workflow)
 
 
