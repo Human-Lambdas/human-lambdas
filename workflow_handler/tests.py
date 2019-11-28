@@ -10,8 +10,10 @@ from .models import Workflow, Task
 class TestModelWorkflow(TestCase):
 
     presetDescription = "bajs is good for you"
+    presetChangedDescription = "bajs is bad for you"
     presetTaskName = "bajs_task"
     presetInputData = {"foo":"bar"}
+    presetChangedInputData = {"foo":"bar", "alpha":"beta"}
     presetWorkflowName = "bajs"
 
     def setUp(self):
@@ -40,6 +42,29 @@ class TestModelWorkflow(TestCase):
         self.assertEqual(task.input_data, self.presetInputData)
         self.assertEqual(task.workflow, workflow)
 
+    def test_workflow_data_changes(self):
+        workflow = Workflow.objects.get(name=self.presetWorkflowName)
+        workflow.description = self.presetChangedDescription
+        workflow.save()
+        newWorkflow = Workflow.objects.get(name=self.presetWorkflowName)
+        self.assertEqual(newWorkflow.description, self.presetChangedDescription)
+
+    def test_task_data_changes(self):
+        task = Task.objects.get(name=self.presetTaskName)
+        task.input_data = self.presetChangedInputData
+        task.save()
+        newTask = Task.objects.get(name=self.presetTaskName)
+        self.assertEqual(newTask.input_data, self.presetChangedInputData)
+
+    def test_workflow_data_deletion(self):
+        workflow = Workflow.objects.all()
+        workflow.delete()
+        self.assertEqual(len(Workflow.objects.all()), 0)    
+
+    def test_task_data_deletion(self):
+        task = Task.objects.all()
+        task.delete()
+        self.assertEqual(len(Task.objects.all()), 0)
 
 class TestCreateWorkflow(APITestCase):
 
