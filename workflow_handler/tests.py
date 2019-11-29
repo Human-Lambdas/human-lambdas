@@ -9,52 +9,51 @@ from .models import Workflow, Task
 
 class TestModelWorkflow(TestCase):
 
-    presetDescription = "bajs is good for you"
-    presetChangedDescription = "bajs is bad for you"
-    presetTaskName = "bajs_task"
-    presetInputData = {"foo":"bar"}
-    presetChangedInputData = {"foo":"bar", "alpha":"beta"}
-    presetWorkflowName = "bajs"
-
     def setUp(self):
+        self.preset_description = "bajs is good for you"
+        self.preset_changed_description = "bajs is bad for you"
+        self.preset_task_name = "bajs_task"
+        self.preset_input_data = {"foo":"bar"}
+        self.preset_changed_input_data = {"foo":"bar", "alpha":"beta"}
+        self.preset_workflow_name = "bajs"
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.save()
         organization = Organization(name="fooInc")
         organization.save()
         organization.user.add(user)
-        workflow = Workflow(name=self.presetWorkflowName,
-                          description=self.presetDescription,
+        workflow = Workflow(name=self.preset_workflow_name,
+                          description=self.preset_description,
                           inputs={} ,
                           outputs={},
                           created_by=user,
                           organization=organization)
         workflow.save()
-        Task(name=self.presetTaskName, workflow=workflow, input_data=self.presetInputData, output_data={}).save()
+        Task(name=self.preset_task_name, workflow=workflow, input_data=self.preset_input_data, output_data={}).save()
 
     def test_workflow_data(self):
-        workflow = Workflow.objects.get(name=self.presetWorkflowName)
-        self.assertEqual(workflow.description, self.presetDescription)
+        workflow = Workflow.objects.get(name=self.preset_workflow_name)
+        self.assertEqual(workflow.description, self.preset_description)
         self.assertEqual(workflow.inputs, {})
 
     def test_task_data(self):
-        task = Task.objects.get(name=self.presetTaskName)
-        workflow = Workflow.objects.get(name=self.presetWorkflowName)
-        self.assertEqual(task.input_data, self.presetInputData)
+        task = Task.objects.get(name=self.preset_task_name)
+        workflow = Workflow.objects.get(name=self.preset_workflow_name)
+        self.assertEqual(task.input_data, self.preset_input_data)
         self.assertEqual(task.workflow, workflow)
 
     def test_workflow_data_changes(self):
-        workflow = Workflow.objects.get(name=self.presetWorkflowName)
-        workflow.description = self.presetChangedDescription
+        workflow = Workflow.objects.get(name=self.preset_workflow_name)
+        workflow.description = self.preset_changed_description
         workflow.save()
-        newWorkflow = Workflow.objects.get(name=self.presetWorkflowName)
-        self.assertEqual(newWorkflow.description, self.presetChangedDescription)
+        newWorkflow = Workflow.objects.get(name=self.preset_workflow_name)
+        self.assertEqual(newWorkflow.description, self.preset_changed_description)
 
     def test_task_data_changes(self):
-        task = Task.objects.get(name=self.presetTaskName)
-        task.input_data = self.presetChangedInputData
+        task = Task.objects.get(name=self.preset_task_name)
+        task.input_data = self.preset_changed_input_data
         task.save()
-        newTask = Task.objects.get(name=self.presetTaskName)
-        self.assertEqual(newTask.input_data, self.presetChangedInputData)
+        newTask = Task.objects.get(name=self.preset_task_name)
+        self.assertEqual(newTask.input_data, self.preset_changed_input_data)
 
     def test_workflow_data_deletion(self):
         workflow = Workflow.objects.all()
