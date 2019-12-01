@@ -16,6 +16,7 @@ class TestModelWorkflow(TestCase):
         self.preset_input_data = {"foo":"bar"}
         self.preset_changed_input_data = {"foo":"bar", "alpha":"beta"}
         self.preset_workflow_name = "bajs"
+        
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.save()
         organization = Organization(name="fooInc")
