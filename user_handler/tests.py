@@ -12,20 +12,42 @@ logger = logging.getLogger(__file__)
 class TestUsers(TestCase):
 
     def setUp(self):
-        user = User(name="foo", email="foo@bar.com", is_admin=True)
+        self.preset_user_name = "foo"
+        self.preset_user_email = "foo@bar.com"
+        self.preset_changed_email = "bar@foo.com"
+        self.organization_name = "fooinc"
+
+        user = User(name=self.preset_user_name, email=self.preset_user_email, is_admin=True)
         user.save()
-        organization = Organization(name="fooinc")
+        organization = Organization(name=self.organization_name)
         organization.save()
         organization.user.add(user)
 
     def test_user_data(self):
-        user = User.objects.get(name="foo")
-        self.assertEquals(user.email, "foo@bar.com")
+        user = User.objects.get(name=self.preset_user_name)
+        self.assertEquals(user.email, self.preset_user_email)
 
     def test_organization_data(self):
-        user = User.objects.get(name="foo")
-        organization = Organization.objects.get(name="fooinc")
+        user = User.objects.get(name=self.preset_user_name)
+        organization = Organization.objects.get(name=self.organization_name)
         self.assertEquals(organization.user.all()[0], user)
+
+    def test_user_data_changes(self):
+        user = User.objects.get(name=self.preset_user_name)
+        user.email = self.preset_changed_email
+        user.save()
+        new_user = User.objects.get(name=self.preset_user_name)
+        self.assertEqual(new_user.email, self.preset_changed_email)
+
+    def test_user_data_deletion(self):
+        user = User.objects.all()
+        user.delete()
+        self.assertEqual(len(User.objects.all()), 0)  
+
+    def test_organization_data_deletion(self):
+        organization = Organization.objects.all()
+        organization.delete()
+        self.assertEqual(len(Organization.objects.all()), 0)
 
 
 class TestAPIjwt(APITestCase):

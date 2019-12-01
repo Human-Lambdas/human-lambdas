@@ -16,6 +16,7 @@ class TestModelWorkflow(TestCase):
         self.preset_input_data = {"foo":"bar"}
         self.preset_changed_input_data = {"foo":"bar", "alpha":"beta"}
         self.preset_workflow_name = "bajs"
+
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.save()
         organization = Organization(name="fooInc")
@@ -45,15 +46,15 @@ class TestModelWorkflow(TestCase):
         workflow = Workflow.objects.get(name=self.preset_workflow_name)
         workflow.description = self.preset_changed_description
         workflow.save()
-        newWorkflow = Workflow.objects.get(name=self.preset_workflow_name)
-        self.assertEqual(newWorkflow.description, self.preset_changed_description)
+        new_workflow = Workflow.objects.get(name=self.preset_workflow_name)
+        self.assertEqual(new_workflow.description, self.preset_changed_description)
 
     def test_task_data_changes(self):
         task = Task.objects.get(name=self.preset_task_name)
         task.input_data = self.preset_changed_input_data
         task.save()
-        newTask = Task.objects.get(name=self.preset_task_name)
-        self.assertEqual(newTask.input_data, self.preset_changed_input_data)
+        new_task = Task.objects.get(name=self.preset_task_name)
+        self.assertEqual(new_task.input_data, self.preset_changed_input_data)
 
     def test_workflow_data_deletion(self):
         workflow = Workflow.objects.all()
