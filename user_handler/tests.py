@@ -36,8 +36,8 @@ class TestUsers(TestCase):
         user = User.objects.get(name=self.preset_user_name)
         user.email = self.preset_changed_email
         user.save()
-        newUser = User.objects.get(name=self.preset_user_name)
-        self.assertEqual(newUser.email, self.preset_changed_email)
+        new_user = User.objects.get(name=self.preset_user_name)
+        self.assertEqual(new_user.email, self.preset_changed_email)
 
     def test_user_data_deletion(self):
         user = User.objects.all()
