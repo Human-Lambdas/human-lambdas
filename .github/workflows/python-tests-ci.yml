@@ -30,7 +30,7 @@ jobs:
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
-        POSTGRES_HOST: postgres
+        POSTGRES_HOST: localhost
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
       run: |
         docker build . --file Dockerfile --tag hl_rest_api
