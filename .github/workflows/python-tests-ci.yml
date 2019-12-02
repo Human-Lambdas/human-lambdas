@@ -24,11 +24,26 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Dockerize and test
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.6
+    - name: Install dependencies
       run: |
-        docker build . --file Dockerfile --tag hl_rest_api
-        env > env_file && docker run --env-file env_file hl_rest_api python manage.py migrate; python manage.py test
-      working-directory: ./postgres
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+#     - name: Lint with flake8
+#       run: |
+#         pip install flake8
+#         # stop the build if there are Python syntax errors or undefined names
+#         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+#         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+#         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        ./initdb/init-user-db.sh
+        python manage.py migrate
+        python manage.py test
       env:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
