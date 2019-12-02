@@ -25,6 +25,10 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Dockerize and test
+      run: |
+        docker build . --file Dockerfile --tag hl_rest_api
+        env > env_file && docker run --env-file env_file hl_rest_api python manage.py migrate; python manage.py test
+      working-directory: ./postgres
       env:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
@@ -32,8 +36,5 @@ jobs:
         POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
         POSTGRES_HOST: postgres
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      run: |
-        docker build . --file Dockerfile --tag hl_rest_api
-        env > env_file && docker run --env-file env_file hl_rest_api python manage.py migrate; python manage.py test
 
 
