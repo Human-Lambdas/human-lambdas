@@ -36,5 +36,5 @@ jobs:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
       run: |
         docker build . --file Dockerfile --tag hl_rest_api --build-arg POSTGRES_USER=$POSTGRES_USER --build-arg POSTGRES_DB=$POSTGRES_DB --build-arg POSTGRES_HOST=localhost --build-arg POSTGRES_PORT=5432 --build-arg POSTGRES_PASSWORD=$POSTGRES_PASSWORD --build-arg SECRET_KEY=$SECRET_KEY 
-        docker run hl_rest_api python manage.py migrate; python manage.py test
+        env > env_file && docker run --env-file env_file hl_rest_api python manage.py migrate; python manage.py test
 
