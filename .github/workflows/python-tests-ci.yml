@@ -31,6 +31,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+      env:
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+        POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
     - name: Set up Python 3.6
       uses: actions/setup-python@v1
       with:
@@ -40,13 +47,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Test with Django Tests
-      env:
-        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-        POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
       run: |
         python manage.py migrate 
         python manage.py test
