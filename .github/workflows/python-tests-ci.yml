@@ -42,7 +42,8 @@ jobs:
 #         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        sudo ./initdb/init-user-db.sh
+        sudo chmod +x ./initdb/init-user-db.sh
+        ./initdb/init-user-db.sh
         python manage.py migrate
         python manage.py test
       env:
