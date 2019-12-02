@@ -1,0 +1,44 @@
+name: Python Tests
+
+on: 
+  pull_request:    
+    branches:
+    - master
+    - develop   
+  push:
+    branches:
+    - master
+    - develop
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:10
+        env:
+          POSTGRES_USER: ${secrets.POSTGRES_USER}
+          POSTGRES_PASSWORD: ${secrets.POSTGRES_PASSWORD}
+          POSTGRES_DB: ${secrets.POSTGRES_DB}
+          POSTGRES_HOST: ${secrets.POSTGRES_HOST}
+        ports:
+        - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      env:
+          POSTGRES_USER: ${secrets.POSTGRES_USER}
+          POSTGRES_PASSWORD: ${secrets.POSTGRES_PASSWORD}
+          POSTGRES_DB: ${secrets.POSTGRES_DB}
+          POSTGRES_HOST: ${secrets.POSTGRES_HOST}
+          POSTGRES_PORT: ${secrets.POSTGRES_PORT}
+          SECRET_KEY: ${secrets.SECRET_KEY}
+      run: |
+        docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+        docker run python manage.py test
