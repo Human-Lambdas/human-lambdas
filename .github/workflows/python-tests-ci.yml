@@ -18,16 +18,13 @@ jobs:
       postgres:
         image: postgres:10  
         ports:
-          - 5432:5432
+        - 5432/tcp
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
     - uses: actions/checkout@v1
     - name: Dockerize and test
-      run: |
-        docker build . --file Dockerfile --tag hl_rest_api
-        env > env_file && docker run --env-file env_file hl_rest_api python manage.py migrate; python manage.py test
       env:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
@@ -35,4 +32,8 @@ jobs:
         POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
         POSTGRES_HOST: postgres
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      run: |
+        docker build . --file Dockerfile --tag hl_rest_api
+        env > env_file && docker run --env-file env_file hl_rest_api python manage.py migrate; python manage.py test
+
 
