@@ -19,8 +19,10 @@ jobs:
     services:
       postgres:
         image: postgres:10
+        env:
+          PGDATA: "/var/lib/postgresql/data/pgdata"        
         ports:
-        - 5432:5432
+          - 5432:5432
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
@@ -39,6 +41,7 @@ jobs:
         python-version: 3.6
     - name: Install dependencies
       run: |
+        apt-get install libpq-dev
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Test with Django Tests
