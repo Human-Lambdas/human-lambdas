@@ -19,11 +19,6 @@ jobs:
     services:
       postgres:
         image: postgres:10
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
         ports:
         - 5432:5432
         # needed because the postgres container does not provide a healthcheck
