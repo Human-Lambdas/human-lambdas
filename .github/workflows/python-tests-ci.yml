@@ -53,7 +53,7 @@ jobs:
         POSTGRES_PASSWORD: ""
         POSTGRES_DB: postgres
         POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
-        POSTGRES_HOST: postgres
+        POSTGRES_HOST: localhost
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
 
