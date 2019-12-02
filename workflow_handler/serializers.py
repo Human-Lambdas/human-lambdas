@@ -28,7 +28,7 @@ _OUTPUT_FORMAT_TYPES = {
     'freetext': None,
 }
 
-class WorkflowCreateSerializer(serializers.ModelSerializer):
+class WorkflowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workflow
         fields = ['name', 'description', 'inputs', 'outputs']

@@ -178,3 +178,37 @@ class TestCreateWorkflow(APITestCase):
         }
         response = self.client.post('/workflow/create/', workflow_data, headers=headers, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+class TestRUDWorkflow(APITestCase):
+
+    def setUp(self):
+        registration_data = {
+            'email': "foo@bar.com",
+            "password": "fooword",
+            "organization": "fooInc",
+            "is_admin": True,
+            "name": "foo"
+        }
+        _ = self.client.post('/users/register/', registration_data)
+        response = self.client.post('/users/token/', {'email': "foo@bar.com", "password": "fooword"})
+        self.access_token = response.data["access"]
+        self.refresh = response.data["refresh"]
+
+    def test_create_workflow(self):
+        headers = {
+            "Authorization": "Bearer {}".format(self.access_token)
+        }
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.access_token)
+
+        workflow_data = {
+            "name": "foowf",
+            "description": "great wf",
+            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "outputs": [
+                {"key": "foo", "name": "foo", "format": {"type": "single-class", "single-class": ["foo1", "bar1"]}}],
+        }
+        response = self.client.post('/workflow/create/', workflow_data, headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertTrue(Workflow.objects.filter(name=workflow_data['name']).exists())
+
+
