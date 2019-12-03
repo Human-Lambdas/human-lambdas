@@ -35,6 +35,9 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = "email"
     objects = UserManager()
 
+    def __str__(self):
+        return self.name
+
     @property
     def is_staff(self):
         "Is the user a member of staff?"
@@ -59,3 +62,6 @@ class User(AbstractBaseUser):
 class Organization(models.Model):
     name = models.CharField(max_length=128)
     user = models.ManyToManyField(User)
+
+    def __str__(self):
+        return self.name
