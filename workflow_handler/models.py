@@ -12,6 +12,10 @@ class Workflow(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name
+
+
 
 class Task(models.Model):
     name = models.CharField(max_length=128)
@@ -20,3 +24,6 @@ class Task(models.Model):
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
     input_data = JSONField()
     output_data = JSONField()
+
+    def __str__(self):
+        return self.name
