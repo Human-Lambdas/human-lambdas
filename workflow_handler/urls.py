@@ -4,5 +4,5 @@ from .views import CreateWorkflowView
 
 
 urlpatterns = [
-    path('create/', CreateWorkflowView.as_view(), name='user-registration'),
+    path("create/", CreateWorkflowView.as_view(), name="user-registration"),
 ]

@@ -8,19 +8,23 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0001_initial'),
+        ("workflow_handler", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='completed',
+            model_name="task",
+            name="completed",
             field=models.DateTimeField(blank=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='task',
-            name='completed_by',
-            field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.CASCADE, to='user_handler.User'),
+            model_name="task",
+            name="completed_by",
+            field=models.ForeignKey(
+                blank=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="user_handler.User",
+            ),
         ),
     ]

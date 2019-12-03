@@ -9,11 +9,9 @@ class UserManager(BaseUserManager):
         birth and password.
         """
         if not email:
-            raise ValueError('Users must have an email address')
+            raise ValueError("Users must have an email address")
 
-        user = self.model(
-            email=self.normalize_email(email),
-        )
+        user = self.model(email=self.normalize_email(email),)
 
         user.set_password(password)
         user.save(using=self._db)
@@ -24,10 +22,7 @@ class UserManager(BaseUserManager):
         Creates and saves a superuser with the given email, date of
         birth and password.
         """
-        user = self.create_user(
-            email,
-            password=password,
-        )
+        user = self.create_user(email, password=password,)
         user.is_admin = True
         user.save(using=self._db)
         return user
@@ -37,7 +32,7 @@ class User(AbstractBaseUser):
     name = models.CharField(max_length=128)
     email = models.EmailField(unique=True)
     is_admin = models.BooleanField(default=False)
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     objects = UserManager()
 
     @property
@@ -51,10 +46,10 @@ class User(AbstractBaseUser):
         return self.is_admin
 
     def has_perm(self, perm, obj=None):
-       return self.is_admin
+        return self.is_admin
 
     def has_module_perms(self, app_label):
-       return self.is_admin
+        return self.is_admin
 
     @is_staff.setter
     def is_staff(self, value):
