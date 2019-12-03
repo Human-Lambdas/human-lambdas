@@ -10,14 +10,15 @@ logger = logging.getLogger(__file__)
 
 
 class TestUsers(TestCase):
-
     def setUp(self):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
         self.preset_changed_email = "bar@foo.com"
         self.organization_name = "fooinc"
 
-        user = User(name=self.preset_user_name, email=self.preset_user_email, is_admin=True)
+        user = User(
+            name=self.preset_user_name, email=self.preset_user_email, is_admin=True
+        )
         user.save()
         organization = Organization(name=self.organization_name)
         organization.save()
@@ -42,7 +43,7 @@ class TestUsers(TestCase):
     def test_user_data_deletion(self):
         user = User.objects.all()
         user.delete()
-        self.assertEqual(len(User.objects.all()), 0)  
+        self.assertEqual(len(User.objects.all()), 0)
 
     def test_organization_data_deletion(self):
         organization = Organization.objects.all()
@@ -51,30 +52,39 @@ class TestUsers(TestCase):
 
 
 class TestAPIjwt(APITestCase):
-
     def setUp(self):
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.set_password("fooword")
         user.save()
-        response = self.client.post('/users/token/', {'email': "foo@bar.com", "password": "fooword"})
+        response = self.client.post(
+            "/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+        )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
 
     def test_token(self):
-        response = self.client.post('/users/token/', {'email': "foo@bar.com", "password": "fooword"})
+        response = self.client.post(
+            "/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
     def test_authorization(self):
-        headers = {
-            "Authorization": "Bearer {}".format(self.access_token)
-        }
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.access_token)
-        response = self.client.get('/users/hello/', headers=headers)
+        headers = {"Authorization": "Bearer {}".format(self.access_token)}
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/users/hello/", headers=headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
 
 class TestAPIRegistration(APITestCase):
-
     def test_registration(self):
-        response = self.client.post('/users/register/', {'email': "foo@bar.com", "password": "fooword", "name": "foo", "is_admin": True, "organization": "barinc"})
+        response = self.client.post(
+            "/users/register/",
+            {
+                "email": "foo@bar.com",
+                "password": "fooword",
+                "name": "foo",
+                "is_admin": True,
+                "organization": "barinc",
+            },
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

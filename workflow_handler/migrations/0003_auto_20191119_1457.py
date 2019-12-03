@@ -7,18 +7,20 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0002_auto_20191119_1457'),
+        ("workflow_handler", "0002_auto_20191119_1457"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='completed',
-            field=models.DateTimeField(null=True),
+            model_name="task", name="completed", field=models.DateTimeField(null=True),
         ),
         migrations.AlterField(
-            model_name='task',
-            name='completed_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='user_handler.User'),
+            model_name="task",
+            name="completed_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="user_handler.User",
+            ),
         ),
     ]
