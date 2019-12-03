@@ -30,8 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
         organization_obj.user.add(user_obj)
         return validated_data
 
-    def update(self, validated_data):
-        user = self.context['request'].user
+    def update(self, instance, validated_data):
         password = validated_data["password"]
-        user.set_password(password)
+        instance.set_password(password)
         return validated_data
