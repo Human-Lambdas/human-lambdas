@@ -8,7 +8,7 @@ logger = logging.getLogger(__file__)
 
 
 # Serializers define the API representation.
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     organization = serializers.CharField(max_length=128, allow_blank=False)
 
     class Meta:
@@ -28,4 +28,10 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user_obj.set_password(password)
         user_obj.save()
         organization_obj.user.add(user_obj)
+        return validated_data
+
+    def update(self, validated_data):
+        user = self.context['request'].user
+        password = validated_data["password"]
+        user.set_password(password)
         return validated_data
