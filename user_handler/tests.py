@@ -103,8 +103,7 @@ class TestAPIChange(APITestCase):
         self.refresh = response.data["refresh"]
 
     def test_authorization(self):
-        headers = {"Authorization": "Bearer {}".format(self.access_token)}
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         data = {"password": self.preset_changed_password}
-        response = self.client.post("/users/update/", data, headers=headers)
+        response = self.client.post("/users/update/", data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
