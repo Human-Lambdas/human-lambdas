@@ -35,5 +35,3 @@ class RUDWorkflowView(RetrieveUpdateDestroyAPIView):
         else:
             raise
         return Workflow.objects.filter(organization=organization)
-
-

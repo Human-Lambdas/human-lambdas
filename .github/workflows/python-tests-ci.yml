@@ -1,0 +1,56 @@
+name: Python Tests
+
+on: 
+  pull_request:    
+    branches:
+    - master
+    - develop   
+  push:
+    branches:
+    - master
+    - develop
+
+jobs:
+  builds:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:10  
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ""
+          POSTGRES_DB: postgres
+        ports:
+        - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.6
+    - name: Install dependencies
+      run: |
+        sudo apt-get install libpq-dev
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 .
+    - name: Test with pytest
+      run: |
+        python manage.py migrate
+        python manage.py test
+      env:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: ""
+        POSTGRES_DB: postgres
+        POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
+        POSTGRES_HOST: localhost
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+
