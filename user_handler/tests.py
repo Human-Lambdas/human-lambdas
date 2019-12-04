@@ -88,3 +88,27 @@ class TestAPIRegistration(APITestCase):
             },
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+class TestAPIChange(APITestCase):
+    def setUp(self):
+        self.preset_password = "fooword"
+        self.preset_changed_password = "barword"
+        user = User(name="foo", email="foo@bar.com", is_admin=True)
+        user.set_password(self.preset_password)
+        user.save()
+        response = self.client.post(
+            "/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+        )
+        self.access_token = response.data["access"]
+        self.refresh = response.data["refresh"]
+
+    def test_retrieve(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/users/update/1")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+    def test_update(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        data = {"password": self.preset_changed_password}
+        response = self.client.patch("/users/update/1", data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
