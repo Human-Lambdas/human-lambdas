@@ -8,8 +8,10 @@ logger = logging.getLogger(__file__)
 
 
 # Serializers define the API representation.
-class UserCreateSerializer(serializers.ModelSerializer):
-    organization = serializers.CharField(max_length=128, allow_blank=False)
+class UserSerializer(serializers.ModelSerializer):
+    organization = serializers.CharField(
+        max_length=128, allow_blank=False, write_only=True
+    )
 
     class Meta:
         model = User
@@ -28,4 +30,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user_obj.set_password(password)
         user_obj.save()
         organization_obj.user.add(user_obj)
+        return validated_data
+
+    def update_partial(self, instance, validated_data):
+        instance.name = validated_data.get("name", instance.name)
+        instance.email = validated_data.get("email", instance.email)
+        instance.is_admin = validated_data.get("is_admin", instance.is_admin)
+        password = validated_data.get("password")
+        if password:
+            instance.set_password(password)
+        # currently we do now allow changes of organization
         return validated_data

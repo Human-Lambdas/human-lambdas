@@ -60,6 +60,14 @@ To register a user you have to `POST` to `/users/register` with the following pa
 {'name': <str>, 'email': <str>, 'password': <str>, 'organization': <str>, 'is_admin': <bool>}
 ```
 
+## Retrieve and Update User Endpoint
+To retrieve a user you have to `GET` to `/users/edit/<userd-id>`  and to update a user you use instead `PATCH` to the same endpoint along with a payload including the data you want to update. Here is an example of the payload to update the password of a user:
+
+```
+{'password': <str>}
+``` 
+
+
 ## JWT Endpoint
 To get the `access` and `refresh` token you need to `POST` to `/users/token` with the following payload: 
 ```
