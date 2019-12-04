@@ -28,6 +28,7 @@ _OUTPUT_FORMAT_TYPES = {
     "freetext": None,
 }
 
+
 class WorkflowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workflow
@@ -55,12 +56,11 @@ class WorkflowSerializer(serializers.ModelSerializer):
         workflow.save()
         return validated_data
 
-    def update(self, validated_data):
-        user = self.context["request"].user
-        wf_name = validated_data.get("name")
-        description = validated_data.get("description")
-        inputs = validated_data.get("inputs")
-        outputs = validated_data.get("outputs")
+    def update_partial(self, instance, validated_data):
+        instance.name = validated_data.get("name", instance.name)
+        instance.description = validated_data.get("description", instance.description)
+        instance.inputs = validated_data.get("inputs", instance.inputs)
+        instance.outputs = validated_data.get("outputs", instance.outputs)
         return validated_data
 
     def validate_inputs(self, data):

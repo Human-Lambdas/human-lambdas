@@ -117,3 +117,15 @@ The endpoint for creating a workflow is `/workflow/create` and the data it requi
 }
 ```
 Here `<data-type>` is a choice between `image` or `text`; and `<output-type>` is a choice between `binary`, `single-class`, `multi-class` or `freetext`.
+
+## List Workflows
+
+To get a list of the workflows in your organization you can do a `GET` call to `/workflow/list/`.
+
+## Retrieve and Update Workflow
+
+To retrieve a specific workflow you can do so by calling `GET` to `/workflow/update/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
+```
+{"description": "This is the new updated description of an existing workflow"}
+```
+Remember you will only have permission to retrieve and update the workflows which are part of your organization.
