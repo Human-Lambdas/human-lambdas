@@ -29,7 +29,7 @@ _OUTPUT_FORMAT_TYPES = {
 }
 
 
-class WorkflowCreateSerializer(serializers.ModelSerializer):
+class WorkflowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workflow
         fields = ["name", "description", "inputs", "outputs"]
@@ -54,6 +54,13 @@ class WorkflowCreateSerializer(serializers.ModelSerializer):
             outputs=outputs,
         )
         workflow.save()
+        return validated_data
+
+    def update_partial(self, instance, validated_data):
+        instance.name = validated_data.get("name", instance.name)
+        instance.description = validated_data.get("description", instance.description)
+        instance.inputs = validated_data.get("inputs", instance.inputs)
+        instance.outputs = validated_data.get("outputs", instance.outputs)
         return validated_data
 
     def validate_inputs(self, data):

@@ -13,7 +13,6 @@ services:
       - "5432:5432"
     volumes:
       - ./initdb/:/docker-entrypoint-initdb.d/
-#      - ./postgres-data:/var/lib/postgresql/data
 
   web:
     build: .
