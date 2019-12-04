@@ -18,12 +18,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["name", "password", "email", "organization", "is_admin"]
         extra_kwargs = {"password": {"write_only": True}}
 
-    def get_organization(self, object):
-        org = Organization.objects.filter(user=object)
-        if org.exists():
-            return org.name
-        return None
-
     def create(self, validated_data):
         name = validated_data["name"]
         password = validated_data["password"]
