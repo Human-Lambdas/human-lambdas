@@ -41,11 +41,13 @@ INSTALLED_APPS = [
     "workflow_handler",
     "rest_framework",
     "rest_framework_simplejwt",
+    "corsheaders"
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -146,6 +148,8 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_EMAIL_FIELD = "email"
 ACCOUNT_LOGOUT_ON_GET = True
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 REST_AUTH_SERIALIZERS = {
     "USER_DETAILS_SERIALIZER": "user_handler.serializers.UserLoginSerializer",
