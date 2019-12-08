@@ -1,0 +1,11 @@
+{
+  "Image": {
+    "Name": "hl_rest_api"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 8080,
+      "HostPort": 8000
+    }
+  ]
+}
