@@ -393,6 +393,10 @@ class TestCRUDWorkflow(APITestCase):
         response = self.client.post("/workflow/create/", workflow_data2, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         response = self.client.get("/workflow/list/")
+        result_1 = response.data[0]
+        result_2 = response.data[1]
+        self.assertTrue(result_1.pop("id"))
+        self.assertTrue(result_2.pop("id"))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(workflow_data2, response.data[0], response.data)
-        self.assertEqual(workflow_data1, response.data[1], response.data)
+        self.assertEqual(workflow_data2,result_1 , response.data)
+        self.assertEqual(workflow_data1, result_2, response.data)
