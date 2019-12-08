@@ -1,7 +1,8 @@
 import csv
+from io import StringIO
 
-def validateKeys(csv_name, workflow):
-        dataset = csv.reader(file)
+def validateKeys(csv_file, workflow):
+        dataset = csv.reader(csv_file)
         title_row = next(dataset) # gets the first line
 
         for input in workflow["inputs"]:
@@ -52,17 +53,6 @@ sample_workflow = {
         ]
 }
 
-# CSV
-# alpha,beta,gamma,delta
-# a,b,c,d
-# e,f,g,h
-# bernat,sean,james,matteus
-
-#- Process the CSV and create dicts in the format of the workflow
-
-# name folder parsing
-
-
 def format_csv(file, workflow):
         dataset = csv.reader(file)
         title_row = next(dataset)
@@ -70,23 +60,30 @@ def format_csv(file, workflow):
 
         for row in dataset:
             if row == title_row:
-                continue # make note of pass vs continue
+                continue
             else:
                 task = []
                 for i in workflow["inputs"]:
-                    print(i)
                     task.append({
                         "key": i["key"],
                         "name": i["name"],
-                        "format": i["format"]
+                        "format": i["format"],
                         "value": row[title_row.index(i["key"])]
                     })
             
             tasks.append(task)
         print(tasks)
 
-with open("current.csv", newline='') as file:
-    validateKeys("current.csv", sample_workflow)
+test_csv_string = """alpha,beta,gamma,delta
+1,2,3,4
+5,6,7,8
+"""
 
-with open("current.csv", newline='') as file:
-    format_csv(file, sample_workflow)
+test_csv_file = StringIO(test_csv_string)
+
+validateKeys(test_csv_file, sample_workflow)
+
+# reset value of test_csv_file to stop function beginning on the second row
+test_csv_file = StringIO(test_csv_string)
+
+format_csv(test_csv_file, sample_workflow)
