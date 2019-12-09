@@ -29,6 +29,6 @@ def format_csv(csv_file, workflow):
                     "format": input["format"],
                     "value": row[title_row.index(input["key"])]
                 })
-        
+
         tasks.append(task)
     return tasks
