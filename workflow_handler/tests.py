@@ -461,8 +461,7 @@ class TestParserWorkflow(TestCase):
                         "key": "<str>", 
                         "name": "<str>", 
                         "format": {"type": "<output-type>", "<output-type>": "[<str>, ...]"},  
-                    }, ...
-
+                    }
                 ]
         }
 
