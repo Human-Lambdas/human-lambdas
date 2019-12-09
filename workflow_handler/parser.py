@@ -2,6 +2,7 @@ import csv
 
 from .models import Task
 
+
 def validate_keys(csv_file, workflow):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
@@ -35,15 +36,16 @@ def format_csv(csv_file, workflow):
         tasks.append(task)
     return tasks
 
+
 def create_tasks(tasks, workflow):
     for task in tasks:
-        input_data=[]
+        input_data = []
         for field in task:
             if workflow == field["workflow"]:
                 input = {field["key"]: field["value"]}
                 input_data.append(input)
             else:
                 raise Exception("The task's workflow does not match the workflow provided")
-        name="%s_task_%d" % (workflow.organization, workflow.id)
+        name= "%s_task_%d" % (workflow.organization, workflow.id)
         new_task = Task(name=name, workflow=workflow, input_data=input_data, output_data={})
         new_task.save()
