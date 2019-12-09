@@ -1,11 +1,17 @@
 from django.test import TestCase
 from user_handler.models import User, Organization
 
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 
 from .models import Workflow, Task
 
+from .parser import validate_keys, format_csv
+
+from io import StringIO
+
+import csv
 
 class TestModelWorkflow(TestCase):
     def setUp(self):
@@ -398,5 +404,98 @@ class TestCRUDWorkflow(APITestCase):
         self.assertTrue(result_1.pop("id"))
         self.assertTrue(result_2.pop("id"))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(workflow_data2,result_1 , response.data)
-        self.assertEqual(workflow_data1, result_2, response.data)
+        self.assertEqual(workflow_data2, response.data[0], response.data)
+        self.assertEqual(workflow_data1, response.data[1], response.data)
+
+class TestParserWorkflow(TestCase):
+    def setUp(self):
+        self.test_csv_string = """alpha,beta,gamma,delta
+        1,2,3,4
+        5,6,7,8"""
+
+        self.test_csv_string_missing_columns = """alpha,beta,delta
+        1,2,4
+        5,6,8"""
+        
+        self.test_csv_string_extra_columns = """alpha,beta,gamma,delta,lambda
+        1,2,3,4,5
+        6,7,8,9,10"""
+        
+        self.test_csv_string_duplicate_columns = """alpha,beta,gamma,delta,alpha
+        1,2,3,4,1
+        5,6,7,8,5"""
+        
+        self.test_csv_file = StringIO(self.test_csv_string)
+        self.test_csv_file_missing_columns = StringIO(self.test_csv_string_missing_columns)
+        self.test_csv_file_extra_columns = StringIO(self.test_csv_string_extra_columns)
+        self.test_csv_file_duplicate_columns = StringIO(self.test_csv_string_duplicate_columns)
+
+        self.sample_workflow = {
+            'name': "<str>", 
+            'description': "<str>", 
+            'inputs': 
+                [
+                    {
+                        "key": "alpha", 
+                        "name": "<str>", 
+                        "format": "<data-type>",
+                    },
+                                {
+                        "key": "beta", 
+                        "name": "<str>", 
+                        "format": "<data-type>",
+                    },
+                                {
+                        "key": "gamma", 
+                        "name": "<str>", 
+                        "format": "<data-type>",
+                    },
+                                {
+                        "key": "delta", 
+                        "name": "<str>", 
+                        "format": "<data-type>",
+                    },  
+                ], 
+            'outputs': 
+                [
+                    {
+                        "key": "<str>", 
+                        "name": "<str>", 
+                        "format": {"type": "<output-type>", "<output-type>": "[<str>, ...]"},  
+                    }
+                ]
+        }
+
+    def test_validate_keys_missing_columns(self):
+        try:
+            validate_keys(self.test_csv_file_missing_columns, self.sample_workflow)
+        except Exception as e:
+            self.assertEqual(str(e), "The dataset is missing some columns")
+
+    def test_validate_keys_duplicate_columns(self):
+        try:
+            validate_keys(self.test_csv_file_duplicate_columns, self.sample_workflow)
+        except Exception as e:
+            self.assertEqual(str(e), "There are duplicate column names")
+
+    def test_validate_keys_correct_columns(self):
+        try:
+            validate_keys(self.test_csv_file, self.sample_workflow)
+        except Exception as e:
+            self.fail("An error has occurred")
+
+    def test_validate_keys_extra_columns(self):
+        try:
+            validate_keys(self.test_csv_file_extra_columns, self.sample_workflow)
+        except Exception as e:
+            self.fail("An error has occurred")
+
+    def test_format_csv(self):
+        try:
+            tasks = format_csv(self.test_csv_file, self.sample_workflow)
+            title_row = ["alpha", "beta", "gamma", "delta"]
+            # Check each workflow key appears once in the dataset
+            for index, i in enumerate(self.sample_workflow["inputs"]):
+                self.assertEqual(1, title_row.count(tasks[0][index]["key"]))
+        except Exception as e:
+            self.fail("An error has occurred")
