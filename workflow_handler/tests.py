@@ -1,6 +1,7 @@
 from django.test import TestCase
 from user_handler.models import User, Organization
 
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 
@@ -493,8 +494,8 @@ class TestParserWorkflow(TestCase):
         try:
             tasks = format_csv(self.test_csv_file, self.sample_workflow)
             title_row = ["alpha", "beta", "gamma", "delta"]
+            # Check each workflow key appears once in the dataset
             for index, i in enumerate(self.sample_workflow["inputs"]):
-                # Check each workflow key appears once in the dataset
                 self.assertEqual(1, title_row.count(tasks[0][index]["key"]))
         except Exception as e:
             self.fail("An error has occurred")
