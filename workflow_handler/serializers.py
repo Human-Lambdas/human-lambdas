@@ -32,7 +32,7 @@ _OUTPUT_FORMAT_TYPES = {
 class WorkflowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workflow
-        fields = ["name", "description", "inputs", "outputs"]
+        fields = ["id", "name", "description", "inputs", "outputs"]
 
     def create(self, validated_data):
         user = self.context["request"].user
