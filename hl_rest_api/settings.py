@@ -24,13 +24,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.getenv("DEBUG", True))
+DEBUG = False if os.getenv("DEBUG") == "False" else True
 
-ALLOWED_HOSTS = [
-    "0.0.0.0",
-    "localhost",
-    "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
-]
+if DEBUG:
+    ALLOWED_HOSTS = [
+        "0.0.0.0",
+        "localhost",
+    ]
+else:
+    ALLOWED_HOSTS = [
+        "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
+    ]
 
 
 # Application definition
@@ -79,7 +83,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "hl_rest_api.wsgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
