@@ -46,6 +46,7 @@ def create_tasks(tasks, workflow):
                 input_data.append(input)
             else:
                 raise Exception("The task's workflow does not match the workflow provided")
-        name= "%s_task_%d" % (workflow.organization, workflow.id)
+        name = "%s_task_%d" % (workflow.organization, workflow.id)
+
         new_task = Task(name=name, workflow=workflow, input_data=input_data, output_data={})
         new_task.save()
