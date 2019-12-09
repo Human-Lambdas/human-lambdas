@@ -499,5 +499,3 @@ class TestParserWorkflow(TestCase):
                 self.assertEqual(1, title_row.count(tasks[0][index]["key"]))
         except Exception as e:
             self.fail("An error has occurred")
-        self.assertEqual(workflow_data2,result_1 , response.data)
-        self.assertEqual(workflow_data1, result_2, response.data)
