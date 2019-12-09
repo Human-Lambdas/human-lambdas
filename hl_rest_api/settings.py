@@ -26,15 +26,11 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False if os.getenv("DEBUG") == "False" else True
 
-if DEBUG:
-    ALLOWED_HOSTS = [
-        "0.0.0.0",
-        "localhost",
-    ]
-else:
-    ALLOWED_HOSTS = [
-        "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
-    ]
+ALLOWED_HOSTS = [
+    "0.0.0.0",
+    "localhost",
+    "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
+]
 
 
 # Application definition
