@@ -23,12 +23,14 @@ def format_csv(csv_file, workflow):
         else:
             task = []
             for input in workflow["inputs"]:
-                task.append({
-                    "key": input["key"],
-                    "name": input["name"],
-                    "format": input["format"],
-                    "value": row[title_row.index(input["key"])]
-                })
+                task.append(
+                    {
+                        "key": input["key"],
+                        "name": input["name"],
+                        "format": input["format"],
+                        "value": row[title_row.index(input["key"])],
+                    }
+                )
 
         tasks.append(task)
     return tasks
