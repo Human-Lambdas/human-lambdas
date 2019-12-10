@@ -8,6 +8,10 @@ python check_db.py
 echo "Apply database migrations"
 python manage.py migrate
 
+# collect static files
+echo "collect static files"
+python manage.py collectstatic
+
 # Start server
 echo "Starting server"
 python manage.py runserver 0.0.0.0:8000

@@ -1,7 +1,7 @@
 import logging
 
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -13,6 +13,7 @@ logger = logging.getLogger(__file__)
 
 
 class RegistrationView(CreateAPIView):
+    permission_classes = (AllowAny,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
