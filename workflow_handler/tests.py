@@ -512,8 +512,8 @@ class TestParserWorkflow(TestCase):
             tasks = Task.objects.all()
             for task in tasks:
                 # Checks that every input key exists exactly once in the csv
-                for input in task.input_data:
-                    self.assertEqual(self.title_row.count([*input][0]), 1)
+                for value in task.input_data:
+                    self.assertEqual(self.title_row.count([*value][0]), 1)
         except Exception as e:
             self.fail("An error has occurred")
             
