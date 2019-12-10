@@ -24,6 +24,7 @@ services:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG}
     volumes:
       - .:/code
     ports:
