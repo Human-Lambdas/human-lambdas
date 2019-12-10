@@ -6,8 +6,8 @@ from .models import Task
 def validate_keys(csv_file, workflow):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
-    for input in workflow.inputs:
-        value_count = title_row.count(input["key"])
+    for value in workflow.inputs:
+        value_count = title_row.count(value["key"])
         if value_count > 1:
             raise Exception("There are duplicate column names")
 
@@ -24,12 +24,12 @@ def format_csv(csv_file, workflow):
             continue
         else:
             task = []
-            for input in workflow.inputs:
+            for workflow_input in workflow.inputs:
                 task.append({
-                    "key": input["key"],
-                    "name": input["name"],
-                    "format": input["format"],
-                    "value": row[title_row.index(input["key"])],
+                    "key": workflow_input["key"],
+                    "name": workflow_input["name"],
+                    "format": workflow_input["format"],
+                    "value": row[title_row.index(workflow_input["key"])],
                     "workflow": workflow
                 })
 
@@ -42,8 +42,8 @@ def create_tasks(tasks, workflow):
         input_data = []
         for field in task:
             if workflow == field["workflow"]:
-                input = {field["key"]: field["value"]}
-                input_data.append(input)
+                task_input = {field["key"]: field["value"]}
+                input_data.append(task_input)
             else:
                 raise Exception("The task's workflow does not match the workflow provided")
         name = "%s_task_%d" % (workflow.organization, workflow.id)
