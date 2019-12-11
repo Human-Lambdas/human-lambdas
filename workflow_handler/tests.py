@@ -7,7 +7,7 @@ from rest_framework import status
 
 from .models import Workflow, Task
 
-from .parser import validate_keys, format_csv
+from .parser import validate_keys, format_csv, create_tasks
 
 from io import StringIO
 
@@ -430,11 +430,14 @@ class TestParserWorkflow(TestCase):
         self.test_csv_file_extra_columns = StringIO(self.test_csv_string_extra_columns)
         self.test_csv_file_duplicate_columns = StringIO(self.test_csv_string_duplicate_columns)
 
-        self.sample_workflow = {
-            'name': "<str>", 
-            'description': "<str>", 
-            'inputs': 
-                [
+        self.sample_user = User(name="John Doe", email="John@Doe.com")
+        self.sample_user.save()
+
+        self.sample_organization = Organization(name="ACMEcorp")
+        self.sample_organization.save()
+
+        self.sample_workflow = Workflow(name="<str>", description="<str>", inputs=
+            [
                     {
                         "key": "alpha", 
                         "name": "<str>", 
@@ -455,16 +458,20 @@ class TestParserWorkflow(TestCase):
                         "name": "<str>", 
                         "format": "<data-type>",
                     },  
-                ], 
-            'outputs': 
-                [
+            ],
+            outputs=[
                     {
                         "key": "<str>", 
                         "name": "<str>", 
                         "format": {"type": "<output-type>", "<output-type>": "[<str>, ...]"},  
                     }
-                ]
-        }
+            ],
+            created_by=self.sample_user,
+            organization=self.sample_organization)
+
+        self.sample_workflow.save()
+
+        self.title_row = ["alpha", "beta", "gamma", "delta"]
 
     def test_validate_keys_missing_columns(self):
         try:
@@ -493,9 +500,20 @@ class TestParserWorkflow(TestCase):
     def test_format_csv(self):
         try:
             tasks = format_csv(self.test_csv_file, self.sample_workflow)
-            title_row = ["alpha", "beta", "gamma", "delta"]
             # Check each workflow key appears once in the dataset
-            for index, i in enumerate(self.sample_workflow["inputs"]):
-                self.assertEqual(1, title_row.count(tasks[0][index]["key"]))
+            for index, i in enumerate(self.sample_workflow.inputs):
+                self.assertEqual(1, self.title_row.count(tasks[0][index]["key"]))
         except Exception as e:
             self.fail("An error has occurred")
+    
+    def test_create_tasks(self):
+        try:
+            create_tasks(format_csv(self.test_csv_file, self.sample_workflow), self.sample_workflow)
+            tasks = Task.objects.all()
+            for task in tasks:
+                # Checks that every input key exists exactly once in the csv
+                for value in task.input_data:
+                    self.assertEqual(self.title_row.count([*value][0]), 1)
+        except Exception as e:
+            self.fail("An error has occurred")
+            
