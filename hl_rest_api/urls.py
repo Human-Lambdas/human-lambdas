@@ -21,4 +21,5 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),
     path("users/", include("user_handler.urls")),
     path("workflow/", include("workflow_handler.urls")),
+    path("upload/", include("uploader.urls")),
 ]
