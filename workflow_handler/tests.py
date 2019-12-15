@@ -404,8 +404,8 @@ class TestCRUDWorkflow(APITestCase):
         self.assertTrue(result_1.pop("id"))
         self.assertTrue(result_2.pop("id"))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(workflow_data2, response.data[0], response.data)
-        self.assertEqual(workflow_data1, response.data[1], response.data)
+        self.assertEqual(workflow_data1, response.data[0], response.data)
+        self.assertEqual(workflow_data2, response.data[1], response.data)
 
 class TestParserWorkflow(TestCase):
     def setUp(self):
@@ -516,4 +516,4 @@ class TestParserWorkflow(TestCase):
                     self.assertEqual(self.title_row.count([*value][0]), 1)
         except Exception as e:
             self.fail("An error has occurred")
-            
+
