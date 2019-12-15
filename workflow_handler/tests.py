@@ -604,10 +604,50 @@ class TestErrorPayloadStructure(APITestCase):
         response = self.client.post("/workflow/list/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    # test several errors from each endpoint
-    # permission error
-    # try with token with fake credentials and get refused
-    # 404
-    # register a new person
-    # try with missing info
-    # update ones arent very important
+    # test update workflows
+    def test_update_workflow_no_jwt(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.post("/workflow/create/", self.complete_workflow_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.credentials(HTTP_AUTHORIZATION=None)
+        workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
+        self.assertTrue(workflow_obj.exists())
+        workflow = workflow_obj.first()
+        self.complete_workflow_data = {
+            "description": "not so great wf",
+        }
+        response = self.client.patch(
+            "/workflow/update/{}".format(workflow.pk), self.complete_workflow_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_workflow_invalid_jwt(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.post("/workflow/create/", self.complete_workflow_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.invalid_token)
+        workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
+        self.assertTrue(workflow_obj.exists())
+        workflow = workflow_obj.first()
+        self.complete_workflow_data = {
+            "description": "not so great wf",
+        }
+        response = self.client.patch(
+            "/workflow/update/{}".format(workflow.pk), self.complete_workflow_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_update_workflow_wrong_method(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.post("/workflow/create/", self.complete_workflow_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
+        self.assertTrue(workflow_obj.exists())
+        workflow = workflow_obj.first()
+        self.complete_workflow_data = {
+            "description": "not so great wf",
+        }
+        response = self.client.post(
+            "/workflow/update/{}".format(workflow.pk), self.complete_workflow_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

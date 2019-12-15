@@ -112,3 +112,11 @@ class TestAPIChange(APITestCase):
         data = {"password": self.preset_changed_password}
         response = self.client.patch("/users/update/1", data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+    # test several errors from each endpoint
+    # permission error
+    # try with token with fake credentials and get refused
+    # 404
+    # register a new person
+    # try with missing info
+    # update ones arent very important
