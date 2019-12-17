@@ -37,6 +37,7 @@ class UpdateUserView(RetrieveUpdateAPIView):
         obj = get_object_or_404(queryset, name=self.request.user.name)
         return obj
 
+
 class GetOrganizationView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Organization.objects.all()
