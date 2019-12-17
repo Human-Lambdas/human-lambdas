@@ -41,3 +41,8 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         # currently we do now allow changes of organization
         return validated_data
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ["name", "user"]

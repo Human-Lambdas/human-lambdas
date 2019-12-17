@@ -9,19 +9,22 @@ from .models import User, Organization
 logger = logging.getLogger(__file__)
 
 
-class TestUsers(TestCase):
+class TestUsers(APITestCase):
     def setUp(self):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
         self.preset_changed_email = "bar@foo.com"
         self.organization_name = "fooinc"
+        self.preset_user_password = "fooword"
 
         user = User(
             name=self.preset_user_name, email=self.preset_user_email, is_admin=True
         )
+        user.set_password(self.preset_user_password)
         user.save()
         organization = Organization(name=self.organization_name)
         organization.save()
+        self.org_id = organization.id
         organization.user.add(user)
 
     def test_user_data(self):
@@ -44,6 +47,16 @@ class TestUsers(TestCase):
         user = User.objects.all()
         user.delete()
         self.assertEqual(len(User.objects.all()), 0)
+
+    def test_get_organization(self):
+        response = self.client.post(
+            "/users/token/", {"email": "foo@bar.com", "password": self.preset_user_password}
+        )
+        access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
+        response = self.client.get("/users/organization/%s" % self.org_id)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["name"], self.organization_name)
 
     def test_organization_data_deletion(self):
         organization = Organization.objects.all()
