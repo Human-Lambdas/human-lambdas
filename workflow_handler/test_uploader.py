@@ -56,7 +56,7 @@ class TestUpload(APITestCase):
                 "/workflow/{}/upload/test_file".format(workflow_id), data=data
             )
         self.assertEqual(
-            response.status_code, status.HTTP_204_NO_CONTENT, response.content
+            response.status_code, status.HTTP_200_OK, response.content
         )
 
     def test_task_creation(self):
@@ -88,7 +88,7 @@ class TestUpload(APITestCase):
                 "/workflow/{}/upload/test_file".format(workflow_id), data=data
             )
         self.assertEqual(
-            response.status_code, status.HTTP_204_NO_CONTENT, response.content
+            response.status_code, status.HTTP_200_OK, response.content
         )
         tasks = Task.objects.all()
         for task in tasks:
