@@ -44,9 +44,6 @@ class GetOrganizationView(RetrieveAPIView):
     serializer_class = OrganizationSerializer
 
     def get_object(self):
-        queryset = self.get_queryset()
+        queryset = self.get_queryset().filter(user = self.request.user)
         obj = get_object_or_404(queryset, id=self.kwargs['pk'])
-        if obj.user.filter(id=self.request.user.id).exists():
-            return obj
-        else:
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return obj

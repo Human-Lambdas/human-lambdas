@@ -26,6 +26,11 @@ class TestUsers(APITestCase):
         organization.save()
         self.org_id = organization.id
         organization.user.add(user)
+        user = User(
+            name="wrong_username", email="wrong@bar.com", is_admin=True
+        )
+        user.set_password("wrong_user")
+        user.save()
 
     def test_user_data(self):
         user = User.objects.get(name=self.preset_user_name)
@@ -57,6 +62,15 @@ class TestUsers(APITestCase):
         response = self.client.get("/users/organization/%s" % self.org_id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], self.organization_name)
+
+    def test_get_organization_wrong_user(self):
+        response = self.client.post(
+            "/users/token/", {"email": "wrong@bar.com", "password": "wrong_user"}
+        )
+        access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
+        response = self.client.get("/users/organization/%s" % self.org_id)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_organization_data_deletion(self):
         organization = Organization.objects.all()
