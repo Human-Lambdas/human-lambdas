@@ -1,10 +1,10 @@
 import csv
 
+from .models import Task
 
-def validate_keys(csv_file, workflow):
-    dataset = csv.reader(csv_file)
-    title_row = next(dataset)
-    for input in workflow["inputs"]:
+
+def validate_keys(title_row, workflow):
+    for input in workflow.inputs:
         value_count = title_row.count(input["key"])
         if value_count > 1:
             raise Exception("There are duplicate column names")
@@ -13,17 +13,19 @@ def validate_keys(csv_file, workflow):
             raise Exception("The dataset is missing some columns")
 
 
-def format_csv(csv_file, workflow):
+def process_csv(csv_file, filename, workflow):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
+    validate_keys(title_row, workflow)
     tasks = []
-    for row in dataset:
+    for ic, row in enumerate(dataset):
         if row == title_row:
             continue
         else:
-            task = []
-            for input in workflow["inputs"]:
-                task.append(
+            task_name = "{0}_{1}_{2}".format(workflow.name, filename, ic)
+            tasks = []
+            for input in workflow.inputs:
+                tasks.append(
                     {
                         "key": input["key"],
                         "name": input["name"],
@@ -31,6 +33,6 @@ def format_csv(csv_file, workflow):
                         "value": row[title_row.index(input["key"])],
                     }
                 )
-
-        tasks.append(task)
+        task_obj = Task(name=task_name, input_data=tasks, workflow=workflow)
+        task_obj.save()
     return tasks

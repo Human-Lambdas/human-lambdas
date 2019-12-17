@@ -1,6 +1,6 @@
 {
 "AWSEBDockerrunVersion": "1", 
-"Volumes": [ 
+"Volumes": [
             { "HostDirectory": "/var/www/static",
               "ContainerDirectory": "/code/static"
             }
