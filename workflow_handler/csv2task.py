@@ -35,4 +35,3 @@ def process_csv(csv_file, filename, workflow):
                 )
         task_obj = Task(name=task_name, input_data=tasks, workflow=workflow)
         task_obj.save()
-    return tasks

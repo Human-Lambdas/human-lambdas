@@ -31,11 +31,3 @@ services:
       - "8000:8000"
     depends_on:
       - db
-#  app:
-#    image: hlambdas/hl-web:latest
-#    container_name: hl_app
-#    ports:
-#      - "3000:3000"
-#    depends_on:
-#      - db
-#      - web
