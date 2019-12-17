@@ -67,4 +67,4 @@ class FileUploadView(APIView):
             raise KeyError("No workflow found for id %s not found", workflow_id)
         content = decode_utf8(file_obj)  # .read()
         process_csv(content, filename=filename, workflow=workflow)
-        return Response(status=204)
+        return Response(status=200)
