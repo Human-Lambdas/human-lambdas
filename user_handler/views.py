@@ -44,6 +44,6 @@ class GetOrganizationView(RetrieveAPIView):
     serializer_class = OrganizationSerializer
 
     def get_object(self):
-        queryset = self.get_queryset().filter(user = self.request.user)
+        queryset = self.get_queryset().filter(user=self.request.user)
         obj = get_object_or_404(queryset, id=self.kwargs['pk'])
         return obj
