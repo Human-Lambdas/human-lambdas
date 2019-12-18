@@ -1,17 +1,14 @@
+from io import StringIO
+import csv
+
 from django.test import TestCase
 from user_handler.models import User, Organization
-
-
 from rest_framework.test import APITestCase
 from rest_framework import status
 
 from .models import Workflow, Task
+from .csv2task import validate_keys, process_csv
 
-from .parser import validate_keys, format_csv, create_tasks
-
-from io import StringIO
-
-import csv
 
 class TestModelWorkflow(TestCase):
     def setUp(self):
@@ -407,6 +404,7 @@ class TestCRUDWorkflow(APITestCase):
         self.assertEqual(workflow_data2, response.data[0], response.data)
         self.assertEqual(workflow_data1, response.data[1], response.data)
 
+
 class TestParserWorkflow(TestCase):
     def setUp(self):
         self.test_csv_string = """alpha,beta,gamma,delta
@@ -429,93 +427,88 @@ class TestParserWorkflow(TestCase):
         self.test_csv_file_missing_columns = StringIO(self.test_csv_string_missing_columns)
         self.test_csv_file_extra_columns = StringIO(self.test_csv_string_extra_columns)
         self.test_csv_file_duplicate_columns = StringIO(self.test_csv_string_duplicate_columns)
-
-        self.sample_user = User(name="John Doe", email="John@Doe.com")
-        self.sample_user.save()
-
-        self.sample_organization = Organization(name="ACMEcorp")
-        self.sample_organization.save()
-
-        self.sample_workflow = Workflow(name="<str>", description="<str>", inputs=
-            [
+        user = User(name="foo", email="foo@bar.com", is_admin=True)
+        user.set_password("123")
+        user.save()
+        org = Organization(name="fooInc")
+        org.save()
+        org.user.add(user)
+        self.sample_workflow = Workflow(
+            name="example",
+            description= "description",
+            inputs=[
                     {
                         "key": "alpha", 
-                        "name": "<str>", 
-                        "format": "<data-type>",
+                        "name": "alpha",
+                        "format": "text",
                     },
                                 {
                         "key": "beta", 
-                        "name": "<str>", 
-                        "format": "<data-type>",
+                        "name": "beta",
+                        "format": "text",
                     },
                                 {
                         "key": "gamma", 
-                        "name": "<str>", 
-                        "format": "<data-type>",
+                        "name": "gamma",
+                        "format": "text",
                     },
                                 {
                         "key": "delta", 
-                        "name": "<str>", 
-                        "format": "<data-type>",
+                        "name": "delta",
+                        "format": "text",
                     },  
-            ],
+                ],
+
             outputs=[
                     {
-                        "key": "<str>", 
-                        "name": "<str>", 
-                        "format": {"type": "<output-type>", "<output-type>": "[<str>, ...]"},  
+                        "key": "binary",
+                        "name": "binary",
+                        "format": {"type": "binary"},
                     }
-            ],
-            created_by=self.sample_user,
-            organization=self.sample_organization)
-
+                ],
+            organization=org,
+            created_by=user
+        )
         self.sample_workflow.save()
 
-        self.title_row = ["alpha", "beta", "gamma", "delta"]
-
     def test_validate_keys_missing_columns(self):
+        title_row = next(csv.reader(self.test_csv_file_missing_columns))
         try:
-            validate_keys(self.test_csv_file_missing_columns, self.sample_workflow)
+            validate_keys(title_row, self.sample_workflow)
         except Exception as e:
             self.assertEqual(str(e), "The dataset is missing some columns")
 
     def test_validate_keys_duplicate_columns(self):
+        title_row = next(csv.reader(self.test_csv_file_duplicate_columns))
         try:
-            validate_keys(self.test_csv_file_duplicate_columns, self.sample_workflow)
+            validate_keys(title_row, self.sample_workflow)
         except Exception as e:
             self.assertEqual(str(e), "There are duplicate column names")
 
     def test_validate_keys_correct_columns(self):
+        title_row = next(csv.reader(self.test_csv_file))
         try:
-            validate_keys(self.test_csv_file, self.sample_workflow)
+            validate_keys(title_row, self.sample_workflow)
         except Exception as e:
             self.fail("An error has occurred")
 
     def test_validate_keys_extra_columns(self):
+        title_row = next(csv.reader(self.test_csv_file_extra_columns))
         try:
-            validate_keys(self.test_csv_file_extra_columns, self.sample_workflow)
+            validate_keys(title_row, self.sample_workflow)
         except Exception as e:
             self.fail("An error has occurred")
 
-    def test_format_csv(self):
-        try:
-            tasks = format_csv(self.test_csv_file, self.sample_workflow)
-            # Check each workflow key appears once in the dataset
-            for index, i in enumerate(self.sample_workflow.inputs):
-                self.assertEqual(1, self.title_row.count(tasks[0][index]["key"]))
-        except Exception as e:
-            self.fail("An error has occurred")
-    
-    def test_create_tasks(self):
-        try:
-            create_tasks(format_csv(self.test_csv_file, self.sample_workflow), self.sample_workflow)
-            tasks = Task.objects.all()
-            for task in tasks:
-                # Checks that every input key exists exactly once in the csv
-                for value in task.input_data:
-                    self.assertEqual(self.title_row.count([*value][0]), 1)
-        except Exception as e:
-            self.fail("An error has occurred")
+    def test_process_csv(self):
+        # try:
+        process_csv(csv_file=self.test_csv_file, filename="filename", workflow=self.sample_workflow)
+        title_row = ["alpha", "beta", "gamma", "delta"]
+        # Check each workflow key appears once in each task
+        tasks = Task.objects.all()
+        for task in tasks:
+            for input_item in task.input_data:
+                self.assertEqual(1, title_row.count(input_item["key"]))
+
 
 
 class TestErrorPayloadStructure(APITestCase):
