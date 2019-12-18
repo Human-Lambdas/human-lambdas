@@ -1,6 +1,11 @@
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from user_handler.models import Organization
+from rest_framework.parsers import MultiPartParser
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from workflow_handler.csv2task import process_csv
+
 
 from .serializers import WorkflowSerializer
 from .models import Workflow
@@ -44,3 +49,22 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         else:
             raise PermissionError
         return Workflow.objects.filter(organization=organization)
+
+
+def decode_utf8(input_iterator):
+    for line in input_iterator:
+        yield line.decode("utf-8")
+
+
+class FileUploadView(APIView):
+
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, workflow_id, filename, format=None):
+        file_obj = request.data["file"]  # request.data['file']
+        workflow = Workflow.objects.get(id=workflow_id)
+        if not workflow:
+            raise KeyError("No workflow found for id %s not found", workflow_id)
+        content = decode_utf8(file_obj)  # .read()
+        process_csv(content, filename=filename, workflow=workflow)
+        return Response(status=200)

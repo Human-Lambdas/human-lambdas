@@ -129,3 +129,7 @@ To retrieve a specific workflow you can do so by calling `GET` to `/workflow/upd
 {"description": "This is the new updated description of an existing workflow"}
 ```
 Remember you will only have permission to retrieve and update the workflows which are part of your organization.
+
+## Upload CSV files
+
+To upload CSV files you have to `POST` a message including the file to `/workflow/<workflow-id>/upload/<filename>`
