@@ -10,5 +10,7 @@ urlpatterns = [
     path("token/refresh/", jwt_views.TokenRefreshView.as_view(), name="token_refresh"),
     path("hello/", HelloView.as_view(), name="hello"),
     path("update/<int:pk>", UpdateUserView.as_view(), name="update-user"),
-    path("organization/<int:pk>", GetOrganizationView.as_view(), name="get-organization"),
+    path(
+        "organization/<int:pk>", GetOrganizationView.as_view(), name="get-organization"
+    ),
 ]
