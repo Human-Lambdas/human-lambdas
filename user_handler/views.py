@@ -1,13 +1,13 @@
 import logging
 
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
-from .models import User
-from .serializers import UserSerializer
+from .models import User, Organization
+from .serializers import UserSerializer, OrganizationSerializer
 
 logger = logging.getLogger(__file__)
 
@@ -34,4 +34,18 @@ class UpdateUserView(RetrieveUpdateAPIView):
     def get_object(self):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, name=self.request.user.name)
+        return obj
+
+
+class GetOrganizationView(RetrieveAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Organization.objects.filter(user=user)
+
+    def get_object(self):
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs['pk'])
         return obj
