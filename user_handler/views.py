@@ -1,6 +1,10 @@
 import logging
 
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView
+from rest_framework.generics import (
+    CreateAPIView,
+    RetrieveUpdateAPIView,
+    RetrieveAPIView,
+)
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -47,5 +51,5 @@ class GetOrganizationView(RetrieveAPIView):
         return Organization.objects.filter(user=user)
 
     def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), id=self.kwargs['pk'])
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
         return obj
