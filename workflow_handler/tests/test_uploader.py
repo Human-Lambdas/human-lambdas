@@ -57,12 +57,12 @@ class TestUpload(APITestCase):
                 }
             ],
         }
-        _ = self.client.post("/workflow/create/", workflow_data, format="json")
+        _ = self.client.post("/workflows/create/", workflow_data, format="json")
         workflow_id = Workflow.objects.get(name="uploader").id
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/workflow/{}/upload/test_file".format(workflow_id), data=data
+                "/workflows/{}/upload/".format(workflow_id), data=data
             )
         self.assertEqual(
             response.status_code, status.HTTP_200_OK, response.content
@@ -89,12 +89,12 @@ class TestUpload(APITestCase):
                 }
             ],
         }
-        _ = self.client.post("/workflow/create/", workflow_data, format="json")
+        _ = self.client.post("/workflows/create/", workflow_data, format="json")
         workflow_id = Workflow.objects.get(name="uploader").id
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/workflow/{}/upload/test_file".format(workflow_id), data=data
+                "/workflows/{}/upload/".format(workflow_id), data=data
             )
         self.assertEqual(
             response.status_code, status.HTTP_200_OK, response.content
@@ -205,7 +205,7 @@ class TestCSV2Task(TestCase):
 
     def test_process_csv(self):
         # try:
-        process_csv(csv_file=self.test_csv_file, filename="filename", workflow=self.sample_workflow)
+        process_csv(csv_file=self.test_csv_file, workflow=self.sample_workflow)
         title_row = ["alpha", "beta", "gamma", "delta"]
         # Check each workflow key appears once in each task
         tasks = Task.objects.all()

@@ -60,11 +60,11 @@ class FileUploadView(APIView):
 
     parser_classes = [MultiPartParser]
 
-    def post(self, request, workflow_id, filename, format=None):
+    def post(self, request, workflow_id, format=None):
         file_obj = request.data["file"]  # request.data['file']
         workflow = Workflow.objects.get(id=workflow_id)
         if not workflow:
             raise KeyError("No workflow found for id %s not found", workflow_id)
         content = decode_utf8(file_obj)  # .read()
-        process_csv(content, filename=filename, workflow=workflow)
+        process_csv(content, workflow=workflow)
         return Response(status=200)

@@ -30,7 +30,7 @@ class HelloView(APIView):
         return Response(content)
 
 
-class UpdateUserView(RetrieveUpdateAPIView):
+class RetrieveUpdateUserView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer

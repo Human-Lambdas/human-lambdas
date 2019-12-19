@@ -61,7 +61,7 @@ To register a user you have to `POST` to `/users/register` with the following pa
 ```
 
 ## Retrieve and Update User Endpoint
-To retrieve a user you have to `GET` to `/users/edit/<userd-id>`  and to update a user you use instead `PATCH` to the same endpoint along with a payload including the data you want to update. Here is an example of the payload to update the password of a user:
+To retrieve a user info you have to `GET` to `/users/<userd-id>`  and to update a user you use instead `PATCH` to the same endpoint along with a payload including the data you want to update. Here is an example of the payload to update the password of a user:
 
 ```
 {'password': <str>}
@@ -92,7 +92,7 @@ And it will respond with the `access` token:
 
 ## Create Workflow
 
-The endpoint for creating a workflow is `/workflow/create` and the data it requires is the following: 
+The endpoint for creating a workflow is `/workflows/create` and the data it requires is the following: 
 
 ```
 {
@@ -120,11 +120,11 @@ Here `<data-type>` is a choice between `image` or `text`; and `<output-type>` is
 
 ## List Workflows
 
-To get a list of the workflows in your organization you can do a `GET` call to `/workflow/list/`.
+To get a list of the workflows in your organization you can do a `GET` call to `/workflows/`.
 
 ## Retrieve and Update Workflow
 
-To retrieve a specific workflow you can do so by calling `GET` to `/workflow/update/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
+To retrieve a specific workflow you can do so by calling `GET` to `/workflow/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
 ```
 {"description": "This is the new updated description of an existing workflow"}
 ```
@@ -132,4 +132,4 @@ Remember you will only have permission to retrieve and update the workflows whic
 
 ## Upload CSV files
 
-To upload CSV files you have to `POST` a message including the file to `/workflow/<workflow-id>/upload/<filename>`
+To upload CSV files you have to `POST` a message including the file to `/workflow/<workflow-id>/upload/`

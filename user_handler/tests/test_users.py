@@ -111,11 +111,11 @@ class TestAPIUserUpdate(APITestCase):
 
     def test_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/users/update/1")
+        response = self.client.get("/users/1")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_update(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         data = {"password": self.preset_changed_password}
-        response = self.client.patch("/users/update/1", data)
+        response = self.client.patch("/users/1", data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
