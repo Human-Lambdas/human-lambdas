@@ -5,7 +5,7 @@ from .views import CreateWorkflowView, RUDWorkflowView, ListWorkflowView, FileUp
 
 urlpatterns = [
     path("create/", CreateWorkflowView.as_view(), name="create-workflow"),
-    path("list/", ListWorkflowView.as_view(), name="list-workflow"),
-    path("update/<int:pk>", RUDWorkflowView.as_view(), name="update-workflow"),
-    path("<workflow_id>/upload/<filename>", FileUploadView.as_view(), name="upload"),
+    path("", ListWorkflowView.as_view(), name="list-workflow"),
+    path("<int:pk>", RUDWorkflowView.as_view(), name="update-workflow"),
+    path("<workflow_id>/upload/", FileUploadView.as_view(), name="upload"),
 ]

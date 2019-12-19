@@ -13,7 +13,7 @@ def validate_keys(title_row, workflow):
             raise Exception("The dataset is missing some columns")
 
 
-def process_csv(csv_file, filename, workflow):
+def process_csv(csv_file, workflow):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
     validate_keys(title_row, workflow)
@@ -22,7 +22,7 @@ def process_csv(csv_file, filename, workflow):
         if row == title_row:
             continue
         else:
-            task_name = "{0}_{1}_{2}".format(workflow.name, filename, ic)
+            task_name = "{0}_{1}".format(workflow.name, ic)
             tasks = []
             for input in workflow.inputs:
                 tasks.append(
