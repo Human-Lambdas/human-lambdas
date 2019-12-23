@@ -17,12 +17,10 @@ def process_csv(csv_file, workflow):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
     validate_keys(title_row, workflow)
-    tasks = []
     for ic, row in enumerate(dataset):
         if row == title_row:
             continue
         else:
-            task_name = "{0}_{1}".format(workflow.name, ic)
             tasks = []
             for input in workflow.inputs:
                 tasks.append(
@@ -33,5 +31,5 @@ def process_csv(csv_file, workflow):
                         "value": row[title_row.index(input["key"])],
                     }
                 )
-        task_obj = Task(name=task_name, input_data=tasks, workflow=workflow)
+        task_obj = Task(inputs=tasks, workflow=workflow)
         task_obj.save()

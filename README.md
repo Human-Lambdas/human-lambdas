@@ -132,4 +132,15 @@ Remember you will only have permission to retrieve and update the workflows whic
 
 ## Upload CSV files
 
-To upload CSV files you have to `POST` a message including the file to `/workflow/<workflow-id>/upload/`
+To upload CSV files you have to `POST` a message including the file to `/workflows/<workflow-id>/upload/`
+
+
+## Get list of Tasks
+
+To get the list of tasks in a given workflow you should do call a `GET` to the endpoint `/workflows/<workflow-id>/tasks/`
+
+## Retrieve and UpdateTask
+
+To retrieve a task you can either call a `GET` to the endpoint `/workflows/<workflow-id>/tasks/next` and this will give a incomplete task. 
+
+Another way is to retrieve a specific task and that is by doing a `GET` to the endpoint `/workflows/<workflow-id>/tasks/<task-id>`, if you do a `PATCH` to this endpoint you will be able to update the task. You will only be able to update the output.
