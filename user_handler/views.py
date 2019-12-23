@@ -36,8 +36,7 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
     serializer_class = UserSerializer
 
     def get_object(self):
-        queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, name=self.request.user.name)
+        obj = get_object_or_404(self.get_queryset(), name=self.request.user.name)
         return obj
 
 

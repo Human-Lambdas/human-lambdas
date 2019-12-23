@@ -5,7 +5,6 @@ from workflow_handler.models import Workflow
 
 
 class TestCreateWorkflow(APITestCase):
-
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
@@ -193,4 +192,3 @@ class TestCreateWorkflow(APITestCase):
             "/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-

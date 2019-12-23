@@ -12,14 +12,12 @@ from workflow_handler.models import Workflow, Task
 from workflow_handler.csv2task import validate_keys, process_csv
 
 
-
 logger = logging.getLogger(__file__)
 
 _CURRENT_DIR = os.path.dirname(__file__)
 
 
 class TestUpload(APITestCase):
-
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
         registration_data = {
@@ -64,9 +62,7 @@ class TestUpload(APITestCase):
             response = self.client.post(
                 "/workflows/{}/upload/".format(workflow_id), data=data
             )
-        self.assertEqual(
-            response.status_code, status.HTTP_200_OK, response.content
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_task_creation(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
@@ -96,20 +92,18 @@ class TestUpload(APITestCase):
             response = self.client.post(
                 "/workflows/{}/upload/".format(workflow_id), data=data
             )
-        self.assertEqual(
-            response.status_code, status.HTTP_200_OK, response.content
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         tasks = Task.objects.all()
         for task in tasks:
-            self.assertEqual(3, len(task.input_data))
-            for input_item in task.input_data:
+            self.assertEqual(3, len(task.inputs))
+            for input_item in task.inputs:
                 self.assertTrue(input_item.pop("value"))
                 self.assertTrue(
                     any(wf_input == input_item for wf_input in workflow_data["inputs"])
                 )
 
-class TestCSV2Task(TestCase):
 
+class TestCSV2Task(TestCase):
     def setUp(self):
         self.test_csv_string = """alpha,beta,gamma,delta
         1,2,3,4
@@ -128,9 +122,13 @@ class TestCSV2Task(TestCase):
         5,6,7,8,5"""
 
         self.test_csv_file = StringIO(self.test_csv_string)
-        self.test_csv_file_missing_columns = StringIO(self.test_csv_string_missing_columns)
+        self.test_csv_file_missing_columns = StringIO(
+            self.test_csv_string_missing_columns
+        )
         self.test_csv_file_extra_columns = StringIO(self.test_csv_string_extra_columns)
-        self.test_csv_file_duplicate_columns = StringIO(self.test_csv_string_duplicate_columns)
+        self.test_csv_file_duplicate_columns = StringIO(
+            self.test_csv_string_duplicate_columns
+        )
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.set_password("123")
         user.save()
@@ -141,37 +139,16 @@ class TestCSV2Task(TestCase):
             name="example",
             description="description",
             inputs=[
-                {
-                    "key": "alpha",
-                    "name": "alpha",
-                    "format": "text",
-                },
-                {
-                    "key": "beta",
-                    "name": "beta",
-                    "format": "text",
-                },
-                {
-                    "key": "gamma",
-                    "name": "gamma",
-                    "format": "text",
-                },
-                {
-                    "key": "delta",
-                    "name": "delta",
-                    "format": "text",
-                },
+                {"key": "alpha", "name": "alpha", "format": "text",},
+                {"key": "beta", "name": "beta", "format": "text",},
+                {"key": "gamma", "name": "gamma", "format": "text",},
+                {"key": "delta", "name": "delta", "format": "text",},
             ],
-
             outputs=[
-                {
-                    "key": "binary",
-                    "name": "binary",
-                    "format": {"type": "binary"},
-                }
+                {"key": "binary", "name": "binary", "format": {"type": "binary"},}
             ],
             organization=org,
-            created_by=user
+            created_by=user,
         )
         self.sample_workflow.save()
 
@@ -210,5 +187,5 @@ class TestCSV2Task(TestCase):
         # Check each workflow key appears once in each task
         tasks = Task.objects.all()
         for task in tasks:
-            for input_item in task.input_data:
+            for input_item in task.inputs:
                 self.assertEqual(1, title_row.count(input_item["key"]))

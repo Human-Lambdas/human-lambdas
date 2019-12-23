@@ -5,7 +5,6 @@ from workflow_handler.models import Workflow
 
 
 class TestErrorPayloadStructure(APITestCase):
-
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
@@ -39,12 +38,16 @@ class TestErrorPayloadStructure(APITestCase):
 
     # Create workflow endpoint tests
     def test_create_workflow_no_jwt(self):
-        response = self.client.post("/workflows/create/", self.complete_workflow_data, format="json")
+        response = self.client.post(
+            "/workflows/create/", self.complete_workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_workflow_invalid_jwt(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.invalid_token)
-        response = self.client.post("/workflows/create/", self.complete_workflow_data, format="json")
+        response = self.client.post(
+            "/workflows/create/", self.complete_workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_workflow_missing_data(self):
@@ -68,7 +71,9 @@ class TestErrorPayloadStructure(APITestCase):
 
     def test_create_workflow_wrong_method(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.patch("/workflows/create/", self.complete_workflow_data, format="json")
+        response = self.client.patch(
+            "/workflows/create/", self.complete_workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     # test list workflows
@@ -89,7 +94,9 @@ class TestErrorPayloadStructure(APITestCase):
     # test update workflows
     def test_update_workflow_no_jwt(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.post("/workflows/create/", self.complete_workflow_data, format="json")
+        response = self.client.post(
+            "/workflows/create/", self.complete_workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.client.credentials(HTTP_AUTHORIZATION=None)
         workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
@@ -99,13 +106,17 @@ class TestErrorPayloadStructure(APITestCase):
             "description": "not so great wf",
         }
         response = self.client.patch(
-            "/workflows/{}".format(workflow.pk), self.complete_workflow_data, format="json"
+            "/workflows/{}".format(workflow.pk),
+            self.complete_workflow_data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_update_workflow_invalid_jwt(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.post("/workflows/create/", self.complete_workflow_data, format="json")
+        response = self.client.post(
+            "/workflows/create/", self.complete_workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.invalid_token)
         workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
@@ -115,13 +126,17 @@ class TestErrorPayloadStructure(APITestCase):
             "description": "not so great wf",
         }
         response = self.client.patch(
-            "/workflows/{}".format(workflow.pk), self.complete_workflow_data, format="json"
+            "/workflows/{}".format(workflow.pk),
+            self.complete_workflow_data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_update_workflow_wrong_method(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.post("/workflows/create/", self.complete_workflow_data, format="json")
+        response = self.client.post(
+            "/workflows/create/", self.complete_workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
@@ -130,6 +145,8 @@ class TestErrorPayloadStructure(APITestCase):
             "description": "not so great wf",
         }
         response = self.client.post(
-            "/workflows/{}".format(workflow.pk), self.complete_workflow_data, format="json"
+            "/workflows/{}".format(workflow.pk),
+            self.complete_workflow_data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

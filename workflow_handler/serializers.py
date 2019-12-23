@@ -1,9 +1,10 @@
 import logging
 
+from django.utils import timezone
 from rest_framework import serializers
 from user_handler.models import Organization
 
-from .models import Workflow
+from .models import Workflow, Task
 
 logger = logging.getLogger(__file__)
 
@@ -61,7 +62,8 @@ class WorkflowSerializer(serializers.ModelSerializer):
         instance.description = validated_data.get("description", instance.description)
         instance.inputs = validated_data.get("inputs", instance.inputs)
         instance.outputs = validated_data.get("outputs", instance.outputs)
-        return validated_data
+        instance.save()
+        return instance
 
     def validate_inputs(self, data):
         if len(data) == 0:
@@ -121,5 +123,47 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 except KeyError:
                     raise serializers.ValidationError(
                         "Input missing key '{0}'".format(out_key)
+                    )
+        return data
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ["id", "status", "created_at", "inputs", "outputs"]
+
+    def update(self, instance, validated_data):
+        outputs = validated_data.get("outputs")
+        if not outputs:
+            raise serializers.ValidationError("You can only update outputs of tasks")
+        instance.outputs = outputs
+        instance.status = "completed"
+        instance.completed_at = timezone.now()  # datetime.datetime.now()
+        instance.completed_by = self.context["request"].user
+        instance.save()
+        return instance
+
+    def validate_inputs(self, data):
+        if len(data) == 0:
+            raise serializers.ValidationError("Inputs cannot be empty")
+        for data_dict in data:
+            for inp_key, inp_type in _INPUT_TUPLES:
+                try:
+                    if not isinstance(data_dict[inp_key], inp_type):
+                        raise serializers.ValidationError(
+                            "'{0}' is of type {1} when expected {2}".format(
+                                inp_key, type(data_dict[inp_key]), inp_type
+                            )
+                        )
+                    if inp_key == "format":
+                        if data_dict[inp_key] not in _INPUT_FORMATS:
+                            raise serializers.ValidationError(
+                                "Input format should be one of following: {0}".format(
+                                    _INPUT_FORMATS
+                                )
+                            )
+                except KeyError:
+                    raise serializers.ValidationError(
+                        "Input missing key '{0}'".format(inp_key)
                     )
         return data

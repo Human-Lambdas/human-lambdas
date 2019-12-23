@@ -5,7 +5,6 @@ from workflow_handler.models import Workflow
 
 
 class TestCRUDWorkflow(APITestCase):
-
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
@@ -90,13 +89,18 @@ class TestCRUDWorkflow(APITestCase):
         workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
-        workflow_data = {
-            "description": "not so great wf",
+        updated_text = "not so great wf"
+        updated_workflow_data = {
+            "description": updated_text,
         }
         response = self.client.patch(
-            "/workflows/{}".format(workflow.pk), workflow_data, format="json"
+            "/workflows/{}".format(workflow.pk), updated_workflow_data, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(updated_text, response.data["description"])
+        workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
+        workflow = workflow_obj.first()
+        self.assertEqual(updated_text, workflow.description)
 
     def test_list_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
@@ -140,6 +144,9 @@ class TestCRUDWorkflow(APITestCase):
         self.assertTrue(result_1.pop("id"))
         self.assertTrue(result_2.pop("id"))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(workflow_data2, response.data[0], response.data)
-        self.assertEqual(workflow_data1, response.data[1], response.data)
-
+        try:
+            self.assertEqual(workflow_data2, response.data[0], response.data)
+            self.assertEqual(workflow_data1, response.data[1], response.data)
+        except AssertionError:
+            self.assertEqual(workflow_data2, response.data[1], response.data)
+            self.assertEqual(workflow_data1, response.data[0], response.data)
