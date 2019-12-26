@@ -9,17 +9,17 @@ from .models import Workflow, Task
 logger = logging.getLogger(__file__)
 
 _INPUT_TUPLES = [
-    ("key", str),
+    ("id", str),
     ("name", str),
-    ("format", str),
+    ("type", str),
 ]
 
 _INPUT_FORMATS = ["image", "text"]
 
 _OUTPUT_TUPLES = [
-    ("key", str),
+    ("id", str),
     ("name", str),
-    ("format", dict),
+    ("type", str),
 ]
 
 _OUTPUT_FORMAT_TYPES = {
@@ -77,7 +77,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
                                 inp_key, type(data_dict[inp_key]), inp_type
                             )
                         )
-                    if inp_key == "format":
+                    if inp_key == "type":
                         if data_dict[inp_key] not in _INPUT_FORMATS:
                             raise serializers.ValidationError(
                                 "Input format should be one of following: {0}".format(
@@ -102,8 +102,8 @@ class WorkflowSerializer(serializers.ModelSerializer):
                                 out_key, type(data_dict[out_key]), out_type
                             )
                         )
-                    if out_key == "format":
-                        ftype = data_dict[out_key]["type"]
+                    if out_key == "type":
+                        ftype = data_dict[out_key]
                         if ftype not in _OUTPUT_FORMAT_TYPES:
                             raise serializers.ValidationError(
                                 "Output format type should be one of following: {0}".format(
@@ -112,7 +112,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
                             )
                         if _OUTPUT_FORMAT_TYPES[ftype]:
                             if not isinstance(
-                                data_dict[out_key].get(ftype),
+                                data_dict.get(ftype),
                                 _OUTPUT_FORMAT_TYPES[ftype],
                             ):
                                 raise serializers.ValidationError(
@@ -155,7 +155,7 @@ class TaskSerializer(serializers.ModelSerializer):
                                 inp_key, type(data_dict[inp_key]), inp_type
                             )
                         )
-                    if inp_key == "format":
+                    if inp_key == "type":
                         if data_dict[inp_key] not in _INPUT_FORMATS:
                             raise serializers.ValidationError(
                                 "Input format should be one of following: {0}".format(

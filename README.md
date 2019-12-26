@@ -109,14 +109,51 @@ The endpoint for creating a workflow is `/workflows/create` and the data it requ
      'outputs': 
         [
             {
-                "key": <str>, 
+                "id": <str>, 
                 "name": <str>, 
-                "format": {"type": <output-type>, "<output-type>": [<str>, ...]},  
+                "type": <output-type>,
+                "<output-type>" : <OUTPUT-TYPE SECTION>
             }, ...
         ]
 }
 ```
-Here `<data-type>` is a choice between `image` or `text`; and `<output-type>` is a choice between `binary`, `single-class`, `multi-class` or `freetext`.
+Here `<data-type>` is a choice between `image` or `text`; and `<output-type>` is a choice between `binary`, `single-class`, `multi-class` or `freetext`. 
+
+Below are the different output sections formats:
+#### binary
+```
+{
+    “options”: {
+        true: "Yes", 
+        false: "No"
+    },
+}
+``` 
+
+#### single-selection
+```
+{
+    “options”: [
+        { "id": "option-1-id", "name": "Option 1"},
+        { "id": "option-2-id", "name": "Option 2"},
+        { "id": "option-3-id", "name": "Option 3"}],
+}
+```
+
+#### multi-selection
+```
+{
+    “options”: [
+        { "id": "option-1-id", "name": "Option 1"},
+        { "id": "option-2-id", "name": "Option 2"},
+        { "id": "option-3-id", "name": "Option 3"}],
+}
+```
+
+#### freetext
+```
+{}
+```
 
 ## List Workflows
 
@@ -124,7 +161,7 @@ To get a list of the workflows in your organization you can do a `GET` call to `
 
 ## Retrieve and Update Workflow
 
-To retrieve a specific workflow you can do so by calling `GET` to `/workflow/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
+To retrieve a specific workflow you can do so by calling `GET` to `/workflows/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
 ```
 {"description": "This is the new updated description of an existing workflow"}
 ```

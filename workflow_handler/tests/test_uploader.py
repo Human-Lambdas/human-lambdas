@@ -40,18 +40,16 @@ class TestUpload(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "inputs": [
-                {"key": "Alpha", "name": "alpha", "format": "text"},
-                {"key": "Beta", "name": "beta", "format": "text"},
-                {"key": "Gamma", "name": "gamma", "format": "text"},
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
             ],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class": ["foo1", "bar1"],
                 }
             ],
         }
@@ -70,18 +68,16 @@ class TestUpload(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "inputs": [
-                {"key": "Alpha", "name": "alpha", "format": "text"},
-                {"key": "Beta", "name": "beta", "format": "text"},
-                {"key": "Gamma", "name": "gamma", "format": "text"},
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
             ],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class": ["foo1", "bar1"],
                 }
             ],
         }
@@ -139,13 +135,13 @@ class TestCSV2Task(TestCase):
             name="example",
             description="description",
             inputs=[
-                {"key": "alpha", "name": "alpha", "format": "text",},
-                {"key": "beta", "name": "beta", "format": "text",},
-                {"key": "gamma", "name": "gamma", "format": "text",},
-                {"key": "delta", "name": "delta", "format": "text",},
+                {"id": "alpha", "name": "alpha", "type": "text",},
+                {"id": "beta", "name": "beta", "type": "text",},
+                {"id": "gamma", "name": "gamma", "type": "text",},
+                {"id": "delta", "name": "delta", "type": "text",},
             ],
             outputs=[
-                {"key": "binary", "name": "binary", "format": {"type": "binary"},}
+                {"id": "binary", "name": "binary", "type": "binary"}
             ],
             organization=org,
             created_by=user,
@@ -188,4 +184,4 @@ class TestCSV2Task(TestCase):
         tasks = Task.objects.all()
         for task in tasks:
             for input_item in task.inputs:
-                self.assertEqual(1, title_row.count(input_item["key"]))
+                self.assertEqual(1, title_row.count(input_item["id"]))

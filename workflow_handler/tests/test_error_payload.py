@@ -23,15 +23,13 @@ class TestErrorPayloadStructure(APITestCase):
         self.complete_workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class": ["foo1", "bar1"],
                 }
             ],
         }
@@ -54,15 +52,13 @@ class TestErrorPayloadStructure(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class": ["foo1", "bar1"],
                 }
             ],
         }
@@ -97,7 +93,7 @@ class TestErrorPayloadStructure(APITestCase):
         response = self.client.post(
             "/workflows/create/", self.complete_workflow_data, format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
         self.client.credentials(HTTP_AUTHORIZATION=None)
         workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
@@ -117,7 +113,7 @@ class TestErrorPayloadStructure(APITestCase):
         response = self.client.post(
             "/workflows/create/", self.complete_workflow_data, format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.invalid_token)
         workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
@@ -137,7 +133,7 @@ class TestErrorPayloadStructure(APITestCase):
         response = self.client.post(
             "/workflows/create/", self.complete_workflow_data, format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
         workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
