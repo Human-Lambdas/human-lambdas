@@ -32,7 +32,7 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-class",
-                    "single-class": ["foo1", "bar1"],
+                    "single-class": {"options":["foo1", "bar1"]}
                 }
             ],
         }
@@ -51,7 +51,7 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-class",
-                    "single-class": ["foo1", "bar1"],
+                    "single-class": {"options":["foo1", "bar1"]}
                 }
             ],
         }
@@ -74,7 +74,7 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-class",
-                    "single-class": ["foo1", "bar1"],
+                    "single-class": {"options":["foo1", "bar1"]}
                 }
             ],
         }
@@ -107,7 +107,7 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-class",
-                    "single-class": ["foo1", "bar1"],
+                    "single-class":{"options":["foo1", "bar1"]}
                 }
             ],
         }
@@ -122,7 +122,7 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-class",
-                    "single-class": ["foo1", "bar1"],
+                    "single-class": {"options":["foo1", "bar1"]}
                 }
             ],
         }

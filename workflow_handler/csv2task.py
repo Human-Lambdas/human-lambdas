@@ -32,5 +32,7 @@ def process_csv(csv_file, workflow):
                         "value": row[title_row.index(input["id"])],
                     }
                 )
-        task_obj = Task(inputs=inputs, outputs=copy.deepcopy(workflow.outputs), workflow=workflow)
+        task_obj = Task(
+            inputs=inputs, outputs=copy.deepcopy(workflow.outputs), workflow=workflow
+        )
         task_obj.save()

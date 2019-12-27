@@ -23,8 +23,8 @@ _OUTPUT_TUPLES = [
 ]
 
 _OUTPUT_FORMAT_TYPES = {
-    "single-class": list,
-    "multi-class": list,
+    "single-class": dict,
+    "multi-class": dict,
     "binary": None,
     "freetext": None,
 }
@@ -112,8 +112,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
                             )
                         if _OUTPUT_FORMAT_TYPES[ftype]:
                             if not isinstance(
-                                data_dict.get(ftype),
-                                _OUTPUT_FORMAT_TYPES[ftype],
+                                data_dict.get(ftype), _OUTPUT_FORMAT_TYPES[ftype],
                             ):
                                 raise serializers.ValidationError(
                                     "Expecting a key {0} with the value of list of strings".format(

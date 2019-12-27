@@ -42,10 +42,12 @@ class TestTasks(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-class",
-                    "single-class": [
+                    "single-class": {
+                        "options": [
                         "foo1",
                         "bar1",
                     ],
+                    }
                 }
             ],
         }
