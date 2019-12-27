@@ -33,18 +33,21 @@ class TestTasks(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "inputs": [
-                {"key": "Alpha", "name": "alpha", "format": "text"},
-                {"key": "Beta", "name": "beta", "format": "text"},
-                {"key": "Gamma", "name": "gamma", "format": "text"},
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
             ],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class": {
+                        "options": [
+                        "foo1",
+                        "bar1",
+                    ],
+                    }
                 }
             ],
         }

@@ -26,15 +26,13 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class": {"options":["foo1", "bar1"]}
                 }
             ],
         }
@@ -47,15 +45,13 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class": {"options":["foo1", "bar1"]}
                 }
             ],
         }
@@ -72,15 +68,13 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class": {"options":["foo1", "bar1"]}
                 }
             ],
         }
@@ -107,15 +101,13 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data1 = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class":{"options":["foo1", "bar1"]}
                 }
             ],
         }
@@ -124,15 +116,13 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data2 = {
             "name": "foowf2",
             "description": "greater wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class": {"options":["foo1", "bar1"]}
                 }
             ],
         }

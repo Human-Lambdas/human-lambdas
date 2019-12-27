@@ -1,11 +1,12 @@
 import csv
+import copy
 
 from .models import Task
 
 
 def validate_keys(title_row, workflow):
     for input in workflow.inputs:
-        value_count = title_row.count(input["key"])
+        value_count = title_row.count(input["id"])
         if value_count > 1:
             raise Exception("There are duplicate column names")
 
@@ -21,15 +22,17 @@ def process_csv(csv_file, workflow):
         if row == title_row:
             continue
         else:
-            tasks = []
+            inputs = []
             for input in workflow.inputs:
-                tasks.append(
+                inputs.append(
                     {
-                        "key": input["key"],
+                        "id": input["id"],
                         "name": input["name"],
-                        "format": input["format"],
-                        "value": row[title_row.index(input["key"])],
+                        "type": input["type"],
+                        "value": row[title_row.index(input["id"])],
                     }
                 )
-        task_obj = Task(inputs=tasks, workflow=workflow)
+        task_obj = Task(
+            inputs=inputs, outputs=copy.deepcopy(workflow.outputs), workflow=workflow
+        )
         task_obj.save()

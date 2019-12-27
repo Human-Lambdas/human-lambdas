@@ -26,15 +26,13 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [
                 {
-                    "key": "foo",
+                    "id": "foo",
                     "name": "foo",
-                    "format": {
-                        "type": "single-class",
-                        "single-class": ["foo1", "bar1"],
-                    },
+                    "type": "single-class",
+                    "single-class": {"options":["foo1", "bar1"]}
                 }
             ],
         }
@@ -62,7 +60,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo"}],
+            "inputs": [{"id": "foo"}],
             "outputs": [],
         }
         response = self.client.post(
@@ -75,7 +73,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": 1, "name": "foo", "format": "text"}],
+            "inputs": [{"id": 1, "name": "foo", "type": "text"}],
             "outputs": [],
         }
         response = self.client.post(
@@ -88,7 +86,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "game"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "game"}],
             "outputs": [],
         }
         response = self.client.post(
@@ -105,7 +103,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [],
         }
         response = self.client.post(
@@ -118,8 +116,8 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
-            "outputs": [{"key": "foo"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [{"id": "foo"}],
         }
         response = self.client.post(
             "/workflows/create/", workflow_data, headers=headers, format="json"
@@ -131,8 +129,8 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
-            "outputs": [{"key": 1}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [{"id": 1}],
         }
         response = self.client.post(
             "/workflows/create/", workflow_data, headers=headers, format="json"
@@ -144,8 +142,8 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
-            "outputs": [{"key": "foo", "name": "foo", "format": {}}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [{"id": "foo", "name": "foo", "type": "notype"}],
         }
         response = self.client.post(
             "/workflows/create/", workflow_data, headers=headers, format="json"
@@ -157,8 +155,8 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
-            "outputs": [{"key": "foo", "name": "foo", "format": {"type": "random"}}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [{"id": "foo", "name": "foo", "type": "random"}],
         }
         response = self.client.post(
             "/workflows/create/", workflow_data, headers=headers, format="json"
@@ -170,9 +168,9 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [
-                {"key": "foo", "name": "foo", "format": {"type": "single-class"}}
+                {"id": "foo", "name": "foo", "type": "single-class"}
             ],
         }
         response = self.client.post(
@@ -185,8 +183,8 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"key": "foo", "name": "foo", "format": "text"}],
-            "outputs": [{"key": "foo", "name": "foo", "format": {"type": "binary"}}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [{"id": "foo", "name": "foo", "type": "binary"}],
         }
         response = self.client.post(
             "/workflows/create/", workflow_data, headers=headers, format="json"
