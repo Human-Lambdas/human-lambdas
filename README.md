@@ -61,7 +61,7 @@ To register a user you have to `POST` to `/users/register` with the following pa
 ```
 
 ## Retrieve and Update User Endpoint
-To retrieve a user you have to `GET` to `/users/edit/<userd-id>`  and to update a user you use instead `PATCH` to the same endpoint along with a payload including the data you want to update. Here is an example of the payload to update the password of a user:
+To retrieve a user info you have to `GET` to `/users/<userd-id>`  and to update a user you use instead `PATCH` to the same endpoint along with a payload including the data you want to update. Here is an example of the payload to update the password of a user:
 
 ```
 {'password': <str>}
@@ -92,7 +92,7 @@ And it will respond with the `access` token:
 
 ## Create Workflow
 
-The endpoint for creating a workflow is `/workflow/create` and the data it requires is the following: 
+The endpoint for creating a workflow is `/workflows/create` and the data it requires is the following: 
 
 ```
 {
@@ -109,23 +109,75 @@ The endpoint for creating a workflow is `/workflow/create` and the data it requi
      'outputs': 
         [
             {
-                "key": <str>, 
+                "id": <str>, 
                 "name": <str>, 
-                "format": {"type": <output-type>, "<output-type>": [<str>, ...]},  
+                "type": <output-type>,
+                "<output-type>" : <OUTPUT-TYPE SECTION>
             }, ...
         ]
 }
 ```
-Here `<data-type>` is a choice between `image` or `text`; and `<output-type>` is a choice between `binary`, `single-class`, `multi-class` or `freetext`.
+Here `<data-type>` is a choice between `image` or `text`; and `<output-type>` is a choice between `binary`, `single-class`, `multi-class` or `freetext`. 
+
+Below are the different output sections formats:
+#### binary
+```
+{
+    “options”: {
+        true: "Yes", 
+        false: "No"
+    },
+}
+``` 
+
+#### single-selection
+```
+{
+    “options”: [
+        { "id": "option-1-id", "name": "Option 1"},
+        { "id": "option-2-id", "name": "Option 2"},
+        { "id": "option-3-id", "name": "Option 3"}],
+}
+```
+
+#### multi-selection
+```
+{
+    “options”: [
+        { "id": "option-1-id", "name": "Option 1"},
+        { "id": "option-2-id", "name": "Option 2"},
+        { "id": "option-3-id", "name": "Option 3"}],
+}
+```
+
+#### freetext
+```
+{}
+```
 
 ## List Workflows
 
-To get a list of the workflows in your organization you can do a `GET` call to `/workflow/list/`.
+To get a list of the workflows in your organization you can do a `GET` call to `/workflows/`.
 
 ## Retrieve and Update Workflow
 
-To retrieve a specific workflow you can do so by calling `GET` to `/workflow/update/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
+To retrieve a specific workflow you can do so by calling `GET` to `/workflows/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
 ```
 {"description": "This is the new updated description of an existing workflow"}
 ```
 Remember you will only have permission to retrieve and update the workflows which are part of your organization.
+
+## Upload CSV files
+
+To upload CSV files you have to `POST` a message including the file to `/workflows/<workflow-id>/upload/`
+
+
+## Get list of Tasks
+
+To get the list of tasks in a given workflow you should do call a `GET` to the endpoint `/workflows/<workflow-id>/tasks/`
+
+## Retrieve and UpdateTask
+
+To retrieve a task you can either call a `GET` to the endpoint `/workflows/<workflow-id>/tasks/next` and this will give a incomplete task. 
+
+Another way is to retrieve a specific task and that is by doing a `GET` to the endpoint `/workflows/<workflow-id>/tasks/<task-id>`, if you do a `PATCH` to this endpoint you will be able to update the task. You will only be able to update the output.

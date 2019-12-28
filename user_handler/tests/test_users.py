@@ -1,28 +1,36 @@
 import logging
 
-from django.test import TestCase
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from .models import User, Organization
+from user_handler.models import User, Organization
 
 logger = logging.getLogger(__file__)
 
 
-class TestUsers(TestCase):
+class TestUsers(APITestCase):
+
     def setUp(self):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
         self.preset_changed_email = "bar@foo.com"
         self.organization_name = "fooinc"
+        self.preset_user_password = "fooword"
 
         user = User(
             name=self.preset_user_name, email=self.preset_user_email, is_admin=True
         )
+        user.set_password(self.preset_user_password)
         user.save()
         organization = Organization(name=self.organization_name)
         organization.save()
+        self.org_id = organization.id
         organization.user.add(user)
+        user = User(
+            name="wrong_username", email="wrong@bar.com", is_admin=True
+        )
+        user.set_password("wrong_user")
+        user.save()
 
     def test_user_data(self):
         user = User.objects.get(name=self.preset_user_name)
@@ -45,13 +53,25 @@ class TestUsers(TestCase):
         user.delete()
         self.assertEqual(len(User.objects.all()), 0)
 
-    def test_organization_data_deletion(self):
-        organization = Organization.objects.all()
-        organization.delete()
-        self.assertEqual(len(Organization.objects.all()), 0)
+
+class TestAPIRegistration(APITestCase):
+
+    def test_registration(self):
+        response = self.client.post(
+            "/users/register/",
+            {
+                "email": "foo@bar.com",
+                "password": "fooword",
+                "name": "foo",
+                "is_admin": True,
+                "organization": "barinc",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
 class TestAPIjwt(APITestCase):
+
     def setUp(self):
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.set_password("fooword")
@@ -75,21 +95,8 @@ class TestAPIjwt(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
 
-class TestAPIRegistration(APITestCase):
-    def test_registration(self):
-        response = self.client.post(
-            "/users/register/",
-            {
-                "email": "foo@bar.com",
-                "password": "fooword",
-                "name": "foo",
-                "is_admin": True,
-                "organization": "barinc",
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+class TestAPIUserUpdate(APITestCase):
 
-class TestAPIChange(APITestCase):
     def setUp(self):
         self.preset_password = "fooword"
         self.preset_changed_password = "barword"
@@ -104,11 +111,11 @@ class TestAPIChange(APITestCase):
 
     def test_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/users/update/1")
+        response = self.client.get("/users/1")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_update(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         data = {"password": self.preset_changed_password}
-        response = self.client.patch("/users/update/1", data)
+        response = self.client.patch("/users/1", data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)

@@ -25,6 +25,13 @@ class UserManager(BaseUserManager):
         user = self.create_user(email, password=password,)
         user.is_admin = True
         user.save(using=self._db)
+        org = Organization.objects.filter(name="superusers")
+        if org.exists():
+            org = org.first()
+        else:
+            org = Organization(name="superusers")
+            org.save()
+        org.user.add(user)
         return user
 
 
@@ -36,7 +43,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     def __str__(self):
-        return self.name
+        return self.email
 
     @property
     def is_staff(self):
@@ -60,7 +67,7 @@ class User(AbstractBaseUser):
 
 
 class Organization(models.Model):
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=128, unique=True)
     user = models.ManyToManyField(User)
 
     def __str__(self):
