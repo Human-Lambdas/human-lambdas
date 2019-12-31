@@ -22,9 +22,9 @@ class TestTasks(APITestCase):
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register/", registration_data)
         response = self.client.post(
-            "/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
@@ -51,17 +51,17 @@ class TestTasks(APITestCase):
                 }
             ],
         }
-        _ = self.client.post("/workflows/create/", workflow_data, format="json")
+        _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
         self.workflow_id = Workflow.objects.get(name="uploader").id
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/workflows/{}/upload/".format(self.workflow_id), data=data
+                "/v1/workflows/{}/upload/".format(self.workflow_id), data=data
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_get_task_list(self):
-        response = self.client.get("/workflows/{}/tasks/".format(self.workflow_id))
+        response = self.client.get("/v1/workflows/{}/tasks/".format(self.workflow_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(3, len(response.data), response.content)
 
@@ -69,7 +69,7 @@ class TestTasks(APITestCase):
         tasks = Task.objects.all()
         for task in tasks:
             response = self.client.get(
-                "/workflows/{}/tasks/{}".format(self.workflow_id, task.id)
+                "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id)
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("incomplete", response.data["status"])
@@ -80,7 +80,7 @@ class TestTasks(APITestCase):
         tasks = Task.objects.all()
         for task in tasks:
             response = self.client.get(
-                "/workflows/{}/tasks/{}".format(self.workflow_id, task.id)
+                "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id)
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("incomplete", response.data["status"])
@@ -93,7 +93,7 @@ class TestTasks(APITestCase):
             output_list = [{"id": "1", "value": output}]
             data = {"outputs": output_list}
             response = self.client.patch(
-                "/workflows/{}/tasks/{}".format(self.workflow_id, task.id),
+                "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id),
                 data=data,
                 format="json",
             )
@@ -106,7 +106,7 @@ class TestTasks(APITestCase):
         task = Task.objects.first()
         data = {"status": "testing"}
         response = self.client.patch(
-            "/workflows/{}/tasks/{}".format(self.workflow_id, task.id),
+            "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id),
             data=data,
             format="json",
         )
@@ -115,6 +115,6 @@ class TestTasks(APITestCase):
         )
 
     def test_next_task(self):
-        response = self.client.get("/workflows/{}/tasks/next/".format(self.workflow_id))
+        response = self.client.get("/v1/workflows/{}/tasks/next/".format(self.workflow_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual("incomplete", response.data["status"], response.content)

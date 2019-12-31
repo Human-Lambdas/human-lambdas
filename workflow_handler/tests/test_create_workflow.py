@@ -13,9 +13,9 @@ class TestCreateWorkflow(APITestCase):
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register/", registration_data)
         response = self.client.post(
-            "/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
@@ -36,7 +36,7 @@ class TestCreateWorkflow(APITestCase):
                 }
             ],
         }
-        response = self.client.post("/workflows/create/", workflow_data, format="json")
+        response = self.client.post("/v1/workflows/create/", workflow_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertTrue(Workflow.objects.filter(name=workflow_data["name"]).exists())
 
@@ -51,7 +51,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -64,7 +64,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -77,7 +77,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -90,7 +90,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -107,7 +107,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -120,7 +120,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": "foo"}],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -133,7 +133,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": 1}],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -146,7 +146,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": "foo", "name": "foo", "type": "notype"}],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -159,7 +159,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": "foo", "name": "foo", "type": "random"}],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -174,7 +174,7 @@ class TestCreateWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.data
@@ -187,6 +187,6 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": "foo", "name": "foo", "type": "binary"}],
         }
         response = self.client.post(
-            "/workflows/create/", workflow_data, headers=headers, format="json"
+            "/v1/workflows/create/", workflow_data, headers=headers, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
