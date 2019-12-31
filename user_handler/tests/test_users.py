@@ -58,7 +58,7 @@ class TestAPIRegistration(APITestCase):
 
     def test_registration(self):
         response = self.client.post(
-            "/users/register/",
+            "/v1/users/register/",
             {
                 "email": "foo@bar.com",
                 "password": "fooword",
@@ -77,21 +77,21 @@ class TestAPIjwt(APITestCase):
         user.set_password("fooword")
         user.save()
         response = self.client.post(
-            "/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
 
     def test_token(self):
         response = self.client.post(
-            "/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
     def test_authorization(self):
         headers = {"Authorization": "Bearer {}".format(self.access_token)}
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/users/hello/", headers=headers)
+        response = self.client.get("/v1/users/hello/", headers=headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
 
@@ -104,18 +104,18 @@ class TestAPIUserUpdate(APITestCase):
         user.set_password(self.preset_password)
         user.save()
         response = self.client.post(
-            "/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
 
     def test_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/users/1")
+        response = self.client.get("/v1/users/1")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_update(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         data = {"password": self.preset_changed_password}
-        response = self.client.patch("/users/1", data)
+        response = self.client.patch("/v1/users/1", data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)

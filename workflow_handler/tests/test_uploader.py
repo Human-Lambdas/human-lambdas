@@ -27,9 +27,9 @@ class TestUpload(APITestCase):
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register/", registration_data)
         response = self.client.post(
-            "/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
@@ -53,12 +53,12 @@ class TestUpload(APITestCase):
                 }
             ],
         }
-        _ = self.client.post("/workflows/create/", workflow_data, format="json")
+        _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
         workflow_id = Workflow.objects.get(name="uploader").id
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/workflows/{}/upload/".format(workflow_id), data=data
+                "/v1/workflows/{}/upload/".format(workflow_id), data=data
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
@@ -81,12 +81,12 @@ class TestUpload(APITestCase):
                 }
             ],
         }
-        _ = self.client.post("/workflows/create/", workflow_data, format="json")
+        _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
         workflow_id = Workflow.objects.get(name="uploader").id
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/workflows/{}/upload/".format(workflow_id), data=data
+                "/v1/workflows/{}/upload/".format(workflow_id), data=data
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         tasks = Task.objects.all()
