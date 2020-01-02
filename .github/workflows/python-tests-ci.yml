@@ -52,5 +52,7 @@ jobs:
         POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
         POSTGRES_HOST: localhost
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        SENTRY_KEY: ${secrets.SENTRY_KEY}
+        SENTRY_PROJECT: ${secrets.SENTRY_PROJECT}
 
 
