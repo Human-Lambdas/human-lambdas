@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 from datetime import timedelta
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,6 +25,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
+
+# SENTRY CREDENTIALS
+SENTRY_KEY = os.getenv("SENTRY_KEY")
+SENTRY_PROJECT = os.getenv("SENTRY_PROJECT")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False if os.getenv("DEBUG") == "False" else True
@@ -174,3 +181,12 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=5),
 }
+
+
+sentry_sdk.init(
+    dsn="https://{0}@sentry.io/{1}".format(SENTRY_KEY, SENTRY_PROJECT),
+    integrations=[DjangoIntegration()],
+    # If you wish to associate users to errors (assuming you are using
+    # django.contrib.auth) you may enable sending PII data.
+    send_default_pii=True,
+)
