@@ -104,9 +104,9 @@ The endpoint for creating a workflow is `/workflows/create` and the data it requ
     'inputs': 
         [
             {
-                "key": <str>, 
+                "id": <str>, 
                 "name": <str>, 
-                "format": <data-type>,
+                "type": <data-type>,
             }, ...
         ], 
      'outputs': 
