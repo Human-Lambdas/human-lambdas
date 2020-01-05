@@ -1,6 +1,6 @@
 
 # Human Lambdas REST API
-Backend to accessing and utilizing Human Lambdas platform. 
+Backend to accessing and utilizing Human Lambdas platform.
 
 ## Cloning
 
@@ -22,6 +22,9 @@ This should set up the enviroment and run both the database and the dockerfile.
 you can access the api at `localhost:8000`
 
 The admin can be accessed at `localhost:8000/admin`
+
+***You can access the API endpoint with the follwoing url: `localhost:8000/v1/`*** 
+(Currently we have `version 1` out so each url path has to start with `v1`)
 
 You will need to access the docker containers once they are running to be able to create a superuser or for testing purposes.
 First off you need to list the containers that are running and you can do that by running following command on your terminal:
@@ -101,9 +104,9 @@ The endpoint for creating a workflow is `/workflows/create` and the data it requ
     'inputs': 
         [
             {
-                "key": <str>, 
+                "id": <str>, 
                 "name": <str>, 
-                "format": <data-type>,
+                "type": <data-type>,
             }, ...
         ], 
      'outputs': 

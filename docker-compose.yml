@@ -25,6 +25,8 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT}
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: ${DEBUG}
+      SENTRY_KEY: ${SENTRY_KEY}
+      SENTRY_PROJECT: ${SENTRY_PROJECT}
     volumes:
       - .:/code
     ports:

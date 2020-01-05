@@ -15,6 +15,7 @@ class TestModelWorkflow(TestCase):
 
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.save()
+        self.user = user
         organization = Organization(name="fooInc")
         organization.save()
         organization.user.add(user)
@@ -65,3 +66,17 @@ class TestModelWorkflow(TestCase):
         task = Task.objects.all()
         task.delete()
         self.assertEqual(len(Task.objects.all()), 0)
+    
+    def test_workflow_no_description(self):
+        organization = Organization(name="noDescInc")
+        organization.save()
+        workflow = Workflow(
+            name="no_desc_workflow",
+            inputs={},
+            outputs={},
+            created_by=self.user,
+            organization=organization,
+        )
+        workflow.save()
+        no_description_workflow = Workflow.objects.get(name="no_desc_workflow")
+        self.assertEqual(no_description_workflow.description, "")

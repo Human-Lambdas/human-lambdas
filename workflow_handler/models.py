@@ -5,7 +5,7 @@ from user_handler.models import User, Organization
 
 class Workflow(models.Model):
     name = models.CharField(max_length=128)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     inputs = JSONField()
     outputs = JSONField()

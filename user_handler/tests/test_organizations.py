@@ -34,21 +34,21 @@ class TestOrganizations(APITestCase):
 
     def test_get_organization(self):
         response = self.client.post(
-            "/users/token/", {"email": "foo@bar.com", "password": self.preset_user_password}
+            "/v1/users/token/", {"email": "foo@bar.com", "password": self.preset_user_password}
         )
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
-        response = self.client.get("/users/organizations/%s" % self.org_id)
+        response = self.client.get("/v1/users/organizations/%s" % self.org_id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], self.organization_name)
 
     def test_get_organization_wrong_user(self):
         response = self.client.post(
-            "/users/token/", {"email": "wrong@bar.com", "password": "wrong_user"}
+            "/v1/users/token/", {"email": "wrong@bar.com", "password": "wrong_user"}
         )
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
-        response = self.client.get("/users/organizations/%s" % self.org_id)
+        response = self.client.get("/v1/users/organizations/%s" % self.org_id)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_organization_data_deletion(self):
