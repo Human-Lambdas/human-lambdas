@@ -135,7 +135,11 @@ class TaskSerializer(serializers.ModelSerializer):
         outputs = validated_data.get("outputs")
         if not outputs:
             raise serializers.ValidationError("You can only update outputs of tasks")
-        instance.outputs = outputs
+        for output in outputs:
+            instance_output = next(
+                item for item in instance.outputs if item["id"] == output["id"]
+            )
+            instance_output["value"] = output["value"]
         instance.status = "completed"
         instance.completed_at = timezone.now()  # datetime.datetime.now()
         instance.completed_by = self.context["request"].user

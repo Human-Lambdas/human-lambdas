@@ -26,10 +26,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-# SENTRY CREDENTIALS
-SENTRY_KEY = os.getenv("SENTRY_KEY")
-SENTRY_PROJECT = os.getenv("SENTRY_PROJECT")
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False if os.getenv("DEBUG") == "False" else True
 
@@ -183,10 +179,15 @@ SIMPLE_JWT = {
 }
 
 
-sentry_sdk.init(
-    dsn="https://{0}@sentry.io/{1}".format(SENTRY_KEY, SENTRY_PROJECT),
-    integrations=[DjangoIntegration()],
-    # If you wish to associate users to errors (assuming you are using
-    # django.contrib.auth) you may enable sending PII data.
-    send_default_pii=True,
-)
+if not DEBUG:
+    # SENTRY CREDENTIALS
+    SENTRY_KEY = os.getenv("SENTRY_KEY")
+    SENTRY_PROJECT = os.getenv("SENTRY_PROJECT")
+
+    sentry_sdk.init(
+        dsn="https://{0}@sentry.io/{1}".format(SENTRY_KEY, SENTRY_PROJECT),
+        integrations=[DjangoIntegration()],
+        # If you wish to associate users to errors (assuming you are using
+        # django.contrib.auth) you may enable sending PII data.
+        send_default_pii=True,
+    )
