@@ -41,8 +41,8 @@ class TestTasks(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-class",
-                    "single-class": {
+                    "type": "single-selection",
+                    "single-selection": {
                         "options": [
                         "foo1",
                         "bar1",
@@ -88,18 +88,21 @@ class TestTasks(APITestCase):
 
     def test_complete_task(self):
         tasks = Task.objects.all()
-        outputs = ["foo1", "bar1", "foo1"]
-        for output, task in zip(outputs, tasks):
-            output_list = [{"id": "1", "value": output}]
+        output_values = ["foo1", "bar1"]
+        expected_outputs = Workflow.objects.get(id=self.workflow_id).outputs
+        for output_value, task in zip(output_values, tasks):
+            next(item for item in expected_outputs if item["id"] == "foo")["value"] = output_value
+            output_list = [{"id": "foo", "value": output_value}]
             data = {"outputs": output_list}
             response = self.client.patch(
                 "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id),
                 data=data,
                 format="json",
             )
+
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("completed", response.data["status"])
-            self.assertEqual(output_list, response.data["outputs"])
+            self.assertEqual(expected_outputs, response.data["outputs"])
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
 
     def test_update_task(self):
