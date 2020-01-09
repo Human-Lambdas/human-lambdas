@@ -23,10 +23,10 @@ _OUTPUT_TUPLES = [
 ]
 
 _OUTPUT_FORMAT_TYPES = {
-    "single-class": dict,
-    "multi-class": dict,
+    "single-selection": dict,
+    "multi-selection": dict,
     "binary": None,
-    "freetext": None,
+    "text": None,
 }
 
 

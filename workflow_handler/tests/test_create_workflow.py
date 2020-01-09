@@ -31,8 +31,8 @@ class TestCreateWorkflow(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-class",
-                    "single-class": {"options":["foo1", "bar1"]}
+                    "type": "single-selection",
+                    "single-selection": {"options":["foo1", "bar1"]}
                 }
             ],
         }
