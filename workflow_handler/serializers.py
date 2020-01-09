@@ -33,7 +33,8 @@ _OUTPUT_FORMAT_TYPES = {
 class WorkflowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workflow
-        fields = ["id", "name", "description", "inputs", "outputs"]
+        fields = ["id", "name", "description", "inputs", "outputs", "disabled"]
+        extra_kwargs = {"disabled": {"write_only": True}}
 
     def create(self, validated_data):
         user = self.context["request"].user
@@ -57,11 +58,12 @@ class WorkflowSerializer(serializers.ModelSerializer):
         workflow.save()
         return validated_data
 
-    def update_partial(self, instance, validated_data):
+    def update(self, instance, validated_data):
         instance.name = validated_data.get("name", instance.name)
         instance.description = validated_data.get("description", instance.description)
         instance.inputs = validated_data.get("inputs", instance.inputs)
         instance.outputs = validated_data.get("outputs", instance.outputs)
+        instance.disabled = validated_data.get("disabled", instance.disabled)
         instance.save()
         return instance
 
