@@ -20,6 +20,7 @@ _CURRENT_DIR = os.path.dirname(__file__)
 class TestUpload(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
+        self.larger_file_path = os.path.join(_CURRENT_DIR, "data", "dataset.csv")
         registration_data = {
             "email": "foo@bar.com",
             "password": "fooword",
@@ -55,7 +56,34 @@ class TestUpload(APITestCase):
         }
         _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
         workflow_id = Workflow.objects.get(name="uploader").id
-        with open(self.file_path) as f:
+        with open(self.file_path,  encoding="ISO-8859-1") as f:
+            data = {"file": f}
+            response = self.client.post(
+                "/v1/workflows/{}/upload/".format(workflow_id), data=data
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+    def test_larger_upload(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        workflow_data = {
+            "name": "uploader",
+            "description": "great wf",
+            "inputs": [
+                {"id": "news", "name": "news", "type": "text"},
+                {"id": "type", "name": "type", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {"options":["foo1", "bar1"]}
+                }
+            ],
+        }
+        _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        workflow_id = Workflow.objects.get(name="uploader").id
+        with open(self.larger_file_path,  encoding="ISO-8859-1") as f:
             data = {"file": f}
             response = self.client.post(
                 "/v1/workflows/{}/upload/".format(workflow_id), data=data

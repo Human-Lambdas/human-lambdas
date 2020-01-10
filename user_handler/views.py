@@ -4,7 +4,9 @@ from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
     RetrieveAPIView,
+    ListAPIView,
 )
+from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -37,6 +39,24 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
 
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), name=self.request.user.name)
+        return obj
+
+
+class ListUsersView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        organization_obj = Organization.objects.filter(user=user)
+        or_condition = Q()
+        for organization in organization_obj.all():
+            or_condition.add(Q(organization=organization), Q.OR)
+        return User.objects.filter(or_condition)
+
+    def get_object(self):
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
         return obj
 
 
