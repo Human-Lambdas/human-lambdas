@@ -140,3 +140,55 @@ class TestCRUDWorkflow(APITestCase):
         except AssertionError:
             self.assertEqual(workflow_data2, response.data[1], response.data)
             self.assertEqual(workflow_data1, response.data[0], response.data)
+
+    def test_list_workflow(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        workflow_data1 = {
+            "name": "foowf",
+            "description": "great wf",
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection":{"options":["foo1", "bar1"]}
+                }
+            ],
+        }
+        response = self.client.post("/v1/workflows/create/", workflow_data1, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        workflow_data2 = {
+            "name": "foowf2",
+            "description": "greater wf",
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {"options":["foo1", "bar1"]}
+                }
+            ],
+        }
+        response = self.client.post("/v1/workflows/create/", workflow_data2, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+        workflow_obj = Workflow.objects.filter(name=workflow_data2["name"])
+        self.assertTrue(workflow_obj.exists())
+        workflow = workflow_obj.first()
+        updated_workflow_data = {
+            "disabled": True,
+        }
+        response = self.client.patch(
+            "/v1/workflows/{}".format(workflow.pk), updated_workflow_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        response = self.client.get("/v1/workflows/")
+        result_1 = response.data[0]
+        self.assertTrue(result_1.pop("id"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(workflow_data1, result_1, response.data)
+

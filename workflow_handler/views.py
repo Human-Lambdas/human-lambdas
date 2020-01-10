@@ -27,9 +27,10 @@ class ListWorkflowView(ListAPIView):
         user = self.request.user
         organization_obj = Organization.objects.filter(user=user)
         or_condition = Q()
+        or_condition.add(Q(disabled=False), Q.AND)
         for organization in organization_obj.all():
             or_condition.add(Q(organization=organization), Q.OR)
-        return Workflow.objects.filter(or_condition)
+        return Workflow.objects.filter(Q(disabled=False) & or_condition)
 
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
