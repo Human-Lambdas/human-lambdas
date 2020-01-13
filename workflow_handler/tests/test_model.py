@@ -28,7 +28,7 @@ class TestModelWorkflow(TestCase):
             organization=organization,
         )
         workflow.save()
-        task = Task(workflow=workflow, inputs=self.preset_input_data,)
+        task = Task(workflow=workflow, inputs=self.preset_input_data, outputs={})
         task.save()
         self.task_id = task.pk
 

@@ -143,7 +143,7 @@ Below are the different output sections formats:
 }
 ```
 
-#### multi-selection
+#### multiple-selection
 ```
 {
     “options”: [
@@ -153,7 +153,7 @@ Below are the different output sections formats:
 }
 ```
 
-#### freetext
+#### text
 ```
 {}
 ```
