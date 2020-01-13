@@ -24,7 +24,7 @@ _OUTPUT_TUPLES = [
 
 _OUTPUT_FORMAT_TYPES = {
     "single-selection": dict,
-    "multi-selection": dict,
+    "multiple-selection": dict,
     "binary": None,
     "text": None,
 }

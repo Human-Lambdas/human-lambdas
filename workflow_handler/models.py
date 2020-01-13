@@ -24,7 +24,7 @@ class Task(models.Model):
     completed_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
     inputs = JSONField()
-    outputs = JSONField(null=True)
+    outputs = JSONField()
 
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
