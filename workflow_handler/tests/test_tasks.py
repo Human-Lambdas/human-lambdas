@@ -121,3 +121,5 @@ class TestTasks(APITestCase):
         response = self.client.get("/v1/workflows/{}/tasks/next/".format(self.workflow_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual("incomplete", response.data["status"], response.content)
+        task = Task.objects.get(id=response.data["id"])
+        self.assertEqual(task.status, "pending")
