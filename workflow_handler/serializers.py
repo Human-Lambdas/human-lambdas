@@ -56,7 +56,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             outputs=outputs,
         )
         workflow.save()
-        return validated_data
+        return workflow
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get("name", instance.name)
