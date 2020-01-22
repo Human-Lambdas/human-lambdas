@@ -165,7 +165,10 @@ class NextTaskView(APIView):
         queryset = self.get_queryset()
         obj = queryset.filter(Q(status="incomplete") & Q(workflow=workflow)).first()
         task = self.serializer_class(obj).data
-        obj.status = "pending"
-        obj.save()
-        task["outputs"] = workflow.outputs
-        return Response(task)
+        if (obj):
+            obj.status = "pending"
+            obj.save()
+            task["outputs"] = workflow.outputs
+            return Response(task)
+        else:
+            return Response(status=204)
