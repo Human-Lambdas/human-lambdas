@@ -163,7 +163,7 @@ class NextTaskView(APIView):
     def get(self, request, workflow_id):
         workflow = Workflow.objects.get(id=workflow_id)
         queryset = self.get_queryset()
-        obj = queryset.filter(status="incomplete", workflow=workflow).first()
+        obj = queryset.filter(Q(status="incomplete") & Q(workflow=workflow)).first()
         task = self.serializer_class(obj).data
         obj.status = "pending"
         obj.save()
