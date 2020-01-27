@@ -56,7 +56,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             outputs=outputs,
         )
         workflow.save()
-        return validated_data
+        return workflow
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get("name", instance.name)
@@ -141,7 +141,7 @@ class TaskSerializer(serializers.ModelSerializer):
             instance_output = next(
                 item for item in instance.outputs if item["id"] == output["id"]
             )
-            instance_output["value"] = output["value"]
+            instance_output[instance_output["type"]]["value"] = output["value"]
         instance.status = "completed"
         instance.completed_at = timezone.now()  # datetime.datetime.now()
         instance.completed_by = self.context["request"].user

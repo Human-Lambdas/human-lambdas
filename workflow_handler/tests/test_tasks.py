@@ -52,7 +52,31 @@ class TestTasks(APITestCase):
             ],
         }
         _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        second_workflow_data = {
+            "name": "second workflow",
+            "description": "great second wf",
+            "inputs": [
+                {"id": "Lambda", "name": "lambda", "type": "text"},
+                {"id": "Delta", "name": "delta", "type": "text"},
+                {"id": "Sigma", "name": "sigma", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "bar",
+                    "name": "bar",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "options": [
+                        "foo2",
+                        "bar2",
+                    ],
+                    }
+                }
+            ],
+        }
+        _ = self.client.post("/v1/workflows/create/", second_workflow_data, format="json")
         self.workflow_id = Workflow.objects.get(name="uploader").id
+        self.second_workflow_id = Workflow.objects.get(name="second workflow").id
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
@@ -91,7 +115,8 @@ class TestTasks(APITestCase):
         output_values = ["foo1", "bar1"]
         expected_outputs = Workflow.objects.get(id=self.workflow_id).outputs
         for output_value, task in zip(output_values, tasks):
-            next(item for item in expected_outputs if item["id"] == "foo")["value"] = output_value
+            exp_output = next(item for item in expected_outputs if item["id"] == "foo")
+            exp_output[exp_output["type"]]["value"] = output_value
             output_list = [{"id": "foo", "value": output_value}]
             data = {"outputs": output_list}
             response = self.client.patch(
@@ -123,3 +148,7 @@ class TestTasks(APITestCase):
         self.assertEqual("incomplete", response.data["status"], response.content)
         task = Task.objects.get(id=response.data["id"])
         self.assertEqual(task.status, "pending")
+
+    def test_next_task_different_workflow(self):
+        response = self.client.get("/v1/workflows/{}/tasks/next/".format(self.second_workflow_id))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.content)

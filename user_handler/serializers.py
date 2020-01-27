@@ -24,11 +24,15 @@ class UserSerializer(serializers.ModelSerializer):
         email = validated_data["email"]
         is_admin = validated_data["is_admin"]
         organization_name = validated_data["organization"]
-        organization_obj = Organization(name=organization_name)
-        organization_obj.save()
         user_obj = User(name=name, email=email, is_admin=is_admin)
         user_obj.set_password(password)
         user_obj.save()
+        organization_obj = Organization.objects.filter(name=organization_name)
+        if organization_obj.exists():
+            organization_obj = organization_obj.first()
+        else:
+            organization_obj = Organization(name=organization_name)
+            organization_obj.save()
         organization_obj.user.add(user_obj)
         return validated_data
 
