@@ -137,7 +137,7 @@ class TaskSerializer(serializers.ModelSerializer):
         outputs = validated_data.get("outputs")
         if not outputs:
             raise serializers.ValidationError("You can only update outputs of tasks")
-        for output in outputs['outputs']:
+        for output in outputs["outputs"]:
             instance_output = next(
                 item for item in instance.outputs if item["id"] == output["id"]
             )

@@ -44,8 +44,8 @@ class TestTasks(APITestCase):
                     "type": "single-selection",
                     "single-selection": {
                         "options": [
-                        "foo1",
-                        "bar1",
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
                     ],
                     }
                 }
@@ -67,8 +67,8 @@ class TestTasks(APITestCase):
                     "type": "single-selection",
                     "single-selection": {
                         "options": [
-                        "foo2",
-                        "bar2",
+                            {"id": "foo2", "name":"foo2"},
+                            {"id": "bar2", "name": "bar2"},
                     ],
                     }
                 }
@@ -96,7 +96,7 @@ class TestTasks(APITestCase):
                 "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id)
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-            self.assertEqual("incomplete", response.data["status"])
+            self.assertEqual("pending", response.data["status"])
             self.assertTrue(len(response.data["inputs"]))
 
     def test_retrieve_task_output(self):
@@ -107,7 +107,7 @@ class TestTasks(APITestCase):
                 "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id)
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-            self.assertEqual("incomplete", response.data["status"])
+            self.assertEqual("pending", response.data["status"])
             self.assertEqual(workflow.outputs, response.data["outputs"])
 
     def test_complete_task(self):
@@ -117,7 +117,7 @@ class TestTasks(APITestCase):
         for output_value, task in zip(output_values, tasks):
             exp_output = next(item for item in expected_outputs if item["id"] == "foo")
             exp_output[exp_output["type"]]["value"] = output_value
-            output_list = [{"id": "foo", "single-selection": {"value": output_value}}]
+            output_list = {"outputs": [{"id": "foo", "single-selection": {"value": output_value}}]}
             data = {"outputs": output_list}
             response = self.client.patch(
                 "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id),
@@ -145,9 +145,9 @@ class TestTasks(APITestCase):
     def test_next_task(self):
         response = self.client.get("/v1/workflows/{}/tasks/next/".format(self.workflow_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual("incomplete", response.data["status"], response.content)
+        self.assertEqual("pending", response.data["status"], response.content)
         task = Task.objects.get(id=response.data["id"])
-        self.assertEqual(task.status, "pending")
+        self.assertEqual(task.status, "assigned")
 
     def test_next_task_different_workflow(self):
         response = self.client.get("/v1/workflows/{}/tasks/next/".format(self.second_workflow_id))
