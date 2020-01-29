@@ -163,10 +163,10 @@ class NextTaskView(APIView):
     def get(self, request, workflow_id):
         workflow = Workflow.objects.get(id=workflow_id)
         queryset = self.get_queryset()
-        obj = queryset.filter(Q(status="incomplete") & Q(workflow=workflow)).first()
+        obj = queryset.filter(Q(status="pending") & Q(workflow=workflow)).first()
         task = self.serializer_class(obj).data
-        if (obj):
-            obj.status = "pending"
+        if obj:
+            obj.status = "assigned"
             obj.save()
             task["outputs"] = workflow.outputs
             return Response(task)
