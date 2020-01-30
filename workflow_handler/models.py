@@ -18,7 +18,7 @@ class Workflow(models.Model):
 
 
 class Task(models.Model):
-    status = models.CharField(max_length=128, default="incomplete")
+    status = models.CharField(max_length=128, default="pending")
     completed_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now=True)
     completed_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
