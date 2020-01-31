@@ -73,6 +73,7 @@ class Organization(models.Model):
     def __str__(self):
         return self.name
 
+
 class Invitation(models.Model):
     email = models.EmailField()
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
