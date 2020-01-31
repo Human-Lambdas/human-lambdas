@@ -12,7 +12,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 from .models import User, Organization
 from .serializers import UserSerializer, OrganizationSerializer
@@ -99,6 +102,12 @@ class SendInviteView(APIView):
                 userObj = User.objects.filter(email=email)
                 organization = Organization.objects.filter(name=request.data["organization"], user=userObj.first())
                 if organization.first() is None:
+                    subject = 'Subject'
+                    html_message = render_to_string('mail_template.html', {'context': 'values'})
+                    plain_message = strip_tags(html_message)
+                    from_email = 'From <from@example.com>'
+                    to = email
+                    send_mail(subject, plain_message, from_email, [to], html_message=html_message)
                     # send email
                     print("")
                 else:
