@@ -83,3 +83,4 @@ class Invitation(models.Model):
 
     def __str__(self):
         return "{0}_invite_to_{1}".format(self.email, self.organization)
+
