@@ -6,17 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0008_task_disabled'),
+        ("workflow_handler", "0008_task_disabled"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='task',
-            name='disabled',
-        ),
+        migrations.RemoveField(model_name="task", name="disabled",),
         migrations.AddField(
-            model_name='workflow',
-            name='disabled',
+            model_name="workflow",
+            name="disabled",
             field=models.BooleanField(default=False),
         ),
     ]

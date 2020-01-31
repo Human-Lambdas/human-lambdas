@@ -50,13 +50,13 @@ class TestUpload(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
         _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
         workflow_id = Workflow.objects.get(name="uploader").id
-        with open(self.file_path,  encoding="ISO-8859-1") as f:
+        with open(self.file_path, encoding="ISO-8859-1") as f:
             data = {"file": f}
             response = self.client.post(
                 "/v1/workflows/{}/upload/".format(workflow_id), data=data
@@ -77,13 +77,13 @@ class TestUpload(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
         _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
         workflow_id = Workflow.objects.get(name="uploader").id
-        with open(self.larger_file_path,  encoding="ISO-8859-1") as f:
+        with open(self.larger_file_path, encoding="ISO-8859-1") as f:
             data = {"file": f}
             response = self.client.post(
                 "/v1/workflows/{}/upload/".format(workflow_id), data=data
@@ -105,7 +105,7 @@ class TestUpload(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
@@ -168,9 +168,7 @@ class TestCSV2Task(TestCase):
                 {"id": "gamma", "name": "gamma", "type": "text",},
                 {"id": "delta", "name": "delta", "type": "text",},
             ],
-            outputs=[
-                {"id": "binary", "name": "binary", "type": "binary"}
-            ],
+            outputs=[{"id": "binary", "name": "binary", "type": "binary"}],
             organization=org,
             created_by=user,
         )

@@ -32,11 +32,13 @@ class TestCreateWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
-        response = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        response = self.client.post(
+            "/v1/workflows/create/", workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertTrue(Workflow.objects.filter(name=workflow_data["name"]).exists())
 
@@ -47,8 +49,8 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [],
-            "outputs": [],
+            "inputs": [{}],
+            "outputs": [{}],
         }
         response = self.client.post(
             "/v1/workflows/create/", workflow_data, headers=headers, format="json"
@@ -104,7 +106,7 @@ class TestCreateWorkflow(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [],
+            "outputs": [{}],
         }
         response = self.client.post(
             "/v1/workflows/create/", workflow_data, headers=headers, format="json"
@@ -169,9 +171,7 @@ class TestCreateWorkflow(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
-                {"id": "foo", "name": "foo", "type": "single-class"}
-            ],
+            "outputs": [{"id": "foo", "name": "foo", "type": "single-class"}],
         }
         response = self.client.post(
             "/v1/workflows/create/", workflow_data, headers=headers, format="json"
@@ -184,7 +184,7 @@ class TestCreateWorkflow(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [{"id": "foo", "name": "foo", "type": "binary"}],
+            "outputs": [{"id": "foo", "name": "foo", "type": "binary", "binary": {}}],
         }
         response = self.client.post(
             "/v1/workflows/create/", workflow_data, headers=headers, format="json"

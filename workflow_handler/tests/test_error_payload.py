@@ -29,9 +29,7 @@ class TestErrorPayloadStructure(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {
-                        "options": ["foo1", "bar1"],
-                    },
+                    "single-selection": {"options": ["foo1", "bar1"],},
                 },
             ],
         }
@@ -60,13 +58,13 @@ class TestErrorPayloadStructure(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {
-                        "options": ["foo1", "bar1"],
-                    },
+                    "single-selection": {"options": ["foo1", "bar1"],},
                 }
             ],
         }
-        response = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        response = self.client.post(
+            "/v1/workflows/create/", workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_workflow_wrong_method(self):
@@ -97,7 +95,9 @@ class TestErrorPayloadStructure(APITestCase):
         response = self.client.post(
             "/v1/workflows/create/", self.complete_workflow_data, format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        self.assertEqual(
+            response.status_code, status.HTTP_201_CREATED, response.content
+        )
         self.client.credentials(HTTP_AUTHORIZATION=None)
         workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
@@ -117,7 +117,9 @@ class TestErrorPayloadStructure(APITestCase):
         response = self.client.post(
             "/v1/workflows/create/", self.complete_workflow_data, format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        self.assertEqual(
+            response.status_code, status.HTTP_201_CREATED, response.content
+        )
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.invalid_token)
         workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
@@ -137,7 +139,9 @@ class TestErrorPayloadStructure(APITestCase):
         response = self.client.post(
             "/v1/workflows/create/", self.complete_workflow_data, format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        self.assertEqual(
+            response.status_code, status.HTTP_201_CREATED, response.content
+        )
         workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
