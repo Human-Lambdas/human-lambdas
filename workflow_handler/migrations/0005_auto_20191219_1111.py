@@ -6,22 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0004_auto_20191216_1841'),
+        ("workflow_handler", "0004_auto_20191216_1841"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='task',
-            old_name='completed',
-            new_name='completed_at',
+            model_name="task", old_name="completed", new_name="completed_at",
         ),
-        migrations.RemoveField(
-            model_name='task',
-            name='name',
-        ),
+        migrations.RemoveField(model_name="task", name="name",),
         migrations.AddField(
-            model_name='task',
-            name='status',
-            field=models.CharField(default='incomplete', max_length=128),
+            model_name="task",
+            name="status",
+            field=models.CharField(default="incomplete", max_length=128),
         ),
     ]

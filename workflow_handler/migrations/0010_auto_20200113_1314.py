@@ -7,13 +7,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0009_auto_20200109_1621'),
+        ("workflow_handler", "0009_auto_20200109_1621"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='outputs',
+            model_name="task",
+            name="outputs",
             field=django.contrib.postgres.fields.jsonb.JSONField(default={}),
             preserve_default=False,
         ),

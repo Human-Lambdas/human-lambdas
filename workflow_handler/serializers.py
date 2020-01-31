@@ -3,31 +3,32 @@ import logging
 from django.utils import timezone
 from rest_framework import serializers
 from user_handler.models import Organization
+from schema import SchemaError
 
 from .models import Workflow, Task
+from .schemas import (
+    WORKFLOW_INPUT_SCHEMA,
+    TASK_INPUT_SCHEMA,
+    OUTPUT_SCHEMA,
+    UPDATE_OUTPUT_SCHEMA,
+)
 
 logger = logging.getLogger(__file__)
 
-_INPUT_TUPLES = [
-    ("id", str),
-    ("name", str),
-    ("type", str),
-]
 
-_INPUT_FORMATS = ["image", "text"]
-
-_OUTPUT_TUPLES = [
-    ("id", str),
-    ("name", str),
-    ("type", str),
-]
-
-_OUTPUT_FORMAT_TYPES = {
-    "single-selection": dict,
-    "multiple-selection": dict,
-    "binary": None,
-    "text": None,
-}
+def validate_output_structure(validated_data_items):
+    for validated_data in validated_data_items:
+        type_data = validated_data.get(validated_data["type"])
+        if type_data is None:
+            raise serializers.ValidationError(
+                "Type do not match to {}".format(validated_data["type"])
+            )
+        if (
+            validated_data["type"] in ["single-selection", "multiple-selection"]
+            and "options" not in type_data
+        ):
+            raise serializers.ValidationError("Output should have a list of options")
+    return validated_data_items
 
 
 class WorkflowSerializer(serializers.ModelSerializer):
@@ -68,64 +69,16 @@ class WorkflowSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_inputs(self, data):
-        if len(data) == 0:
-            raise serializers.ValidationError("Inputs cannot be empty")
-        for data_dict in data:
-            for inp_key, inp_type in _INPUT_TUPLES:
-                try:
-                    if not isinstance(data_dict[inp_key], inp_type):
-                        raise serializers.ValidationError(
-                            "'{0}' is of type {1} when expected {2}".format(
-                                inp_key, type(data_dict[inp_key]), inp_type
-                            )
-                        )
-                    if inp_key == "type":
-                        if data_dict[inp_key] not in _INPUT_FORMATS:
-                            raise serializers.ValidationError(
-                                "Input format should be one of following: {0}".format(
-                                    _INPUT_FORMATS
-                                )
-                            )
-                except KeyError:
-                    raise serializers.ValidationError(
-                        "Input missing key '{0}'".format(inp_key)
-                    )
-        return data
+        try:
+            return WORKFLOW_INPUT_SCHEMA.validate(data)
+        except SchemaError as exception:
+            raise serializers.ValidationError(exception)
 
     def validate_outputs(self, data):
-        if len(data) == 0:
-            raise serializers.ValidationError("Outputs cannot be empty")
-        for data_dict in data:
-            for out_key, out_type in _OUTPUT_TUPLES:
-                try:
-                    if not isinstance(data_dict[out_key], out_type):
-                        raise serializers.ValidationError(
-                            "'{0}' is of type {1} when expected {2}".format(
-                                out_key, type(data_dict[out_key]), out_type
-                            )
-                        )
-                    if out_key == "type":
-                        ftype = data_dict[out_key]
-                        if ftype not in _OUTPUT_FORMAT_TYPES:
-                            raise serializers.ValidationError(
-                                "Output format type should be one of following: {0}".format(
-                                    list(_OUTPUT_FORMAT_TYPES.keys())
-                                )
-                            )
-                        if _OUTPUT_FORMAT_TYPES[ftype]:
-                            if not isinstance(
-                                data_dict.get(ftype), _OUTPUT_FORMAT_TYPES[ftype],
-                            ):
-                                raise serializers.ValidationError(
-                                    "Expecting a key {0} with the value of list of strings".format(
-                                        ftype
-                                    )
-                                )
-                except KeyError:
-                    raise serializers.ValidationError(
-                        "Input missing key '{0}'".format(out_key)
-                    )
-        return data
+        try:
+            return validate_output_structure(OUTPUT_SCHEMA.validate(data))
+        except SchemaError as exception:
+            raise serializers.ValidationError(exception)
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -150,26 +103,16 @@ class TaskSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_inputs(self, data):
-        if len(data) == 0:
-            raise serializers.ValidationError("Inputs cannot be empty")
-        for data_dict in data:
-            for inp_key, inp_type in _INPUT_TUPLES:
-                try:
-                    if not isinstance(data_dict[inp_key], inp_type):
-                        raise serializers.ValidationError(
-                            "'{0}' is of type {1} when expected {2}".format(
-                                inp_key, type(data_dict[inp_key]), inp_type
-                            )
-                        )
-                    if inp_key == "type":
-                        if data_dict[inp_key] not in _INPUT_FORMATS:
-                            raise serializers.ValidationError(
-                                "Input format should be one of following: {0}".format(
-                                    _INPUT_FORMATS
-                                )
-                            )
-                except KeyError:
-                    raise serializers.ValidationError(
-                        "Input missing key '{0}'".format(inp_key)
-                    )
-        return data
+        try:
+            return TASK_INPUT_SCHEMA.validate(data)
+        except SchemaError as exception:
+            raise serializers.ValidationError(exception)
+
+    def validate_outputs(self, data):
+        try:
+            if self.partial:
+                return UPDATE_OUTPUT_SCHEMA.validate(data)
+            else:
+                return validate_output_structure(OUTPUT_SCHEMA.validate(data))
+        except SchemaError as exception:
+            raise serializers.ValidationError(exception)
