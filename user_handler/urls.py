@@ -7,6 +7,7 @@ from .views import (
     RetrieveUpdateUserView,
     GetOrganizationView,
     ListUsersView,
+    SendInviteView,
 )
 
 
@@ -19,5 +20,8 @@ urlpatterns = [
     path("", ListUsersView.as_view(), name="list-users"),
     path(
         "organizations/<int:pk>", GetOrganizationView.as_view(), name="get-organization"
+    ),
+    path(
+        "invite/", SendInviteView.as_view(), name="send-invite"
     ),
 ]
