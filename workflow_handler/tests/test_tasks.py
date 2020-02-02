@@ -162,3 +162,11 @@ class TestTasks(APITestCase):
         self.assertEqual(
             response.status_code, status.HTTP_204_NO_CONTENT, response.content
         )
+
+    def test_next_task_without_slash(self):
+        response = self.client.get(
+            "/v1/workflows/{}/tasks/next".format(self.workflow_id)
+        )
+        self.assertEqual(
+            response.status_code, status.HTTP_301_MOVED_PERMANENTLY, response.content
+        )
