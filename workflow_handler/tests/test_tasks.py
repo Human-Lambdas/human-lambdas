@@ -119,9 +119,7 @@ class TestTasks(APITestCase):
         for output_value, task in zip(output_values, tasks):
             exp_output = next(item for item in expected_outputs if item["id"] == "foo")
             exp_output[exp_output["type"]]["value"] = output_value
-            output_list = {
-                "outputs": [{"id": "foo", "single-selection": {"value": output_value}}]
-            }
+            output_list = [{"id": "foo", "single-selection": {"value": output_value}}]
             data = {"outputs": output_list}
             response = self.client.patch(
                 "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id),
