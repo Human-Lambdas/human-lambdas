@@ -18,16 +18,16 @@ logger = logging.getLogger(__file__)
 
 def validate_output_structure(validated_data_items):
     for validated_data in validated_data_items:
-        type_data = validated_data.get(validated_data["type"])
-        if type_data is None:
-            raise serializers.ValidationError(
-                "Type do not match to {}".format(validated_data["type"])
-            )
-        if (
-            validated_data["type"] in ["single-selection", "multiple-selection"]
-            and "options" not in type_data
-        ):
-            raise serializers.ValidationError("Output should have a list of options")
+        if validated_data["type"] in ["single-selection", "multiple-selection"]:
+            type_data = validated_data.get(validated_data["type"])
+            if type_data is None:
+                raise serializers.ValidationError(
+                    "Type do not match to {}".format(validated_data["type"])
+                )
+            if "options" not in type_data:
+                raise serializers.ValidationError(
+                    "Output should have a list of options"
+                )
     return validated_data_items
 
 
@@ -90,11 +90,13 @@ class TaskSerializer(serializers.ModelSerializer):
         outputs = validated_data.get("outputs")
         if not outputs:
             raise serializers.ValidationError("You can only update outputs of tasks")
-        for output in outputs["outputs"]:
+        for output in outputs:
             instance_output = next(
                 item for item in instance.outputs if item["id"] == output["id"]
             )
             itype = instance_output["type"]
+            if itype not in instance_output:
+                instance_output[itype] = {}
             instance_output[itype]["value"] = output[itype]["value"]
         instance.status = "completed"
         instance.completed_at = timezone.now()  # datetime.datetime.now()
@@ -116,3 +118,15 @@ class TaskSerializer(serializers.ModelSerializer):
                 return validate_output_structure(OUTPUT_SCHEMA.validate(data))
         except SchemaError as exception:
             raise serializers.ValidationError(exception)
+
+
+chos = {
+    "name": "wfcar",
+    "description": "something",
+    "inputs": [
+        {"id": "car", "name": "car", "type": "text"},
+        {"id": "img_2", "name": "image", "type": "image"},
+        {"id": "field_id", "name": "field", "type": "image"},
+    ],
+    "outputs": [{"id": "chos", "name": "chos", "type": "binary"}],
+}
