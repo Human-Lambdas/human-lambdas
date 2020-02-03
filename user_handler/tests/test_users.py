@@ -9,7 +9,6 @@ logger = logging.getLogger(__file__)
 
 
 class TestUsers(APITestCase):
-
     def setUp(self):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
@@ -26,9 +25,7 @@ class TestUsers(APITestCase):
         organization.save()
         self.org_id = organization.id
         organization.user.add(user)
-        user = User(
-            name="wrong_username", email="wrong@bar.com", is_admin=True
-        )
+        user = User(name="wrong_username", email="wrong@bar.com", is_admin=True)
         user.set_password("wrong_user")
         user.save()
 
@@ -55,7 +52,6 @@ class TestUsers(APITestCase):
 
 
 class TestAPIRegistration(APITestCase):
-
     def test_registration(self):
         response = self.client.post(
             "/v1/users/register/",
@@ -71,7 +67,6 @@ class TestAPIRegistration(APITestCase):
 
 
 class TestAPIjwt(APITestCase):
-
     def setUp(self):
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.set_password("fooword")
@@ -96,7 +91,6 @@ class TestAPIjwt(APITestCase):
 
 
 class TestAPIUserUpdate(APITestCase):
-
     def setUp(self):
         self.preset_password = "fooword"
         self.preset_changed_password = "barword"
@@ -122,7 +116,6 @@ class TestAPIUserUpdate(APITestCase):
 
 
 class TestListUsers(APITestCase):
-
     def setUp(self):
         self.user_name = "foo"
         user = User(name=self.user_name, email="foo@bar.com", is_admin=True)

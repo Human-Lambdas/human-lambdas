@@ -9,7 +9,6 @@ logger = logging.getLogger(__file__)
 
 
 class TestOrganizations(APITestCase):
-
     def setUp(self):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
@@ -26,15 +25,14 @@ class TestOrganizations(APITestCase):
         organization.save()
         self.org_id = organization.id
         organization.user.add(user)
-        user = User(
-            name="wrong_username", email="wrong@bar.com", is_admin=True
-        )
+        user = User(name="wrong_username", email="wrong@bar.com", is_admin=True)
         user.set_password("wrong_user")
         user.save()
 
     def test_get_organization(self):
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": self.preset_user_password}
+            "/v1/users/token/",
+            {"email": "foo@bar.com", "password": self.preset_user_password},
         )
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
