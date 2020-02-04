@@ -2,7 +2,8 @@ import logging
 
 from rest_framework.generics import (
     CreateAPIView,
-    RetrieveUpdateAPIView,
+    # RetrieveUpdateAPIView,
+    RetrieveUpdateDestroyAPIView,
     RetrieveAPIView,
     ListAPIView,
 )
@@ -33,14 +34,37 @@ class HelloView(APIView):
         return Response(content)
 
 
-class RetrieveUpdateUserView(RetrieveUpdateAPIView):
+class RetrieveUpdateDestroyUserView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_admin:
+            organization_obj = Organization.objects.filter(user=user)
+            or_condition = Q()
+            for organization in organization_obj.all():
+                or_condition.add(Q(organization=organization), Q.OR)
+            return User.objects.filter(or_condition)
+        else:
+            return User.objects.filter(pk=user.pk)
+
     def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), name=self.request.user.name)
+        obj = get_object_or_404(
+            self.get_queryset(), id=self.kwargs["pk"]
+        )  # name=self.request.user.name)
         return obj
+
+    def destroy(self, request, *args, **kwargs):
+        if self.request.user.is_admin:
+            if request.user.pk == kwargs["pk"]:
+                return Response({"Error": "You cannot delete yourself"}, status=403)
+            else:
+                user_obj = self.get_object()
+                user_obj.delete()
+                return Response(status=204)
+        return Response(status=403)
 
 
 class ListUsersView(ListAPIView):
@@ -50,11 +74,14 @@ class ListUsersView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        organization_obj = Organization.objects.filter(user=user)
-        or_condition = Q()
-        for organization in organization_obj.all():
-            or_condition.add(Q(organization=organization), Q.OR)
-        return User.objects.filter(or_condition)
+        if user.is_admin:
+            organization_obj = Organization.objects.filter(user=user)
+            or_condition = Q()
+            for organization in organization_obj.all():
+                or_condition.add(Q(organization=organization), Q.OR)
+            return User.objects.filter(or_condition)
+        else:
+            return User.objects.filter(pk=user.pk)
 
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])

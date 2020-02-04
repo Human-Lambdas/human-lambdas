@@ -100,18 +100,19 @@ class TestAPIUserUpdate(APITestCase):
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
+        self.user_id = user.pk
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
 
     def test_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/1")
+        response = self.client.get("/v1/users/{}".format(self.user_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_update(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         data = {"password": self.preset_changed_password}
-        response = self.client.patch("/v1/users/1", data)
+        response = self.client.patch("/v1/users/{}".format(self.user_id), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
 
