@@ -19,4 +19,4 @@ class TestAPIToken(APITestCase):
             "/v1/users/api-token/", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
-        self. assertEqual(self.token, response.data['token'])
+        self.assertEqual(self.token, response.data["token"])
