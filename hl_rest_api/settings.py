@@ -191,3 +191,13 @@ if not DEBUG:
         # django.contrib.auth) you may enable sending PII data.
         send_default_pii=True,
     )
+
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+print(os.getenv("SENDGRID_API_KEY"))
+print(os.getenv("SENTRY_PROJECT"))
+
+EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_HOST_USER = "apikey"
+EMAIL_HOST_PASSWORD = "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"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

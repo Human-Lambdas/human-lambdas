@@ -13,8 +13,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.template.loader import get_template, render_to_string
+from django.template import Context
 from django.utils.html import strip_tags
 
 from .models import User, Organization
@@ -98,18 +99,27 @@ class SendInviteView(APIView):
 
         for email in email_set:
             if bool(re.fullmatch(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?", email)):
+                print("attempting send")
                 # checks the email is valid
                 userObj = User.objects.filter(email=email)
                 organization = Organization.objects.filter(name=request.data["organization"], user=userObj.first())
                 if organization.first() is None:
-                    subject = 'Subject'
-                    html_message = render_to_string('mail_template.html', {'context': 'values'})
-                    plain_message = strip_tags(html_message)
-                    from_email = 'From <from@example.com>'
-                    to = email
-                    send_mail(subject, plain_message, from_email, [to], html_message=html_message)
-                    # send email
-                    print("")
+                    # send 
+                    
+                    render_info = {
+                        "organization_name": "foobar",
+                        "invite_sender": "",
+                        "invite_link": "".format()
+                    }
+
+                    plain_text = get_template('invite.txt')
+                    htmly = get_template('invite.html')
+
+                    text_content = plain_text.render(render_info)
+                    html_content = htmly.render(render_info)
+
+                    msg = EmailMultiAlternatives("Human Lambdas workflow invitation", text_content, "no-reply@humanlambdas.com", ["sean@humanlambdas.com"])
+                    print(msg.send())
                 else:
                     already_added_email_list.append(email)
             else:
