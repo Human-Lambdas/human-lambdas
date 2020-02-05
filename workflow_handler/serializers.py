@@ -118,15 +118,3 @@ class TaskSerializer(serializers.ModelSerializer):
                 return validate_output_structure(OUTPUT_SCHEMA.validate(data))
         except SchemaError as exception:
             raise serializers.ValidationError(exception)
-
-
-chos = {
-    "name": "wfcar",
-    "description": "something",
-    "inputs": [
-        {"id": "car", "name": "car", "type": "text"},
-        {"id": "img_2", "name": "image", "type": "image"},
-        {"id": "field_id", "name": "field", "type": "image"},
-    ],
-    "outputs": [{"id": "chos", "name": "chos", "type": "binary"}],
-}

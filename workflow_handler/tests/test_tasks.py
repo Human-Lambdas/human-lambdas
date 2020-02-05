@@ -56,16 +56,16 @@ class TestTasks(APITestCase):
             "name": "second workflow",
             "description": "great second wf",
             "inputs": [
-                {"id": "Lambda", "name": "lambda", "type": "text"},
-                {"id": "Delta", "name": "delta", "type": "text"},
-                {"id": "Sigma", "name": "sigma", "type": "text"},
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
             ],
             "outputs": [
                 {
                     "id": "bar",
                     "name": "bar",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "multiple-selection",
+                    "multiple-selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -85,6 +85,12 @@ class TestTasks(APITestCase):
                 "/v1/workflows/{}/upload/".format(self.workflow_id), data=data
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        with open(self.file_path) as f:
+            data = {"file": f}
+            response = self.client.post(
+                "/v1/workflows/{}/upload/".format(self.second_workflow_id), data=data
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_get_task_list(self):
         response = self.client.get("/v1/workflows/{}/tasks/".format(self.workflow_id))
@@ -92,7 +98,8 @@ class TestTasks(APITestCase):
         self.assertEqual(3, len(response.data), response.content)
 
     def test_retrieve_task(self):
-        tasks = Task.objects.all()
+        workflow = Workflow.objects.get(id=self.workflow_id)
+        tasks = Task.objects.filter(workflow=workflow).all()
         for task in tasks:
             response = self.client.get(
                 "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id)
@@ -103,7 +110,7 @@ class TestTasks(APITestCase):
 
     def test_retrieve_task_output(self):
         workflow = Workflow.objects.get(id=self.workflow_id)
-        tasks = Task.objects.all()
+        tasks = Task.objects.filter(workflow=workflow).all()
         for task in tasks:
             response = self.client.get(
                 "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id)
@@ -112,10 +119,11 @@ class TestTasks(APITestCase):
             self.assertEqual("pending", response.data["status"])
             self.assertEqual(workflow.outputs, response.data["outputs"])
 
-    def test_complete_task(self):
-        tasks = Task.objects.all()
+    def test_complete_single_selection_task(self):
+        workflow = Workflow.objects.get(id=self.workflow_id)
+        tasks = Task.objects.filter(workflow=workflow).all()
         output_values = ["foo1", "bar1"]
-        expected_outputs = Workflow.objects.get(id=self.workflow_id).outputs
+        expected_outputs = workflow.outputs
         for output_value, task in zip(output_values, tasks):
             exp_output = next(item for item in expected_outputs if item["id"] == "foo")
             exp_output[exp_output["type"]]["value"] = output_value
@@ -123,6 +131,27 @@ class TestTasks(APITestCase):
             data = {"outputs": output_list}
             response = self.client.patch(
                 "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id),
+                data=data,
+                format="json",
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+            self.assertEqual("completed", response.data["status"])
+            self.assertEqual(expected_outputs, response.data["outputs"])
+            self.assertEqual("completed", Task.objects.get(id=task.id).status)
+
+    def test_complete_multiple_selection_task(self):
+        workflow = Workflow.objects.get(id=self.second_workflow_id)
+        tasks = Task.objects.filter(workflow=workflow).all()
+        output_values = [["foo1"], ["foo1", "bar1"]]
+        expected_outputs = workflow.outputs
+        for output_value, task in zip(output_values, tasks):
+            exp_output = next(item for item in expected_outputs if item["id"] == "bar")
+            exp_output[exp_output["type"]]["value"] = output_value
+            output_list = [{"id": "bar", "multiple-selection": {"value": output_value}}]
+            data = {"outputs": output_list}
+            response = self.client.patch(
+                "/v1/workflows/{}/tasks/{}".format(self.second_workflow_id, task.id),
                 data=data,
                 format="json",
             )
@@ -157,9 +186,7 @@ class TestTasks(APITestCase):
         response = self.client.get(
             "/v1/workflows/{}/tasks/next/".format(self.second_workflow_id)
         )
-        self.assertEqual(
-            response.status_code, status.HTTP_204_NO_CONTENT, response.content
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_next_task_without_slash(self):
         response = self.client.get(
