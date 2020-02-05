@@ -104,6 +104,7 @@ class GetOrganizationView(RetrieveAPIView):
 
 class APIAuthToken(APIView):
     serializer_class = APITokenUserSerializer
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(

@@ -8,6 +8,7 @@ from .views import (
     ListTaskView,
     RUDTaskView,
     NextTaskView,
+    CreateTaskView,
 )
 
 
@@ -23,4 +24,7 @@ urlpatterns = [
         name="update-task",
     ),
     path("<int:workflow_id>/tasks/next/", NextTaskView.as_view(), name="next-task"),
+    path(
+        "<int:workflow_id>/tasks/create/", CreateTaskView.as_view(), name="create-task"
+    ),
 ]
