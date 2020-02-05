@@ -6,6 +6,8 @@ from .models import Task
 
 def validate_keys(title_row, workflow):
     for input in workflow.inputs:
+        if input["id"] == "":
+            continue
         value_count = title_row.count(input["id"])
         if value_count > 1:
             raise Exception("There are duplicate column names")
@@ -24,6 +26,8 @@ def process_csv(csv_file, workflow):
         else:
             inputs = []
             for input in workflow.inputs:
+                if input["id"] == "":
+                    continue
                 inputs.append(
                     {
                         "id": input["id"],

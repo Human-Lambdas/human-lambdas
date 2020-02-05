@@ -2,7 +2,7 @@ from schema import Schema, And, Or, Optional
 
 
 WORKFLOW_INPUT_SCHEMA = Schema(
-    [{"id": And(str, len), "name": And(str, len), "type": Or("text", "image")}],
+    [{"id": str, "name": str, "type": Or("text", "image")}],
     ignore_extra_keys=True,
 )
 

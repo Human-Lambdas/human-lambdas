@@ -126,6 +126,43 @@ class TestUpload(APITestCase):
                     any(wf_input == input_item for wf_input in workflow_data["inputs"])
                 )
 
+    def test_task_creation_with_spaces(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        workflow_data_empty_columns = {
+            "name": "uploader",
+            "description": "great wf",
+            "inputs": [
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "", "name": "", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {"options": ["foo1", "bar1"]},
+                }
+            ],
+        }
+        _ = self.client.post("/v1/workflows/create/", workflow_data_empty_columns, format="json")
+        workflow_id = Workflow.objects.get(name="uploader").id
+        with open(self.file_path) as f:
+            data = {"file": f}
+            response = self.client.post(
+                "/v1/workflows/{}/upload/".format(workflow_id), data=data
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        tasks = Task.objects.all()
+        for task in tasks:
+            self.assertEqual(3, len(task.inputs))
+            for input_item in task.inputs:
+                self.assertTrue(input_item.pop("value"))
+                self.assertTrue(
+                    any(wf_input == input_item for wf_input in workflow_data_empty_columns["inputs"])
+                )
+
 
 class TestCSV2Task(TestCase):
     def setUp(self):
