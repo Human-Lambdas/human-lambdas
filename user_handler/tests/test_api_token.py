@@ -25,5 +25,3 @@ class TestAPIToken(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
         self.assertEqual(self.token, response.data["token"])
-
-

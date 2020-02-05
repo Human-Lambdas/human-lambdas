@@ -9,7 +9,7 @@ from workflow_handler.csv2task import process_csv
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
 
-from .serializers import WorkflowSerializer, TaskSerializer  # , CreateTaskSerializer
+from .serializers import WorkflowSerializer, TaskSerializer
 from .models import Workflow, Task
 
 

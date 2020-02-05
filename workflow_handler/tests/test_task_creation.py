@@ -4,7 +4,7 @@ from rest_framework import status
 from ..models import Task
 
 
-class TestAPIToken(APITestCase):
+class TestTaskCreation(APITestCase):
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
