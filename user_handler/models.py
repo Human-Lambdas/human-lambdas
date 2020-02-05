@@ -72,3 +72,15 @@ class Organization(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Invitation(models.Model):
+    email = models.EmailField()
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    invited_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=128)
+    datetime = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField()
+
+    def __str__(self):
+        return "{0}_invite_to_{1}".format(self.email, self.organization)
