@@ -86,6 +86,14 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = ["id", "status", "created_at", "inputs", "outputs"]
 
+    def create(self, validated_data):
+        inputs = validated_data["inputs"]
+        outputs = validated_data["outputs"]
+        workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
+        task = Task(inputs=inputs, outputs=outputs, workflow=workflow)
+        task.save()
+        return task
+
     def update(self, instance, validated_data):
         outputs = validated_data.get("outputs")
         if not outputs:

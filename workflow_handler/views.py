@@ -1,5 +1,6 @@
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from user_handler.models import Organization
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
@@ -14,13 +15,11 @@ from .models import Workflow, Task
 
 class CreateWorkflowView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Workflow.objects.all()
     serializer_class = WorkflowSerializer
 
 
 class ListWorkflowView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Workflow.objects.all()
     serializer_class = WorkflowSerializer
 
     def get_queryset(self):
@@ -43,7 +42,6 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    queryset = Workflow.objects.all()
     serializer_class = WorkflowSerializer
 
     def get_queryset(self):
@@ -83,7 +81,6 @@ class FileUploadView(APIView):
 
 class ListTaskView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -113,7 +110,6 @@ class RUDTaskView(RetrieveUpdateAPIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -148,7 +144,6 @@ class RUDTaskView(RetrieveUpdateAPIView):
 
 class NextTaskView(APIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -175,3 +170,54 @@ class NextTaskView(APIView):
             return Response(task)
         else:
             return Response(status=204)
+
+
+class CreateTaskView(CreateAPIView):
+    """
+    External API View for creating Tasks
+    """
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        organization_obj = Organization.objects.filter(user=user)
+        or_condition = Q()
+        for organization in organization_obj.all():
+            or_condition.add(Q(organization=organization), Q.OR)
+        workflow_obj = Workflow.objects.filter(or_condition)
+        or_condition = Q()
+        for workflow in workflow_obj.all():
+            or_condition.add(Q(workflow=workflow), Q.OR)
+        return Task.objects.filter(or_condition)
+
+    def post(self, request, *args, **kwargs):
+        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
+        if not workflow:
+            return Response(
+                {
+                    "Error": "Workflow with id {} was not found".format(
+                        kwargs["workflow_id"]
+                    )
+                },
+                status=404,
+            )
+        request.data["outputs"] = workflow.outputs
+        for task_input in request.data["inputs"]:
+            try:
+                workflow_input = next(
+                    item for item in workflow.inputs if item["id"] == task_input["id"]
+                )
+            except StopIteration:
+                return Response(
+                    {
+                        "Error": "Cannot find input with input id: {}".format(
+                            task_input["id"]
+                        )
+                    },
+                    status=400,
+                )
+            task_input.update(workflow_input)
+        return self.create(request, *args, **kwargs)
