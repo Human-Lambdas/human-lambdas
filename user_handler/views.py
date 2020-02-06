@@ -1,8 +1,10 @@
-import logging, re, csv
+import logging
+import re
+import csv
 from io import StringIO
 import datetime
-from django.utils.timezone import make_aware
 
+from django.utils.timezone import make_aware
 from rest_framework.generics import (
     CreateAPIView,
     # RetrieveUpdateAPIView,
@@ -17,9 +19,8 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.models import Token
 
-from django.core.mail import send_mail, EmailMultiAlternatives
-from django.template.loader import get_template, render_to_string
-from django.template import Context
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import get_template
 from django.utils.html import strip_tags
 
 from .models import User, Organization, Invitation
@@ -134,7 +135,7 @@ class SendInviteView(APIView):
                 userObj = User.objects.filter(email=email)
                 organization = Organization.objects.filter(name=request.data["organization"], user=userObj.first())
                 if organization.first() is None:
-                    # send 
+                    # send
                     to_hash = str(email + request.data["organization"])
                     token = hash(to_hash)
 
@@ -154,11 +155,11 @@ class SendInviteView(APIView):
 
                     text_content = plain_text.render(render_info)
                     html_content = htmly.render(render_info)
-
+                    send_mail("gonudrnuduho", "rndrngniodngrio", "no-reply@humanlambdas.com", ["sean@humanlambdas.com"])
                     msg = EmailMultiAlternatives("Human Lambdas workflow invitation", text_content, "no-reply@humanlambdas.com", ["sean@humanlambdas.com"])
                     msg.attach_alternative(html_content, "text/html")
                     invite.save()
-                    msg.send()
+                    print(msg.send())
                 else:
                     already_added_email_list.append(email)
             else:
