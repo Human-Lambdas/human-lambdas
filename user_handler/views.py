@@ -21,7 +21,6 @@ from rest_framework.authtoken.models import Token
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
-from django.utils.html import strip_tags
 
 from .models import User, Organization, Invitation
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
@@ -155,11 +154,10 @@ class SendInviteView(APIView):
 
                     text_content = plain_text.render(render_info)
                     html_content = htmly.render(render_info)
-                    send_mail("gonudrnuduho", "rndrngniodngrio", "no-reply@humanlambdas.com", ["sean@humanlambdas.com"])
                     msg = EmailMultiAlternatives("Human Lambdas workflow invitation", text_content, "no-reply@humanlambdas.com", ["sean@humanlambdas.com"])
                     msg.attach_alternative(html_content, "text/html")
                     invite.save()
-                    print(msg.send())
+                    msg.send()
                 else:
                     already_added_email_list.append(email)
             else:
@@ -202,7 +200,7 @@ class InvitationView(APIView):
             return Response({"message": "no invitation with this token exists"}, status=404)
         else:
             invitation_email, invitation_org = invite.first().email, invite.first().organization.name
-            return Response({"invitation_email": invitation_email,"invitation_org": invitation_org}, status=200)
+            return Response({"invitation_email": invitation_email, "invitation_org": invitation_org}, status=200)
 
     def post(self, request, *args, **kwargs):
         invite = Invitation.objects.filter(token=self.kwargs["pk"]).first()
@@ -210,7 +208,7 @@ class InvitationView(APIView):
             return Response({"message": "no invitation with this token exists"}, status=404)
         else:
             invitation_org = invite.organization
-            if User.objects.filter(email = invite.email).first() is None:
+            if User.objects.filter(email=invite.email).first() is None:
                 new_user = User(email=invite.email)
                 new_user.save()
                 invitation_org.user.add(new_user)
@@ -220,7 +218,6 @@ class InvitationView(APIView):
                 invitation_org.user.add(user)
                 return Response(status=200)
         return Response(status=500)
-
 
 
 class APIAuthToken(APIView):
