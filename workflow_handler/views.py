@@ -31,9 +31,18 @@ class ListWorkflowView(ListAPIView):
             or_condition.add(Q(organization=organization), Q.OR)
         return Workflow.objects.filter(Q(disabled=False) & or_condition)
 
-    def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
-        return obj
+    # def get_object(self):
+    #     obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
+    #     return obj
+
+    def list(self, request, *args, **kwargs):
+        obj = get_list_or_404(self.get_queryset())
+        serializer = self.serializer_class(obj, many=True)
+        for workflow in serializer.data:
+            workflow["n_tasks"] = Task.objects.filter(
+                workflow__id=workflow["id"]
+            ).count()
+        return Response(serializer.data)
 
 
 class RUDWorkflowView(RetrieveUpdateAPIView):
@@ -53,8 +62,14 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         return Workflow.objects.filter(or_condition)
 
     def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
         return obj
+
+    def retrieve(self, request, *args, **kwargs):
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
+        workflow = self.serializer_class(obj).data
+        workflow["n_tasks"] = Task.objects.filter(workflow__id=workflow["id"]).count()
+        return Response(workflow)
 
 
 def decode_utf8(input_iterator):
