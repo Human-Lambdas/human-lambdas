@@ -199,6 +199,6 @@ print(os.getenv("SENTRY_PROJECT"))
 
 EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_HOST_USER = "apikey"
-EMAIL_HOST_PASSWORD = "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"
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
