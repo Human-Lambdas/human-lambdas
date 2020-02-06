@@ -40,7 +40,7 @@ class ListWorkflowView(ListAPIView):
         serializer = self.serializer_class(obj, many=True)
         for workflow in serializer.data:
             workflow["n_tasks"] = Task.objects.filter(
-                workflow__id=workflow["id"]
+                workflow__id=workflow["id"], status="pending"
             ).count()
         return Response(serializer.data)
 
@@ -68,7 +68,7 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     def retrieve(self, request, *args, **kwargs):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
         workflow = self.serializer_class(obj).data
-        workflow["n_tasks"] = Task.objects.filter(workflow__id=workflow["id"]).count()
+        workflow["n_tasks"] = Task.objects.filter(workflow__id=workflow["id"], status="pending").count()
         return Response(workflow)
 
 
