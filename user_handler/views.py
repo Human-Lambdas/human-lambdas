@@ -1,5 +1,7 @@
 import logging, re, csv
 from io import StringIO
+import datetime
+from django.utils.timezone import make_aware
 
 from rest_framework.generics import (
     CreateAPIView,
@@ -20,7 +22,7 @@ from django.template.loader import get_template, render_to_string
 from django.template import Context
 from django.utils.html import strip_tags
 
-from .models import User, Organization
+from .models import User, Organization, Invitation
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
 
 logger = logging.getLogger(__file__)
@@ -108,7 +110,6 @@ class GetOrganizationView(RetrieveAPIView):
         return obj
 
 
-<<<<<<< HEAD
 class SendInviteView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -134,11 +135,18 @@ class SendInviteView(APIView):
                 organization = Organization.objects.filter(name=request.data["organization"], user=userObj.first())
                 if organization.first() is None:
                     # send 
-                    
+                    to_hash = str(email + request.data["organization"])
+                    token = hash(to_hash)
+
+                    naive_expiry_date = datetime.datetime.now() + datetime.timedelta(14)
+                    aware_expiry_date = make_aware(naive_expiry_date)
+
+                    invite = Invitation(email=email, organization=invite_org.first(), invited_by=request.user, token=token, expires_at=aware_expiry_date)
+
                     render_info = {
-                        "organization_name": "foobar",
-                        "invite_sender": "",
-                        "invite_link": "".format()
+                        "organization_name": request.data["organization"],
+                        "invite_sender": request.user.name,
+                        "invite_link": "HL-URL/{0}".format(token)
                     }
 
                     plain_text = get_template('invite.txt')
@@ -148,7 +156,9 @@ class SendInviteView(APIView):
                     html_content = htmly.render(render_info)
 
                     msg = EmailMultiAlternatives("Human Lambdas workflow invitation", text_content, "no-reply@humanlambdas.com", ["sean@humanlambdas.com"])
-                    print(msg.send())
+                    msg.attach_alternative(html_content, "text/html")
+                    invite.save()
+                    msg.send()
                 else:
                     already_added_email_list.append(email)
             else:
@@ -176,7 +186,42 @@ class SendInviteView(APIView):
             return Response({"message": response_text}, status=400)
         return Response(status=500)
 
-=======
+
+class InvitationView(APIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Invitation.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        return Organization.objects.filter(user=user)
+
+    def get(self, request, *args, **kwargs):
+        invite = Invitation.objects.filter(token=self.kwargs["pk"])
+        if invite.first() is None:
+            return Response({"message": "no invitation with this token exists"}, status=404)
+        else:
+            invitation_email, invitation_org = invite.first().email, invite.first().organization.name
+            return Response({"invitation_email": invitation_email,"invitation_org": invitation_org}, status=200)
+
+    def post(self, request, *args, **kwargs):
+        invite = Invitation.objects.filter(token=self.kwargs["pk"]).first()
+        if invite is None:
+            return Response({"message": "no invitation with this token exists"}, status=404)
+        else:
+            invitation_org = invite.organization
+            if User.objects.filter(email = invite.email).first() is None:
+                new_user = User(email=invite.email)
+                new_user.save()
+                invitation_org.user.add(new_user)
+                return Response(status=200)
+            else:
+                user = User.objects.filter(email=invite.email).first()
+                invitation_org.user.add(user)
+                return Response(status=200)
+        return Response(status=500)
+
+
+
 class APIAuthToken(APIView):
     serializer_class = APITokenUserSerializer
     permission_classes = (IsAuthenticated,)
@@ -189,4 +234,3 @@ class APIAuthToken(APIView):
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
         return Response({"token": token.key, "user_id": user.pk, "email": user.email})
->>>>>>> 8152cb0b714c8c0bb9515a6d2c5c8b1419d147b7

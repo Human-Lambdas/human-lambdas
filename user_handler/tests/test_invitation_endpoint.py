@@ -1,4 +1,3 @@
-
 import logging
 
 from rest_framework.test import APITestCase
@@ -35,78 +34,54 @@ class TestInvite(APITestCase):
         self.org_id = organization.id
         organization.user.add(user)
 
-    def test_endpoint_call(self):
+    def test_invitation_get_call_no_invite(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.post(
+        response = self.client.get(
+            "/v1/users/invitation/vv3w87nvw3703yvw07vhs7vsnhs0vv4t7ehom"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_invitation_get_call(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        org, recipient = "fooinc", "sean@humanlambdas.com"
+        _ = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "sean@humanlambdas.com,bernat@humanlambdas.com,james@humanlambdas.com",
-                "organization": "fooinc"
+                "emails": "{0},bernat@humanlambdas.com,james@humanlambdas.com".format(recipient),
+                "organization": org
             },
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_endpoint_call_with_spaces(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.post(
-            "/v1/users/invite/",
-            {
-                "emails": "sean@humanlambdas.com     ,bernat@humanlambdas.com,    james@humanlambdas.com    ",
-                "organization": "fooinc"
-            },
+        response = self.client.get(
+            "/v1/users/invitation/{0}".format(hash(str("sean@humanlambdas.com" + "fooinc")))
         )
+        print(response.data)
+        self.assertEqual(response.data["invitation_email"], recipient)
+        self.assertEqual(response.data["invitation_org"], org)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_endpoint_call_duplicate_emails(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.post(
-            "/v1/users/invite/",
-            {
-                "emails": "sean@humanlambdas.com,bernat@humanlambdas.com,james@humanlambdas.com,bernat@humanlambdas.com",
-                "organization": "fooinc"
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_endpoint_call_no_jwt(self):
-        response = self.client.post(
-            "/v1/users/invite/",
-            {
-                "emails": "sean@humanlambdas.com,bernat@humanlambdas.com,james@humanlambdas.com",
-                "organization": "fooinc"
-            },
+    def test_invitation_get_call_no_jwt(self):
+        response = self.client.get(
+            "/v1/users/invitation/vv3w87nvw3703yvw07vhs7vsnhs0vv4t7ehom"
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_endpoint_call_already_added_email(self):
+    def test_invitation_post_call(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.post(
+        org, recipient = "fooinc", "sean@humanlambdas.com"
+        _ = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "sean@humanlambdas.com,foo@bar.com,james@humanlambdas.com",
-                "organization": "fooinc"
+                "emails": "{0},bernat@humanlambdas.com,james@humanlambdas.com".format(recipient),
+                "organization": org
             },
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.client.post(
+            "/v1/users/invitation/{0}".format(hash(str("sean@humanlambdas.com" + "fooinc")))
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_endpoint_call_invalid_emails(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+    def test_invitation_post_call_no_jwt(self):
         response = self.client.post(
-            "/v1/users/invite/",
-            {
-                "emails": "sean@humanlambdas.com,bernat@bernat,james.com",
-                "organization": "fooinc"
-            },
+            "/v1/users/invitation/vv3w87nvw3703yvw07vhs7vsnhs0vv4t7ehom"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_endpoint_call_invalid_emails_and_already_added_emails(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.post(
-            "/v1/users/invite/",
-            {
-                "emails": "sean@humanlambdas.com,bernat@bernat,james.com,foo@bar.com",
-                "organization": "fooinc"
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

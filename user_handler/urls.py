@@ -7,11 +7,9 @@ from .views import (
     RetrieveUpdateDestroyUserView,
     GetOrganizationView,
     ListUsersView,
-<<<<<<< HEAD
     SendInviteView,
-=======
+    InvitationView,
     APIAuthToken,
->>>>>>> 8152cb0b714c8c0bb9515a6d2c5c8b1419d147b7
 )
 
 
@@ -25,11 +23,11 @@ urlpatterns = [
     path(
         "organizations/<int:pk>", GetOrganizationView.as_view(), name="get-organization"
     ),
-<<<<<<< HEAD
     path(
         "invite/", SendInviteView.as_view(), name="send-invite"
     ),
-=======
+    path(
+        "invitation/<str:pk>", InvitationView.as_view(), name="receive-invitation"
+    ),
     path("api-token/", APIAuthToken.as_view(), name="api-token"),
->>>>>>> 8152cb0b714c8c0bb9515a6d2c5c8b1419d147b7
 ]

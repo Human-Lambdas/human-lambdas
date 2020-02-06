@@ -23,7 +23,8 @@ button {
   margin-left: calc(50% - 82px);
   background-color: #6648ee;
   border: none;
-  height: 24px;
+  height: 32px;
+  font-size: 20px;
   border-radius: 12px;
   color: white;
 }
