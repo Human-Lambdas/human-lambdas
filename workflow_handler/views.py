@@ -82,7 +82,7 @@ class FileUploadView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request, workflow_id, format=None):
-        file_obj = request.data["file"]  # request.data['file']
+        file_obj = request.data["file"]
         workflow = Workflow.objects.get(id=workflow_id)
         if not workflow:
             raise KeyError("No workflow found for id %s not found", workflow_id)
