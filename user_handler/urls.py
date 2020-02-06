@@ -23,11 +23,7 @@ urlpatterns = [
     path(
         "organizations/<int:pk>", GetOrganizationView.as_view(), name="get-organization"
     ),
-    path(
-        "invite/", SendInviteView.as_view(), name="send-invite"
-    ),
-    path(
-        "invitation/<str:pk>", InvitationView.as_view(), name="receive-invitation"
-    ),
+    path("invite/", SendInviteView.as_view(), name="send-invite"),
+    path("invitation/<str:pk>", InvitationView.as_view(), name="receive-invitation"),
     path("api-token/", APIAuthToken.as_view(), name="api-token"),
 ]

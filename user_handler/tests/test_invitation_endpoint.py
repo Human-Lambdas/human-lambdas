@@ -9,7 +9,6 @@ logger = logging.getLogger(__file__)
 
 
 class TestInvite(APITestCase):
-
     def setUp(self):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
@@ -47,12 +46,16 @@ class TestInvite(APITestCase):
         _ = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "{0},bernat@humanlambdas.com,james@humanlambdas.com".format(recipient),
-                "organization": org
+                "emails": "{0},bernat@humanlambdas.com,james@humanlambdas.com".format(
+                    recipient
+                ),
+                "organization": org,
             },
         )
         response = self.client.get(
-            "/v1/users/invitation/{0}".format(hash(str("sean@humanlambdas.com" + "fooinc")))
+            "/v1/users/invitation/{0}".format(
+                hash(str("sean@humanlambdas.com" + "fooinc"))
+            )
         )
         print(response.data)
         self.assertEqual(response.data["invitation_email"], recipient)
@@ -71,12 +74,16 @@ class TestInvite(APITestCase):
         _ = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "{0},bernat@humanlambdas.com,james@humanlambdas.com".format(recipient),
-                "organization": org
+                "emails": "{0},bernat@humanlambdas.com,james@humanlambdas.com".format(
+                    recipient
+                ),
+                "organization": org,
             },
         )
         response = self.client.post(
-            "/v1/users/invitation/{0}".format(hash(str("sean@humanlambdas.com" + "fooinc")))
+            "/v1/users/invitation/{0}".format(
+                hash(str("sean@humanlambdas.com" + "fooinc"))
+            )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

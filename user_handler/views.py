@@ -115,14 +115,18 @@ class SendInviteView(APIView):
 
     def post(self, request):
         stripped_email_list = StringIO("".join(request.data["emails"].split()))
-        reader = csv.reader(stripped_email_list, delimiter=',')
+        reader = csv.reader(stripped_email_list, delimiter=",")
         email_set = set(next(reader))
         # convert to set to ignore any duplicated emails
 
-        invite_org = Organization.objects.filter(name=request.data["organization"], user=request.user)
+        invite_org = Organization.objects.filter(
+            name=request.data["organization"], user=request.user
+        )
         if invite_org is None:
             # ensure user is inviting to an organization they belong to
-            return Response({"message": "You are not a member of this organization"}, status=401)
+            return Response(
+                {"message": "You are not a member of this organization"}, status=401
+            )
 
         invalid_email_list = []
         already_added_email_list = []
@@ -132,7 +136,9 @@ class SendInviteView(APIView):
                 print("attempting send")
                 # checks the email is valid
                 userObj = User.objects.filter(email=email)
-                organization = Organization.objects.filter(name=request.data["organization"], user=userObj.first())
+                organization = Organization.objects.filter(
+                    name=request.data["organization"], user=userObj.first()
+                )
                 if organization.first() is None:
                     # send
                     to_hash = str(email + request.data["organization"])
@@ -141,20 +147,31 @@ class SendInviteView(APIView):
                     naive_expiry_date = datetime.datetime.now() + datetime.timedelta(14)
                     aware_expiry_date = make_aware(naive_expiry_date)
 
-                    invite = Invitation(email=email, organization=invite_org.first(), invited_by=request.user, token=token, expires_at=aware_expiry_date)
+                    invite = Invitation(
+                        email=email,
+                        organization=invite_org.first(),
+                        invited_by=request.user,
+                        token=token,
+                        expires_at=aware_expiry_date,
+                    )
 
                     render_info = {
                         "organization_name": request.data["organization"],
                         "invite_sender": request.user.name,
-                        "invite_link": "HL-URL/{0}".format(token)
+                        "invite_link": "HL-URL/{0}".format(token),
                     }
 
-                    plain_text = get_template('invite.txt')
-                    htmly = get_template('invite.html')
+                    plain_text = get_template("invite.txt")
+                    htmly = get_template("invite.html")
 
                     text_content = plain_text.render(render_info)
                     html_content = htmly.render(render_info)
-                    msg = EmailMultiAlternatives("Human Lambdas workflow invitation", text_content, "no-reply@humanlambdas.com", ["sean@humanlambdas.com"])
+                    msg = EmailMultiAlternatives(
+                        "Human Lambdas workflow invitation",
+                        text_content,
+                        "no-reply@humanlambdas.com",
+                        ["sean@humanlambdas.com"],
+                    )
                     msg.attach_alternative(html_content, "text/html")
                     invite.save()
                     msg.send()
@@ -165,13 +182,17 @@ class SendInviteView(APIView):
 
         # sending responses
         if len(invalid_email_list) == 0 and len(already_added_email_list) == 0:
-            return Response({"message": "all emails were successfully added!"}, status=200)
+            return Response(
+                {"message": "all emails were successfully added!"}, status=200
+            )
         if len(invalid_email_list) > 0 and len(already_added_email_list) > 0:
             response_text = "error:"
             for email in invalid_email_list:
                 response_text += " {0} is an invalid email.".format(email)
             for email in already_added_email_list:
-                response_text += " {0} is already a part of the organization, and so does not need to be added again.".format(email)
+                response_text += " {0} is already a part of the organization, and so does not need to be added again.".format(
+                    email
+                )
             return Response({"message": response_text}, status=400)
         if len(invalid_email_list) > 0:
             response_text = "error:"
@@ -181,7 +202,9 @@ class SendInviteView(APIView):
         if len(already_added_email_list) > 0:
             response_text = "error:"
             for email in already_added_email_list:
-                response_text += " {0} is already a part of the organization, and so does not need to be added again.".format(email)
+                response_text += " {0} is already a part of the organization, and so does not need to be added again.".format(
+                    email
+                )
             return Response({"message": response_text}, status=400)
         return Response(status=500)
 
@@ -197,15 +220,28 @@ class InvitationView(APIView):
     def get(self, request, *args, **kwargs):
         invite = Invitation.objects.filter(token=self.kwargs["pk"])
         if invite.first() is None:
-            return Response({"message": "no invitation with this token exists"}, status=404)
+            return Response(
+                {"message": "no invitation with this token exists"}, status=404
+            )
         else:
-            invitation_email, invitation_org = invite.first().email, invite.first().organization.name
-            return Response({"invitation_email": invitation_email, "invitation_org": invitation_org}, status=200)
+            invitation_email, invitation_org = (
+                invite.first().email,
+                invite.first().organization.name,
+            )
+            return Response(
+                {
+                    "invitation_email": invitation_email,
+                    "invitation_org": invitation_org,
+                },
+                status=200,
+            )
 
     def post(self, request, *args, **kwargs):
         invite = Invitation.objects.filter(token=self.kwargs["pk"]).first()
         if invite is None:
-            return Response({"message": "no invitation with this token exists"}, status=404)
+            return Response(
+                {"message": "no invitation with this token exists"}, status=404
+            )
         else:
             invitation_org = invite.organization
             if User.objects.filter(email=invite.email).first() is None:

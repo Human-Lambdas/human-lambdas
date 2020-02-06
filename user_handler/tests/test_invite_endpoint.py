@@ -1,4 +1,3 @@
-
 import logging
 
 from rest_framework.test import APITestCase
@@ -10,7 +9,6 @@ logger = logging.getLogger(__file__)
 
 
 class TestInvite(APITestCase):
-
     def setUp(self):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
@@ -41,7 +39,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "sean@humanlambdas.com,bernat@humanlambdas.com,james@humanlambdas.com",
-                "organization": "fooinc"
+                "organization": "fooinc",
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -52,7 +50,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "sean@humanlambdas.com     ,bernat@humanlambdas.com,    james@humanlambdas.com    ",
-                "organization": "fooinc"
+                "organization": "fooinc",
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -63,7 +61,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "sean@humanlambdas.com,bernat@humanlambdas.com,james@humanlambdas.com,bernat@humanlambdas.com",
-                "organization": "fooinc"
+                "organization": "fooinc",
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -73,7 +71,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "sean@humanlambdas.com,bernat@humanlambdas.com,james@humanlambdas.com",
-                "organization": "fooinc"
+                "organization": "fooinc",
             },
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -84,7 +82,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "sean@humanlambdas.com,foo@bar.com,james@humanlambdas.com",
-                "organization": "fooinc"
+                "organization": "fooinc",
             },
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -95,7 +93,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "sean@humanlambdas.com,bernat@bernat,james.com",
-                "organization": "fooinc"
+                "organization": "fooinc",
             },
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -106,7 +104,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "sean@humanlambdas.com,bernat@bernat,james.com,foo@bar.com",
-                "organization": "fooinc"
+                "organization": "fooinc",
             },
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
