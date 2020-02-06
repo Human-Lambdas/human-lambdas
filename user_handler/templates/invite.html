@@ -15,11 +15,11 @@
   <body>
     <img id="logo" src="HL-logo.png" />
     <h1>
-      You've been invited to join {{organization_name}} by {{invite_sender}}
+      You've been invited to join {{ organization_name }} by {{ invite_sender }}
     </h1>
     <h4>Once you accept, you will be able to work this organization's tasks</h4>
     <div id="centerContainer">
-      <button>Accept Invite</button>
+      <button href="{{ invite_link }}">Accept Invite</button>
     </div>
   </body>
 </html>
