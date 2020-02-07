@@ -75,7 +75,7 @@ class FileUploadView(APIView):
         try:
             process_csv(content, workflow=workflow)
         except Exception as exception:
-            return Response({"message": exception}, status=400)
+            return Response({"error": str(exception)}, status=400)
         return Response(status=200)
 
 
