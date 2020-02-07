@@ -9,6 +9,8 @@ from workflow_handler.csv2task import process_csv
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
 
+# from rest_framework.pagination import LimitOffsetPagination
+
 from .serializers import WorkflowSerializer, TaskSerializer
 from .models import Workflow, Task
 
@@ -227,6 +229,7 @@ class GetCompletedTaskView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
+    # pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -242,6 +245,8 @@ class GetCompletedTaskView(ListAPIView):
 
     def list(self, request, workflow_id, format=None):
         workflow = Workflow.objects.get(id=workflow_id)
-        obj = get_list_or_404(self.get_queryset(), workflow=workflow)
+        obj = get_list_or_404(
+            self.get_queryset(), workflow=workflow, status="completed"
+        )
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
