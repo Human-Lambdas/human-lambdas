@@ -9,6 +9,8 @@ from workflow_handler.csv2task import process_csv
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
 
+# from rest_framework.pagination import LimitOffsetPagination
+
 from .serializers import WorkflowSerializer, TaskSerializer
 from .models import Workflow, Task
 
@@ -116,8 +118,6 @@ class ListTaskView(ListAPIView):
         workflow = Workflow.objects.get(id=workflow_id)
         obj = get_list_or_404(self.get_queryset(), workflow=workflow)
         serializer = self.serializer_class(obj, many=True)
-        for task in serializer.data:
-            task["outputs"] = workflow.outputs
         return Response(serializer.data)
 
 
@@ -152,7 +152,6 @@ class RUDTaskView(RetrieveUpdateAPIView):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
         task = self.serializer_class(obj).data
-        task["outputs"] = workflow.outputs
         return Response(task)
 
     def perform_update(self, serializer):
@@ -183,7 +182,6 @@ class NextTaskView(APIView):
         if obj:
             obj.status = "assigned"
             obj.save()
-            task["outputs"] = workflow.outputs
             return Response(task)
         else:
             return Response(status=204)
@@ -238,3 +236,34 @@ class CreateTaskView(CreateAPIView):
                 )
             task_input.update(workflow_input)
         return self.create(request, *args, **kwargs)
+
+
+class GetCompletedTaskView(ListAPIView):
+    """
+    External API View for getting all the Tasks
+    """
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TaskSerializer
+    # pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        organization_obj = Organization.objects.filter(user=user)
+        or_condition = Q()
+        for organization in organization_obj.all():
+            or_condition.add(Q(organization=organization), Q.OR)
+        workflow_obj = Workflow.objects.filter(or_condition)
+        or_condition = Q()
+        for workflow in workflow_obj.all():
+            or_condition.add(Q(workflow=workflow), Q.OR)
+        return Task.objects.filter(or_condition)
+
+    def list(self, request, workflow_id, format=None):
+        workflow = Workflow.objects.get(id=workflow_id)
+        obj = get_list_or_404(
+            self.get_queryset(), workflow=workflow, status="completed"
+        )
+        serializer = self.serializer_class(obj, many=True)
+        return Response(serializer.data)
