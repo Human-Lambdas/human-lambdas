@@ -4,6 +4,10 @@ import csv
 from io import StringIO
 import datetime
 
+import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
 from django.utils.timezone import make_aware
 from rest_framework.generics import (
     CreateAPIView,
@@ -175,6 +179,18 @@ class SendInviteView(APIView):
                     msg.attach_alternative(html_content, "text/html")
                     invite.save()
                     msg.send()
+
+                    if not os.environ.get('DEBUG'):
+                        message = Mail(
+                            from_email='no-reply@humanlambdas.com',
+                            to_emails='sean@humanlambdas.com',
+                            subject='Human Lambdas workflow invitation',
+                            html_content=html_content)
+                        try:
+                            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                            sg.send(message)
+                        except Exception as e:
+                            print(e.message)
                 else:
                     already_added_email_list.append(email)
             else:
