@@ -6,13 +6,11 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0011_auto_20200129_1640'),
+        ("workflow_handler", "0011_auto_20200129_1640"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workflow',
-            name='n_tasks',
-            field=models.IntegerField(default=0),
+            model_name="workflow", name="n_tasks", field=models.IntegerField(default=0),
         ),
     ]
