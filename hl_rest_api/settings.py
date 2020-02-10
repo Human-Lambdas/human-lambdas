@@ -176,7 +176,7 @@ LOGGING = {
 
 SIMPLE_JWT = {
     # https://github.com/davesque/django-rest-framework-simplejwt
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "ALGORITHM': 'HS256",
     "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
     "SIGNING_KEY": os.getenv("SECRET_KEY"),
