@@ -154,8 +154,11 @@ class RUDTaskView(RetrieveUpdateAPIView):
         task = self.serializer_class(obj).data
         return Response(task)
 
-    def perform_update(self, serializer):
+    def perform_update(self, serializer, *args, **kwargs):
         serializer.save(owner=self.request.user)
+        # workflow = Workflow.objects.get(id=self.kwargs["workflow_id"])
+        # workflow.n_tasks -= 1
+        # workflow.save()
 
 
 class NextTaskView(APIView):
@@ -235,6 +238,8 @@ class CreateTaskView(CreateAPIView):
                     status=400,
                 )
             task_input.update(workflow_input)
+        # workflow.n_tasks += 1
+        # workflow.save()
         return self.create(request, *args, **kwargs)
 
 
