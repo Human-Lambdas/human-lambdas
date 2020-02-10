@@ -57,7 +57,6 @@ class TestInvite(APITestCase):
                 hash(str("sean@humanlambdas.com" + "fooinc"))
             )
         )
-        print(response.data)
         self.assertEqual(response.data["invitation_email"], recipient)
         self.assertEqual(response.data["invitation_org"], org)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
