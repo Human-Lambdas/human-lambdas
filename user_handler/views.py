@@ -137,7 +137,6 @@ class SendInviteView(APIView):
 
         for email in email_set:
             if bool(re.fullmatch(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?", email)):
-                print("attempting send")
                 # checks the email is valid
                 userObj = User.objects.filter(email=email)
                 organization = Organization.objects.filter(
@@ -170,15 +169,8 @@ class SendInviteView(APIView):
 
                     text_content = plain_text.render(render_info)
                     html_content = htmly.render(render_info)
-                    msg = EmailMultiAlternatives(
-                        "Human Lambdas workflow invitation",
-                        text_content,
-                        "no-reply@humanlambdas.com",
-                        ["sean@humanlambdas.com"],
-                    )
-                    msg.attach_alternative(html_content, "text/html")
+
                     invite.save()
-                    msg.send()
 
                     if not os.environ.get('DEBUG'):
                         message = Mail(

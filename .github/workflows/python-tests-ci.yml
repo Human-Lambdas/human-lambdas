@@ -54,5 +54,6 @@ jobs:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         SENTRY_KEY: ${{ secrets.SENTRY_KEY }}
         SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
 
 
