@@ -34,8 +34,19 @@ def validate_output_structure(validated_data_items):
 class WorkflowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workflow
-        fields = ["id", "name", "description", "inputs", "outputs", "disabled"]
-        extra_kwargs = {"disabled": {"write_only": True}}
+        fields = [
+            "id",
+            "name",
+            "description",
+            "inputs",
+            "outputs",
+            "disabled",
+            "n_tasks",
+        ]
+        extra_kwargs = {
+            "disabled": {"write_only": True},
+            "n_tasks": {"read_only": True},
+        }
 
     def create(self, validated_data):
         user = self.context["request"].user

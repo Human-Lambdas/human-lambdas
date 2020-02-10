@@ -256,4 +256,6 @@ class TestUploadFail(APITestCase):
             response = self.client.post(
                 "/v1/workflows/{}/upload/".format(workflow_id), data=data
             )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.content)
+        self.assertEqual(
+            response.status_code, status.HTTP_400_BAD_REQUEST, response.content
+        )

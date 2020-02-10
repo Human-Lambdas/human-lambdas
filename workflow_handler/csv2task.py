@@ -37,5 +37,5 @@ def process_csv(csv_file, workflow):
             inputs=inputs, outputs=copy.deepcopy(workflow.outputs), workflow=workflow
         )
         task_obj.save()
-    # workflow.n_tasks = ic + 1
-    # workflow.save()
+    workflow.n_tasks = ic + 1
+    workflow.save()

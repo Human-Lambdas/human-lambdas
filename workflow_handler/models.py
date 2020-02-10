@@ -12,7 +12,7 @@ class Workflow(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     disabled = models.BooleanField(default=False)
-    # n_tasks = models.IntegerField(default=0)
+    n_tasks = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name

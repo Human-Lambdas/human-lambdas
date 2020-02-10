@@ -33,17 +33,9 @@ class ListWorkflowView(ListAPIView):
             or_condition.add(Q(organization=organization), Q.OR)
         return Workflow.objects.filter(Q(disabled=False) & or_condition)
 
-    # def get_object(self):
-    #     obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
-    #     return obj
-
     def list(self, request, *args, **kwargs):
         obj = get_list_or_404(self.get_queryset())
         serializer = self.serializer_class(obj, many=True)
-        for workflow in serializer.data:
-            workflow["n_tasks"] = Task.objects.filter(
-                workflow__id=workflow["id"], status="pending"
-            ).count()
         return Response(serializer.data)
 
 
@@ -70,9 +62,6 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     def retrieve(self, request, *args, **kwargs):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
         workflow = self.serializer_class(obj).data
-        workflow["n_tasks"] = Task.objects.filter(
-            workflow__id=workflow["id"], status="pending"
-        ).count()
         return Response(workflow)
 
 
@@ -156,9 +145,9 @@ class RUDTaskView(RetrieveUpdateAPIView):
 
     def perform_update(self, serializer, *args, **kwargs):
         serializer.save(owner=self.request.user)
-        # workflow = Workflow.objects.get(id=self.kwargs["workflow_id"])
-        # workflow.n_tasks -= 1
-        # workflow.save()
+        workflow = Workflow.objects.get(id=self.kwargs["workflow_id"])
+        workflow.n_tasks -= 1
+        workflow.save()
 
 
 class NextTaskView(APIView):
@@ -238,8 +227,8 @@ class CreateTaskView(CreateAPIView):
                     status=400,
                 )
             task_input.update(workflow_input)
-        # workflow.n_tasks += 1
-        # workflow.save()
+        workflow.n_tasks += 1
+        workflow.save()
         return self.create(request, *args, **kwargs)
 
 
