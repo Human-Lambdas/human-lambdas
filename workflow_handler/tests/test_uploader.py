@@ -211,3 +211,51 @@ class TestCSV2Task(TestCase):
         for task in tasks:
             for input_item in task.inputs:
                 self.assertEqual(1, title_row.count(input_item["id"]))
+
+
+class TestUploadFail(APITestCase):
+    def setUp(self):
+        self.file_path = os.path.join(_CURRENT_DIR, "data", "data_space.csv")
+        registration_data = {
+            "email": "foo@bar.com",
+            "password": "fooword",
+            "organization": "fooInc",
+            "is_admin": True,
+            "name": "foo",
+        }
+        _ = self.client.post("/v1/users/register/", registration_data)
+        response = self.client.post(
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+        )
+        self.access_token = response.data["access"]
+        self.refresh = response.data["refresh"]
+
+    def test_upload(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        workflow_data = {
+            "name": "uploader",
+            "description": "great wf",
+            "inputs": [
+                {"id": "car", "name": "alpha", "type": "text"},
+                {"id": "img_1", "name": "beta", "type": "text"},
+                {"id": "img_2", "name": "gamma", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {"options": ["foo1", "bar1"]},
+                }
+            ],
+        }
+        _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        workflow_id = Workflow.objects.get(name="uploader").id
+        with open(self.file_path, encoding="ISO-8859-1") as f:
+            data = {"file": f}
+            response = self.client.post(
+                "/v1/workflows/{}/upload/".format(workflow_id), data=data
+            )
+        self.assertEqual(
+            response.status_code, status.HTTP_400_BAD_REQUEST, response.content
+        )

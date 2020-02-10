@@ -11,7 +11,6 @@ from sendgrid.helpers.mail import Mail
 from django.utils.timezone import make_aware
 from rest_framework.generics import (
     CreateAPIView,
-    # RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
     RetrieveAPIView,
     ListAPIView,
