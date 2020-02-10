@@ -23,7 +23,6 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.models import Token
 
-from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 
 from .models import User, Organization, Invitation
@@ -169,6 +168,8 @@ class SendInviteView(APIView):
 
                     text_content = plain_text.render(render_info)
                     html_content = htmly.render(render_info)
+
+                    print(text_content)
 
                     invite.save()
 
