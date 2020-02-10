@@ -2,7 +2,6 @@ import logging
 
 from rest_framework.generics import (
     CreateAPIView,
-    # RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
     RetrieveAPIView,
     ListAPIView,
