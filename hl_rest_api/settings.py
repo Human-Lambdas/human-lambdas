@@ -146,6 +146,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
+    "EXCEPTION_HANDLER": "hl_rest_api.utils.custom_exception_handler",
 }
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
