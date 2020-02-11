@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 
 def trigger_error(request):
@@ -24,7 +25,9 @@ def trigger_error(request):
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api-auth/", include("rest_framework.urls")),
     path("v1/", include("v1.urls")),
     path("sentry-debug/", trigger_error),
 ]
+
+
+urlpatterns += staticfiles_urlpatterns()

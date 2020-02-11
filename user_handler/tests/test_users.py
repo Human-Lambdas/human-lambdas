@@ -9,7 +9,6 @@ logger = logging.getLogger(__file__)
 
 
 class TestUsers(APITestCase):
-
     def setUp(self):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
@@ -26,9 +25,7 @@ class TestUsers(APITestCase):
         organization.save()
         self.org_id = organization.id
         organization.user.add(user)
-        user = User(
-            name="wrong_username", email="wrong@bar.com", is_admin=True
-        )
+        user = User(name="wrong_username", email="wrong@bar.com", is_admin=True)
         user.set_password("wrong_user")
         user.save()
 
@@ -55,7 +52,6 @@ class TestUsers(APITestCase):
 
 
 class TestAPIRegistration(APITestCase):
-
     def test_registration(self):
         response = self.client.post(
             "/v1/users/register/",
@@ -71,7 +67,6 @@ class TestAPIRegistration(APITestCase):
 
 
 class TestAPIjwt(APITestCase):
-
     def setUp(self):
         user = User(name="foo", email="foo@bar.com", is_admin=True)
         user.set_password("fooword")
@@ -96,7 +91,6 @@ class TestAPIjwt(APITestCase):
 
 
 class TestAPIUserUpdate(APITestCase):
-
     def setUp(self):
         self.preset_password = "fooword"
         self.preset_changed_password = "barword"
@@ -106,23 +100,23 @@ class TestAPIUserUpdate(APITestCase):
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
+        self.user_id = user.pk
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
 
     def test_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/1")
+        response = self.client.get("/v1/users/{}".format(self.user_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_update(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         data = {"password": self.preset_changed_password}
-        response = self.client.patch("/v1/users/1", data)
+        response = self.client.patch("/v1/users/{}".format(self.user_id), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
 
 class TestListUsers(APITestCase):
-
     def setUp(self):
         self.user_name = "foo"
         user = User(name=self.user_name, email="foo@bar.com", is_admin=True)

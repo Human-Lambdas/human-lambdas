@@ -1,5 +1,6 @@
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from user_handler.models import Organization
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 from workflow_handler.csv2task import process_csv
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
+from rest_framework.pagination import LimitOffsetPagination
 
 from .serializers import WorkflowSerializer, TaskSerializer
 from .models import Workflow, Task
@@ -14,13 +16,11 @@ from .models import Workflow, Task
 
 class CreateWorkflowView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Workflow.objects.all()
     serializer_class = WorkflowSerializer
 
 
 class ListWorkflowView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Workflow.objects.all()
     serializer_class = WorkflowSerializer
 
     def get_queryset(self):
@@ -32,9 +32,10 @@ class ListWorkflowView(ListAPIView):
             or_condition.add(Q(organization=organization), Q.OR)
         return Workflow.objects.filter(Q(disabled=False) & or_condition)
 
-    def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
-        return obj
+    def list(self, request, *args, **kwargs):
+        obj = get_list_or_404(self.get_queryset())
+        serializer = self.serializer_class(obj, many=True)
+        return Response(serializer.data)
 
 
 class RUDWorkflowView(RetrieveUpdateAPIView):
@@ -43,7 +44,6 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    queryset = Workflow.objects.all()
     serializer_class = WorkflowSerializer
 
     def get_queryset(self):
@@ -55,8 +55,13 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         return Workflow.objects.filter(or_condition)
 
     def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
         return obj
+
+    def retrieve(self, request, *args, **kwargs):
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
+        workflow = self.serializer_class(obj).data
+        return Response(workflow)
 
 
 def decode_utf8(input_iterator):
@@ -69,18 +74,20 @@ class FileUploadView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request, workflow_id, format=None):
-        file_obj = request.data["file"]  # request.data['file']
+        file_obj = request.data["file"]
         workflow = Workflow.objects.get(id=workflow_id)
         if not workflow:
             raise KeyError("No workflow found for id %s not found", workflow_id)
         content = decode_utf8(file_obj)  # .read()
-        process_csv(content, workflow=workflow)
+        try:
+            process_csv(content, workflow=workflow)
+        except Exception as exception:
+            return Response({"error": str(exception)}, status=400)
         return Response(status=200)
 
 
 class ListTaskView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -99,8 +106,6 @@ class ListTaskView(ListAPIView):
         workflow = Workflow.objects.get(id=workflow_id)
         obj = get_list_or_404(self.get_queryset(), workflow=workflow)
         serializer = self.serializer_class(obj, many=True)
-        for task in serializer.data:
-            task["outputs"] = workflow.outputs
         return Response(serializer.data)
 
 
@@ -110,7 +115,6 @@ class RUDTaskView(RetrieveUpdateAPIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -136,16 +140,17 @@ class RUDTaskView(RetrieveUpdateAPIView):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
         task = self.serializer_class(obj).data
-        task["outputs"] = workflow.outputs
         return Response(task)
 
-    def perform_update(self, serializer):
+    def perform_update(self, serializer, *args, **kwargs):
         serializer.save(owner=self.request.user)
+        workflow = Workflow.objects.get(id=self.kwargs["workflow_id"])
+        workflow.n_tasks -= 1
+        workflow.save()
 
 
 class NextTaskView(APIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -168,7 +173,100 @@ class NextTaskView(APIView):
         if obj:
             obj.status = "assigned"
             obj.save()
-            task["outputs"] = workflow.outputs
             return Response(task)
         else:
             return Response(status=204)
+
+
+class CreateTaskView(CreateAPIView):
+    """
+    External API View for creating Tasks
+    """
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        organization_obj = Organization.objects.filter(user=user)
+        or_condition = Q()
+        for organization in organization_obj.all():
+            or_condition.add(Q(organization=organization), Q.OR)
+        workflow_obj = Workflow.objects.filter(or_condition)
+        or_condition = Q()
+        for workflow in workflow_obj.all():
+            or_condition.add(Q(workflow=workflow), Q.OR)
+        return Task.objects.filter(or_condition)
+
+    def post(self, request, *args, **kwargs):
+        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
+        if not workflow:
+            return Response(
+                {
+                    "Error": "Workflow with id {} was not found".format(
+                        kwargs["workflow_id"]
+                    )
+                },
+                status=404,
+            )
+        request.data["outputs"] = workflow.outputs
+        for task_input in request.data["inputs"]:
+            try:
+                workflow_input = next(
+                    item for item in workflow.inputs if item["id"] == task_input["id"]
+                )
+            except StopIteration:
+                return Response(
+                    {
+                        "Error": "Cannot find input with input id: {}".format(
+                            task_input["id"]
+                        )
+                    },
+                    status=400,
+                )
+            task_input.update(workflow_input)
+        workflow.n_tasks += 1
+        workflow.save()
+        return self.create(request, *args, **kwargs)
+
+
+class GetCompletedTaskView(ListAPIView):
+    """
+    External API View for getting all the Tasks
+    """
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TaskSerializer
+    pagination_class = LimitOffsetPagination
+    paginate_by = 10
+    paginate_by_param = "page_size"
+    max_paginate_by = 100
+
+    def get_queryset(self):
+        user = self.request.user
+        organization_obj = Organization.objects.filter(user=user)
+        or_condition = Q()
+        for organization in organization_obj.all():
+            or_condition.add(Q(organization=organization), Q.OR)
+        workflow_obj = Workflow.objects.filter(or_condition)
+        or_condition = Q()
+        for workflow in workflow_obj.all():
+            or_condition.add(Q(workflow=workflow), Q.OR)
+        return Task.objects.filter(or_condition)
+
+    def list(self, request, workflow_id, format=None):
+        workflow = Workflow.objects.get(id=workflow_id)
+        queryset = self.filter_queryset(self.get_queryset())
+        queryset.filter(workflow=workflow).filter(status="completed")
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        obj = get_list_or_404(
+            self.get_queryset(), workflow=workflow, status="completed"
+        )
+        serializer = self.serializer_class(obj, many=True)
+        return Response(serializer.data)

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -145,6 +146,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
+    "EXCEPTION_HANDLER": "hl_rest_api.utils.custom_exception_handler",
 }
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -174,8 +176,11 @@ LOGGING = {
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=5),
+    # https://github.com/davesque/django-rest-framework-simplejwt
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "ALGORITHM": "HS256",
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
+    "SIGNING_KEY": os.getenv("SECRET_KEY"),
 }
 
 
