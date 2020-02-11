@@ -32,11 +32,13 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
-        response = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        response = self.client.post(
+            "/v1/workflows/create/", workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertTrue(Workflow.objects.filter(name=workflow_data["name"]).exists())
 
@@ -51,11 +53,13 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
-        response = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        response = self.client.post(
+            "/v1/workflows/create/", workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
@@ -74,11 +78,13 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
-        response = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        response = self.client.post(
+            "/v1/workflows/create/", workflow_data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
@@ -107,11 +113,13 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection":{"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
-        response = self.client.post("/v1/workflows/create/", workflow_data1, format="json")
+        response = self.client.post(
+            "/v1/workflows/create/", workflow_data1, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         workflow_data2 = {
             "name": "foowf2",
@@ -122,17 +130,21 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
-        response = self.client.post("/v1/workflows/create/", workflow_data2, format="json")
+        response = self.client.post(
+            "/v1/workflows/create/", workflow_data2, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         response = self.client.get("/v1/workflows/")
         result_1 = response.data[0]
         result_2 = response.data[1]
         self.assertTrue(result_1.pop("id"))
         self.assertTrue(result_2.pop("id"))
+        self.assertEqual(result_1.pop("n_tasks"), 0)
+        self.assertEqual(result_2.pop("n_tasks"), 0)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         try:
             self.assertEqual(workflow_data2, response.data[0], response.data)
@@ -141,7 +153,7 @@ class TestCRUDWorkflow(APITestCase):
             self.assertEqual(workflow_data2, response.data[1], response.data)
             self.assertEqual(workflow_data1, response.data[0], response.data)
 
-    def test_list_workflow(self):
+    def test_list_workflow2(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data1 = {
             "name": "foowf",
@@ -152,11 +164,13 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection":{"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
-        response = self.client.post("/v1/workflows/create/", workflow_data1, format="json")
+        response = self.client.post(
+            "/v1/workflows/create/", workflow_data1, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         workflow_data2 = {
             "name": "foowf2",
@@ -167,11 +181,13 @@ class TestCRUDWorkflow(APITestCase):
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
-                    "single-selection": {"options":["foo1", "bar1"]}
+                    "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
         }
-        response = self.client.post("/v1/workflows/create/", workflow_data2, format="json")
+        response = self.client.post(
+            "/v1/workflows/create/", workflow_data2, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
         workflow_obj = Workflow.objects.filter(name=workflow_data2["name"])
@@ -190,5 +206,5 @@ class TestCRUDWorkflow(APITestCase):
         self.assertTrue(result_1.pop("id"))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
+        workflow_data1["n_tasks"] = 0
         self.assertEqual(workflow_data1, result_1, response.data)
-

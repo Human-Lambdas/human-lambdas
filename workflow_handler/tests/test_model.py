@@ -66,7 +66,7 @@ class TestModelWorkflow(TestCase):
         task = Task.objects.all()
         task.delete()
         self.assertEqual(len(Task.objects.all()), 0)
-    
+
     def test_workflow_no_description(self):
         organization = Organization(name="noDescInc")
         organization.save()

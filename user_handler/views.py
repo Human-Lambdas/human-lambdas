@@ -2,7 +2,7 @@ import logging
 
 from rest_framework.generics import (
     CreateAPIView,
-    RetrieveUpdateAPIView,
+    RetrieveUpdateDestroyAPIView,
     RetrieveAPIView,
     ListAPIView,
 )
@@ -11,9 +11,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from rest_framework.authtoken.models import Token
 
 from .models import User, Organization
-from .serializers import UserSerializer, OrganizationSerializer
+from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
 
 logger = logging.getLogger(__file__)
 
@@ -32,14 +33,37 @@ class HelloView(APIView):
         return Response(content)
 
 
-class RetrieveUpdateUserView(RetrieveUpdateAPIView):
+class RetrieveUpdateDestroyUserView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_admin:
+            organization_obj = Organization.objects.filter(user=user)
+            or_condition = Q()
+            for organization in organization_obj.all():
+                or_condition.add(Q(organization=organization), Q.OR)
+            return User.objects.filter(or_condition)
+        else:
+            return User.objects.filter(pk=user.pk)
+
     def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), name=self.request.user.name)
+        obj = get_object_or_404(
+            self.get_queryset(), id=self.kwargs["pk"]
+        )  # name=self.request.user.name)
         return obj
+
+    def destroy(self, request, *args, **kwargs):
+        if self.request.user.is_admin:
+            if request.user.pk == kwargs["pk"]:
+                return Response({"Error": "You cannot delete yourself"}, status=403)
+            else:
+                user_obj = self.get_object()
+                user_obj.delete()
+                return Response(status=204)
+        return Response(status=403)
 
 
 class ListUsersView(ListAPIView):
@@ -49,11 +73,14 @@ class ListUsersView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        organization_obj = Organization.objects.filter(user=user)
-        or_condition = Q()
-        for organization in organization_obj.all():
-            or_condition.add(Q(organization=organization), Q.OR)
-        return User.objects.filter(or_condition)
+        if user.is_admin:
+            organization_obj = Organization.objects.filter(user=user)
+            or_condition = Q()
+            for organization in organization_obj.all():
+                or_condition.add(Q(organization=organization), Q.OR)
+            return User.objects.filter(or_condition)
+        else:
+            return User.objects.filter(pk=user.pk)
 
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
@@ -72,3 +99,17 @@ class GetOrganizationView(RetrieveAPIView):
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
         return obj
+
+
+class APIAuthToken(APIView):
+    serializer_class = APITokenUserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({"token": token.key, "user_id": user.pk, "email": user.email})
