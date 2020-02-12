@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             organization_obj = Organization(name=organization_name)
             organization_obj.save()
         organization_obj.user.add(user_obj)
-        return validated_data
+        return user_obj
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get("name", instance.name)

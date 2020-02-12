@@ -5,7 +5,6 @@ from .views import (
     RegistrationView,
     HelloView,
     RetrieveUpdateDestroyUserView,
-    GetOrganizationView,
     ListUsersView,
     APIAuthToken,
 )
@@ -18,8 +17,5 @@ urlpatterns = [
     path("hello/", HelloView.as_view(), name="hello"),
     path("<int:pk>", RetrieveUpdateDestroyUserView.as_view(), name="update-user"),
     path("", ListUsersView.as_view(), name="list-users"),
-    path(
-        "organizations/<int:pk>", GetOrganizationView.as_view(), name="get-organization"
-    ),
     path("api-token/", APIAuthToken.as_view(), name="api-token"),
 ]

@@ -24,6 +24,13 @@ class RegistrationView(CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
+
 
 class HelloView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -74,17 +81,10 @@ class ListUsersView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_admin:
-            organization_obj = Organization.objects.filter(user=user)
-            or_condition = Q()
-            for organization in organization_obj.all():
-                or_condition.add(Q(organization=organization), Q.OR)
-            return User.objects.filter(or_condition)
+            organizations = Organization.objects.filter(user=user).all()
+            return User.objects.filter(organization__in=organizations)
         else:
             return User.objects.filter(pk=user.pk)
-
-    def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
-        return obj
 
 
 class GetOrganizationView(RetrieveAPIView):
@@ -97,7 +97,7 @@ class GetOrganizationView(RetrieveAPIView):
         return Organization.objects.filter(user=user)
 
     def get_object(self):
-        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["org_id"])
         return obj
 
 
@@ -113,3 +113,13 @@ class APIAuthToken(APIView):
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
         return Response({"token": token.key, "user_id": user.pk, "email": user.email})
+
+
+class ListOrganizationView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
+    serializer_class = OrganizationSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Organization.objects.filter(user=user)

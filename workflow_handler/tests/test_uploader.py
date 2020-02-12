@@ -29,6 +29,7 @@ class TestUpload(APITestCase):
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register/", registration_data)
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
@@ -54,12 +55,17 @@ class TestUpload(APITestCase):
                 }
             ],
         }
-        _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
         workflow_id = Workflow.objects.get(name="uploader").id
         with open(self.file_path, encoding="ISO-8859-1") as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/workflows/{}/upload/".format(workflow_id), data=data
+                "/v1/orgs/{0}/workflows/{1}/upload/".format(self.org_id, workflow_id),
+                data=data,
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
@@ -81,12 +87,17 @@ class TestUpload(APITestCase):
                 }
             ],
         }
-        _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
         workflow_id = Workflow.objects.get(name="uploader").id
         with open(self.larger_file_path, encoding="ISO-8859-1") as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/workflows/{}/upload/".format(workflow_id), data=data
+                "/v1/orgs/{0}/workflows/{1}/upload/".format(self.org_id, workflow_id),
+                data=data,
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
@@ -109,12 +120,17 @@ class TestUpload(APITestCase):
                 }
             ],
         }
-        _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
         workflow_id = Workflow.objects.get(name="uploader").id
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/workflows/{}/upload/".format(workflow_id), data=data
+                "/v1/orgs/{0}/workflows/{1}/upload/".format(self.org_id, workflow_id),
+                data=data,
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         tasks = Task.objects.all()
@@ -224,6 +240,7 @@ class TestUploadFail(APITestCase):
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register/", registration_data)
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
@@ -249,12 +266,17 @@ class TestUploadFail(APITestCase):
                 }
             ],
         }
-        _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
         workflow_id = Workflow.objects.get(name="uploader").id
         with open(self.file_path, encoding="ISO-8859-1") as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/workflows/{}/upload/".format(workflow_id), data=data
+                "/v1/orgs/{0}/workflows/{1}/upload/".format(self.org_id, workflow_id),
+                data=data,
             )
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.content
