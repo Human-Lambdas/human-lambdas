@@ -195,3 +195,12 @@ class TestTasks(APITestCase):
         self.assertEqual(
             response.status_code, status.HTTP_301_MOVED_PERMANENTLY, response.content
         )
+
+    def test_workflow_list_task_count(self):
+        response = self.client.get("/v1/workflows/")
+        for data, expected in zip(response.data, [3, 3]):
+            self.assertEqual(data["n_tasks"], expected)
+
+    def test_workflow_retrieve_task_count(self):
+        response = self.client.get("/v1/workflows/{}".format(self.workflow_id))
+        self.assertEqual(response.data["n_tasks"], 3)
