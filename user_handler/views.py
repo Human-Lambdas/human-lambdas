@@ -127,7 +127,7 @@ class SendInviteView(APIView):
         if invite_org is None:
             # ensure user is inviting to an organization they belong to
             return Response(
-                {"message": "You are not a member of this organization"}, status=401
+                {"error": "You are not a member of this organization"}, status=401
             )
 
         invalid_email_list = []
@@ -162,27 +162,24 @@ class SendInviteView(APIView):
                         "invite_link": "HL-URL/{0}".format(token),
                     }
 
-                    plain_text = get_template("invite.txt")
+                    #plain_text = get_template("invite.txt")
                     htmly = get_template("invite.html")
 
-                    text_content = plain_text.render(render_info)
+                    #text_content = plain_text.render(render_info)
                     html_content = htmly.render(render_info)
 
-                    print(text_content)
+                    #print(text_content)
 
                     invite.save()
 
-                    if not os.environ.get('DEBUG'):
+                    if True: #not os.environ.get('DEBUG'):
                         message = Mail(
                             from_email='no-reply@humanlambdas.com',
-                            to_emails='sean@humanlambdas.com',
+                            to_emails=email,
                             subject='Human Lambdas workflow invitation',
                             html_content=html_content)
-                        try:
-                            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-                            sg.send(message)
-                        except Exception as e:
-                            print(e.message)
+                        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                        sg.send(message)
                 else:
                     already_added_email_list.append(email)
             else:
@@ -202,12 +199,12 @@ class SendInviteView(APIView):
                 """so does not need to be added again.""".format(
                     email
                 )
-            return Response({"message": response_text}, status=400)
+            return Response({"error": response_text}, status=400)
         if len(invalid_email_list) > 0:
             response_text = "error:"
             for email in invalid_email_list:
                 response_text += " {0} is an invalid email.".format(email)
-            return Response({"message": response_text}, status=400)
+            return Response({"error": response_text}, status=400)
         if len(already_added_email_list) > 0:
             response_text = "error:"
             for email in already_added_email_list:
@@ -215,8 +212,7 @@ class SendInviteView(APIView):
                 """so does not need to be added again.""".format(
                     email
                 )
-            return Response({"message": response_text}, status=400)
-        return Response(status=500)
+            return Response({"error": response_text}, status=400)
 
 
 class InvitationView(APIView):
@@ -228,10 +224,10 @@ class InvitationView(APIView):
         return Organization.objects.filter(user=user)
 
     def get(self, request, *args, **kwargs):
-        invite = Invitation.objects.filter(token=self.kwargs["pk"])
+        invite = Invitation.objects.filter(token=self.kwargs["invite_token"])
         if invite.first() is None:
             return Response(
-                {"message": "no invitation with this token exists"}, status=404
+                {"error": "no invitation with this token exists"}, status=404
             )
         else:
             invitation_email, invitation_org = (
@@ -247,10 +243,10 @@ class InvitationView(APIView):
             )
 
     def post(self, request, *args, **kwargs):
-        invite = Invitation.objects.filter(token=self.kwargs["pk"]).first()
+        invite = Invitation.objects.filter(token=self.kwargs["invite_token"]).first()
         if invite is None:
             return Response(
-                {"message": "no invitation with this token exists"}, status=404
+                {"error": "no invitation with this token exists"}, status=404
             )
         else:
             invitation_org = invite.organization
@@ -263,7 +259,6 @@ class InvitationView(APIView):
                 user = User.objects.filter(email=invite.email).first()
                 invitation_org.user.add(user)
                 return Response(status=200)
-        return Response(status=500)
 
 
 class APIAuthToken(APIView):
