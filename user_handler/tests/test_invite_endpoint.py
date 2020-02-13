@@ -38,7 +38,7 @@ class TestInvite(APITestCase):
         response = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "sean@humanlambdas.com,bernat@humanlambdas.com,james@humanlambdas.com",
+                "emails": "lambda@sigma.com,alpha@beta.com,gamma@delta.com",
                 "organization": "fooinc",
             },
         )
@@ -49,7 +49,7 @@ class TestInvite(APITestCase):
         response = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "sean@humanlambdas.com     ,bernat@humanlambdas.com,    james@humanlambdas.com    ",
+                "emails": "lambda@sigma.com     ,alpha@beta.com,    gamma@delta.com    ",
                 "organization": "fooinc",
             },
         )
@@ -60,7 +60,7 @@ class TestInvite(APITestCase):
         response = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "sean@humanlambdas.com,bernat@humanlambdas.com,james@humanlambdas.com,bernat@humanlambdas.com",
+                "emails": "lambda@sigma.com,alpha@beta.com,gamma@delta.com,alpha@beta.com",
                 "organization": "fooinc",
             },
         )
@@ -70,7 +70,7 @@ class TestInvite(APITestCase):
         response = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "sean@humanlambdas.com,bernat@humanlambdas.com,james@humanlambdas.com",
+                "emails": "lambda@sigma.com,alpha@beta.com,gamma@delta.com",
                 "organization": "fooinc",
             },
         )
@@ -81,7 +81,7 @@ class TestInvite(APITestCase):
         response = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "sean@humanlambdas.com,foo@bar.com,james@humanlambdas.com",
+                "emails": "lambda@sigma.com,foo@bar.com,gamma@delta.com",
                 "organization": "fooinc",
             },
         )
@@ -92,7 +92,7 @@ class TestInvite(APITestCase):
         response = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "sean@humanlambdas.com,bernat@bernat,james.com",
+                "emails": "lambda@sigma.com,foo@foo,bar.com",
                 "organization": "fooinc",
             },
         )
@@ -103,7 +103,7 @@ class TestInvite(APITestCase):
         response = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "sean@humanlambdas.com,bernat@bernat,james.com,foo@bar.com",
+                "emails": "lambda@sigma.com,foo@foo,bar.com,foo@bar.com",
                 "organization": "fooinc",
             },
         )

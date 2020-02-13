@@ -46,7 +46,7 @@ class TestInvite(APITestCase):
         _ = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "{0},bernat@humanlambdas.com,james@humanlambdas.com".format(
+                "emails": "{0},alpha@beta.com,gamma@delta.com".format(
                     recipient
                 ),
                 "organization": org,
@@ -69,11 +69,11 @@ class TestInvite(APITestCase):
 
     def test_invitation_post_call(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        org, recipient = "fooinc", "sean@humanlambdas.com"
+        org, recipient = "fooinc", "lambda@signma.com"
         _ = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "{0},bernat@humanlambdas.com,james@humanlambdas.com".format(
+                "emails": "{0},alpha@beta.com,gamma@delta.com".format(
                     recipient
                 ),
                 "organization": org,
@@ -81,7 +81,7 @@ class TestInvite(APITestCase):
         )
         response = self.client.post(
             "/v1/users/invitation/{0}".format(
-                hash(str("sean@humanlambdas.com" + "fooinc"))
+                hash(str(recipient + org))
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
