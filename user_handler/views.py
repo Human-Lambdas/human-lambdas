@@ -162,13 +162,13 @@ class SendInviteView(APIView):
                         "invite_link": "HL-URL/{0}".format(token),
                     }
 
-                    #plain_text = get_template("invite.txt")
+                    # plain_text = get_template("invite.txt")
                     htmly = get_template("invite.html")
 
-                    #text_content = plain_text.render(render_info)
+                    # text_content = plain_text.render(render_info)
                     html_content = htmly.render(render_info)
 
-                    #print(text_content)
+                    # print(text_content)
 
                     invite.save()
 
