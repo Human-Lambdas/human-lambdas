@@ -53,7 +53,7 @@ You will also want to create a superuser so that you can access the django admin
 To create a superuser you run the following command in the container:
 
 ```
-python manager.py createsuperuser
+python manage.py createsuperuser
 ```
 and it will ask for your user credentials and then set up the user account.  
 
