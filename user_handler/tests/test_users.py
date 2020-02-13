@@ -16,18 +16,13 @@ class TestUsers(APITestCase):
         self.organization_name = "fooinc"
         self.preset_user_password = "fooword"
 
-        user = User(
-            name=self.preset_user_name, email=self.preset_user_email, is_admin=True
-        )
+        user = User(name=self.preset_user_name, email=self.preset_user_email)
         user.set_password(self.preset_user_password)
         user.save()
         organization = Organization(name=self.organization_name)
         organization.save()
         self.org_id = organization.id
-        organization.user.add(user)
-        user = User(name="wrong_username", email="wrong@bar.com", is_admin=True)
-        user.set_password("wrong_user")
-        user.save()
+        organization.add_admin(user)
 
     def test_user_data(self):
         user = User.objects.get(name=self.preset_user_name)
@@ -68,7 +63,7 @@ class TestAPIRegistration(APITestCase):
 
 class TestAPIjwt(APITestCase):
     def setUp(self):
-        user = User(name="foo", email="foo@bar.com", is_admin=True)
+        user = User(name="foo", email="foo@bar.com")
         user.set_password("fooword")
         user.save()
         response = self.client.post(
@@ -94,7 +89,7 @@ class TestAPIUserUpdate(APITestCase):
     def setUp(self):
         self.preset_password = "fooword"
         self.preset_changed_password = "barword"
-        user = User(name="foo", email="foo@bar.com", is_admin=True)
+        user = User(name="foo", email="foo@bar.com")
         user.set_password(self.preset_password)
         user.save()
         response = self.client.post(
@@ -119,13 +114,13 @@ class TestAPIUserUpdate(APITestCase):
 class TestListUsers(APITestCase):
     def setUp(self):
         self.user_name = "foo"
-        user = User(name=self.user_name, email="foo@bar.com", is_admin=True)
+        user = User(name=self.user_name, email="foo@bar.com")
         user.set_password("foopwd")
         user.save()
         self.organization_name = "fooinc"
         organization = Organization(name=self.organization_name)
         organization.save()
-        organization.user.add(user)
+        organization.add_admin(user)
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "foopwd"}
         )
@@ -134,23 +129,34 @@ class TestListUsers(APITestCase):
 
         self.worker1_name = "peter"
         self.worker2_name = "paul"
-        worker1 = User(name=self.worker1_name, email="worker1@bar.com", is_admin=False)
+        worker1 = User(name=self.worker1_name, email="worker1@bar.com")
         worker1.set_password("pwd")
         worker1.save()
         organization.user.add(worker1)
+        self.org_id1 = organization.pk
 
-        worker2 = User(name=self.worker1_name, email="worker2@bar.com", is_admin=False)
+        worker2 = User(name=self.worker1_name, email="worker2@bar.com")
         worker2.set_password("pwd")
         worker2.save()
         organization_other = Organization(name="otherorg")
         organization_other.save()
         organization_other.user.add(worker2)
+        self.org_id2 = organization.pk
 
-    def test_list_user(self):
+    def test_list_user1(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/")
+        response = self.client.get("/v1/orgs/{}/users/".format(self.org_id1))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 2)
         self.assertTrue(self.user_name in [i["name"] for i in response.data])
         self.assertTrue(self.worker1_name in [i["name"] for i in response.data])
         self.assertTrue(self.worker2_name not in [i["name"] for i in response.data])
+
+    # def test_list_user2(self):
+    #     self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+    #     response = self.client.get("/v1/orgs/{}/users/".format(self.org_id1))
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+    #     self.assertEqual(len(response.data), 2)
+    #     self.assertTrue(self.user_name in [i["name"] for i in response.data])
+    #     self.assertTrue(self.worker1_name in [i["name"] for i in response.data])
+    #     self.assertTrue(self.worker2_name not in [i["name"] for i in response.data])

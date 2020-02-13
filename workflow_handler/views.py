@@ -18,6 +18,21 @@ class CreateWorkflowView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = WorkflowSerializer
 
+    def create(self, request, *args, **kwargs):
+        if (
+            not Organization.objects.filter(pk=kwargs["org_id"])
+            .filter(admin=request.user)
+            .exists()
+        ):
+            return Response(
+                {"error": "You do not have permission to create workflow"}, status=403
+            )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
+
 
 class ListWorkflowView(ListAPIView):
     permission_classes = (IsAuthenticated,)
@@ -62,6 +77,20 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
         workflow = self.serializer_class(obj).data
         return Response(workflow)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        if instance.organization.admin.filter(pk=request.user.pk).exists():
+            serializer = self.get_serializer(
+                instance, data=request.data, partial=partial
+            )
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        return Response(
+            {"error": "You do not have permission to change workflow"}, status=403
+        )
 
 
 def decode_utf8(input_iterator):

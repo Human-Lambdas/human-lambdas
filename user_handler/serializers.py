@@ -13,11 +13,22 @@ class UserSerializer(serializers.ModelSerializer):
     organization = serializers.CharField(
         max_length=128, allow_blank=False, write_only=True
     )
+    is_admin = serializers.BooleanField(write_only=True)
 
     class Meta:
         model = User
-        fields = ["name", "password", "email", "organization", "is_admin"]
-        extra_kwargs = {"password": {"write_only": True}}
+        fields = [
+            "name",
+            "password",
+            "email",
+            "organization",
+            "is_admin",
+            "current_organization_id",
+        ]
+        extra_kwargs = {
+            "password": {"write_only": True},
+            "current_organization_id": {"read_only": True},
+        }
 
     def create(self, validated_data):
         name = validated_data["name"]
@@ -25,7 +36,7 @@ class UserSerializer(serializers.ModelSerializer):
         email = validated_data["email"]
         is_admin = validated_data["is_admin"]
         organization_name = validated_data["organization"]
-        user_obj = User(name=name, email=email, is_admin=is_admin)
+        user_obj = User(name=name, email=email)
         user_obj.set_password(password)
         user_obj.save()
         organization_obj = Organization.objects.filter(name=organization_name)
@@ -35,6 +46,9 @@ class UserSerializer(serializers.ModelSerializer):
             organization_obj = Organization(name=organization_name)
             organization_obj.save()
         organization_obj.user.add(user_obj)
+        if is_admin:
+            organization_obj.admin.add(user_obj)
+        user_obj.current_organization_id = organization_obj.pk
         return user_obj
 
     def update(self, instance, validated_data):
@@ -43,16 +57,10 @@ class UserSerializer(serializers.ModelSerializer):
         password = validated_data.get("password")
         if password:
             instance.set_password(password)
-        if self.context["request"].user.pk != instance.pk:
-            instance.is_admin = validated_data.get("is_admin", instance.is_admin)
-        # currently we do now allow changes of organization
         return instance
 
 
 class APITokenUserSerializer(serializers.Serializer):
-    # class Meta:
-    #     model = User
-    #     fields = ["password", "email"]
     email = serializers.CharField()
     password = serializers.CharField()
 

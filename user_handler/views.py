@@ -2,11 +2,11 @@ import logging
 
 from rest_framework.generics import (
     CreateAPIView,
-    RetrieveUpdateDestroyAPIView,
+    RetrieveUpdateAPIView,
     RetrieveAPIView,
     ListAPIView,
+    RetrieveUpdateDestroyAPIView,
 )
-from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -40,49 +40,92 @@ class HelloView(APIView):
         return Response(content)
 
 
-class RetrieveUpdateDestroyUserView(RetrieveUpdateDestroyAPIView):
+class RetrieveUpdateUserView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_admin:
-            organization_obj = Organization.objects.filter(user=user)
-            or_condition = Q()
-            for organization in organization_obj.all():
-                or_condition.add(Q(organization=organization), Q.OR)
-            return User.objects.filter(or_condition)
-        else:
-            return User.objects.filter(pk=user.pk)
+        return User.objects.filter(pk=user.pk)
 
     def get_object(self):
-        obj = get_object_or_404(
-            self.get_queryset(), id=self.kwargs["pk"]
-        )  # name=self.request.user.name)
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
         return obj
 
+
+class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        organization = (
+            Organization.objects.filter(pk=self.kwargs["org_id"])
+            .filter(admin=self.request.user)
+            .first()
+        )
+        return User.objects.filter(organization=organization)
+
+    def get_object(self):
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["user_id"])
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        user = self.get_object()
+        if request.user == user:
+            return Response({"Error": "You cannot change your own role"}, status=403)
+        else:
+            org = Organization.objects.get(pk=kwargs["org_id"])
+            try:
+                if request.data["admin"]:
+                    org.admin.add(user)
+                    return Response(
+                        {"message": "Users role was changed to admin"}, status=200
+                    )
+                else:
+                    org.admin.remove(user)
+                    return Response(
+                        {"message": "Users role was changed to worker"}, status=200
+                    )
+            except KeyError:
+                return Response(
+                    {"error": "payload should have the boolean field 'admin'"},
+                    status=400,
+                )
+
     def destroy(self, request, *args, **kwargs):
-        if self.request.user.is_admin:
-            if request.user.pk == kwargs["pk"]:
-                return Response({"Error": "You cannot delete yourself"}, status=403)
+        user = self.get_object()
+        if request.user == user:
+            return Response({"Error": "You cannot delete yourself"}, status=403)
+        else:
+            all_orgs_member = Organization.objects.filter(user=user)
+            if all_orgs_member.count() == 1:
+                user.delete()
+                return Response({"message": "User was deleted"}, status=204)
             else:
-                user_obj = self.get_object()
-                user_obj.delete()
-                return Response(status=204)
-        return Response(status=403)
+                org = all_orgs_member.objects.get(pk=kwargs["org_id"])
+                org.user.remove(user)
+                org.admin.remove(user)
+                return Response(
+                    {"message": "User was deleted from organization"}, status=204
+                )
 
 
-class ListUsersView(ListAPIView):
+class ListOrgUsersView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_admin:
-            organizations = Organization.objects.filter(user=user).all()
-            return User.objects.filter(organization__in=organizations)
+        organization = (
+            Organization.objects.filter(pk=self.kwargs["org_id"])
+            .filter(admin=user)
+            .first()
+        )
+        if organization:
+            return User.objects.filter(organization=organization)
         else:
             return User.objects.filter(pk=user.pk)
 

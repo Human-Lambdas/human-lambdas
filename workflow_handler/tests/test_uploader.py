@@ -169,12 +169,12 @@ class TestCSV2Task(TestCase):
         self.test_csv_file_duplicate_columns = StringIO(
             self.test_csv_string_duplicate_columns
         )
-        user = User(name="foo", email="foo@bar.com", is_admin=True)
+        user = User(name="foo", email="foo@bar.com")
         user.set_password("123")
         user.save()
         org = Organization(name="fooInc")
         org.save()
-        org.user.add(user)
+        org.add_admin(user)
         self.sample_workflow = Workflow(
             name="example",
             description="description",
