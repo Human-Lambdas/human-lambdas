@@ -53,7 +53,7 @@ You will also want to create a superuser so that you can access the django admin
 To create a superuser you run the following command in the container:
 
 ```
-python manager.py createsuperuser
+python manage.py createsuperuser
 ```
 and it will ask for your user credentials and then set up the user account.  
 
@@ -188,3 +188,4 @@ Another way is to retrieve a specific task and that is by doing a `GET` to the e
 ## List Organizations
 
 To get a list of the organization you can do a `GET` call to `/orgs/`.
+Another way is to retrieve a specific task and that is by doing a `GET` to the endpoint `/workflows/<workflow-id>/tasks/<task-id>`, if you do a `PATCH` to this endpoint you will be able to update the task. You will only be able to update the output.
