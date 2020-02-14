@@ -95,7 +95,7 @@ And it will respond with the `access` token:
 
 ## Create Workflow
 
-The endpoint for creating a workflow is `/workflows/create` and the data it requires is the following: 
+The endpoint for creating a workflow is `/orgs/<org-id>/workflows/create` and the data it requires is the following: 
 
 ```
 {
@@ -160,11 +160,11 @@ Below are the different output sections formats:
 
 ## List Workflows
 
-To get a list of the workflows in your organization you can do a `GET` call to `/workflows/`.
+To get a list of the workflows in your organization you can do a `GET` call to `/orgs/<org-id>/workflows/`.
 
 ## Retrieve and Update Workflow
 
-To retrieve a specific workflow you can do so by calling `GET` to `/workflows/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
+To retrieve a specific workflow you can do so by calling `GET` to `/orgs/<org-id>/workflows/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
 ```
 {"description": "This is the new updated description of an existing workflow"}
 ```
@@ -172,15 +172,20 @@ Remember you will only have permission to retrieve and update the workflows whic
 
 ## Upload CSV files
 
-To upload CSV files you have to `POST` a message including the file to `/workflows/<workflow-id>/upload/`
+To upload CSV files you have to `POST` a message including the file to `/orgs/<org-id>/workflows/<workflow-id>/upload/`
 
 
 ## Get list of Tasks
 
-To get the list of tasks in a given workflow you should do call a `GET` to the endpoint `/workflows/<workflow-id>/tasks/`
+To get the list of tasks in a given workflow you should do call a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/`
 
 ## Retrieve and UpdateTask
 
-To retrieve a task you can either call a `GET` to the endpoint `/workflows/<workflow-id>/tasks/next` and this will give a incomplete task. 
+To retrieve a task you can either call a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/next` and this will give a incomplete task. 
 
+Another way is to retrieve a specific task and that is by doing a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/<task-id>`, if you do a `PATCH` to this endpoint you will be able to update the task. You will only be able to update the output.
+
+## List Organizations
+
+To get a list of the organization you can do a `GET` call to `/orgs/`.
 Another way is to retrieve a specific task and that is by doing a `GET` to the endpoint `/workflows/<workflow-id>/tasks/<task-id>`, if you do a `PATCH` to this endpoint you will be able to update the task. You will only be able to update the output.

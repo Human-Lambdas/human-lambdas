@@ -18,6 +18,21 @@ class CreateWorkflowView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = WorkflowSerializer
 
+    def create(self, request, *args, **kwargs):
+        if (
+            not Organization.objects.filter(pk=kwargs["org_id"])
+            .filter(admin=request.user)
+            .exists()
+        ):
+            return Response(
+                {"error": "You do not have permission to create workflow"}, status=403
+            )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
+
 
 class ListWorkflowView(ListAPIView):
     permission_classes = (IsAuthenticated,)
@@ -27,7 +42,9 @@ class ListWorkflowView(ListAPIView):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
         return Workflow.objects.filter(
-            Q(disabled=False) & Q(organization__in=organizations)
+            Q(disabled=False)
+            & Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
         )
 
     def list(self, request, *args, **kwargs):
@@ -47,7 +64,10 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     def get_queryset(self):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
-        return Workflow.objects.filter(organization__in=organizations)
+        return Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
 
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
@@ -57,6 +77,20 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
         workflow = self.serializer_class(obj).data
         return Response(workflow)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        if instance.organization.admin.filter(pk=request.user.pk).exists():
+            serializer = self.get_serializer(
+                instance, data=request.data, partial=partial
+            )
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        return Response(
+            {"error": "You do not have permission to change workflow"}, status=403
+        )
 
 
 def decode_utf8(input_iterator):
@@ -68,11 +102,13 @@ class FileUploadView(APIView):
 
     parser_classes = [MultiPartParser]
 
-    def post(self, request, workflow_id, format=None):
+    def post(self, request, *args, **kwargs):
         file_obj = request.data["file"]
-        workflow = Workflow.objects.get(id=workflow_id)
+        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         if not workflow:
-            raise KeyError("No workflow found for id %s not found", workflow_id)
+            raise KeyError(
+                "No workflow found for id %s not found", kwargs["workflow_id"]
+            )
         content = decode_utf8(file_obj)  # .read()
         try:
             process_csv(content, workflow=workflow)
@@ -87,18 +123,17 @@ class ListTaskView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        organization_obj = Organization.objects.filter(user=user)
-        or_condition = Q()
-        for organization in organization_obj.all():
-            or_condition.add(Q(organization=organization), Q.OR)
-        workflow_obj = Workflow.objects.filter(or_condition)
-        or_condition = Q()
-        for workflow in workflow_obj.all():
-            or_condition.add(Q(workflow=workflow), Q.OR)
-        return Task.objects.filter(or_condition)
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
+        )
 
-    def list(self, request, workflow_id, format=None):
-        workflow = Workflow.objects.get(id=workflow_id)
+    def list(self, request, *args, **kwargs):
+        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         obj = get_list_or_404(self.get_queryset(), workflow=workflow)
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
@@ -114,15 +149,14 @@ class RUDTaskView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        organization_obj = Organization.objects.filter(user=user)
-        or_condition = Q()
-        for organization in organization_obj.all():
-            or_condition.add(Q(organization=organization), Q.OR)
-        workflow_obj = Workflow.objects.filter(or_condition)
-        or_condition = Q()
-        for workflow in workflow_obj.all():
-            or_condition.add(Q(workflow=workflow), Q.OR)
-        return Task.objects.filter(or_condition)
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
+        )
 
     def get_object(self):
         workflow = Workflow.objects.get(id=self.kwargs["workflow_id"])
@@ -150,18 +184,17 @@ class NextTaskView(APIView):
 
     def get_queryset(self):
         user = self.request.user
-        organization_obj = Organization.objects.filter(user=user)
-        or_condition = Q()
-        for organization in organization_obj.all():
-            or_condition.add(Q(organization=organization), Q.OR)
-        workflow_obj = Workflow.objects.filter(or_condition)
-        or_condition = Q()
-        for workflow in workflow_obj.all():
-            or_condition.add(Q(workflow=workflow), Q.OR)
-        return Task.objects.filter(or_condition)
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
+        )
 
-    def get(self, request, workflow_id):
-        workflow = Workflow.objects.get(id=workflow_id)
+    def get(self, request, *args, **kwargs):
+        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.get_queryset()
         obj = queryset.filter(Q(status="pending") & Q(workflow=workflow)).first()
         task = self.serializer_class(obj).data
@@ -184,15 +217,14 @@ class CreateTaskView(CreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        organization_obj = Organization.objects.filter(user=user)
-        or_condition = Q()
-        for organization in organization_obj.all():
-            or_condition.add(Q(organization=organization), Q.OR)
-        workflow_obj = Workflow.objects.filter(or_condition)
-        or_condition = Q()
-        for workflow in workflow_obj.all():
-            or_condition.add(Q(workflow=workflow), Q.OR)
-        return Task.objects.filter(or_condition)
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
+        )
 
     def post(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
@@ -241,18 +273,17 @@ class GetCompletedTaskView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        organization_obj = Organization.objects.filter(user=user)
-        or_condition = Q()
-        for organization in organization_obj.all():
-            or_condition.add(Q(organization=organization), Q.OR)
-        workflow_obj = Workflow.objects.filter(or_condition)
-        or_condition = Q()
-        for workflow in workflow_obj.all():
-            or_condition.add(Q(workflow=workflow), Q.OR)
-        return Task.objects.filter(or_condition)
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
+        )
 
-    def list(self, request, workflow_id, format=None):
-        workflow = Workflow.objects.get(id=workflow_id)
+    def list(self, request, *args, **kwargs):
+        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.filter_queryset(self.get_queryset())
         queryset.filter(workflow=workflow).filter(status="completed")
         page = self.paginate_queryset(queryset)

@@ -1,7 +1,8 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from ..models import Task
+from workflow_handler.models import Task
+from user_handler.models import Organization
 
 
 class TestTaskCreation(APITestCase):
@@ -14,6 +15,7 @@ class TestTaskCreation(APITestCase):
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register/", registration_data)
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
@@ -48,7 +50,9 @@ class TestTaskCreation(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/workflows/create/", workflow_data, format="json"
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            workflow_data,
+            format="json",
         )
         self.workflow_id = response.data["id"]
 
@@ -62,7 +66,9 @@ class TestTaskCreation(APITestCase):
         }
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
-            "/v1/workflows/{}/tasks/create/".format(self.workflow_id),
+            "/v1/orgs/{}/workflows/{}/tasks/create/".format(
+                self.org_id, self.workflow_id
+            ),
             task_data,
             format="json",
         )

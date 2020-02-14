@@ -4,9 +4,8 @@ from rest_framework_simplejwt import views as jwt_views
 from .views import (
     RegistrationView,
     HelloView,
-    RetrieveUpdateDestroyUserView,
-    GetOrganizationView,
-    ListUsersView,
+    RetrieveUpdateUserView,
+    # ListUsersView,
     APIAuthToken,
 )
 
@@ -16,10 +15,6 @@ urlpatterns = [
     path("token/", jwt_views.TokenObtainPairView.as_view(), name="token-obtain-pair"),
     path("token/refresh/", jwt_views.TokenRefreshView.as_view(), name="token-refresh"),
     path("hello/", HelloView.as_view(), name="hello"),
-    path("<int:pk>", RetrieveUpdateDestroyUserView.as_view(), name="update-user"),
-    path("", ListUsersView.as_view(), name="list-users"),
-    path(
-        "organizations/<int:pk>", GetOrganizationView.as_view(), name="get-organization"
-    ),
+    path("<int:pk>", RetrieveUpdateUserView.as_view(), name="update-user"),
     path("api-token/", APIAuthToken.as_view(), name="api-token"),
 ]
