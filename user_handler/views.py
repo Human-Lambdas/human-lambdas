@@ -53,6 +53,13 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["pk"])
         return obj
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        is_admin = Organization.objects.filter(pk=instance.current_organization_id).filter(admin=instance).exists()
+        data = serializer.data
+        data["is_admin"] = is_admin
+        return Response(data)
 
 class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)

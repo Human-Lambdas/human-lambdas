@@ -61,6 +61,30 @@ class TestAPIRegistration(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
+class TestAPIUserCRUD(APITestCase):
+    def setUp(self):
+        response = self.client.post(
+            "/v1/users/register/",
+            {
+                "email": "foo@bar.com",
+                "password": "fooword",
+                "name": "foo",
+                "is_admin": True,
+                "organization": "barinc",
+            },
+        )
+        self.user_id = response.data["id"]
+        response = self.client.post(
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+        )
+        self.access_token = response.data["access"]
+
+    def test_retrieve_user(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/v1/users/{}".format(self.user_id))
+        self.assertTrue(response.data["is_admin"])
+
+
 class TestAPIjwt(APITestCase):
     def setUp(self):
         user = User(name="foo", email="foo@bar.com")

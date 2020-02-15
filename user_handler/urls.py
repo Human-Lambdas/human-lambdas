@@ -5,7 +5,6 @@ from .views import (
     RegistrationView,
     HelloView,
     RetrieveUpdateUserView,
-    # ListUsersView,
     APIAuthToken,
 )
 
