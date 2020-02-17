@@ -6,6 +6,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from workflow_handler.csv2task import process_csv
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import LimitOffsetPagination
@@ -196,14 +197,19 @@ class NextTaskView(APIView):
     def get(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.get_queryset()
-        obj = queryset.filter(Q(status="pending") & Q(workflow=workflow)).first()
-        task = self.serializer_class(obj).data
-        if obj:
-            obj.status = "assigned"
-            obj.save()
-            return Response(task)
-        else:
-            return Response(status=204)
+        with transaction.atomic():
+            obj = (
+                queryset.select_for_update()
+                .filter(Q(status="pending") & Q(workflow=workflow))
+                .first()
+            )
+            task = self.serializer_class(obj).data
+            if obj:
+                obj.status = "assigned"
+                obj.save()
+                return Response(task)
+            else:
+                return Response(status=204)
 
 
 class CreateTaskView(CreateAPIView):
