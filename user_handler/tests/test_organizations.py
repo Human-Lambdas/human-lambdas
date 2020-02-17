@@ -48,6 +48,7 @@ class TestOrganizations(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["name"], self.organization_name)
+        self.assertIsNotNone(response.data[0].get("id"))
 
     def test_get_organization_wrong_user(self):
         response = self.client.post(
