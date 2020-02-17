@@ -93,4 +93,4 @@ class APITokenUserSerializer(serializers.Serializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ["name", "user"]
+        fields = ["name", "user", "id"]
