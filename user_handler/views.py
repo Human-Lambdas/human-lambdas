@@ -126,9 +126,7 @@ class SendInviteView(APIView):
         )
         if invite_org is None:
             # ensure user is inviting to an organization they belong to
-            return Response(
-                {"error": "You are not a member of this organization"}, status=401
-            )
+            return Response({"error": "You are not a member of this organization"}, status=401)
 
         invalid_email_list = []
         already_added_email_list = []
@@ -148,9 +146,14 @@ class SendInviteView(APIView):
                     naive_expiry_date = datetime.datetime.now() + datetime.timedelta(14)
                     aware_expiry_date = make_aware(naive_expiry_date)
 
+                    inviting_org = Organization.objects.filter(name=request.data["organization"]).first()
+
+                    if inviting_org is None:
+                        return Response({"error": "the organization you are inviting to does not exist"}, status=400)
+
                     invite = Invitation(
                         email=email,
-                        organization=invite_org.first(),
+                        organization=inviting_org,
                         invited_by=request.user,
                         token=token,
                         expires_at=aware_expiry_date,
@@ -195,8 +198,7 @@ class SendInviteView(APIView):
             for email in invalid_email_list:
                 response_text += " {0} is an invalid email.".format(email)
             for email in already_added_email_list:
-                response_text += """ {0} is already a part of the organization, and """
-                """so does not need to be added again.""".format(
+                response_text += """ {0} is already a part of the organization, and so does not need to be added again.""".format(
                     email
                 )
             return Response({"error": response_text}, status=400)
@@ -208,8 +210,7 @@ class SendInviteView(APIView):
         if len(already_added_email_list) > 0:
             response_text = "error:"
             for email in already_added_email_list:
-                response_text += """ {0} is already a part of the organization, and """
-                """so does not need to be added again.""".format(
+                response_text += """ {0} is already a part of the organization, and so does not need to be added again.""".format(
                     email
                 )
             return Response({"error": response_text}, status=400)
@@ -239,7 +240,7 @@ class InvitationView(APIView):
                     "invitation_email": invitation_email,
                     "invitation_org": invitation_org,
                 },
-                status=200,
+                status=200
             )
 
     def post(self, request, *args, **kwargs):
@@ -251,14 +252,15 @@ class InvitationView(APIView):
         else:
             invitation_org = invite.organization
             if User.objects.filter(email=invite.email).first() is None:
-                new_user = User(email=invite.email)
+                new_user = User(email=invite.email, name=request.data["name"])
+                new_user.set_password(request.data["password"])
                 new_user.save()
                 invitation_org.user.add(new_user)
-                return Response(status=200)
+                return Response({"message": "Your account has been created!"}, status=200)
             else:
                 user = User.objects.filter(email=invite.email).first()
                 invitation_org.user.add(user)
-                return Response(status=200)
+                return Response({"message": "Success!"}, status=200)
 
 
 class APIAuthToken(APIView):
