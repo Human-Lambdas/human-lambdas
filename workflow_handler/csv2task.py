@@ -18,7 +18,7 @@ def process_csv(csv_file, workflow):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
     validate_keys(title_row, workflow)
-    task_counter = 0
+    task_counter = workflow.n_tasks
     for ic, row in enumerate(dataset):
         if row == title_row:
             continue
