@@ -174,9 +174,6 @@ class RUDTaskView(RetrieveUpdateAPIView):
 
     def perform_update(self, serializer, *args, **kwargs):
         serializer.save(owner=self.request.user)
-        workflow = Workflow.objects.get(id=self.kwargs["workflow_id"])
-        workflow.n_tasks -= 1
-        workflow.save()
 
 
 class NextTaskView(APIView):
@@ -203,10 +200,12 @@ class NextTaskView(APIView):
                 .filter(Q(status="pending") & Q(workflow=workflow))
                 .first()
             )
-            task = self.serializer_class(obj).data
             if obj:
+                task = self.serializer_class(obj).data
                 obj.status = "assigned"
                 obj.save()
+                workflow.n_tasks -= 1
+                workflow.save()
                 return Response(task)
             else:
                 return Response(status=204)
@@ -229,7 +228,7 @@ class CreateTaskView(CreateAPIView):
             & Q(organization__pk=self.kwargs["org_id"])
         )
         return Task.objects.filter(
-            Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
+            Q(workflow__in=workflows) & Q(workflow__id=self.kwargs["workflow_id"])
         )
 
     def post(self, request, *args, **kwargs):
