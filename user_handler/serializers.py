@@ -24,9 +24,11 @@ class UserSerializer(serializers.ModelSerializer):
             "organization",
             "is_admin",
             "current_organization_id",
+            "id",
         ]
         extra_kwargs = {
             "password": {"write_only": True},
+            "id": {"read_only": True},
             "current_organization_id": {"read_only": True},
         }
 
@@ -49,6 +51,7 @@ class UserSerializer(serializers.ModelSerializer):
         if is_admin:
             organization_obj.admin.add(user_obj)
         user_obj.current_organization_id = organization_obj.pk
+        user_obj.save()
         return user_obj
 
     def update(self, instance, validated_data):
