@@ -19,7 +19,7 @@ jobs:
         image: postgres:10  
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ""
+          POSTGRES_PASSWORD: "test"
           POSTGRES_DB: postgres
         ports:
         - 5432:5432
@@ -47,7 +47,7 @@ jobs:
         python manage.py test
       env:
         POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: ""
+        POSTGRES_PASSWORD: "test"
         POSTGRES_DB: postgres
         POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
         POSTGRES_HOST: localhost
