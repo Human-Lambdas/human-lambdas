@@ -10,7 +10,7 @@ from rest_framework.generics import (
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.authtoken.models import Token
 
 from .models import User, Organization
@@ -140,6 +140,19 @@ class ListOrgUsersView(ListAPIView):
             return User.objects.filter(organization=organization)
         else:
             return User.objects.filter(pk=user.pk)
+
+    def list(self, request, *args, **kwargs):
+        obj = get_list_or_404(self.get_queryset())
+        serializer = self.serializer_class(obj, many=True)
+        result = []
+        for user in serializer.data:
+            user["is_admin"] = (
+                Organization.objects.filter(pk=user["current_organization_id"])
+                .filter(admin__pk=user["id"])
+                .exists()
+            )
+            result.append(user)
+        return Response(result)
 
 
 class GetOrganizationView(RetrieveAPIView):

@@ -15,6 +15,8 @@ class TestUserRoles(APITestCase):
         organization.save()
         organization.add_admin(user)
         self.org_id = organization.pk
+        user.current_organization_id = self.org_id
+        user.save()
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "foopwd"}
         )
@@ -22,7 +24,9 @@ class TestUserRoles(APITestCase):
         self.admin_id = user.pk
 
         self.worker_email = "worker@bar.com"
-        worker = User(name="peter", email=self.worker_email)
+        worker = User(
+            name="peter", email=self.worker_email, current_organization_id=self.org_id
+        )
         worker.set_password("pwd")
         worker.save()
         organization.user.add(worker)
