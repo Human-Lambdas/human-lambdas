@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from workflow_handler.csv2task import process_csv
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -204,7 +204,7 @@ class NextTaskView(APIView):
                 task = self.serializer_class(obj).data
                 obj.status = "assigned"
                 obj.save()
-                workflow.n_tasks -= 1
+                workflow.n_tasks = F("n_tasks") - 1
                 workflow.save()
                 return Response(task)
             else:
@@ -258,7 +258,7 @@ class CreateTaskView(CreateAPIView):
                     status=400,
                 )
             task_input.update(workflow_input)
-        workflow.n_tasks += 1
+        workflow.n_tasks = F("n_tasks") + 1
         workflow.save()
         return self.create(request, *args, **kwargs)
 
