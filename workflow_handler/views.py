@@ -198,7 +198,11 @@ class NextTaskView(APIView):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.get_queryset()
         with transaction.atomic():
-            obj = queryset.select_for_update().filter(Q(status="pending") & Q(workflow=workflow)).first()
+            obj = (
+                queryset.select_for_update()
+                .filter(Q(status="pending") & Q(workflow=workflow))
+                .first()
+            )
             task = self.serializer_class(obj).data
             if obj:
                 obj.status = "assigned"
