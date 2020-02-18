@@ -193,7 +193,9 @@ class SendInviteView(APIView):
         )
         if invite_org is None:
             # ensure user is inviting to an organization they belong to
-            return Response({"error": "You are not a member of this organization"}, status=401)
+            return Response(
+                {"error": "You are not a member of this organization"}, status=401
+            )
 
         invalid_email_list = []
         already_added_email_list = []
@@ -213,10 +215,17 @@ class SendInviteView(APIView):
                     naive_expiry_date = datetime.datetime.now() + datetime.timedelta(14)
                     aware_expiry_date = make_aware(naive_expiry_date)
 
-                    inviting_org = Organization.objects.filter(pk=request.data["organization_id"]).first()
+                    inviting_org = Organization.objects.filter(
+                        pk=request.data["organization_id"]
+                    ).first()
 
                     if inviting_org is None:
-                        return Response({"error": "the organization you are inviting to does not exist"}, status=400)
+                        return Response(
+                            {
+                                "error": "the organization you are inviting to does not exist"
+                            },
+                            status=400,
+                        )
 
                     invite = Invitation(
                         email=email,
@@ -236,7 +245,7 @@ class SendInviteView(APIView):
                     render_info = {
                         "organization_name": inviting_org.name,
                         "invite_sender": request.user.name,
-                        "invite_link": invite_link
+                        "invite_link": invite_link,
                     }
 
                     # plain_text = get_template("invite.txt")
@@ -249,13 +258,14 @@ class SendInviteView(APIView):
 
                     invite.save()
 
-                    if not os.environ.get('DEBUG'):
+                    if not os.environ.get("DEBUG"):
                         message = Mail(
-                            from_email='no-reply@humanlambdas.com',
+                            from_email="no-reply@humanlambdas.com",
                             to_emails=email,
-                            subject='Human Lambdas workflow invitation',
-                            html_content=html_content)
-                        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                            subject="Human Lambdas workflow invitation",
+                            html_content=html_content,
+                        )
+                        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
                         sg.send(message)
                 else:
                     already_added_email_list.append(email)
@@ -314,7 +324,7 @@ class InvitationView(APIView):
                     "invitation_email": invitation_email,
                     "invitation_org": invitation_org,
                 },
-                status=200
+                status=200,
             )
 
     def post(self, request, *args, **kwargs):
@@ -330,7 +340,9 @@ class InvitationView(APIView):
                 new_user.set_password(request.data["password"])
                 new_user.save()
                 invitation_org.user.add(new_user)
-                return Response({"message": "Your account has been created!"}, status=200)
+                return Response(
+                    {"message": "Your account has been created!"}, status=200
+                )
             else:
                 user = User.objects.filter(email=invite.email).first()
                 invitation_org.user.add(user)

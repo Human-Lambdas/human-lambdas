@@ -16,9 +16,7 @@ class TestInvite(APITestCase):
         self.organization_name = 1
         self.preset_user_password = "fooword"
 
-        user = User(
-            name=self.preset_user_name, email=self.preset_user_email
-        )
+        user = User(name=self.preset_user_name, email=self.preset_user_email)
         user.set_password(self.preset_user_password)
         user.save()
 
@@ -39,7 +37,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,alpha@beta.com,gamma@delta.com",
-                "organization_id": self.org_id
+                "organization_id": self.org_id,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -50,7 +48,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com     ,alpha@beta.com,    gamma@delta.com    ",
-                "organization_id": self.org_id
+                "organization_id": self.org_id,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -61,7 +59,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,alpha@beta.com,gamma@delta.com,alpha@beta.com",
-                "organization_id": self.org_id
+                "organization_id": self.org_id,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -91,10 +89,7 @@ class TestInvite(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.post(
             "/v1/users/invite/",
-            {
-                "emails": "lambda@sigma.com,foo@foo,bar.com",
-                "organization_id": 1,
-            },
+            {"emails": "lambda@sigma.com,foo@foo,bar.com", "organization_id": 1,},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

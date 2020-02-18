@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user_handler', '0007_user_is_superuser'),
-        ('user_handler', '0006_auto_20200206_1457'),
+        ("user_handler", "0007_user_is_superuser"),
+        ("user_handler", "0006_auto_20200206_1457"),
     ]
 
-    operations = [
-    ]
+    operations = []

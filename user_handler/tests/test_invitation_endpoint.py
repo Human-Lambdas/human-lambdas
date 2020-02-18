@@ -16,9 +16,7 @@ class TestInvite(APITestCase):
         self.organization_name = "fooinc"
         self.preset_user_password = "fooword"
 
-        user = User(
-            name=self.preset_user_name, email=self.preset_user_email
-        )
+        user = User(name=self.preset_user_name, email=self.preset_user_email)
         user.set_password(self.preset_user_password)
         user.save()
 
@@ -46,9 +44,7 @@ class TestInvite(APITestCase):
         _ = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "{0},alpha@beta.com,gamma@delta.com".format(
-                    recipient
-                ),
+                "emails": "{0},alpha@beta.com,gamma@delta.com".format(recipient),
                 "organization_id": self.org_id,
             },
         )
@@ -73,22 +69,15 @@ class TestInvite(APITestCase):
         _ = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "{0},alpha@beta.com,gamma@delta.com".format(
-                    recipient
-                ),
+                "emails": "{0},alpha@beta.com,gamma@delta.com".format(recipient),
                 "organization_id": self.org_id,
             },
         )
         response = self.client.post(
-            "/v1/users/invitation/{0}".format(
-                hash(str(recipient + str(self.org_id)))
-            ),
-            {
-                "name": "sean",
-                "password": "fooword"
-            }
+            "/v1/users/invitation/{0}".format(hash(str(recipient + str(self.org_id)))),
+            {"name": "sean", "password": "fooword"},
         )
-        self.assertEqual(response.data["message"] , "Your account has been created!")
+        self.assertEqual(response.data["message"], "Your account has been created!")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_invitation_post_call_existing_user(self):
@@ -97,9 +86,7 @@ class TestInvite(APITestCase):
         _ = self.client.post(
             "/v1/users/invite/",
             {
-                "emails": "{0},alpha@beta.com,gamma@delta.com".format(
-                    recipient
-                ),
+                "emails": "{0},alpha@beta.com,gamma@delta.com".format(recipient),
                 "organization_id": self.org_id,
             },
         )
@@ -107,13 +94,8 @@ class TestInvite(APITestCase):
         new_user.set_password("fooword")
         new_user.save()
         response = self.client.post(
-            "/v1/users/invitation/{0}".format(
-                hash(str(recipient + str(self.org_id)))
-            ),
-            {
-                "name": "sean",
-                "password": "fooword"
-            }
+            "/v1/users/invitation/{0}".format(hash(str(recipient + str(self.org_id)))),
+            {"name": "sean", "password": "fooword"},
         )
         self.assertEqual(response.data["message"], "Success!")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
