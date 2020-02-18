@@ -3,11 +3,10 @@ import re
 import csv
 from io import StringIO
 import datetime
-
 import os
+
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-
 from django.utils.timezone import make_aware
 from rest_framework.generics import (
     CreateAPIView,
@@ -21,8 +20,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.authtoken.models import Token
-
 from django.template.loader import get_template
+from django.conf import settings
 
 from .models import User, Organization, Invitation
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
@@ -227,10 +226,17 @@ class SendInviteView(APIView):
                         expires_at=aware_expiry_date,
                     )
 
+                    invite_link = settings.FRONT_END_BASE_URL
+
+                    if User.objects.filter(email=email).first() is None:
+                        invite_link += "invite/{0}".format(token)
+                    else:
+                        invite_link += "invite/success/{0}".format(token)
+
                     render_info = {
                         "organization_name": inviting_org.name,
                         "invite_sender": request.user.name,
-                        "invite_link": "HL-URL/{0}".format(token),
+                        "invite_link": invite_link
                     }
 
                     # plain_text = get_template("invite.txt")
