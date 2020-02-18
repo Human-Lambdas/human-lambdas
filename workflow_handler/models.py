@@ -29,3 +29,6 @@ class Task(models.Model):
 
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
+
+    def complete_task(self):
+        pass

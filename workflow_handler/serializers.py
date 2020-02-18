@@ -1,7 +1,7 @@
 import logging
 
 from django.utils import timezone
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from user_handler.models import Organization
 from schema import SchemaError
 
@@ -82,17 +82,24 @@ class WorkflowSerializer(serializers.ModelSerializer):
     def validate_inputs(self, data):
         try:
             return WORKFLOW_INPUT_SCHEMA.validate(data)
-        except SchemaError as exception:
-            raise serializers.ValidationError(exception)
+        except SchemaError as exception_text:
+            raise serializers.ValidationError(exception_text)
 
     def validate_outputs(self, data):
         try:
             return validate_output_structure(OUTPUT_SCHEMA.validate(data))
-        except SchemaError as exception:
-            raise serializers.ValidationError(exception)
+        except SchemaError as exception_text:
+            raise serializers.ValidationError(exception_text)
 
 
 class TaskSerializer(serializers.ModelSerializer):
+
+    def validate_event(self, event):
+        if event not in settings.HOOK_EVENTS:
+            err_msg = "Unexpected event {}".format(event)
+            raise exceptions.ValidationError(detail=err_msg, code=400)
+        return event
+
     class Meta:
         model = Task
         fields = ["id", "status", "created_at", "inputs", "outputs"]
@@ -126,8 +133,8 @@ class TaskSerializer(serializers.ModelSerializer):
     def validate_inputs(self, data):
         try:
             return TASK_INPUT_SCHEMA.validate(data)
-        except SchemaError as exception:
-            raise serializers.ValidationError(exception)
+        except SchemaError as exception_text:
+            raise serializers.ValidationError(exception_text)
 
     def validate_outputs(self, data):
         try:
@@ -135,5 +142,5 @@ class TaskSerializer(serializers.ModelSerializer):
                 return UPDATE_OUTPUT_SCHEMA.validate(data)
             else:
                 return validate_output_structure(OUTPUT_SCHEMA.validate(data))
-        except SchemaError as exception:
-            raise serializers.ValidationError(exception)
+        except SchemaError as exception_text:
+            raise serializers.ValidationError(exception_text)
