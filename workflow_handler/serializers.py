@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.utils import timezone
 from rest_framework import serializers, exceptions
 from user_handler.models import Organization
@@ -128,6 +129,7 @@ class TaskSerializer(serializers.ModelSerializer):
         instance.completed_at = timezone.now()  # datetime.datetime.now()
         instance.completed_by = self.context["request"].user
         instance.save()
+        instance.task_completed()
         return instance
 
     def validate_inputs(self, data):

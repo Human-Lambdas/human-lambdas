@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 from user_handler.models import User, Organization
+from rest_hooks.signals import hook_event
 
 
 class Workflow(models.Model):
@@ -30,5 +31,9 @@ class Task(models.Model):
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
 
-    def complete_task(self):
-        pass
+    def task_completed(self):
+        hook_event.send(
+            sender=self.__class__,
+            action='completed',
+            instance=self
+        )

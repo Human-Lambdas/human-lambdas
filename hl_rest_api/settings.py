@@ -51,7 +51,9 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     "rest_framework.authtoken",
+    "rest_hooks",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -196,3 +198,7 @@ if not DEBUG:
         # django.contrib.auth) you may enable sending PII data.
         send_default_pii=True,
     )
+
+HOOK_EVENTS = {
+    'task.completed':         'workflow_handler.Task.completed',
+}
