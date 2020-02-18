@@ -6,7 +6,7 @@ from user_handler.models import User
 
 class TestAPIToken(APITestCase):
     def setUp(self):
-        user = User(name="foo", email="foo@bar.com", is_admin=True)
+        user = User(name="foo", email="foo@bar.com")
         user.set_password("fooword")
         user.save()
         response = self.client.post(

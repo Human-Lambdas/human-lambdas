@@ -2,6 +2,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import Workflow
+from user_handler.models import Organization
 
 
 class TestErrorPayloadStructure(APITestCase):
@@ -14,6 +15,7 @@ class TestErrorPayloadStructure(APITestCase):
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register/", registration_data)
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
@@ -37,14 +39,18 @@ class TestErrorPayloadStructure(APITestCase):
     # Create workflow endpoint tests
     def test_create_workflow_no_jwt(self):
         response = self.client.post(
-            "/v1/workflows/create/", self.complete_workflow_data, format="json"
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            self.complete_workflow_data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_workflow_invalid_jwt(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.invalid_token)
         response = self.client.post(
-            "/v1/workflows/create/", self.complete_workflow_data, format="json"
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            self.complete_workflow_data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -63,37 +69,43 @@ class TestErrorPayloadStructure(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/workflows/create/", workflow_data, format="json"
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            workflow_data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_workflow_wrong_method(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.patch(
-            "/v1/workflows/create/", self.complete_workflow_data, format="json"
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            self.complete_workflow_data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     # test list workflows
     def test_list_workflow_no_jwt(self):
-        response = self.client.get("/v1/workflows/")
+        response = self.client.get("/v1/orgs/{}/workflows/".format(self.org_id))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_list_workflow_invalid_jwt(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.invalid_token)
-        response = self.client.get("/v1/workflows/")
+        response = self.client.get("/v1/orgs/{}/workflows/".format(self.org_id))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_list_workflow_wrong_method(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.post("/v1/workflows/")
+        response = self.client.post("/v1/orgs/{}/workflows/".format(self.org_id))
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     # test update workflows
     def test_update_workflow_no_jwt(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.post(
-            "/v1/workflows/create/", self.complete_workflow_data, format="json"
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            self.complete_workflow_data,
+            format="json",
         )
         self.assertEqual(
             response.status_code, status.HTTP_201_CREATED, response.content
@@ -106,7 +118,7 @@ class TestErrorPayloadStructure(APITestCase):
             "description": "not so great wf",
         }
         response = self.client.patch(
-            "/v1/workflows/{}".format(workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
             self.complete_workflow_data,
             format="json",
         )
@@ -115,7 +127,9 @@ class TestErrorPayloadStructure(APITestCase):
     def test_update_workflow_invalid_jwt(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.post(
-            "/v1/workflows/create/", self.complete_workflow_data, format="json"
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            self.complete_workflow_data,
+            format="json",
         )
         self.assertEqual(
             response.status_code, status.HTTP_201_CREATED, response.content
@@ -128,7 +142,7 @@ class TestErrorPayloadStructure(APITestCase):
             "description": "not so great wf",
         }
         response = self.client.patch(
-            "/v1/workflows/{}".format(workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
             self.complete_workflow_data,
             format="json",
         )
@@ -137,7 +151,9 @@ class TestErrorPayloadStructure(APITestCase):
     def test_update_workflow_wrong_method(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.post(
-            "/v1/workflows/create/", self.complete_workflow_data, format="json"
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            self.complete_workflow_data,
+            format="json",
         )
         self.assertEqual(
             response.status_code, status.HTTP_201_CREATED, response.content
@@ -149,7 +165,7 @@ class TestErrorPayloadStructure(APITestCase):
             "description": "not so great wf",
         }
         response = self.client.post(
-            "/v1/workflows/{}".format(workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
             self.complete_workflow_data,
             format="json",
         )
