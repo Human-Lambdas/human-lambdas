@@ -17,7 +17,7 @@ class TestInvite(APITestCase):
         self.preset_user_password = "fooword"
 
         user = User(
-            name=self.preset_user_name, email=self.preset_user_email, is_admin=True
+            name=self.preset_user_name, email=self.preset_user_email
         )
         user.set_password(self.preset_user_password)
         user.save()
@@ -49,12 +49,12 @@ class TestInvite(APITestCase):
                 "emails": "{0},alpha@beta.com,gamma@delta.com".format(
                     recipient
                 ),
-                "organization": org,
+                "organization_id": self.org_id,
             },
         )
         response = self.client.get(
             "/v1/users/invitation/{0}".format(
-                hash(str("sean@humanlambdas.com" + "fooinc"))
+                hash(str("sean@humanlambdas.com" + str(self.org_id)))
             )
         )
         self.assertEqual(response.data["invitation_email"], recipient)
@@ -67,23 +67,55 @@ class TestInvite(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_invitation_post_call(self):
+    def test_invitation_post_call_new_user(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        org, recipient = "fooinc", "lambda@signma.com"
+        recipient = "lambda@signma.com"
         _ = self.client.post(
             "/v1/users/invite/",
             {
                 "emails": "{0},alpha@beta.com,gamma@delta.com".format(
                     recipient
                 ),
-                "organization": org,
+                "organization_id": self.org_id,
             },
         )
         response = self.client.post(
             "/v1/users/invitation/{0}".format(
-                hash(str(recipient + org))
-            )
+                hash(str(recipient + str(self.org_id)))
+            ),
+            {
+                "name": "sean",
+                "password": "fooword"
+            }
         )
+        self.assertEqual(response.data["message"] , "Your account has been created!")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_invitation_post_call_existing_user(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        recipient = "lambda@signma.com"
+        _ = self.client.post(
+            "/v1/users/invite/",
+            {
+                "emails": "{0},alpha@beta.com,gamma@delta.com".format(
+                    recipient
+                ),
+                "organization_id": self.org_id,
+            },
+        )
+        new_user = User(name="sean", email=recipient)
+        new_user.set_password("fooword")
+        new_user.save()
+        response = self.client.post(
+            "/v1/users/invitation/{0}".format(
+                hash(str(recipient + str(self.org_id)))
+            ),
+            {
+                "name": "sean",
+                "password": "fooword"
+            }
+        )
+        self.assertEqual(response.data["message"], "Success!")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_invitation_post_call_no_jwt(self):

@@ -13,11 +13,11 @@ class TestInvite(APITestCase):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
         self.preset_changed_email = "bar@foo.com"
-        self.organization_name = "fooinc"
+        self.organization_name = 1
         self.preset_user_password = "fooword"
 
         user = User(
-            name=self.preset_user_name, email=self.preset_user_email, is_admin=True
+            name=self.preset_user_name, email=self.preset_user_email
         )
         user.set_password(self.preset_user_password)
         user.save()
@@ -39,7 +39,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,alpha@beta.com,gamma@delta.com",
-                "organization": "fooinc",
+                "organization_id": self.org_id
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -50,7 +50,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com     ,alpha@beta.com,    gamma@delta.com    ",
-                "organization": "fooinc",
+                "organization_id": self.org_id
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -61,7 +61,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,alpha@beta.com,gamma@delta.com,alpha@beta.com",
-                "organization": "fooinc",
+                "organization_id": self.org_id
             },
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -71,7 +71,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,alpha@beta.com,gamma@delta.com",
-                "organization": "fooinc",
+                "organization_id": 1,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -82,7 +82,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,foo@bar.com,gamma@delta.com",
-                "organization": "fooinc",
+                "organization_id": 1,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -93,7 +93,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,foo@foo,bar.com",
-                "organization": "fooinc",
+                "organization_id": 1,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -104,7 +104,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,foo@foo,bar.com,foo@bar.com",
-                "organization": "fooinc",
+                "organization_id": 1,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
