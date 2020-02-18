@@ -190,7 +190,7 @@ class SendInviteView(APIView):
         # convert to set to ignore any duplicated emails
 
         invite_org = Organization.objects.filter(
-            name=request.data["organization"], user=request.user
+            pk=request.data["organization_id"], user=request.user
         )
         if invite_org is None:
             # ensure user is inviting to an organization they belong to
@@ -204,17 +204,17 @@ class SendInviteView(APIView):
                 # checks the email is valid
                 userObj = User.objects.filter(email=email)
                 organization = Organization.objects.filter(
-                    name=request.data["organization"], user=userObj.first()
+                    pk=request.data["organization_id"], user=userObj.first()
                 )
                 if organization.first() is None:
                     # send
-                    to_hash = str(email + request.data["organization"])
+                    to_hash = str(email + str(request.data["organization_id"]))
                     token = hash(to_hash)
 
                     naive_expiry_date = datetime.datetime.now() + datetime.timedelta(14)
                     aware_expiry_date = make_aware(naive_expiry_date)
 
-                    inviting_org = Organization.objects.filter(name=request.data["organization"]).first()
+                    inviting_org = Organization.objects.filter(pk=request.data["organization_id"]).first()
 
                     if inviting_org is None:
                         return Response({"error": "the organization you are inviting to does not exist"}, status=400)
@@ -228,7 +228,7 @@ class SendInviteView(APIView):
                     )
 
                     render_info = {
-                        "organization_name": request.data["organization"],
+                        "organization_name": inviting_org.name,
                         "invite_sender": request.user.name,
                         "invite_link": "HL-URL/{0}".format(token),
                     }
