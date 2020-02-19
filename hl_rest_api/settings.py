@@ -200,5 +200,5 @@ if not DEBUG:
     )
 
 HOOK_EVENTS = {
-    'task.completed':         'workflow_handler.Task.completed',
+    "task.completed": "workflow_handler.Task.completed",
 }

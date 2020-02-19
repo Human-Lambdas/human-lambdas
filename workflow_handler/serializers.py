@@ -94,7 +94,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
             err_msg = "Unexpected event {}".format(event)
@@ -125,11 +124,12 @@ class TaskSerializer(serializers.ModelSerializer):
             if itype not in instance_output:
                 instance_output[itype] = {}
             instance_output[itype]["value"] = output[itype]["value"]
+        user = self.context["request"].user
         instance.status = "completed"
         instance.completed_at = timezone.now()  # datetime.datetime.now()
-        instance.completed_by = self.context["request"].user
+        instance.completed_by = user
         instance.save()
-        instance.task_completed()
+        instance.task_completed(user)
         return instance
 
     def validate_inputs(self, data):
