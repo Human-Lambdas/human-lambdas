@@ -128,11 +128,40 @@ class TestAPIUserUpdate(APITestCase):
         response = self.client.get("/v1/users/{}".format(self.user_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
-    def test_update(self):
+    def test_update_password(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         data = {"password": self.preset_changed_password}
         response = self.client.patch("/v1/users/{}".format(self.user_id), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        response = self.client.post(
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+        )
+        self.assertEqual(response.status_code, 401)
+        response = self.client.post(
+            "/v1/users/token/",
+            {"email": "foo@bar.com", "password": self.preset_changed_password},
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_name(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        new_name = "baaaard"
+        data = {"name": new_name}
+        response = self.client.patch("/v1/users/{}".format(self.user_id), data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data["name"], new_name, response.data)
+        user = User.objects.get(pk=self.user_id)
+        self.assertEqual(user.name, new_name)
+
+    def test_update_email(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        new_email = "baaard@foo.com"
+        data = {"email": new_email}
+        response = self.client.patch("/v1/users/{}".format(self.user_id), data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data["email"], new_email, response.data)
+        user = User.objects.get(pk=self.user_id)
+        self.assertEqual(user.email, new_email)
 
 
 class TestListUsers(APITestCase):
