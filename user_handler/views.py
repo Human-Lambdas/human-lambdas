@@ -258,7 +258,7 @@ class SendInviteView(APIView):
 
                     invite.save()
 
-                    if not os.environ.get("DEBUG"):
+                    if not settings.DEBUG:
                         message = Mail(
                             from_email="no-reply@humanlambdas.com",
                             to_emails=email,
@@ -278,40 +278,40 @@ class SendInviteView(APIView):
                 {"message": "all emails were successfully added!"}, status=200
             )
         if len(invalid_email_list) > 0 and len(already_added_email_list) > 0:
-            response_text = "error:"
+            response_text = ""
             for email in invalid_email_list:
-                response_text += " {0} is an invalid email.".format(email)
+                response_text += "{0} is an invalid email. ".format(email)
             for email in already_added_email_list:
-                response_text += " {0} is already a part of the organization,".format(
+                response_text += "{0} is already a part of the organization,".format(
                     email
                 )
-                response_text += " and so does not need to be added again."
+                response_text += " and so does not need to be added again. "
             return Response({"error": response_text}, status=400)
         if len(invalid_email_list) > 0:
-            response_text = "error:"
+            response_text = ""
             for email in invalid_email_list:
-                response_text += " {0} is an invalid email.".format(email)
+                response_text += "{0} is an invalid email. ".format(email)
             return Response({"error": response_text}, status=400)
         if len(already_added_email_list) > 0:
-            response_text = "error:"
+            response_text = ""
             for email in already_added_email_list:
-                response_text += " {0} is already a part of the organization,".format(
+                response_text += "{0} is already a part of the organization,".format(
                     email
                 )
-                response_text += " and so does not need to be added again."
+                response_text += " and so does not need to be added again. "
             return Response({"error": response_text}, status=400)
 
 
 class InvitationView(APIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Invitation.objects.all()
 
     def get_queryset(self):
         user = self.request.user
-        return Organization.objects.filter(user=user)
+        return Invitation.objects.filter(organization__user=user)
 
     def get(self, request, *args, **kwargs):
-        invite = Invitation.objects.filter(token=self.kwargs["invite_token"])
+        invite = self.get_queryset()
+        invite = invite.filter(token=self.kwargs["invite_token"])
         if invite.first() is None:
             return Response(
                 {"error": "no invitation with this token exists"}, status=404
