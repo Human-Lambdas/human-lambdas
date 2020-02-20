@@ -31,9 +31,7 @@ class TestTaskCount(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.post(
-            "/v1/users/api-token/", {"email": "foo@bar.com", "password": "fooword"}
-        )
+        response = self.client.get("/v1/users/api-token/",)
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",

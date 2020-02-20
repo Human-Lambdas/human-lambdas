@@ -63,7 +63,7 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "workerwf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "inputs": [{"id": "foo", "name": "foo", "type": "text", "layout": {}}],
             "outputs": [
                 {
                     "id": "foo",
