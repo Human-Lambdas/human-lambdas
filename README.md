@@ -181,7 +181,7 @@ To get the list of tasks in a given workflow you should do call a `GET` to the e
 
 ## Retrieve and UpdateTask
 
-To retrieve a task you can either call a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/next` and this will give a incomplete task. 
+To retrieve a task you can either call a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/next/` and this will give a incomplete task. 
 
 Another way is to retrieve a specific task and that is by doing a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/<task-id>`, if you do a `PATCH` to this endpoint you will be able to update the task. You will only be able to update the output.
 
