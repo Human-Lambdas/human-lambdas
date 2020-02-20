@@ -35,6 +35,9 @@ ALLOWED_HOSTS = [
     "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
 ]
 
+HOOK_EVENTS = {
+    "task.completed": "workflow_handler.Task.completed",
+}
 
 # Application definition
 
@@ -198,7 +201,3 @@ if not DEBUG:
         # django.contrib.auth) you may enable sending PII data.
         send_default_pii=True,
     )
-
-HOOK_EVENTS = {
-    "task.completed": "workflow_handler.Task.completed",
-}

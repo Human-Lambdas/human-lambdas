@@ -10,6 +10,8 @@ from .views import (
     NextTaskView,
     CreateTaskView,
     GetCompletedTaskView,
+    CreateHookView,
+    RUDHookView,
 )
 
 
@@ -32,5 +34,11 @@ urlpatterns = [
         "<int:workflow_id>/completed/",
         GetCompletedTaskView.as_view(),
         name="completed-task",
+    ),
+    path("<int:workflow_id>/webhooks/", CreateHookView.as_view(), name="webhook"),
+    path(
+        "<int:workflow_id>/webhooks/<int:hook_id>",
+        RUDHookView.as_view(),
+        name="webhook",
     ),
 ]
