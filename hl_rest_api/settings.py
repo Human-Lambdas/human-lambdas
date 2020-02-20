@@ -196,3 +196,5 @@ if not DEBUG:
         # django.contrib.auth) you may enable sending PII data.
         send_default_pii=True,
     )
+
+FRONT_END_BASE_URL = "http://human-lambdas-api.eu-west-2.elasticbeanstalk.com/"

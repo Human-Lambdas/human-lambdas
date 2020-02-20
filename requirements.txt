@@ -6,4 +6,5 @@ django-cors-headers==3.1.0
 drf-chunked-upload==0.4.2
 sentry_sdk==0.13.5
 schema==0.7.1
+sendgrid==6.1.1
 gunicorn==20.0.04
