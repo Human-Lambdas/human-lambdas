@@ -22,9 +22,7 @@ class TestTaskCreation(APITestCase):
         self.access_token = response.data["access"]
 
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get(
-            "/v1/users/api-token/"
-        )
+        response = self.client.get("/v1/users/api-token/")
         self.token = response.data["token"]
 
         workflow_data = {
