@@ -35,6 +35,9 @@ ALLOWED_HOSTS = [
     "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
 ]
 
+HOOK_EVENTS = {
+    "task.completed": "workflow_handler.Task.completed",
+}
 
 # Application definition
 
@@ -51,7 +54,9 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     "rest_framework.authtoken",
+    "rest_hooks",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

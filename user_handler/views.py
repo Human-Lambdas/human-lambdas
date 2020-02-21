@@ -203,9 +203,9 @@ class SendInviteView(APIView):
         for email in email_set:
             if bool(re.fullmatch(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?", email)):
                 # checks the email is valid
-                userObj = User.objects.filter(email=email)
+                user_obj = User.objects.filter(email=email)
                 organization = Organization.objects.filter(
-                    pk=request.data["organization_id"], user=userObj.first()
+                    pk=request.data["organization_id"], user=user_obj.first()
                 )
                 if organization.first() is None:
                     # send
