@@ -40,7 +40,7 @@ class TestInvite(APITestCase):
 
     def test_invitation_get_call(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        org, recipient = "fooinc", "sean@humanlambdas.com"
+        org, recipient = "fooinc", "matteus@humanlambdas.com"
         _ = self.client.post(
             "/v1/users/invite/",
             {
@@ -50,7 +50,7 @@ class TestInvite(APITestCase):
         )
         response = self.client.get(
             "/v1/users/invitation/{0}".format(
-                hash(str("sean@humanlambdas.com" + str(self.org_id)))
+                hash(str("matteus@humanlambdas.com" + str(self.org_id)))
             )
         )
         self.assertEqual(response.data["invitation_email"], recipient)
