@@ -331,6 +331,8 @@ class InvitationView(APIView):
 
     def post(self, request, *args, **kwargs):
         invite = Invitation.objects.filter(token=self.kwargs["invite_token"]).first()
+        if invite.expires_at < make_aware(datetime.datetime.now()):
+            return Response({"error": "this token has expired!"}, status=400)
         if invite is None:
             return Response(
                 {"error": "no invitation with this token exists"}, status=404
