@@ -212,7 +212,7 @@ class SendInviteView(APIView):
                     to_hash = str(email + str(request.data["organization_id"]))
                     token = hash(to_hash)
 
-                    naive_expiry_date = datetime.datetime.now() + datetime.timedelta(14)
+                    naive_expiry_date = datetime.datetime.now() + datetime.timedelta(30)
                     aware_expiry_date = make_aware(naive_expiry_date)
 
                     inviting_org = Organization.objects.filter(
