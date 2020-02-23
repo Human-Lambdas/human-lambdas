@@ -209,7 +209,7 @@ class SendInviteView(APIView):
                 )
                 if organization.first() is None:
                     # send
-                    to_hash = str(email + str(request.data["organization_id"]))
+                    to_hash = str(email + str(request.data["organization_id"]) + str(datetime.datetime.now()))
                     token = hash(to_hash)
 
                     naive_expiry_date = datetime.datetime.now() + datetime.timedelta(30)
@@ -331,12 +331,12 @@ class InvitationView(APIView):
 
     def post(self, request, *args, **kwargs):
         invite = Invitation.objects.filter(token=self.kwargs["invite_token"]).first()
-        if invite.expires_at < make_aware(datetime.datetime.now()):
-            return Response({"error": "this token has expired!"}, status=400)
         if invite is None:
             return Response(
                 {"error": "no invitation with this token exists"}, status=404
             )
+        if invite.expires_at < make_aware(datetime.datetime.now()):
+            return Response({"error": "this token has expired!"}, status=400)
         else:
             invitation_org = invite.organization
             if User.objects.filter(email=invite.email).first() is None:
