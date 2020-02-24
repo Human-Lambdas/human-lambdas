@@ -209,8 +209,11 @@ class SendInviteView(APIView):
                 )
                 if organization.first() is None:
                     # send
-                    to_hash = str(email + str(request.data["organization_id"]))
-                    to_hash = str(to_hash + str(datetime.datetime.now()))
+                    to_hash = str(
+                        email
+                        + str(request.data["organization_id"])
+                        + str(datetime.datetime.now())
+                    )
                     token = hash(to_hash)
 
                     naive_expiry_date = datetime.datetime.now() + datetime.timedelta(30)
