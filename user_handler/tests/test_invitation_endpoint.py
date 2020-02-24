@@ -35,11 +35,21 @@ class TestInvite(APITestCase):
         self.org_id = organization.id
         organization.user.add(user)
 
-        self.new_recipient, self.existing_recipient, time = "matteus@humanlambdas.com", "lambda@sigma.com", str(datetime.datetime.now())
+        self.new_recipient, self.existing_recipient, time = (
+            "matteus@humanlambdas.com",
+            "lambda@sigma.com",
+            str(datetime.datetime.now()),
+        )
         self.token = hash(str(self.existing_recipient) + str(self.org_id) + str(time))
         aware_expiry_date = make_aware(datetime.datetime.now() + datetime.timedelta(30))
 
-        new_invite = Invitation(email=self.existing_recipient, organization=self.organization, invited_by=self.user, token=self.token, expires_at=aware_expiry_date)
+        new_invite = Invitation(
+            email=self.existing_recipient,
+            organization=self.organization,
+            invited_by=self.user,
+            token=self.token,
+            expires_at=aware_expiry_date,
+        )
         new_invite.save()
 
     def test_invitation_get_call_no_invite(self):
@@ -50,11 +60,7 @@ class TestInvite(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_invitation_get_call(self):
-        response = self.client.get(
-            "/v1/users/invitation/{0}".format(
-                self.token
-            )
-        )
+        response = self.client.get("/v1/users/invitation/{0}".format(self.token))
         self.assertEqual(response.data["invitation_email"], self.existing_recipient)
         self.assertEqual(response.data["invitation_org"], str(self.organization))
         self.assertEqual(response.status_code, status.HTTP_200_OK)

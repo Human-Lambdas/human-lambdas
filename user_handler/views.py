@@ -312,7 +312,7 @@ class InvitationView(APIView):
 
     def get(self, request, *args, **kwargs):
         invite = Invitation.objects.all()
-        #invite = self.get_queryset()
+        # invite = self.get_queryset()
         invite = invite.filter(token=self.kwargs["invite_token"])
         if invite.first() is None:
             return Response(
@@ -341,7 +341,9 @@ class InvitationView(APIView):
             return Response({"error": "this token has expired!"}, status=400)
         else:
             invitation_org = invite.organization
-            if Organization.objects.filter(user__email=invite.email, name=str(invitation_org)).exists():
+            if Organization.objects.filter(
+                user__email=invite.email, name=str(invitation_org)
+            ).exists():
                 return Response({"error": "this organization has already been joined"})
             if User.objects.filter(email=invite.email).first() is None:
                 new_user = User(email=invite.email, name=request.data["name"])
