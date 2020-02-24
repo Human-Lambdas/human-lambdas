@@ -307,11 +307,6 @@ class SendInviteView(APIView):
 
 
 class InvitationView(APIView):
-    # permission_classes = (IsAuthenticated,)
-
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     return Invitation.objects.filter(organization__user=user)
 
     def get(self, request, *args, **kwargs):
         invite = Invitation.objects.all()
