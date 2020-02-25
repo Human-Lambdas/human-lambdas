@@ -33,6 +33,7 @@ def process_csv(csv_file, workflow):
                         "name": input["name"],
                         "type": input["type"],
                         "value": row[title_row.index(input["id"])],
+                        "layout": input.get("layout"),
                     }
                 )
         task_obj = Task(

@@ -29,9 +29,9 @@ class TestTaskCreation(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
+                {"id": "Alpha", "name": "alpha", "type": "text", "layout": {}},
+                {"id": "Beta", "name": "beta", "type": "text", "layout": {}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "layout": {}},
             ],
             "outputs": [
                 {
@@ -73,3 +73,4 @@ class TestTaskCreation(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         task = Task.objects.get(id=response.data["id"])
         self.assertIsNotNone(task)
+        self.assertTrue("layout" in task.inputs[0])

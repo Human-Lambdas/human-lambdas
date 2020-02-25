@@ -107,9 +107,9 @@ class TestUpload(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
+                {"id": "Alpha", "name": "alpha", "type": "text", "layout": {}},
+                {"id": "Beta", "name": "beta", "type": "text", "layout": {}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "layout": {}},
             ],
             "outputs": [
                 {
