@@ -308,10 +308,8 @@ class SendInviteView(APIView):
 
 class InvitationView(APIView):
     def get(self, request, *args, **kwargs):
-        invite = Invitation.objects.all()
-        # invite = self.get_queryset()
-        invite = invite.filter(token=self.kwargs["invite_token"])
-        if invite.first() is None:
+        invite = Invitation.objects.filter(token=self.kwargs["invite_token"])
+        if not invite.exists():
             return Response(
                 {"error": "no invitation with this token exists"}, status=404
             )
