@@ -70,14 +70,13 @@ class TestInvite(APITestCase):
         )
 
         token = hash(str(recipient) + str(self.org_id) + str(datetime.datetime.now()))
-        aware_expiry_date = make_aware(datetime.datetime.now() + datetime.timedelta(30))
 
         new_user_invite = Invitation(
             email=recipient,
             organization=self.organization,
             invited_by=self.user,
             token=token,
-            expires_at=aware_expiry_date,
+            expires_at=make_aware(datetime.datetime.now() + datetime.timedelta(30)),
         )
         new_user_invite.save()
 
@@ -112,9 +111,9 @@ class TestInvite(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_invitation_expiration_30_days(self):
-        recipient = "new@user.com"
         _ = self.client.post(
-            "/v1/users/invite/", {"emails": recipient, "organization_id": self.org_id,},
+            "/v1/users/invite/",
+            {"emails": self.existing_recipient, "organization_id": self.org_id,},
         )
 
         token = hash(
@@ -122,16 +121,15 @@ class TestInvite(APITestCase):
             + str(self.org_id)
             + str(datetime.datetime.now())
         )
-        aware_expiry_date = make_aware(datetime.datetime.now() - datetime.timedelta(1))
 
-        new_user_invite = Invitation(
-            email=recipient,
+        expired_invite = Invitation(
+            email=self.existing_recipient,
             organization=self.organization,
             invited_by=self.user,
             token=token,
-            expires_at=aware_expiry_date,
+            expires_at=make_aware(datetime.datetime.now() - datetime.timedelta(1)),
         )
-        new_user_invite.save()
+        expired_invite.save()
 
         response = self.client.post(
             "/v1/users/invitation/{0}".format(token),
@@ -141,13 +139,9 @@ class TestInvite(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_invitation_post_call_already_joined_org(self):
-        recipient = "lambda@sigma.com"
         _ = self.client.post(
             "/v1/users/invite/",
-            {
-                "emails": "{0},alpha@beta.com,gamma@delta.com".format(recipient),
-                "organization_id": self.org_id,
-            },
+            {"emails": self.existing_recipient, "organization_id": self.org_id,},
         )
         response = self.client.post(
             "/v1/users/invitation/{0}".format(self.token),
