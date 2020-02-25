@@ -35,22 +35,21 @@ class TestInvite(APITestCase):
         self.org_id = organization.id
         organization.user.add(user)
 
-        self.new_recipient, self.existing_recipient, time = (
-            "matteus@humanlambdas.com",
+        self.existing_recipient, time = (
             "lambda@sigma.com",
             str(datetime.datetime.now()),
         )
         self.token = hash(str(self.existing_recipient) + str(self.org_id) + str(time))
         aware_expiry_date = make_aware(datetime.datetime.now() + datetime.timedelta(30))
 
-        new_invite = Invitation(
-            email=self.existing_recipient,
+        existing_invite = Invitation(
+            email=self.preset_user_email,
             organization=self.organization,
             invited_by=self.user,
             token=self.token,
             expires_at=aware_expiry_date,
         )
-        new_invite.save()
+        existing_invite.save()
 
     def test_invitation_get_call_no_invite(self):
         response = self.client.get(
@@ -60,11 +59,88 @@ class TestInvite(APITestCase):
 
     def test_invitation_get_call(self):
         response = self.client.get("/v1/users/invitation/{0}".format(self.token))
-        self.assertEqual(response.data["invitation_email"], self.existing_recipient)
+        self.assertEqual(response.data["invitation_email"], self.preset_user_email)
         self.assertEqual(response.data["invitation_org"], str(self.organization))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_invitation_post_call_new_user(self):
+        recipient = "new@user.com"
+        _ = self.client.post(
+            "/v1/users/invite/", {"emails": recipient, "organization_id": self.org_id,},
+        )
+
+        token = hash(str(recipient) + str(self.org_id) + str(datetime.datetime.now()))
+        aware_expiry_date = make_aware(datetime.datetime.now() + datetime.timedelta(30))
+
+        new_user_invite = Invitation(
+            email=recipient,
+            organization=self.organization,
+            invited_by=self.user,
+            token=token,
+            expires_at=aware_expiry_date,
+        )
+        new_user_invite.save()
+
+        response = self.client.post(
+            "/v1/users/invitation/{0}".format(token),
+            {"name": "sean", "password": "fooword"},
+        )
+        self.assertEqual(response.data["message"], "Your account has been created!")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_invitation_post_call_existing_user(self):
+        new_user = User(email="new@user.com")
+        new_user.save()
+        _ = self.client.post(
+            "/v1/users/invite/",
+            {"emails": "new@user.com", "organization_id": self.org_id,},
+        )
+        token = "s8ni3fisme03msi0s3emimc"
+        new_invite = Invitation(
+            email="new@user.com",
+            organization=self.organization,
+            invited_by=self.user,
+            token=token,
+            expires_at=make_aware(datetime.datetime.now() + datetime.timedelta(30)),
+        )
+        new_invite.save()
+        response = self.client.post(
+            "/v1/users/invitation/{0}".format(token),
+            {"name": "sean", "password": "fooword"},
+        )
+        self.assertEqual(response.data["message"], "Success!")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_invitation_expiration_30_days(self):
+        recipient = "new@user.com"
+        _ = self.client.post(
+            "/v1/users/invite/", {"emails": recipient, "organization_id": self.org_id,},
+        )
+
+        token = hash(
+            str(self.existing_recipient)
+            + str(self.org_id)
+            + str(datetime.datetime.now())
+        )
+        aware_expiry_date = make_aware(datetime.datetime.now() - datetime.timedelta(1))
+
+        new_user_invite = Invitation(
+            email=recipient,
+            organization=self.organization,
+            invited_by=self.user,
+            token=token,
+            expires_at=aware_expiry_date,
+        )
+        new_user_invite.save()
+
+        response = self.client.post(
+            "/v1/users/invitation/{0}".format(token),
+            {"name": "sean", "password": "fooword"},
+        )
+        self.assertEqual(response.data["error"], "this token has expired!")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_invitation_post_call_already_joined_org(self):
         recipient = "lambda@sigma.com"
         _ = self.client.post(
             "/v1/users/invite/",
@@ -77,16 +153,7 @@ class TestInvite(APITestCase):
             "/v1/users/invitation/{0}".format(self.token),
             {"name": "sean", "password": "fooword"},
         )
-        self.assertEqual(response.data["message"], "Your account has been created!")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    # write test for post call with existing user
-
-    # write test for making two invites with the same name and checking they are unique
-
-    # test for token expiration after 30 days
-
-    # test users cannot be added twice to the same org
-
-    
-
+        self.assertEqual(
+            response.data["error"], "this organization has already been joined"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

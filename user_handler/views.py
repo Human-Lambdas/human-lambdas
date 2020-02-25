@@ -307,7 +307,6 @@ class SendInviteView(APIView):
 
 
 class InvitationView(APIView):
-
     def get(self, request, *args, **kwargs):
         invite = Invitation.objects.all()
         # invite = self.get_queryset()
@@ -342,14 +341,16 @@ class InvitationView(APIView):
             if Organization.objects.filter(
                 user__email=invite.email, name=str(invitation_org)
             ).exists():
-                return Response({"error": "this organization has already been joined"})
+                return Response(
+                    {"error": "this organization has already been joined"}, status=400
+                )
             if User.objects.filter(email=invite.email).first() is None:
                 new_user = User(email=invite.email, name=request.data["name"])
                 new_user.set_password(request.data["password"])
                 new_user.save()
                 invitation_org.user.add(new_user)
                 return Response(
-                    {"message": "Your account has been created!"}, status=200
+                    {"message": "Your account has been created!"}, status=201
                 )
             else:
                 user = User.objects.filter(email=invite.email).first()
