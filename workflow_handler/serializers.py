@@ -43,11 +43,13 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "outputs",
             "disabled",
             "n_tasks",
+            "created_at",
         ]
         extra_kwargs = {
             "disabled": {"write_only": True},
             "n_tasks": {"read_only": True},
             "id": {"read_only": True},
+            "created_at": {"read_only": True},
         }
 
     def create(self, validated_data):

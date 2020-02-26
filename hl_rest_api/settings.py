@@ -12,9 +12,12 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 from datetime import timedelta
+import logging
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+
+logger = logging.getLogger(__file__)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -180,7 +183,6 @@ LOGGING = {
     "handlers": {"console": {"level": "DEBUG", "class": "logging.StreamHandler"}},
     "loggers": {"": {"handlers": ["console"], "level": "DEBUG" if DEBUG else "INFO"}},
 }
-
 
 SIMPLE_JWT = {
     # https://github.com/davesque/django-rest-framework-simplejwt
