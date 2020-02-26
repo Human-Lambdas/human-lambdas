@@ -282,21 +282,19 @@ class GetCompletedTaskView(ListAPIView):
             & Q(organization__pk=self.kwargs["org_id"])
         )
         return Task.objects.filter(
-            Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
+            Q(workflow__in=workflows)
+            & Q(workflow=self.kwargs["workflow_id"])
+            & Q(status="completed")
         )
 
     def list(self, request, *args, **kwargs):
-        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.filter_queryset(self.get_queryset())
-        queryset.filter(workflow=workflow).filter(status="completed")
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        obj = get_list_or_404(
-            self.get_queryset(), workflow=workflow, status="completed"
-        )
+        obj = get_list_or_404(self.get_queryset())
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
 
