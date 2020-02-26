@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 from datetime import timedelta
 import logging
+import requests
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -206,3 +207,11 @@ if not DEBUG:
     )
 
 FRONT_END_BASE_URL = "http://human-lambdas-api.eu-west-2.elasticbeanstalk.com/"
+
+LOCAL_IP = None
+try:
+    LOCAL_IP = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4', timeout=0.01).text
+except requests.exceptions.RequestException:
+    pass
+if LOCAL_IP and not DEBUG:
+    ALLOWED_HOSTS.append(LOCAL_IP)
