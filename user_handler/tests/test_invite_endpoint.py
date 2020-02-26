@@ -13,7 +13,7 @@ class TestInvite(APITestCase):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
         self.preset_changed_email = "bar@foo.com"
-        self.organization_name = 1
+        self.organization_name = "barinc"
         self.preset_user_password = "fooword"
 
         user = User(name=self.preset_user_name, email=self.preset_user_email)
@@ -69,7 +69,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,alpha@beta.com,gamma@delta.com",
-                "organization_id": 1,
+                "organization_id": self.org_id,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -80,7 +80,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,foo@bar.com,gamma@delta.com",
-                "organization_id": 1,
+                "organization_id": self.org_id,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -89,7 +89,10 @@ class TestInvite(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.post(
             "/v1/users/invite/",
-            {"emails": "lambda@sigma.com,foo@foo,bar.com", "organization_id": 1,},
+            {
+                "emails": "lambda@sigma.com,foo@foo,bar.com",
+                "organization_id": self.org_id,
+            },
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -99,7 +102,7 @@ class TestInvite(APITestCase):
             "/v1/users/invite/",
             {
                 "emails": "lambda@sigma.com,foo@foo,bar.com,foo@bar.com",
-                "organization_id": 1,
+                "organization_id": self.org_id,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
