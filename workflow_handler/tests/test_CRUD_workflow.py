@@ -267,6 +267,8 @@ class TestCRUDWorkflow(APITestCase):
         self.assertTrue(result_2.pop("id"))
         self.assertEqual(result_1.pop("n_tasks"), 0)
         self.assertEqual(result_2.pop("n_tasks"), 0)
+        self.assertTrue(result_1.pop("created_at"))
+        self.assertTrue(result_2.pop("created_at"))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         try:
             self.assertEqual(workflow_data2, response.data[0], response.data)
@@ -332,6 +334,7 @@ class TestCRUDWorkflow(APITestCase):
         response = self.client.get("/v1/orgs/{}/workflows/".format(self.org_id))
         result_1 = response.data[0]
         self.assertTrue(result_1.pop("id"))
+        self.assertTrue(result_1.pop("created_at"))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
         workflow_data1["n_tasks"] = 0
