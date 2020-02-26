@@ -209,10 +209,14 @@ class SendInviteView(APIView):
                 )
                 if organization.first() is None:
                     # send
-                    to_hash = str(email + str(request.data["organization_id"]))
+                    to_hash = str(
+                        email
+                        + str(request.data["organization_id"])
+                        + str(datetime.datetime.now())
+                    )
                     token = hash(to_hash)
 
-                    naive_expiry_date = datetime.datetime.now() + datetime.timedelta(14)
+                    naive_expiry_date = datetime.datetime.now() + datetime.timedelta(30)
                     aware_expiry_date = make_aware(naive_expiry_date)
 
                     inviting_org = Organization.objects.filter(
@@ -303,16 +307,9 @@ class SendInviteView(APIView):
 
 
 class InvitationView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        user = self.request.user
-        return Invitation.objects.filter(organization__user=user)
-
     def get(self, request, *args, **kwargs):
-        invite = self.get_queryset()
-        invite = invite.filter(token=self.kwargs["invite_token"])
-        if invite.first() is None:
+        invite = Invitation.objects.filter(token=self.kwargs["invite_token"])
+        if not invite.exists():
             return Response(
                 {"error": "no invitation with this token exists"}, status=404
             )
@@ -335,15 +332,23 @@ class InvitationView(APIView):
             return Response(
                 {"error": "no invitation with this token exists"}, status=404
             )
+        if invite.expires_at < make_aware(datetime.datetime.now()):
+            return Response({"error": "this token has expired!"}, status=400)
         else:
             invitation_org = invite.organization
+            if Organization.objects.filter(
+                user__email=invite.email, name=str(invitation_org)
+            ).exists():
+                return Response(
+                    {"error": "this organization has already been joined"}, status=400
+                )
             if User.objects.filter(email=invite.email).first() is None:
                 new_user = User(email=invite.email, name=request.data["name"])
                 new_user.set_password(request.data["password"])
                 new_user.save()
                 invitation_org.user.add(new_user)
                 return Response(
-                    {"message": "Your account has been created!"}, status=200
+                    {"message": "Your account has been created!"}, status=201
                 )
             else:
                 user = User.objects.filter(email=invite.email).first()
