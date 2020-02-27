@@ -14,6 +14,7 @@ import os
 from datetime import timedelta
 import logging
 
+import requests
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -32,13 +33,6 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False if os.getenv("DEBUG") == "False" else True
 
-ALLOWED_HOSTS = [
-    "0.0.0.0",
-    "localhost",
-    "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
-    "3.8.80.181",
-    "ec2-3-8-80-181.eu-west-2.compute.amazonaws.com",
-]
 
 HOOK_EVENTS = {
     "task.completed": "workflow_handler.Task.completed",
@@ -146,7 +140,12 @@ AUTH_USER_MODEL = "user_handler.User"
 
 if DEBUG:
     DEFAULT_PERMISSION = "rest_framework.permissions.AllowAny"
+    ALLOWED_HOSTS = ["*"]
 else:
+    ALLOWED_HOSTS = [
+        "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
+        "api.humanlambdas.com",
+    ]
     DEFAULT_PERMISSION = "rest_framework.permissions.IsAuthenticated"
 
 REST_FRAMEWORK = {
@@ -207,3 +206,13 @@ if not DEBUG:
     )
 
 FRONT_END_BASE_URL = "http://human-lambdas-api.eu-west-2.elasticbeanstalk.com/"
+
+LOCAL_IP = None
+try:
+    LOCAL_IP = requests.get(
+        "http://169.254.169.254/latest/meta-data/local-ipv4", timeout=0.01
+    ).text
+except requests.exceptions.RequestException:
+    pass
+if LOCAL_IP and not DEBUG:
+    ALLOWED_HOSTS.append(LOCAL_IP)
