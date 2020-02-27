@@ -2,6 +2,7 @@ name: Deploy-AWS-ElasticBeanstalk
 env:
   EB_APPLICATION_NAME       : "human-lambdas-api"
   EB_ENVIRONMENT_NAME       : "human-lambdas"
+  AWS_REGION_NAME           : "eu-west-2a"
 
 on:
   push:
@@ -17,6 +18,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ env.AWS_REGION_NAME }}
 
       - name: Create new ElasticBeanstalk Applicaiton Version
         run: |
@@ -29,3 +31,4 @@ jobs:
 
       - name: Print nice message on completion of CD Pipeline
         run: echo "CD Pipeline part finished successfully"
+
