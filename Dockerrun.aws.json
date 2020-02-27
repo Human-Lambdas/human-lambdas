@@ -5,8 +5,8 @@
     "Update": "true"
   },
   "Authentication": {
-    "Bucket": "devops",
-    "Key": "hlambda.dockercfg"
+    "Bucket": "hl-dockercfg",
+    "Key": "index.docker.io/config.json"
   },
   "Volumes": [
     {
