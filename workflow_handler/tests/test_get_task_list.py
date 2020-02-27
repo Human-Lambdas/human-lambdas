@@ -74,12 +74,12 @@ class TestTaskList(APITestCase):
             "/v1/orgs/{}/workflows/{}/completed/".format(self.org_id, self.workflow_id)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertTrue(len(response.data) > 100)
+        self.assertEqual(len(response.data["tasks"]), 100, response.data)
         response = self.client.get(
             "/v1/orgs/{}/workflows/{}/completed/".format(self.org_id, self.workflow_id),
             format="json",
-            data={"limit": 100},
+            data={"limit": 50},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data["results"]), 100, response.data)
+        self.assertEqual(len(response.data["tasks"]), 50, response.data)
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
