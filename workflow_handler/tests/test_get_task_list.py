@@ -62,7 +62,8 @@ class TestTaskList(APITestCase):
                 data=data,
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        for task in Task.objects.all():
+        self.completed_tasks = 150
+        for task in Task.objects.all()[: self.completed_tasks]:
             task.status = "completed"
             task.save()
 
@@ -81,3 +82,4 @@ class TestTaskList(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["results"]), 100, response.data)
+        self.assertEqual(response.data["count"], self.completed_tasks, response.data)
