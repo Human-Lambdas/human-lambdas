@@ -46,7 +46,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION_NAME }}
 
       -name: Check if bundle created
-        run: |
+       run: |
           not_exist=true
           while [ $not_exist ]
           do
