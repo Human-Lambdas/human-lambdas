@@ -27,6 +27,7 @@ services:
       DEBUG: ${DEBUG}
       SENTRY_KEY: ${SENTRY_KEY}
       SENTRY_PROJECT: ${SENTRY_PROJECT}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
     volumes:
       - .:/code
     ports:

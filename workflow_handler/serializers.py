@@ -1,11 +1,12 @@
 import logging
 
+from django.conf import settings
 from django.utils import timezone
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from user_handler.models import Organization
 from schema import SchemaError
 
-from .models import Workflow, Task
+from .models import Workflow, Task, WorkflowHook
 from .schemas import (
     WORKFLOW_INPUT_SCHEMA,
     TASK_INPUT_SCHEMA,
@@ -42,10 +43,13 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "outputs",
             "disabled",
             "n_tasks",
+            "created_at",
         ]
         extra_kwargs = {
             "disabled": {"write_only": True},
             "n_tasks": {"read_only": True},
+            "id": {"read_only": True},
+            "created_at": {"read_only": True},
         }
 
     def create(self, validated_data):
@@ -82,17 +86,23 @@ class WorkflowSerializer(serializers.ModelSerializer):
     def validate_inputs(self, data):
         try:
             return WORKFLOW_INPUT_SCHEMA.validate(data)
-        except SchemaError as exception:
-            raise serializers.ValidationError(exception)
+        except SchemaError as exception_text:
+            raise serializers.ValidationError(exception_text)
 
     def validate_outputs(self, data):
         try:
             return validate_output_structure(OUTPUT_SCHEMA.validate(data))
-        except SchemaError as exception:
-            raise serializers.ValidationError(exception)
+        except SchemaError as exception_text:
+            raise serializers.ValidationError(exception_text)
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    def validate_event(self, event):
+        if event not in settings.HOOK_EVENTS:
+            err_msg = "Unexpected event {}".format(event)
+            raise exceptions.ValidationError(detail=err_msg, code=400)
+        return event
+
     class Meta:
         model = Task
         fields = ["id", "status", "created_at", "inputs", "outputs"]
@@ -117,17 +127,19 @@ class TaskSerializer(serializers.ModelSerializer):
             if itype not in instance_output:
                 instance_output[itype] = {}
             instance_output[itype]["value"] = output[itype]["value"]
+        user = self.context["request"].user
         instance.status = "completed"
         instance.completed_at = timezone.now()  # datetime.datetime.now()
-        instance.completed_by = self.context["request"].user
+        instance.completed_by = user
         instance.save()
+        instance.task_completed(user)
         return instance
 
     def validate_inputs(self, data):
         try:
             return TASK_INPUT_SCHEMA.validate(data)
-        except SchemaError as exception:
-            raise serializers.ValidationError(exception)
+        except SchemaError as exception_text:
+            raise serializers.ValidationError(exception_text)
 
     def validate_outputs(self, data):
         try:
@@ -135,5 +147,38 @@ class TaskSerializer(serializers.ModelSerializer):
                 return UPDATE_OUTPUT_SCHEMA.validate(data)
             else:
                 return validate_output_structure(OUTPUT_SCHEMA.validate(data))
-        except SchemaError as exception:
-            raise serializers.ValidationError(exception)
+        except SchemaError as exception_text:
+            raise serializers.ValidationError(exception_text)
+
+
+class HookSerializer(serializers.ModelSerializer):
+    def validate_event(self, event):
+        if event not in settings.HOOK_EVENTS:
+            err_msg = "Unexpected event {}".format(event)
+            raise exceptions.ValidationError(detail=err_msg, code=400)
+        return event
+
+    class Meta:
+        model = WorkflowHook
+        fields = "__all__"
+        read_only_fields = ("user", "event", "workflow", "id")
+
+    def update(self, instance, validated_data):
+        instance.target = validated_data.get("target", instance.target)
+        instance.save()
+        return instance
+
+    def create(self, validated_data):
+        workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
+        if WorkflowHook.objects.filter(workflow=workflow).exists():
+            raise serializers.ValidationError(
+                "Webhook to this workflow already exists", code=400
+            )
+        hook = WorkflowHook(
+            user=validated_data["user"],
+            event="task.completed",
+            target=validated_data["target"],
+            workflow=workflow,
+        )
+        hook.save()
+        return hook

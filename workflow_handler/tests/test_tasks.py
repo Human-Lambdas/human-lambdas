@@ -5,6 +5,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import Workflow, Task
+from user_handler.models import Organization
 
 
 logger = logging.getLogger(__file__)
@@ -23,11 +24,11 @@ class TestTasks(APITestCase):
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register/", registration_data)
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
-        self.refresh = response.data["refresh"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "name": "uploader",
@@ -51,7 +52,11 @@ class TestTasks(APITestCase):
                 }
             ],
         }
-        _ = self.client.post("/v1/workflows/create/", workflow_data, format="json")
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
         second_workflow_data = {
             "name": "second workflow",
             "description": "great second wf",
@@ -75,25 +80,35 @@ class TestTasks(APITestCase):
             ],
         }
         _ = self.client.post(
-            "/v1/workflows/create/", second_workflow_data, format="json"
+            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            second_workflow_data,
+            format="json",
         )
         self.workflow_id = Workflow.objects.get(name="uploader").id
         self.second_workflow_id = Workflow.objects.get(name="second workflow").id
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/workflows/{}/upload/".format(self.workflow_id), data=data
+                "/v1/orgs/{0}/workflows/{1}/upload/".format(
+                    self.org_id, self.workflow_id
+                ),
+                data=data,
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/workflows/{}/upload/".format(self.second_workflow_id), data=data
+                "/v1/orgs/{0}/workflows/{1}/upload/".format(
+                    self.org_id, self.second_workflow_id
+                ),
+                data=data,
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_get_task_list(self):
-        response = self.client.get("/v1/workflows/{}/tasks/".format(self.workflow_id))
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/".format(self.org_id, self.workflow_id)
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(3, len(response.data), response.content)
 
@@ -102,7 +117,9 @@ class TestTasks(APITestCase):
         tasks = Task.objects.filter(workflow=workflow).all()
         for task in tasks:
             response = self.client.get(
-                "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id)
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                    self.org_id, self.workflow_id, task.id
+                )
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("pending", response.data["status"])
@@ -113,7 +130,9 @@ class TestTasks(APITestCase):
         tasks = Task.objects.filter(workflow=workflow).all()
         for task in tasks:
             response = self.client.get(
-                "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id)
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                    self.org_id, self.workflow_id, task.id
+                )
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("pending", response.data["status"])
@@ -130,7 +149,9 @@ class TestTasks(APITestCase):
             output_list = [{"id": "foo", "single-selection": {"value": output_value}}]
             data = {"outputs": output_list}
             response = self.client.patch(
-                "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id),
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                    self.org_id, self.workflow_id, task.id
+                ),
                 data=data,
                 format="json",
             )
@@ -151,7 +172,9 @@ class TestTasks(APITestCase):
             output_list = [{"id": "bar", "multiple-selection": {"value": output_value}}]
             data = {"outputs": output_list}
             response = self.client.patch(
-                "/v1/workflows/{}/tasks/{}".format(self.second_workflow_id, task.id),
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                    self.org_id, self.second_workflow_id, task.id
+                ),
                 data=data,
                 format="json",
             )
@@ -165,7 +188,9 @@ class TestTasks(APITestCase):
         task = Task.objects.first()
         data = {"status": "testing"}
         response = self.client.patch(
-            "/v1/workflows/{}/tasks/{}".format(self.workflow_id, task.id),
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                self.org_id, self.workflow_id, task.id
+            ),
             data=data,
             format="json",
         )
@@ -175,7 +200,9 @@ class TestTasks(APITestCase):
 
     def test_next_task(self):
         response = self.client.get(
-            "/v1/workflows/{}/tasks/next/".format(self.workflow_id)
+            "/v1/orgs/{0}/workflows/{1}/tasks/next/".format(
+                self.org_id, self.workflow_id
+            )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual("pending", response.data["status"], response.content)
@@ -184,23 +211,29 @@ class TestTasks(APITestCase):
 
     def test_next_task_different_workflow(self):
         response = self.client.get(
-            "/v1/workflows/{}/tasks/next/".format(self.second_workflow_id)
+            "/v1/orgs/{0}/workflows/{1}/tasks/next/".format(
+                self.org_id, self.second_workflow_id
+            )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_next_task_without_slash(self):
         response = self.client.get(
-            "/v1/workflows/{}/tasks/next".format(self.workflow_id)
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
         )
         self.assertEqual(
             response.status_code, status.HTTP_301_MOVED_PERMANENTLY, response.content
         )
 
     def test_workflow_list_task_count(self):
-        response = self.client.get("/v1/workflows/")
+        response = self.client.get("/v1/orgs/{}/workflows/".format(self.org_id))
         for data, expected in zip(response.data, [3, 3]):
             self.assertEqual(data["n_tasks"], expected)
 
     def test_workflow_retrieve_task_count(self):
-        response = self.client.get("/v1/workflows/{}".format(self.workflow_id))
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id)
+        )
         self.assertEqual(response.data["n_tasks"], 3)

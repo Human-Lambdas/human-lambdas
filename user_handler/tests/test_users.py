@@ -16,18 +16,13 @@ class TestUsers(APITestCase):
         self.organization_name = "fooinc"
         self.preset_user_password = "fooword"
 
-        user = User(
-            name=self.preset_user_name, email=self.preset_user_email, is_admin=True
-        )
+        user = User(name=self.preset_user_name, email=self.preset_user_email)
         user.set_password(self.preset_user_password)
         user.save()
         organization = Organization(name=self.organization_name)
         organization.save()
         self.org_id = organization.id
-        organization.user.add(user)
-        user = User(name="wrong_username", email="wrong@bar.com", is_admin=True)
-        user.set_password("wrong_user")
-        user.save()
+        organization.add_admin(user)
 
     def test_user_data(self):
         user = User.objects.get(name=self.preset_user_name)
@@ -66,9 +61,33 @@ class TestAPIRegistration(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
+class TestAPIUserCRUD(APITestCase):
+    def setUp(self):
+        response = self.client.post(
+            "/v1/users/register/",
+            {
+                "email": "foo@bar.com",
+                "password": "fooword",
+                "name": "foo",
+                "is_admin": True,
+                "organization": "barinc",
+            },
+        )
+        self.user_id = response.data["id"]
+        response = self.client.post(
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+        )
+        self.access_token = response.data["access"]
+
+    def test_retrieve_user(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/v1/users/{}".format(self.user_id))
+        self.assertTrue(response.data["is_admin"])
+
+
 class TestAPIjwt(APITestCase):
     def setUp(self):
-        user = User(name="foo", email="foo@bar.com", is_admin=True)
+        user = User(name="foo", email="foo@bar.com")
         user.set_password("fooword")
         user.save()
         response = self.client.post(
@@ -94,7 +113,7 @@ class TestAPIUserUpdate(APITestCase):
     def setUp(self):
         self.preset_password = "fooword"
         self.preset_changed_password = "barword"
-        user = User(name="foo", email="foo@bar.com", is_admin=True)
+        user = User(name="foo", email="foo@bar.com")
         user.set_password(self.preset_password)
         user.save()
         response = self.client.post(
@@ -109,23 +128,52 @@ class TestAPIUserUpdate(APITestCase):
         response = self.client.get("/v1/users/{}".format(self.user_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
-    def test_update(self):
+    def test_update_password(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         data = {"password": self.preset_changed_password}
         response = self.client.patch("/v1/users/{}".format(self.user_id), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        response = self.client.post(
+            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+        )
+        self.assertEqual(response.status_code, 401)
+        response = self.client.post(
+            "/v1/users/token/",
+            {"email": "foo@bar.com", "password": self.preset_changed_password},
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_name(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        new_name = "baaaard"
+        data = {"name": new_name}
+        response = self.client.patch("/v1/users/{}".format(self.user_id), data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data["name"], new_name, response.data)
+        user = User.objects.get(pk=self.user_id)
+        self.assertEqual(user.name, new_name)
+
+    def test_update_email(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        new_email = "baaard@foo.com"
+        data = {"email": new_email}
+        response = self.client.patch("/v1/users/{}".format(self.user_id), data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data["email"], new_email, response.data)
+        user = User.objects.get(pk=self.user_id)
+        self.assertEqual(user.email, new_email)
 
 
 class TestListUsers(APITestCase):
     def setUp(self):
         self.user_name = "foo"
-        user = User(name=self.user_name, email="foo@bar.com", is_admin=True)
+        user = User(name=self.user_name, email="foo@bar.com")
         user.set_password("foopwd")
         user.save()
         self.organization_name = "fooinc"
         organization = Organization(name=self.organization_name)
         organization.save()
-        organization.user.add(user)
+        organization.add_admin(user)
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "foopwd"}
         )
@@ -134,23 +182,34 @@ class TestListUsers(APITestCase):
 
         self.worker1_name = "peter"
         self.worker2_name = "paul"
-        worker1 = User(name=self.worker1_name, email="worker1@bar.com", is_admin=False)
+        worker1 = User(name=self.worker1_name, email="worker1@bar.com")
         worker1.set_password("pwd")
         worker1.save()
         organization.user.add(worker1)
+        self.org_id1 = organization.pk
 
-        worker2 = User(name=self.worker1_name, email="worker2@bar.com", is_admin=False)
+        worker2 = User(name=self.worker1_name, email="worker2@bar.com")
         worker2.set_password("pwd")
         worker2.save()
         organization_other = Organization(name="otherorg")
         organization_other.save()
         organization_other.user.add(worker2)
+        self.org_id2 = organization.pk
 
-    def test_list_user(self):
+    def test_list_user1(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/")
+        response = self.client.get("/v1/orgs/{}/users/".format(self.org_id1))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 2)
         self.assertTrue(self.user_name in [i["name"] for i in response.data])
         self.assertTrue(self.worker1_name in [i["name"] for i in response.data])
         self.assertTrue(self.worker2_name not in [i["name"] for i in response.data])
+
+    # def test_list_user2(self):
+    #     self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+    #     response = self.client.get("/v1/orgs/{}/users/".format(self.org_id1))
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+    #     self.assertEqual(len(response.data), 2)
+    #     self.assertTrue(self.user_name in [i["name"] for i in response.data])
+    #     self.assertTrue(self.worker1_name in [i["name"] for i in response.data])
+    #     self.assertTrue(self.worker2_name not in [i["name"] for i in response.data])

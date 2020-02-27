@@ -12,9 +12,13 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 from datetime import timedelta
+import logging
 
+import requests
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+
+logger = logging.getLogger(__file__)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,12 +33,10 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False if os.getenv("DEBUG") == "False" else True
 
-ALLOWED_HOSTS = [
-    "0.0.0.0",
-    "localhost",
-    "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
-]
 
+HOOK_EVENTS = {
+    "task.completed": "workflow_handler.Task.completed",
+}
 
 # Application definition
 
@@ -51,7 +53,9 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     "rest_framework.authtoken",
+    "rest_hooks",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -136,7 +140,12 @@ AUTH_USER_MODEL = "user_handler.User"
 
 if DEBUG:
     DEFAULT_PERMISSION = "rest_framework.permissions.AllowAny"
+    ALLOWED_HOSTS = ["*"]
 else:
+    ALLOWED_HOSTS = [
+        "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
+        "api.humanlambdas.com",
+    ]
     DEFAULT_PERMISSION = "rest_framework.permissions.IsAuthenticated"
 
 REST_FRAMEWORK = {
@@ -174,7 +183,6 @@ LOGGING = {
     "loggers": {"": {"handlers": ["console"], "level": "DEBUG" if DEBUG else "INFO"}},
 }
 
-
 SIMPLE_JWT = {
     # https://github.com/davesque/django-rest-framework-simplejwt
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
@@ -196,3 +204,15 @@ if not DEBUG:
         # django.contrib.auth) you may enable sending PII data.
         send_default_pii=True,
     )
+
+FRONT_END_BASE_URL = "http://human-lambdas-api.eu-west-2.elasticbeanstalk.com/"
+
+LOCAL_IP = None
+try:
+    LOCAL_IP = requests.get(
+        "http://169.254.169.254/latest/meta-data/local-ipv4", timeout=0.01
+    ).text
+except requests.exceptions.RequestException:
+    pass
+if LOCAL_IP and not DEBUG:
+    ALLOWED_HOSTS.append(LOCAL_IP)

@@ -19,12 +19,12 @@ jobs:
         image: postgres:10  
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ""
+          POSTGRES_PASSWORD: "test"
           POSTGRES_DB: postgres
         ports:
         - 5432:5432
         # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 10
 
     steps:
     - uses: actions/checkout@v1
@@ -44,15 +44,17 @@ jobs:
     - name: Test with pytest
       run: |
         python manage.py migrate
-        python manage.py test
+        python manage.py test --debug-mode
       env:
         POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: ""
+        POSTGRES_PASSWORD: "test"
         POSTGRES_DB: postgres
         POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
         POSTGRES_HOST: localhost
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         SENTRY_KEY: ${{ secrets.SENTRY_KEY }}
         SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        DEBUG: True
 
 
