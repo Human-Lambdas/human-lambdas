@@ -1,7 +1,7 @@
 name: Deploy-AWS-ElasticBeanstalk
 env:
-  EB_APPLICATION_NAME       : "human-lambdas-api"
-  EB_ENVIRONMENT_NAME       : "human-lambdas"
+  EB_APPLICATION_NAME       : "human-lambdas"
+  EB_ENVIRONMENT_NAME       : "human-lambdas-api"
   AWS_REGION_NAME           : "eu-west-2"
 
 on:
