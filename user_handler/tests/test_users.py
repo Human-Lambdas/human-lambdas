@@ -204,12 +204,3 @@ class TestListUsers(APITestCase):
         self.assertTrue(self.user_name in [i["name"] for i in response.data])
         self.assertTrue(self.worker1_name in [i["name"] for i in response.data])
         self.assertTrue(self.worker2_name not in [i["name"] for i in response.data])
-
-    # def test_list_user2(self):
-    #     self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-    #     response = self.client.get("/v1/orgs/{}/users/".format(self.org_id1))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-    #     self.assertEqual(len(response.data), 2)
-    #     self.assertTrue(self.user_name in [i["name"] for i in response.data])
-    #     self.assertTrue(self.worker1_name in [i["name"] for i in response.data])
-    #     self.assertTrue(self.worker2_name not in [i["name"] for i in response.data])
