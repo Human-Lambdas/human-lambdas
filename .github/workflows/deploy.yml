@@ -37,6 +37,8 @@ jobs:
 
   deployment:
     runs-on: ubuntu-latest
+    needs: [create-bundle]
+    
     steps:
       - name: Configure my AWS Credentils
         uses: aws-actions/configure-aws-credentials@v1
@@ -44,15 +46,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: ${{ env.AWS_REGION_NAME }}
-
-      - name: Check if bundle created
-        run: |
-          not_exist=true
-          while [ $not_exist ]
-          do
-            aws s3api head-object --bucket ${{ env.EB_PACKAGE_S3_BUCKET_NAME }} --key ${{ env.DEPLOY_PACKAGE_NAME }} || not_exist=true
-            sleep 10
-          echo "Bundle ready!"
 
       - name: Create new ElasticBeanstalk Applicaiton Version
         run: |
