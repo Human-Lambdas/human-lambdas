@@ -3,6 +3,8 @@ env:
   EB_APPLICATION_NAME       : "human-lambdas"
   EB_ENVIRONMENT_NAME       : "human-lambdas-api"
   AWS_REGION_NAME           : "eu-west-2"
+  DEPLOY_PACKAGE_NAME       : "hl-rest-api-${{ github.sha }}.zip"
+  EB_PACKAGE_S3_BUCKET_NAME : "hl-rest-api-bundles-prod"
 
 on:
   push:
@@ -10,6 +12,29 @@ on:
     - master
 
 jobs:
+  create-bundle:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git clone our repository
+        uses: actions/checkout@v1
+
+      - name: Create ZIP deployment package
+        run: zip -r ${{ env.DEPLOY_PACKAGE_NAME }} ./  -x  *.git*
+
+      - name: Configure my AWS Credentils
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.MY_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.MY_AWS_SECRET_KEY }}
+          aws-region: ${{ env.AWS_REGION_NAME }}
+
+      - name: Copy our Deployment package to S3 bucket
+        run: aws s3 cp ${{ env.DEPLOY_PACKAGE_NAME }} s3://${{ env.EB_PACKAGE_S3_BUCKET_NAME}}/
+
+      - name: Print nice message on completion of CI Pipeline
+        run: echo "CI Pipeline part finished successfully"
+
   deployment:
     runs-on: ubuntu-latest
     steps:
@@ -24,6 +49,7 @@ jobs:
         run: |
           aws elasticbeanstalk create-application-version \
           --application-name ${{ env.EB_APPLICATION_NAME }} \
+          --source-bundle S3Bucket="${{ env.EB_PACKAGE_S3_BUCKET_NAME }}",S3Key="${{ env.DEPLOY_PACKAGE_NAME }}" \
           --version-label "Ver-${{ github.sha }}" \
           --description "CommitSHA-${{ github.sha }}"
       - name: Deploy our new Application Version
