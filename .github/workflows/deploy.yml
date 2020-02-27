@@ -45,8 +45,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: ${{ env.AWS_REGION_NAME }}
 
-      -name: Check if bundle created
-       run: |
+      - name: Check if bundle created
+        run: |
           not_exist=true
           while [ $not_exist ]
           do
