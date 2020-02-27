@@ -260,20 +260,25 @@ class CreateTaskView(CreateAPIView):
         workflow.save()
         return self.create(request, *args, **kwargs)
 
+
 class TaskPagination(LimitOffsetPagination):
     """
     Extended pagination class for Tasks
     """
+
     default_limit = 100
     max_limit = 1000
 
     def get_paginated_response(self, data):
-        return Response({
-            'next': self.get_next_link(),
-            'previous': self.get_previous_link(),
-            'count': self.count,
-            'tasks': data
-        })
+        return Response(
+            {
+                "next": self.get_next_link(),
+                "previous": self.get_previous_link(),
+                "count": self.count,
+                "tasks": data,
+            }
+        )
+
 
 class GetCompletedTaskView(ListAPIView):
     """
