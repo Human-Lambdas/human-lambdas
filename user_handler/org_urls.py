@@ -23,5 +23,7 @@ urlpatterns = [
         name="remove-organization-users",
     ),
     path("<int:org_id>/workflows/", include("workflow_handler.urls")),
-    path("<int:org_id>/workflows/invite/", SendInviteView.as_view(), name="send-invite"),
+    path(
+        "<int:org_id>/workflows/invite/", SendInviteView.as_view(), name="send-invite"
+    ),
 ]

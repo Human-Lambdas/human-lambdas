@@ -188,9 +188,7 @@ class SendInviteView(APIView):
         email_set = set(next(reader))
         # convert to set to ignore any duplicated emails
 
-        invite_org = Organization.objects.filter(
-            pk=kwargs["org_id"], user=request.user
-        )
+        invite_org = Organization.objects.filter(pk=kwargs["org_id"], user=request.user)
         if invite_org is None:
             # ensure user is inviting to an organization they belong to
             return Response(
@@ -210,9 +208,7 @@ class SendInviteView(APIView):
                 if organization.first() is None:
                     # send
                     to_hash = str(
-                        email
-                        + str(kwargs["org_id"])
-                        + str(datetime.datetime.now())
+                        email + str(kwargs["org_id"]) + str(datetime.datetime.now())
                     )
                     token = hash(to_hash)
 
