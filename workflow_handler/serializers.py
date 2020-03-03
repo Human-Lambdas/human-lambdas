@@ -105,7 +105,15 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ["id", "status", "created_at", "inputs", "outputs"]
+        fields = [
+            "id",
+            "status",
+            "created_at",
+            "inputs",
+            "outputs",
+            "completed_by",
+            "completed_at",
+        ]
 
     def create(self, validated_data):
         inputs = validated_data["inputs"]

@@ -38,6 +38,9 @@ HOOK_EVENTS = {
     "task.completed": "workflow_handler.Task.completed",
 }
 
+HOOK_CUSTOM_MODEL = "workflow_handler.WorkflowHook"
+
+
 # Application definition
 
 INSTALLED_APPS = [

@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0013_workflowhook'),
+        ("workflow_handler", "0013_workflowhook"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='created_at',
+            model_name="task",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True),
         ),
         migrations.AlterField(
-            model_name='workflow',
-            name='created_at',
+            model_name="workflow",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True),
         ),
     ]
