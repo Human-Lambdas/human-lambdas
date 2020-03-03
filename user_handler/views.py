@@ -182,15 +182,13 @@ class GetOrganizationView(RetrieveAPIView):
 class SendInviteView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         stripped_email_list = StringIO("".join(request.data["emails"].split()))
         reader = csv.reader(stripped_email_list, delimiter=",")
         email_set = set(next(reader))
         # convert to set to ignore any duplicated emails
 
-        invite_org = Organization.objects.filter(
-            pk=request.data["organization_id"], user=request.user
-        )
+        invite_org = Organization.objects.filter(pk=kwargs["org_id"], user=request.user)
         if invite_org is None:
             # ensure user is inviting to an organization they belong to
             return Response(
@@ -205,14 +203,12 @@ class SendInviteView(APIView):
                 # checks the email is valid
                 user_obj = User.objects.filter(email=email)
                 organization = Organization.objects.filter(
-                    pk=request.data["organization_id"], user=user_obj.first()
+                    pk=kwargs["org_id"], user=user_obj.first()
                 )
                 if organization.first() is None:
                     # send
                     to_hash = str(
-                        email
-                        + str(request.data["organization_id"])
-                        + str(datetime.datetime.now())
+                        email + str(kwargs["org_id"]) + str(datetime.datetime.now())
                     )
                     token = hash(to_hash)
 
@@ -220,7 +216,7 @@ class SendInviteView(APIView):
                     aware_expiry_date = make_aware(naive_expiry_date)
 
                     inviting_org = Organization.objects.filter(
-                        pk=request.data["organization_id"]
+                        pk=kwargs["org_id"]
                     ).first()
 
                     if inviting_org is None:
