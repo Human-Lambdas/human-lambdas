@@ -11,7 +11,7 @@ class Workflow(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     inputs = JSONField()
     outputs = JSONField()
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     disabled = models.BooleanField(default=False)
     n_tasks = models.IntegerField(default=0)
@@ -23,7 +23,7 @@ class Workflow(models.Model):
 class Task(models.Model):
     status = models.CharField(max_length=128, default="pending")
     completed_at = models.DateTimeField(null=True)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     completed_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
     inputs = JSONField()
