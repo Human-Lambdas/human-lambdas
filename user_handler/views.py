@@ -258,7 +258,7 @@ class SendInviteView(APIView):
 
                     invite.save()
 
-                    if False:
+                    if not settings.DEBUG:
                         message = Mail(
                             from_email="no-reply@humanlambdas.com",
                             to_emails=email,
