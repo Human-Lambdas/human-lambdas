@@ -345,10 +345,15 @@ class InvitationView(APIView):
             if User.objects.filter(email=invite.email).first() is None:
                 new_user = User(email=invite.email, name=request.data["name"])
                 new_user.set_password(request.data["password"])
+                new_user.current_organization_id = invitation_org.id
                 new_user.save()
                 invitation_org.user.add(new_user)
                 return Response(
-                    {"message": "Your account has been created!"}, status=201
+                    {
+                        "message": "Your account has been created!",
+                        "email": invite.email,
+                    },
+                    status=201,
                 )
             else:
                 user = User.objects.filter(email=invite.email).first()
