@@ -41,21 +41,48 @@ class TestUsers(APITestCase):
         self.assertEqual(new_user.email, self.preset_changed_email)
 
     def test_user_password_change(self):
+        new_password = "wordfoo"
         response = self.client.post(
-            "/v1/users/token/", {"email": self.preset_user_email, "password": self.preset_user_password}
+            "/v1/users/token/",
+            {"email": self.preset_user_email, "password": self.preset_user_password},
         )
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
-        response = self.client.post("/v1/users/change-password/", {"currentPassword": self.preset_user_password, "newPassword": "changedpassword"})
+        response = self.client.post(
+            "/v1/users/change-password/",
+            {"currentPassword": self.preset_user_password, "newPassword": new_password},
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.post(
-            "/v1/users/token/", {"email": self.preset_user_email, "password": self.preset_user_password}
+            "/v1/users/token/",
+            {"email": self.preset_user_email, "password": self.preset_user_password},
         )
         # user password has changed so will get a 401
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.post(
+            "/v1/users/token/",
+            {"email": self.preset_user_email, "password": new_password},
+        )
+        # can get token with correct password
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_password_change_no_current_password(self):
+        new_password = "wordfoo"
+        response = self.client.post(
+            "/v1/users/token/",
+            {"email": self.preset_user_email, "password": self.preset_user_password},
+        )
+        access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
+        response = self.client.post(
+            "/v1/users/change-password/", {"newPassword": new_password}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_user_password_change_no_jwt(self):
-        response = self.client.post("/v1/users/change-password/", {"newPassword": "eff"})
+        response = self.client.post(
+            "/v1/users/change-password/", {"newPassword": "eff"}
+        )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_user_data_deletion(self):

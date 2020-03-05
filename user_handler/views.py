@@ -139,10 +139,23 @@ class ChangePasswordView(APIView):
 
     def post(self, request):
         user = self.request.user
-        changing_user = User.objects.get(pk=user.pk)#
-        changing_user.set_password("eeee")
-        changing_user.save()
-        return Response(status=200)
+        changing_user = User.objects.get(pk=user.pk)
+        try:
+            _ = request.data["currentPassword"]
+            _ = request.data["newPassword"]
+        except:
+            return Response(status=400)
+        if changing_user.check_password(request.data["currentPassword"]):
+            changing_user.set_password(request.data["newPassword"])
+            changing_user.save()
+            return Response({"message": "Your password has been changed"}, status=200)
+        else:
+            return Response(
+                {
+                    "error": "The current password provided does not match the user password"
+                },
+                status=400,
+            )
 
 
 class ListOrgUsersView(ListAPIView):
@@ -269,7 +282,7 @@ class SendInviteView(APIView):
 
                     invite.save()
 
-                    if False: # not settings.DEBUG:
+                    if not settings.DEBUG:
                         message = Mail(
                             from_email="no-reply@humanlambdas.com",
                             to_emails=email,
