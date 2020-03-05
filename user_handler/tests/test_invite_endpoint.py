@@ -29,7 +29,7 @@ class TestInvite(APITestCase):
         organization = Organization(name=self.organization_name)
         organization.save()
         self.org_id = organization.id
-        organization.user.add(user)
+        organization.add_admin(user)
 
     def test_endpoint_call(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)

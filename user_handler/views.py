@@ -22,6 +22,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.authtoken.models import Token
 from django.template.loader import get_template
 from django.conf import settings
+from user_handler.permissions import IsOrgAdmin
 
 from .models import User, Organization, Invitation
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
@@ -180,7 +181,7 @@ class GetOrganizationView(RetrieveAPIView):
 
 
 class SendInviteView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
 
     def post(self, request, *args, **kwargs):
         stripped_email_list = StringIO("".join(request.data["emails"].split()))
