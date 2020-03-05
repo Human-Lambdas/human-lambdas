@@ -134,6 +134,17 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                 )
 
 
+class ChangePasswordView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        user = self.request.user
+        changing_user = User.objects.get(pk=user.pk)#
+        changing_user.set_password("eeee")
+        changing_user.save()
+        return Response(status=200)
+
+
 class ListOrgUsersView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
@@ -258,7 +269,7 @@ class SendInviteView(APIView):
 
                     invite.save()
 
-                    if not settings.DEBUG:
+                    if False: # not settings.DEBUG:
                         message = Mail(
                             from_email="no-reply@humanlambdas.com",
                             to_emails=email,

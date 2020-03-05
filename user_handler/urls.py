@@ -7,6 +7,7 @@ from .views import (
     InvitationView,
     RetrieveUpdateUserView,
     APIAuthToken,
+    ChangePasswordView,
 )
 
 
@@ -14,6 +15,7 @@ urlpatterns = [
     path("register/", RegistrationView.as_view(), name="user-registration"),
     path("token/", jwt_views.TokenObtainPairView.as_view(), name="token-obtain-pair"),
     path("token/refresh/", jwt_views.TokenRefreshView.as_view(), name="token-refresh"),
+    path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("hello/", HelloView.as_view(), name="hello"),
     path(
         "invitation/<str:invite_token>",
