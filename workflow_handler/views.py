@@ -244,7 +244,9 @@ class CreateTaskView(CreateAPIView):
         for task_input in request.data["inputs"]:
             try:
                 workflow_input = next(
-                    item for item in workflow.inputs if item["id"] == task_input["id"]
+                    {"name": item["name"], "type": item["type"]}
+                    for item in workflow.inputs
+                    if item["id"] == task_input["id"]
                 )
             except StopIteration:
                 return Response(

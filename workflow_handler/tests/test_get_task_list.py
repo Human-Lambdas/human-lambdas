@@ -71,15 +71,24 @@ class TestTaskList(APITestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/completed/".format(self.org_id, self.workflow_id)
+            "/v1/orgs/{}/workflows/{}/tasks/completed/".format(
+                self.org_id, self.workflow_id
+            )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["tasks"]), 100, response.data)
         response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/completed/".format(self.org_id, self.workflow_id),
+            "/v1/orgs/{}/workflows/{}/tasks/completed/".format(
+                self.org_id, self.workflow_id
+            ),
             format="json",
             data={"limit": 50},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["tasks"]), 50, response.data)
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
+
+    def test_hook_serializer(self):
+        task = Task.objects.filter(status="completed").first()
+        result = task.serialize_hook()
+        self.assertEqual(result["id"], task.pk)
