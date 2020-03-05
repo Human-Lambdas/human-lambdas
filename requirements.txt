@@ -7,5 +7,5 @@ drf-chunked-upload==0.4.2
 sentry_sdk==0.14.2
 schema==0.7.1
 gunicorn==20.0.04
--e git+https://github.com/zapier/django-rest-hooks.git@d21a070b9a099b5e9c755b2afa6b81c9d8b26e7c#egg=django_rest_hooks-1.6.0
+git+https://github.com/zapier/django-rest-hooks.git@d21a070b9a099b5e9c755b2afa6b81c9d8b26e7c#egg=django_rest_hooks-1.6.0
 sendgrid==6.1.2
