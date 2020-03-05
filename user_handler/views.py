@@ -23,7 +23,7 @@ from rest_framework.authtoken.models import Token
 from django.template.loader import get_template
 from django.conf import settings
 
-from .models import User, Organization, Invitation
+from .models import User, Organization, Invitation. ForgottenPassword
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
 
 logger = logging.getLogger(__file__)
@@ -177,6 +177,50 @@ class GetOrganizationView(RetrieveAPIView):
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["org_id"])
         return obj
+
+
+class SendForgottenPasswordView(APIView):
+
+    def post(self):
+        to_hash = str(
+            self.request.data["email"] + str(self.request.data["name"]) + str(datetime.datetime.now())
+        )
+        token = hash(to_hash)
+
+        naive_expiry_date = datetime.datetime.now() + datetime.timedelta(0.5)
+        aware_expiry_date = make_aware(naive_expiry_date)
+
+        forgotten_password = ForgottenPassword(
+            email=email,
+            token=token,
+            expires_at=aware_expiry_date,
+        )
+
+        invite_link = settings.FRONT_END_BASE_URL
+
+        invite_link += "/change-password/{0}".format(token)
+
+        render_info = {
+            "invite_link": invite_link,
+        }
+
+        htmly = get_template("forgottenPassword.html")
+
+        html_content = htmly.render(render_info)
+
+        forgotten_password.save()
+
+        if not settings.DEBUG:
+            message = Mail(
+                from_email="no-reply@humanlambdas.com",
+                to_email=self.request.data["email"],
+                subject="Human Lambdas forgotten password",
+                html_content=html_content,
+            )
+            sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+            sg.send(message)
+
+        return Response(status=200)
 
 
 class SendInviteView(APIView):
