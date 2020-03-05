@@ -3,7 +3,6 @@ from django.contrib.postgres.fields import JSONField
 from user_handler.models import User, Organization
 from rest_hooks.signals import hook_event
 from rest_hooks.models import AbstractHook
-from django.forms.models import model_to_dict
 
 
 class Workflow(models.Model):
@@ -39,18 +38,16 @@ class Task(models.Model):
         )
 
     def serialize_hook(self, *args, **kwargs):
-        return model_to_dict(
-            self,
-            fields=[
-                "status",
-                "completed_at",
-                "created_at",
-                "completed_by",
-                "workflow",
-                "inputs",
-                "outputs",
-            ],
-        )
+        return {
+            "id": self.pk,
+            "status": self.status,
+            "completed_at": self.completed_at,
+            "created_at": self.created_at,
+            "completed_by": self.completed_by,
+            "workflow_id": self.workflow.pk,
+            "inputs": self.inputs,
+            "outputs": self.outputs,
+        }
 
 
 class WorkflowHook(AbstractHook):
