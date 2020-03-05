@@ -31,7 +31,7 @@ urlpatterns = [
         "<int:workflow_id>/tasks/create/", CreateTaskView.as_view(), name="create-task"
     ),
     path(
-        "<int:workflow_id>/completed/",
+        "<int:workflow_id>/tasks/completed/",
         GetCompletedTaskView.as_view(),
         name="completed-task",
     ),
