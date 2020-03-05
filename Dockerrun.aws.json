@@ -17,5 +17,6 @@
   "Ports": [
     {
       "ContainerPort": 8000
-    },
+    }
+  ]
 }
