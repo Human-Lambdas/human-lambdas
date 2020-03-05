@@ -143,7 +143,7 @@ class ChangePasswordView(APIView):
         try:
             _ = request.data["currentPassword"]
             _ = request.data["newPassword"]
-        except:
+        except Exception:
             return Response(status=400)
         if changing_user.check_password(request.data["currentPassword"]):
             changing_user.set_password(request.data["newPassword"])
