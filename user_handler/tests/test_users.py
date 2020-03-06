@@ -81,7 +81,7 @@ class TestAPIUserCRUD(APITestCase):
 
     def test_retrieve_user(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/{}".format(self.user_id))
+        response = self.client.get("/v1/users/{}/".format(self.user_id))
         self.assertTrue(response.data["is_admin"])
 
 
@@ -108,6 +108,12 @@ class TestAPIjwt(APITestCase):
         response = self.client.get("/v1/users/hello/", headers=headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
+    def test_trailing_slash(self):
+        headers = {"Authorization": "Bearer {}".format(self.access_token)}
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/v1/users/hello", headers=headers)
+        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY, response)
+
 
 class TestAPIUserUpdate(APITestCase):
     def setUp(self):
@@ -125,13 +131,13 @@ class TestAPIUserUpdate(APITestCase):
 
     def test_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/{}".format(self.user_id))
+        response = self.client.get("/v1/users/{}/".format(self.user_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_update_password(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         data = {"password": self.preset_changed_password}
-        response = self.client.patch("/v1/users/{}".format(self.user_id), data)
+        response = self.client.patch("/v1/users/{}/".format(self.user_id), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         response = self.client.post(
             "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
@@ -147,7 +153,7 @@ class TestAPIUserUpdate(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         new_name = "baaaard"
         data = {"name": new_name}
-        response = self.client.patch("/v1/users/{}".format(self.user_id), data)
+        response = self.client.patch("/v1/users/{}/".format(self.user_id), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["name"], new_name, response.data)
         user = User.objects.get(pk=self.user_id)
@@ -157,7 +163,7 @@ class TestAPIUserUpdate(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         new_email = "baaard@foo.com"
         data = {"email": new_email}
-        response = self.client.patch("/v1/users/{}".format(self.user_id), data)
+        response = self.client.patch("/v1/users/{}/".format(self.user_id), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["email"], new_email, response.data)
         user = User.objects.get(pk=self.user_id)

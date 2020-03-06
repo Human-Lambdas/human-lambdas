@@ -84,7 +84,7 @@ class TestCRUDWorkflow(APITestCase):
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id1, workflow.pk)
+            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id1, workflow.pk)
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 

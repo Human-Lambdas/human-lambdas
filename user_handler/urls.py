@@ -20,6 +20,6 @@ urlpatterns = [
         InvitationView.as_view(),
         name="receive-invitation",
     ),
-    path("<int:pk>", RetrieveUpdateUserView.as_view(), name="update-user"),
+    path("<int:pk>/", RetrieveUpdateUserView.as_view(), name="update-user"),
     path("api-token/", APIAuthToken.as_view(), name="api-token"),
 ]

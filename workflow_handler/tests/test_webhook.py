@@ -113,7 +113,7 @@ class TestOrganizations(APITestCase):
         hook_id = response.data["id"]
         new_url = "http://someother.url.com"
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}/".format(
                 self.org_id, self.workflow_id, hook_id
             ),
             {"target": new_url},
@@ -133,7 +133,7 @@ class TestOrganizations(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         hook_id = response.data["id"]
         response = self.client.delete(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}/".format(
                 self.org_id, self.workflow_id, hook_id
             )
         )
@@ -153,7 +153,7 @@ class TestOrganizations(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         hook_id = response.data["id"]
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}/".format(
                 self.org_id, self.workflow_id, hook_id
             )
         )
