@@ -224,7 +224,7 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(
-            response.status_code, status.HTTP_301_MOVED_PERMANENTLY, response.content
+            response.status_code, status.HTTP_404_NOT_FOUND, response.content
         )
 
     def test_workflow_list_task_count(self):

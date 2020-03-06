@@ -112,7 +112,7 @@ class TestAPIjwt(APITestCase):
         headers = {"Authorization": "Bearer {}".format(self.access_token)}
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.get("/v1/users/hello", headers=headers)
-        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY, response)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response)
 
 
 class TestAPIUserUpdate(APITestCase):
