@@ -106,7 +106,7 @@ class TestCRUDWorkflow(APITestCase):
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk)
+            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
@@ -136,7 +136,7 @@ class TestCRUDWorkflow(APITestCase):
         workflow = workflow_obj.first()
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token_worker)
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk)
+            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
@@ -170,7 +170,7 @@ class TestCRUDWorkflow(APITestCase):
         }
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token_worker)
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk),
             updated_workflow_data,
             format="json",
         )
@@ -210,7 +210,7 @@ class TestCRUDWorkflow(APITestCase):
         }
 
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk),
             updated_workflow_data,
             format="json",
         )
@@ -325,7 +325,7 @@ class TestCRUDWorkflow(APITestCase):
             "disabled": True,
         }
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk),
             updated_workflow_data,
             format="json",
         )

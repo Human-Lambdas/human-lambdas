@@ -117,7 +117,7 @@ class TestTasks(APITestCase):
         tasks = Task.objects.filter(workflow=workflow).all()
         for task in tasks:
             response = self.client.get(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/".format(
                     self.org_id, self.workflow_id, task.id
                 )
             )
@@ -130,7 +130,7 @@ class TestTasks(APITestCase):
         tasks = Task.objects.filter(workflow=workflow).all()
         for task in tasks:
             response = self.client.get(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/".format(
                     self.org_id, self.workflow_id, task.id
                 )
             )
@@ -149,7 +149,7 @@ class TestTasks(APITestCase):
             output_list = [{"id": "foo", "single-selection": {"value": output_value}}]
             data = {"outputs": output_list}
             response = self.client.patch(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/".format(
                     self.org_id, self.workflow_id, task.id
                 ),
                 data=data,
@@ -172,7 +172,7 @@ class TestTasks(APITestCase):
             output_list = [{"id": "bar", "multiple-selection": {"value": output_value}}]
             data = {"outputs": output_list}
             response = self.client.patch(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/".format(
                     self.org_id, self.second_workflow_id, task.id
                 ),
                 data=data,
@@ -188,7 +188,7 @@ class TestTasks(APITestCase):
         task = Task.objects.first()
         data = {"status": "testing"}
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}/".format(
                 self.org_id, self.workflow_id, task.id
             ),
             data=data,
@@ -224,7 +224,7 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(
-            response.status_code, status.HTTP_301_MOVED_PERMANENTLY, response.content
+            response.status_code, status.HTTP_404_NOT_FOUND, response.content
         )
 
     def test_workflow_list_task_count(self):
@@ -234,6 +234,6 @@ class TestTasks(APITestCase):
 
     def test_workflow_retrieve_task_count(self):
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id)
+            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, self.workflow_id)
         )
         self.assertEqual(response.data["n_tasks"], 3)

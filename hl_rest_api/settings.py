@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "rest_hooks",
 ]
 
+APPEND_SLASH = False
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

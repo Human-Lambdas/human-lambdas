@@ -55,12 +55,12 @@ class TestUserRoles(APITestCase):
     def test_admin_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.get(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.admin_id)
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.admin_id)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(self.admin_email, response.data["email"], response.data)
         response = self.client.get(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.worker_id)
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.worker_id)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(self.worker_email, response.data["email"], response.data)
@@ -68,11 +68,11 @@ class TestUserRoles(APITestCase):
     def test_worker_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.worker_access_token)
         response = self.client.get(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.admin_id)
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.admin_id)
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
         response = self.client.get(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.worker_id)
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.worker_id)
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
@@ -80,12 +80,12 @@ class TestUserRoles(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.worker_access_token)
         data = {"admin": True}
         response = self.client.patch(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.worker_id), data
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.worker_id), data
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
         data = {"admin": False}
         response = self.client.patch(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.admin_id), data
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.admin_id), data
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
@@ -93,12 +93,12 @@ class TestUserRoles(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         data = {"admin": False}
         response = self.client.patch(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.admin_id), data
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.admin_id), data
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         data = {"admin": True}
         response = self.client.patch(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.worker_id), data
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.worker_id), data
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["message"], "Users role was changed to admin")
@@ -106,21 +106,21 @@ class TestUserRoles(APITestCase):
     def test_admin_delete(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.delete(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.worker_id)
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.worker_id)
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         response = self.client.delete(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.admin_id)
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.admin_id)
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_worker_delete(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.worker_access_token)
         response = self.client.delete(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.worker_id)
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.worker_id)
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         response = self.client.delete(
-            "/v1/orgs/{0}/users/{1}".format(self.org_id, self.admin_id)
+            "/v1/orgs/{0}/users/{1}/".format(self.org_id, self.admin_id)
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

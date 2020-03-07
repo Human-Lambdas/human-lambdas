@@ -118,7 +118,7 @@ class TestErrorPayloadStructure(APITestCase):
             "description": "not so great wf",
         }
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk),
             self.complete_workflow_data,
             format="json",
         )
@@ -142,7 +142,7 @@ class TestErrorPayloadStructure(APITestCase):
             "description": "not so great wf",
         }
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk),
             self.complete_workflow_data,
             format="json",
         )
@@ -165,7 +165,7 @@ class TestErrorPayloadStructure(APITestCase):
             "description": "not so great wf",
         }
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk),
             self.complete_workflow_data,
             format="json",
         )
