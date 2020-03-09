@@ -25,7 +25,7 @@ class TestOrganizations(APITestCase):
         self.org_id = organization.id
         organization.add_admin(user)
         response = self.client.post(
-            "/v1/users/token/",
+            "/v1/users/token",
             {"email": "foo@bar.com", "password": self.preset_user_password},
         )
         self.admin_access_token = response.data["access"]
@@ -44,7 +44,7 @@ class TestOrganizations(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -54,7 +54,7 @@ class TestOrganizations(APITestCase):
         user.save()
         organization.user.add(user)
         response = self.client.post(
-            "/v1/users/token/",
+            "/v1/users/token",
             {"email": "worker@bar.com", "password": self.preset_user_password},
         )
         self.worker_access_token = response.data["access"]
@@ -62,7 +62,7 @@ class TestOrganizations(APITestCase):
     def test_admin_webhook_creation(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
                 self.org_id, self.workflow_id
             ),
             {"target": "http://some.url.com"},
@@ -74,7 +74,7 @@ class TestOrganizations(APITestCase):
     def test_worker_webhook_creation(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.worker_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
                 self.org_id, self.workflow_id
             ),
             {"target": "http://some.url.com"},
@@ -84,14 +84,14 @@ class TestOrganizations(APITestCase):
     def test_multiple_admin_webhook_creation(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
                 self.org_id, self.workflow_id
             ),
             {"target": "http://some.url.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
                 self.org_id, self.workflow_id
             ),
             {"target": "http://some.url.com"},
@@ -104,7 +104,7 @@ class TestOrganizations(APITestCase):
     def test_webhook_update(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
                 self.org_id, self.workflow_id
             ),
             {"target": "http://some.url.com"},
@@ -113,7 +113,7 @@ class TestOrganizations(APITestCase):
         hook_id = response.data["id"]
         new_url = "http://someother.url.com"
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}/".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}".format(
                 self.org_id, self.workflow_id, hook_id
             ),
             {"target": new_url},
@@ -125,7 +125,7 @@ class TestOrganizations(APITestCase):
     def test_webhook_delete(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
                 self.org_id, self.workflow_id
             ),
             {"target": "http://some.url.com"},
@@ -133,7 +133,7 @@ class TestOrganizations(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         hook_id = response.data["id"]
         response = self.client.delete(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}/".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}".format(
                 self.org_id, self.workflow_id, hook_id
             )
         )
@@ -145,7 +145,7 @@ class TestOrganizations(APITestCase):
     def test_webhook_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
                 self.org_id, self.workflow_id
             ),
             {"target": "http://some.url.com"},
@@ -153,7 +153,7 @@ class TestOrganizations(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         hook_id = response.data["id"]
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}/".format(
+            "/v1/orgs/{0}/workflows/{1}/webhooks/{2}".format(
                 self.org_id, self.workflow_id, hook_id
             )
         )

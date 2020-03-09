@@ -14,9 +14,9 @@ class TestCRUDWorkflow(APITestCase):
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register", registration_data)
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         self.access_token = response.data["access"]
@@ -27,9 +27,9 @@ class TestCRUDWorkflow(APITestCase):
             "is_admin": False,
             "name": "worker",
         }
-        _ = self.client.post("/v1/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register", registration_data)
         response = self.client.post(
-            "/v1/users/token/", {"email": "worker@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "worker@bar.com", "password": "fooword"}
         )
         self.access_token_worker = response.data["access"]
 
@@ -50,7 +50,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -74,7 +74,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -97,7 +97,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -106,7 +106,7 @@ class TestCRUDWorkflow(APITestCase):
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk)
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
@@ -126,7 +126,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -136,7 +136,7 @@ class TestCRUDWorkflow(APITestCase):
         workflow = workflow_obj.first()
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token_worker)
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk)
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
@@ -156,7 +156,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -170,7 +170,7 @@ class TestCRUDWorkflow(APITestCase):
         }
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token_worker)
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
             updated_workflow_data,
             format="json",
         )
@@ -196,7 +196,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -210,7 +210,7 @@ class TestCRUDWorkflow(APITestCase):
         }
 
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
             updated_workflow_data,
             format="json",
         )
@@ -236,7 +236,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data1,
             format="json",
         )
@@ -255,12 +255,12 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data2,
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        response = self.client.get("/v1/orgs/{}/workflows/".format(self.org_id))
+        response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id))
         result_1 = response.data[0]
         result_2 = response.data[1]
         self.assertTrue(result_1.pop("id"))
@@ -293,7 +293,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data1,
             format="json",
         )
@@ -312,7 +312,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data2,
             format="json",
         )
@@ -325,13 +325,13 @@ class TestCRUDWorkflow(APITestCase):
             "disabled": True,
         }
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, workflow.pk),
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
             updated_workflow_data,
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
-        response = self.client.get("/v1/orgs/{}/workflows/".format(self.org_id))
+        response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id))
         result_1 = response.data[0]
         self.assertTrue(result_1.pop("id"))
         self.assertTrue(result_1.pop("created_at"))
