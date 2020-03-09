@@ -111,7 +111,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "created_at",
             "inputs",
             "outputs",
-            "completed_by",
+            "assigned_to",
             "completed_at",
         ]
 
@@ -137,8 +137,8 @@ class TaskSerializer(serializers.ModelSerializer):
             instance_output[itype]["value"] = output[itype]["value"]
         user = self.context["request"].user
         instance.status = "completed"
-        instance.completed_at = timezone.now()  # datetime.datetime.now()
-        instance.completed_by = user
+        instance.completed_at = timezone.now()
+        instance.assigned_to = user
         instance.save()
         instance.task_completed(user)
         return instance

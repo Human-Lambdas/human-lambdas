@@ -1,3 +1,5 @@
+from django.utils import timezone
+from django.conf import settings
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
@@ -195,18 +197,40 @@ class NextTaskView(APIView):
         with transaction.atomic():
             obj = (
                 queryset.select_for_update()
-                .filter(Q(status="pending") & Q(workflow=workflow))
+                .filter(assigned_to=request.user)
                 .first()
             )
-            if obj:
-                task = self.serializer_class(obj).data
-                obj.status = "assigned"
+
+
+            if not obj:
+                obj = (
+                    queryset.select_for_update()
+                    .filter(status="pending")
+                    .first()
+                )
+            elif timezone.now() - obj.assigned_at > timezone.timedelta(minutes=settings.TASK_EXPIRATION_MIN):
+                obj_new = (
+                    queryset.select_for_update()
+                    .filter(status="pending")
+                    .first()
+                )
+                obj.assigned_to = None
+                obj.assigned_at = None
+                obj.status = "pending"
                 obj.save()
-                workflow.n_tasks = F("n_tasks") - 1
-                workflow.save()
-                return Response(task)
-            else:
+                obj = obj_new
+
+
+            if not obj:
                 return Response(status=204)
+            obj.status = "assigned"
+            obj.assigned_to = request.user
+            obj.assigned_at = timezone.now()
+            obj.save()
+            workflow.n_tasks = F("n_tasks") - 1
+            workflow.save()
+            task = self.serializer_class(obj).data
+            return Response(task)
 
 
 class CreateTaskView(CreateAPIView):
