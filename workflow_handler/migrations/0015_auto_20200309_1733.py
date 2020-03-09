@@ -6,18 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0014_auto_20200303_0949'),
+        ("workflow_handler", "0014_auto_20200303_0949"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='task',
-            old_name='completed_by',
-            new_name='assigned_to',
+            model_name="task", old_name="completed_by", new_name="assigned_to",
         ),
         migrations.AddField(
-            model_name='task',
-            name='assigned_at',
+            model_name="task",
+            name="assigned_at",
             field=models.DateTimeField(null=True),
         ),
     ]

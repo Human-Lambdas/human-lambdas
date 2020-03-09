@@ -90,8 +90,7 @@ class TestTaskList(APITestCase):
 
     def test_non_existing_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
-        response = self.client.get(
-            "/v1/orgs/10000/workflows/1000/completed")
+        response = self.client.get("/v1/orgs/10000/workflows/1000/completed")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_hook_serializer(self):
