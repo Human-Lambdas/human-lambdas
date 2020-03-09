@@ -14,15 +14,15 @@ class TestTaskCreation(APITestCase):
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register", registration_data)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
 
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/api-token/")
+        response = self.client.get("/v1/users/api-token")
         self.token = response.data["token"]
 
         workflow_data = {
@@ -48,7 +48,7 @@ class TestTaskCreation(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -64,7 +64,7 @@ class TestTaskCreation(APITestCase):
         }
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
-            "/v1/orgs/{}/workflows/{}/tasks/create/".format(
+            "/v1/orgs/{}/workflows/{}/tasks/create".format(
                 self.org_id, self.workflow_id
             ),
             task_data,

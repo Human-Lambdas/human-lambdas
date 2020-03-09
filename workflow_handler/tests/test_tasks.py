@@ -23,10 +23,10 @@ class TestTasks(APITestCase):
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register", registration_data)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
@@ -53,7 +53,7 @@ class TestTasks(APITestCase):
             ],
         }
         _ = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -80,7 +80,7 @@ class TestTasks(APITestCase):
             ],
         }
         _ = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             second_workflow_data,
             format="json",
         )
@@ -89,7 +89,7 @@ class TestTasks(APITestCase):
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/orgs/{0}/workflows/{1}/upload/".format(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(
                     self.org_id, self.workflow_id
                 ),
                 data=data,
@@ -98,7 +98,7 @@ class TestTasks(APITestCase):
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/orgs/{0}/workflows/{1}/upload/".format(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(
                     self.org_id, self.second_workflow_id
                 ),
                 data=data,
@@ -107,7 +107,7 @@ class TestTasks(APITestCase):
 
     def test_get_task_list(self):
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/".format(self.org_id, self.workflow_id)
+            "/v1/orgs/{0}/workflows/{1}/tasks".format(self.org_id, self.workflow_id)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(3, len(response.data), response.content)
@@ -117,7 +117,7 @@ class TestTasks(APITestCase):
         tasks = Task.objects.filter(workflow=workflow).all()
         for task in tasks:
             response = self.client.get(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/".format(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.id
                 )
             )
@@ -130,7 +130,7 @@ class TestTasks(APITestCase):
         tasks = Task.objects.filter(workflow=workflow).all()
         for task in tasks:
             response = self.client.get(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/".format(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.id
                 )
             )
@@ -149,7 +149,7 @@ class TestTasks(APITestCase):
             output_list = [{"id": "foo", "single-selection": {"value": output_value}}]
             data = {"outputs": output_list}
             response = self.client.patch(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/".format(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.id
                 ),
                 data=data,
@@ -172,7 +172,7 @@ class TestTasks(APITestCase):
             output_list = [{"id": "bar", "multiple-selection": {"value": output_value}}]
             data = {"outputs": output_list}
             response = self.client.patch(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/".format(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.second_workflow_id, task.id
                 ),
                 data=data,
@@ -188,7 +188,7 @@ class TestTasks(APITestCase):
         task = Task.objects.first()
         data = {"status": "testing"}
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}/tasks/{2}/".format(
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                 self.org_id, self.workflow_id, task.id
             ),
             data=data,
@@ -200,7 +200,7 @@ class TestTasks(APITestCase):
 
     def test_next_task(self):
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next/".format(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
                 self.org_id, self.workflow_id
             )
         )
@@ -211,15 +211,15 @@ class TestTasks(APITestCase):
 
     def test_next_task_different_workflow(self):
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next/".format(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
                 self.org_id, self.second_workflow_id
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-    def test_next_task_without_slash(self):
+    def test_next_task_with_slash(self):
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next/".format(
                 self.org_id, self.workflow_id
             )
         )
@@ -228,12 +228,12 @@ class TestTasks(APITestCase):
         )
 
     def test_workflow_list_task_count(self):
-        response = self.client.get("/v1/orgs/{}/workflows/".format(self.org_id))
+        response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id))
         for data, expected in zip(response.data, [3, 3]):
             self.assertEqual(data["n_tasks"], expected)
 
     def test_workflow_retrieve_task_count(self):
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/".format(self.org_id, self.workflow_id)
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id)
         )
         self.assertEqual(response.data["n_tasks"], 3)

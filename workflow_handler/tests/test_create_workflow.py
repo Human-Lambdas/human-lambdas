@@ -14,10 +14,10 @@ class TestCreateWorkflow(APITestCase):
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register", registration_data)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
@@ -39,7 +39,7 @@ class TestCreateWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -57,7 +57,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{}],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
@@ -73,7 +73,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
@@ -89,7 +89,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
@@ -105,7 +105,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
@@ -125,7 +125,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{}],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
@@ -141,7 +141,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": "foo"}],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
@@ -157,7 +157,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": 1}],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
@@ -173,7 +173,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": "foo", "name": "foo", "type": "notype"}],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
@@ -189,7 +189,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": "foo", "name": "foo", "type": "random"}],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
@@ -205,7 +205,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": "foo", "name": "foo", "type": "single-class"}],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
@@ -221,7 +221,7 @@ class TestCreateWorkflow(APITestCase):
             "outputs": [{"id": "foo", "name": "foo", "type": "binary", "binary": {}}],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             headers=headers,
             format="json",
