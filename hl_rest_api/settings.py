@@ -221,4 +221,4 @@ except requests.exceptions.RequestException:
 if LOCAL_IP and not DEBUG:
     ALLOWED_HOSTS.append(LOCAL_IP)
 
-TASK_EXPIRATION_MIN = 15  # Minutes
+TASK_EXPIRATION_MIN = 60  # Minutes
