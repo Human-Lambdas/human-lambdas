@@ -1,6 +1,7 @@
 import logging
 import os
 
+from django.utils import timezone
 from rest_framework.test import APITestCase
 from rest_framework import status
 
@@ -205,9 +206,44 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual("pending", response.data["status"], response.content)
+        self.assertEqual("assigned", response.data["status"], response.content)
         task = Task.objects.get(id=response.data["id"])
         self.assertEqual(task.status, "assigned")
+
+    def test_next_task_repeatedly(self):
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual("assigned", response.data["status"], response.content)
+
+        task_id = response.data["id"]
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual(response.data["id"], task_id)
+
+        task = Task.objects.get(pk=task_id)
+        task.assigned_at = timezone.now() - timezone.timedelta(hours=24)
+        task.save()
+
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertNotEqual(response.data["id"], task_id)
+
+        task = Task.objects.get(pk=task_id)
+        self.assertEqual(task.status, "pending")
+        self.assertIsNone(task.assigned_to)
+        self.assertIsNone(task.assigned_at)
 
     def test_next_task_different_workflow(self):
         response = self.client.get(

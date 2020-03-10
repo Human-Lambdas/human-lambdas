@@ -62,9 +62,7 @@ class TestOrganizations(APITestCase):
     def test_admin_webhook_creation(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
-                self.org_id, self.workflow_id
-            ),
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(self.org_id, self.workflow_id),
             {"target": "http://some.url.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -74,9 +72,7 @@ class TestOrganizations(APITestCase):
     def test_worker_webhook_creation(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.worker_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
-                self.org_id, self.workflow_id
-            ),
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(self.org_id, self.workflow_id),
             {"target": "http://some.url.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -84,16 +80,12 @@ class TestOrganizations(APITestCase):
     def test_multiple_admin_webhook_creation(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
-                self.org_id, self.workflow_id
-            ),
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(self.org_id, self.workflow_id),
             {"target": "http://some.url.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
-                self.org_id, self.workflow_id
-            ),
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(self.org_id, self.workflow_id),
             {"target": "http://some.url.com"},
         )
         self.assertEqual(response.status_code, 400)
@@ -104,9 +96,7 @@ class TestOrganizations(APITestCase):
     def test_webhook_update(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
-                self.org_id, self.workflow_id
-            ),
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(self.org_id, self.workflow_id),
             {"target": "http://some.url.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -125,9 +115,7 @@ class TestOrganizations(APITestCase):
     def test_webhook_delete(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
-                self.org_id, self.workflow_id
-            ),
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(self.org_id, self.workflow_id),
             {"target": "http://some.url.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -145,9 +133,7 @@ class TestOrganizations(APITestCase):
     def test_webhook_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/workflows/{1}/webhooks".format(
-                self.org_id, self.workflow_id
-            ),
+            "/v1/orgs/{0}/workflows/{1}/webhooks".format(self.org_id, self.workflow_id),
             {"target": "http://some.url.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
