@@ -9,10 +9,11 @@ def custom_exception_handler(exc, context):
     # Now add the HTTP status code to the response.
     if response is not None:
         if isinstance(response.data, list):
-            response.data = {
-                "status_code": response.status_code,
-                "errors": response.data,
-            }
+            errors = response.data
         else:
-            response.data["status_code"] = response.status_code
+            errors = [response.data]
+        response.data = {
+            "status_code": response.status_code,
+            "errors": errors,
+        }
     return response
