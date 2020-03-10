@@ -6,6 +6,7 @@ from rest_framework import status
 from user_handler.models import User, Organization
 
 logger = logging.getLogger(__file__)
+logging.disable(logging.DEBUG)
 
 
 class TestInvite(APITestCase):

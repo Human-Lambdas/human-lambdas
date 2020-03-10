@@ -61,6 +61,8 @@ INSTALLED_APPS = [
 
 APPEND_SLASH = False
 
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -149,6 +151,7 @@ else:
     ALLOWED_HOSTS = [
         "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
         "api.humanlambdas.com",
+        "localhost",
     ]
     DEFAULT_PERMISSION = "rest_framework.permissions.IsAuthenticated"
 
@@ -180,7 +183,7 @@ REST_AUTH_SERIALIZERS = {
 REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "user_handler.serializers.UserCreateSerializer",
 }
-
+os.environ.get("SENDGRID_API_KEY")
 LOGGING = {
     "version": 1,
     "handlers": {"console": {"level": "DEBUG", "class": "logging.StreamHandler"}},
