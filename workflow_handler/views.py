@@ -1,3 +1,5 @@
+from django.utils import timezone
+from django.conf import settings
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
@@ -193,20 +195,30 @@ class NextTaskView(APIView):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.get_queryset()
         with transaction.atomic():
-            obj = (
-                queryset.select_for_update()
-                .filter(Q(status="pending") & Q(workflow=workflow))
-                .first()
-            )
-            if obj:
-                task = self.serializer_class(obj).data
-                obj.status = "assigned"
+            obj = queryset.select_for_update().filter(assigned_to=request.user).first()
+
+            if not obj:
+                obj = queryset.select_for_update().filter(status="pending").first()
+            elif timezone.now() - obj.assigned_at > timezone.timedelta(
+                minutes=settings.TASK_EXPIRATION_MIN
+            ):
+                obj_new = queryset.select_for_update().filter(status="pending").first()
+                obj.assigned_to = None
+                obj.assigned_at = None
+                obj.status = "pending"
                 obj.save()
-                workflow.n_tasks = F("n_tasks") - 1
-                workflow.save()
-                return Response(task)
-            else:
+                obj = obj_new
+
+            if not obj:
                 return Response(status=204)
+            obj.status = "assigned"
+            obj.assigned_to = request.user
+            obj.assigned_at = timezone.now()
+            obj.save()
+            workflow.n_tasks = F("n_tasks") - 1
+            workflow.save()
+            task = self.serializer_class(obj).data
+            return Response(task)
 
 
 class CreateTaskView(CreateAPIView):
@@ -244,7 +256,9 @@ class CreateTaskView(CreateAPIView):
         for task_input in request.data["inputs"]:
             try:
                 workflow_input = next(
-                    item for item in workflow.inputs if item["id"] == task_input["id"]
+                    {"name": item["name"], "type": item["type"]}
+                    for item in workflow.inputs
+                    if item["id"] == task_input["id"]
                 )
             except StopIteration:
                 return Response(
@@ -305,12 +319,12 @@ class GetCompletedTaskView(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        obj = get_list_or_404(self.get_queryset())
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        obj = get_list_or_404(self.get_queryset())
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
 

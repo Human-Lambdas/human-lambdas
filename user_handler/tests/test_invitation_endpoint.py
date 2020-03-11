@@ -24,7 +24,7 @@ class TestInvite(APITestCase):
         self.user = user
 
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
@@ -66,7 +66,7 @@ class TestInvite(APITestCase):
     def test_invitation_post_call_new_user(self):
         recipient = "new@user.com"
         _ = self.client.post(
-            "/v1/users/invite/", {"emails": recipient, "organization_id": self.org_id,},
+            "/v1/users/invite", {"emails": recipient, "organization_id": self.org_id,},
         )
 
         token = hash(str(recipient) + str(self.org_id) + str(datetime.datetime.now()))
@@ -91,7 +91,7 @@ class TestInvite(APITestCase):
         new_user = User(email="new@user.com")
         new_user.save()
         _ = self.client.post(
-            "/v1/users/invite/",
+            "/v1/users/invite",
             {"emails": "new@user.com", "organization_id": self.org_id,},
         )
         token = "s8ni3fisme03msi0s3emimc"
@@ -112,7 +112,7 @@ class TestInvite(APITestCase):
 
     def test_invitation_expiration_30_days(self):
         _ = self.client.post(
-            "/v1/users/invite/",
+            "/v1/users/invite",
             {"emails": self.existing_recipient, "organization_id": self.org_id,},
         )
 
@@ -140,7 +140,7 @@ class TestInvite(APITestCase):
 
     def test_invitation_post_call_already_joined_org(self):
         _ = self.client.post(
-            "/v1/users/invite/",
+            "/v1/users/invite",
             {"emails": self.existing_recipient, "organization_id": self.org_id,},
         )
         response = self.client.post(

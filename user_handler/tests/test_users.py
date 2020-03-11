@@ -49,7 +49,7 @@ class TestUsers(APITestCase):
 class TestAPIRegistration(APITestCase):
     def test_registration(self):
         response = self.client.post(
-            "/v1/users/register/",
+            "/v1/users/register",
             {
                 "email": "foo@bar.com",
                 "password": "fooword",
@@ -64,7 +64,7 @@ class TestAPIRegistration(APITestCase):
 class TestAPIUserCRUD(APITestCase):
     def setUp(self):
         response = self.client.post(
-            "/v1/users/register/",
+            "/v1/users/register",
             {
                 "email": "foo@bar.com",
                 "password": "fooword",
@@ -75,7 +75,7 @@ class TestAPIUserCRUD(APITestCase):
         )
         self.user_id = response.data["id"]
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
 
@@ -91,22 +91,28 @@ class TestAPIjwt(APITestCase):
         user.set_password("fooword")
         user.save()
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
 
     def test_token(self):
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
     def test_authorization(self):
         headers = {"Authorization": "Bearer {}".format(self.access_token)}
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/hello/", headers=headers)
+        response = self.client.get("/v1/users/hello", headers=headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
+
+    def test_trailing_slash(self):
+        headers = {"Authorization": "Bearer {}".format(self.access_token)}
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/v1/users/hello/", headers=headers)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response)
 
 
 class TestAPIUserUpdate(APITestCase):
@@ -117,7 +123,7 @@ class TestAPIUserUpdate(APITestCase):
         user.set_password(self.preset_password)
         user.save()
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.user_id = user.pk
         self.access_token = response.data["access"]
@@ -134,11 +140,11 @@ class TestAPIUserUpdate(APITestCase):
         response = self.client.patch("/v1/users/{}".format(self.user_id), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.assertEqual(response.status_code, 401)
         response = self.client.post(
-            "/v1/users/token/",
+            "/v1/users/token",
             {"email": "foo@bar.com", "password": self.preset_changed_password},
         )
         self.assertEqual(response.status_code, 200)
@@ -175,7 +181,7 @@ class TestListUsers(APITestCase):
         organization.save()
         organization.add_admin(user)
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "foopwd"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foopwd"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
@@ -198,7 +204,7 @@ class TestListUsers(APITestCase):
 
     def test_list_user1(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/orgs/{}/users/".format(self.org_id1))
+        response = self.client.get("/v1/orgs/{}/users".format(self.org_id1))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 2)
         self.assertTrue(self.user_name in [i["name"] for i in response.data])

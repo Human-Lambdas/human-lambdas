@@ -24,13 +24,13 @@ class TestErrorPayloadStructure(APITestCase):
     # test hello world
     def test_hello_world(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.invalid_token)
-        response = self.client.get("/v1/users/hello/")
+        response = self.client.get("/v1/users/hello")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     # Register user endpoint tests
     def test_register_user_invalid_data(self):
         response = self.client.post(
-            "/v1/users/register/", self.invalid_registration_data,
+            "/v1/users/register", self.invalid_registration_data,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

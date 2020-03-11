@@ -105,7 +105,15 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ["id", "status", "created_at", "inputs", "outputs"]
+        fields = [
+            "id",
+            "status",
+            "created_at",
+            "inputs",
+            "outputs",
+            "assigned_to",
+            "completed_at",
+        ]
 
     def create(self, validated_data):
         inputs = validated_data["inputs"]
@@ -129,8 +137,8 @@ class TaskSerializer(serializers.ModelSerializer):
             instance_output[itype]["value"] = output[itype]["value"]
         user = self.context["request"].user
         instance.status = "completed"
-        instance.completed_at = timezone.now()  # datetime.datetime.now()
-        instance.completed_by = user
+        instance.completed_at = timezone.now()
+        instance.assigned_to = user
         instance.save()
         instance.task_completed(user)
         return instance

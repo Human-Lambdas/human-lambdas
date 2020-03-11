@@ -38,6 +38,9 @@ HOOK_EVENTS = {
     "task.completed": "workflow_handler.Task.completed",
 }
 
+HOOK_CUSTOM_MODEL = "workflow_handler.WorkflowHook"
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -56,6 +59,7 @@ INSTALLED_APPS = [
     "rest_hooks",
 ]
 
+APPEND_SLASH = False
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -216,3 +220,5 @@ except requests.exceptions.RequestException:
     pass
 if LOCAL_IP and not DEBUG:
     ALLOWED_HOSTS.append(LOCAL_IP)
+
+TASK_EXPIRATION_MIN = 60  # Minutes

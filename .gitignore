@@ -205,3 +205,6 @@ venv/*
 
 # static files
 static/
+
+# src files
+src/

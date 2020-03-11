@@ -24,7 +24,8 @@ class Task(models.Model):
     status = models.CharField(max_length=128, default="pending")
     completed_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    completed_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    assigned_at = models.DateTimeField(null=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
     inputs = JSONField()
     outputs = JSONField()
@@ -36,6 +37,18 @@ class Task(models.Model):
         hook_event.send(
             sender=self.__class__, action="completed", instance=self, user=user
         )
+
+    def serialize_hook(self, *args, **kwargs):
+        return {
+            "id": self.pk,
+            "status": self.status,
+            "completed_at": self.completed_at,
+            "created_at": self.created_at,
+            "assigned_to": self.assigned_to,
+            "workflow_id": self.workflow.pk,
+            "inputs": self.inputs,
+            "outputs": self.outputs,
+        }
 
 
 class WorkflowHook(AbstractHook):
