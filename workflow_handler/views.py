@@ -199,6 +199,8 @@ class NextTaskView(APIView):
 
             if not obj:
                 obj = queryset.select_for_update().filter(status="pending").first()
+            elif not obj.assigned_at:  # This needs to be here during transition
+                obj.assigned_at = timezone.now()
             elif timezone.now() - obj.assigned_at > timezone.timedelta(
                 minutes=settings.TASK_EXPIRATION_MIN
             ):
@@ -210,7 +212,7 @@ class NextTaskView(APIView):
                 obj = obj_new
 
             if not obj:
-                return Response(status=204)
+                return Response({}, status=204)
             obj.status = "assigned"
             obj.assigned_to = request.user
             obj.assigned_at = timezone.now()
