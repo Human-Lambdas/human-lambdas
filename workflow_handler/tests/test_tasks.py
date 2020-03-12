@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import Workflow, Task
-from user_handler.models import Organization
+from user_handler.models import Organization, User
 
 
 logger = logging.getLogger(__file__)
@@ -241,9 +241,10 @@ class TestTasks(APITestCase):
         self.assertEqual(response.data["id"], task_id)
 
         task = Task.objects.get(pk=task_id)
+        user = User.objects.get(email="foo@bar.com")
         self.assertEqual(task.status, "assigned")
-        self.assertIsNone(task.assigned_to)
-        self.assertIsNone(task.assigned_at)
+        self.assertEqual(task.assigned_to, user)
+        self.assertIsNotNone(task.assigned_at)
 
     def test_next_task_different_workflow(self):
         response = self.client.get(
