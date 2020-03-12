@@ -241,7 +241,7 @@ class TestTasks(APITestCase):
         self.assertEqual(response.data["id"], task_id)
 
         task = Task.objects.get(pk=task_id)
-        self.assertEqual(task.status, "pending")
+        self.assertEqual(task.status, "assigned")
         self.assertIsNone(task.assigned_to)
         self.assertIsNone(task.assigned_at)
 
