@@ -238,7 +238,7 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertNotEqual(response.data["id"], task_id)
+        self.assertEqual(response.data["id"], task_id)
 
         task = Task.objects.get(pk=task_id)
         self.assertEqual(task.status, "pending")
