@@ -195,22 +195,29 @@ class NextTaskView(APIView):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.get_queryset()
         with transaction.atomic():
-            obj = queryset.select_for_update().filter(assigned_to=request.user).first()
-
+            obj = (
+                queryset.select_for_update()
+                .filter(status="assigned")
+                .filter(assigned_to=request.user)
+                .first()
+            )
             if not obj:
-                obj = queryset.select_for_update().filter(status="pending").first()
+                obj = queryset.select_for_update().filter(status="pending").last()
+            elif not obj.assigned_at:  # This needs to be here during transition
+                obj.assigned_at = timezone.now()
             elif timezone.now() - obj.assigned_at > timezone.timedelta(
                 minutes=settings.TASK_EXPIRATION_MIN
             ):
-                obj_new = queryset.select_for_update().filter(status="pending").first()
+                obj_new = queryset.select_for_update().filter(status="pending").last()
                 obj.assigned_to = None
                 obj.assigned_at = None
                 obj.status = "pending"
                 obj.save()
                 obj = obj_new
+                workflow.n_tasks = F("n_tasks") + 1
 
             if not obj:
-                return Response(status=204)
+                return Response({}, status=204)
             obj.status = "assigned"
             obj.assigned_to = request.user
             obj.assigned_at = timezone.now()
