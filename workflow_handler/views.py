@@ -196,16 +196,12 @@ class NextTaskView(APIView):
         queryset = self.get_queryset()
 
         # 1 get assigned to self
-        with transaction.atomic():
-            obj = (
-                queryset.select_for_update()
-                .filter(status="assigned")
-                .filter(assigned_to=request.user)
-                .first()
-            )
-            if obj:
-                task = self.serializer_class(obj).data
-                return Response(task)
+        obj = (
+            queryset.filter(status="assigned").filter(assigned_to=request.user).first()
+        )
+        if obj:
+            task = self.serializer_class(obj).data
+            return Response(task)
 
         # 2 get assigned to someone else and expired
         with transaction.atomic():

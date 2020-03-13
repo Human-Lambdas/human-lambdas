@@ -15,6 +15,13 @@ _CURRENT_DIR = os.path.dirname(__file__)
 
 
 class TestTasks(APITestCase):
+    def setUserClient(self, email):
+        response = self.client.post(
+            "/v1/users/token", {"email": email, "password": "fooword"}
+        )
+        self.access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
         registration_data = {
@@ -25,12 +32,18 @@ class TestTasks(APITestCase):
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
+
+        registration_data["email"] = "foojr@bar.com"
+        _ = self.client.post("/v1/users/register", registration_data)
+        registration_data["email"] = "foo@bar.com"
+
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
@@ -228,10 +241,26 @@ class TestTasks(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(response.data["id"], task_id)
 
+        # get next task by client 2 should be different because task_id assigned_at has not expired
+        self.setUserClient("foojr@bar.com")
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertNotEqual(response.data["id"], task_id)
+
+        # unassign from client 2
+        task = Task.objects.get(pk=response.data["id"])
+        task.status = "pending"
+        task.save()
+
         task = Task.objects.get(pk=task_id)
         task.assigned_at = timezone.now() - timezone.timedelta(hours=24)
         task.save()
 
+        # get next task by client 2 should be task_id because assigned_at has expired
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
                 self.org_id, self.workflow_id
@@ -243,8 +272,9 @@ class TestTasks(APITestCase):
         task = Task.objects.get(pk=task_id)
         user = User.objects.get(email="foo@bar.com")
         self.assertEqual(task.status, "assigned")
-        self.assertEqual(task.assigned_to, user)
+        self.assertNotEqual(task.assigned_to, user)
         self.assertIsNotNone(task.assigned_at)
+        self.setUserClient("foo@bar.com")
 
     def test_next_task_different_workflow(self):
         response = self.client.get(
