@@ -135,7 +135,7 @@ class TestInvite(APITestCase):
             "/v1/users/invitation/{0}".format(token),
             {"name": "sean", "password": "fooword"},
         )
-        self.assertEqual(response.data["error"], "this token has expired!")
+        self.assertEqual(response.data["errors"][0]["message"], "this token has expired!")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_invitation_post_call_already_joined_org(self):
@@ -148,6 +148,6 @@ class TestInvite(APITestCase):
             {"name": "sean", "password": "fooword"},
         )
         self.assertEqual(
-            response.data["error"], "this organization has already been joined"
+            response.data["errors"][0]["message"], "this organization has already been joined"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
