@@ -76,7 +76,7 @@ class TestTaskCount(APITestCase):
         self.assertEqual(workflow.n_tasks, self.total_rows)
 
     def test_assigning_task(self):
-        n_tasks = self.total_rows
+        n_tasks = self.total_rows - 1
         for i in range(self.total_rows):
             _ = self.client.get(
                 "/v1/orgs/{}/workflows/{}/tasks/next".format(
@@ -84,7 +84,6 @@ class TestTaskCount(APITestCase):
                 )
             )
             workflow = Workflow.objects.get(pk=self.workflow_id)
-            n_tasks -= 1
             self.assertEqual(workflow.n_tasks, n_tasks)
 
     def test_task_creation(self):

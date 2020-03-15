@@ -194,28 +194,30 @@ class NextTaskView(APIView):
     def get(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.get_queryset()
+
+        # 1 get assigned to self
+        obj = (
+            queryset.filter(status="assigned").filter(assigned_to=request.user).first()
+        )
+        if obj:
+            task = self.serializer_class(obj).data
+            return Response(task)
+
+        # 2 get assigned to someone else and expired
         with transaction.atomic():
-            obj = (
-                queryset.select_for_update()
-                .filter(status="assigned")
-                .filter(assigned_to=request.user)
-                .first()
-            )
-            if not obj:
-                obj = queryset.select_for_update().filter(status="pending").last()
-            elif not obj.assigned_at:  # This needs to be here during transition
-                obj.assigned_at = timezone.now()
-            elif timezone.now() - obj.assigned_at > timezone.timedelta(
+            obj = queryset.select_for_update().filter(status="assigned").first()
+            if obj and timezone.now() - obj.assigned_at > timezone.timedelta(
                 minutes=settings.TASK_EXPIRATION_MIN
             ):
-                obj_new = queryset.select_for_update().filter(status="pending").last()
-                obj.assigned_to = None
-                obj.assigned_at = None
-                obj.status = "pending"
+                obj.assigned_to = request.user
+                obj.assigned_at = timezone.now()
                 obj.save()
-                obj = obj_new
-                workflow.n_tasks = F("n_tasks") + 1
+                task = self.serializer_class(obj).data
+                return Response(task)
 
+        # 3 get first pending
+        with transaction.atomic():
+            obj = queryset.select_for_update().filter(status="pending").first()
             if not obj:
                 return Response({}, status=204)
             obj.status = "assigned"
