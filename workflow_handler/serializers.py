@@ -100,7 +100,7 @@ class TaskSerializer(serializers.ModelSerializer):
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
             err_msg = "Unexpected event {}".format(event)
-            raise exceptions.ValidationError(detail=err_msg, code=400)
+            raise exceptions.ValidationError(detail=err_msg)
         return event
 
     class Meta:
@@ -163,7 +163,7 @@ class HookSerializer(serializers.ModelSerializer):
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
             err_msg = "Unexpected event {}".format(event)
-            raise exceptions.ValidationError(detail=err_msg, code=400)
+            raise exceptions.ValidationError(detail=err_msg)
         return event
 
     class Meta:
@@ -179,9 +179,7 @@ class HookSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
         if WorkflowHook.objects.filter(workflow=workflow).exists():
-            raise serializers.ValidationError(
-                "Webhook to this workflow already exists", code=400
-            )
+            raise serializers.ValidationError("Webhook to this workflow already exists")
         hook = WorkflowHook(
             user=validated_data["user"],
             event="task.completed",
