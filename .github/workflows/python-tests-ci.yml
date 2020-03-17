@@ -56,5 +56,6 @@ jobs:
         SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
         DEBUG: True
+        APP_URL: https://app.humanlambdas.com
 
 
