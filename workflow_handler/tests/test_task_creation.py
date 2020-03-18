@@ -73,3 +73,28 @@ class TestTaskCreation(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         task = Task.objects.get(id=response.data["id"])
         self.assertIsNotNone(task)
+
+    def test_empty_create_task(self):
+        task_data = {"input": []}
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/{}/tasks/create".format(
+                self.org_id, self.workflow_id
+            ),
+            task_data,
+            format="json",
+        )
+        self.assertEqual(
+            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
+        )
+        task_data = {}
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/{}/tasks/create".format(
+                self.org_id, self.workflow_id
+            ),
+            task_data,
+            format="json",
+        )
+        self.assertEqual(
+            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
+        )
