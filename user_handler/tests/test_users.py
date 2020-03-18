@@ -60,6 +60,19 @@ class TestAPIRegistration(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_registration_short_password(self):
+        response = self.client.post(
+            "/v1/users/register",
+            {
+                "email": "foo@bar.com",
+                "password": "fooword",
+                "name": "foo",
+                "is_admin": True,
+                "organization": "barinc",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class TestAPIUserCRUD(APITestCase):
     def setUp(self):
