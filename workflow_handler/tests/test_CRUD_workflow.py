@@ -9,27 +9,27 @@ class TestCRUDWorkflow(APITestCase):
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
-            "password": "fooword",
+            "password": "foowordbar",
             "organization": "fooInc",
             "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
         response = self.client.post(
-            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         self.access_token = response.data["access"]
         registration_data = {
             "email": "worker@bar.com",
-            "password": "fooword",
+            "password": "foowordbar",
             "organization": "fooInc",
             "is_admin": False,
             "name": "worker",
         }
         _ = self.client.post("/v1/users/register", registration_data)
         response = self.client.post(
-            "/v1/users/token", {"email": "worker@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "worker@bar.com", "password": "foowordbar"}
         )
         self.access_token_worker = response.data["access"]
 

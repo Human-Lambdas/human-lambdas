@@ -9,7 +9,7 @@ class TestCRUDWorkflow(APITestCase):
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
-            "password": "fooword",
+            "password": "foowordbar",
             "organization": "fooInc",
             "is_admin": True,
             "name": "foo",
@@ -17,13 +17,13 @@ class TestCRUDWorkflow(APITestCase):
         _ = self.client.post("/v1/users/register", registration_data)
         self.org_id1 = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
-            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token1 = response.data["access"]
 
         registration_data = {
             "email": "bar@bar.com",
-            "password": "fooword",
+            "password": "foowordbar",
             "organization": "barInc",
             "is_admin": True,
             "name": "bar",
@@ -31,7 +31,7 @@ class TestCRUDWorkflow(APITestCase):
         _ = self.client.post("/v1/users/register", registration_data)
         self.org_id2 = Organization.objects.get(user__email="bar@bar.com").pk
         response = self.client.post(
-            "/v1/users/token", {"email": "bar@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "bar@bar.com", "password": "foowordbar"}
         )
         self.access_token2 = response.data["access"]
 
