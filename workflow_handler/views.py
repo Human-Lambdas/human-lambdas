@@ -67,6 +67,7 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         return Workflow.objects.filter(
             Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
+            & Q(pk=self.kwargs["workflow_id"])
         )
 
     def get_object(self):
@@ -74,8 +75,10 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         return obj
 
     def retrieve(self, request, *args, **kwargs):
-        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
+        obj = get_object_or_404(self.get_queryset())
         workflow = self.serializer_class(obj).data
+        if hasattr(obj, "workflowhook"):
+            workflow["webhook"] = {"target": obj.workflowhook.target}
         return Response(workflow)
 
     def update(self, request, *args, **kwargs):

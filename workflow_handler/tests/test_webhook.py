@@ -63,35 +63,15 @@ class TestOrganizations(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        # self.assertEqual(response.data["webhook"]["target"], new_url)
+        self.assertEqual(response.data["webhook"]["target"], new_url)
         self.assertEqual(
             WorkflowHook.objects.get(workflow__pk=self.workflow_id).target, new_url
         )
 
-    # def test_webhook_delete(self):
-    #     self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
-    #     response = self.client.post(
-    #         "/v1/orgs/{0}/workflows/{1}/webhooks".format(self.org_id, self.workflow_id),
-    #         {"target": "http://some.url.com"},
-    #     )
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #     hook_id = response.data["id"]
-    #     response = self.client.delete(
-    #         "/v1/orgs/{0}/workflows/{1}/webhooks/{2}".format(
-    #             self.org_id, self.workflow_id, hook_id
-    #         )
-    #     )
-    #     self.assertEqual(
-    #         response.status_code, status.HTTP_204_NO_CONTENT, response.data
-    #     )
-    #     self.assertEqual(WorkflowHook.objects.filter(pk=hook_id).count(), 0)
-    #
-    # def test_webhook_retrieve(self):
-    #     self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
-    #     response = self.client.get(
-    #         "/v1/orgs/{0}/workflows/{1}".format(
-    #             self.org_id, self.workflow_id
-    #         )
-    #     )
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-    #     self.assertEqual(response.data["webhook"]["target"], "http://some.url.com")
+    def test_webhook_retrieve(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id)
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data["webhook"]["target"], "http://some.url.com")

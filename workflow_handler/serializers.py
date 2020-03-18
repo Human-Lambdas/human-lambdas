@@ -113,7 +113,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 webhook_data["event"] = "task.completed"
                 webhook_data["user"] = self.context["request"].user
                 WorkflowHook.objects.create(**webhook_data)
-        return instance
+        return super(WorkflowSerializer, self).update(instance, validated_data)
 
     def validate_inputs(self, data):
         try:
