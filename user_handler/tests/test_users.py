@@ -49,7 +49,7 @@ class TestUsers(APITestCase):
         )
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
-        response = self.client.post(
+        response = self.client.patch(
             "/v1/users/{0}".format(self.user_id),
             {"currentPassword": self.preset_user_password, "newPassword": new_password},
         )
@@ -75,13 +75,13 @@ class TestUsers(APITestCase):
         )
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
-        response = self.client.post(
+        response = self.client.patch(
             "/v1/users/{0}".format(self.user_id), {"newPassword": new_password}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_user_password_change_no_jwt(self):
-        response = self.client.post(
+        response = self.client.patch(
             "/v1/users/{0}".format(self.user_id), {"newPassword": "eff"}
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

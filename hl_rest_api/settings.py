@@ -205,7 +205,7 @@ if not DEBUG:
         send_default_pii=True,
     )
 
-FRONT_END_BASE_URL = "http://human-lambdas-api.eu-west-2.elasticbeanstalk.com/"
+FRONT_END_BASE_URL = os.getenv("APP_URL")
 
 LOCAL_IP = None
 try:

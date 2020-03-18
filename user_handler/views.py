@@ -75,7 +75,7 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         data["is_admin"] = is_admin
         return Response(data)
 
-    def post(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         user = self.request.user
         changing_user = User.objects.get(pk=user.pk)
         try:
@@ -256,6 +256,7 @@ class SendInviteView(APIView):
                     )
 
                     invite_link = settings.FRONT_END_BASE_URL
+                    print(invite_link)
 
                     if User.objects.filter(email=email).first() is None:
                         invite_link += "invite/{0}".format(token)
