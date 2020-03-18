@@ -75,6 +75,25 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         data["is_admin"] = is_admin
         return Response(data)
 
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
+        changing_user = User.objects.get(pk=user.pk)
+        try:
+            _ = request.data["currentPassword"]
+            _ = request.data["newPassword"]
+        except Exception:
+            return Response(status=400)
+        if changing_user.check_password(request.data["currentPassword"]):
+            changing_user.set_password(request.data["newPassword"])
+            changing_user.save()
+            return Response({"message": "Your password has been changed"}, status=200)
+        else:
+            return Response(
+                {
+                    "error": "The current password provided does not match the user password"
+                },
+                status=400,
+            )
 
 class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
@@ -132,30 +151,6 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                 return Response(
                     {"message": "User was deleted from organization"}, status=204
                 )
-
-
-class ChangePasswordView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request):
-        user = self.request.user
-        changing_user = User.objects.get(pk=user.pk)
-        try:
-            _ = request.data["currentPassword"]
-            _ = request.data["newPassword"]
-        except Exception:
-            return Response(status=400)
-        if changing_user.check_password(request.data["currentPassword"]):
-            changing_user.set_password(request.data["newPassword"])
-            changing_user.save()
-            return Response({"message": "Your password has been changed"}, status=200)
-        else:
-            return Response(
-                {
-                    "error": "The current password provided does not match the user password"
-                },
-                status=400,
-            )
 
 
 class ListOrgUsersView(ListAPIView):

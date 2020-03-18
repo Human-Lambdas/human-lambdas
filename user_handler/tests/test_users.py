@@ -19,6 +19,7 @@ class TestUsers(APITestCase):
         user = User(name=self.preset_user_name, email=self.preset_user_email)
         user.set_password(self.preset_user_password)
         user.save()
+        self.user_id = user.id
         organization = Organization(name=self.organization_name)
         organization.save()
         self.org_id = organization.id
@@ -41,7 +42,7 @@ class TestUsers(APITestCase):
         self.assertEqual(new_user.email, self.preset_changed_email)
 
     def test_user_password_change(self):
-        new_password = "wordfoo"
+        new_password = "wordfooword"
         response = self.client.post(
             "/v1/users/token/",
             {"email": self.preset_user_email, "password": self.preset_user_password},
@@ -49,7 +50,7 @@ class TestUsers(APITestCase):
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
         response = self.client.post(
-            "/v1/users/change-password/",
+            "/v1/users/{0}".format(self.user_id),
             {"currentPassword": self.preset_user_password, "newPassword": new_password},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -75,13 +76,13 @@ class TestUsers(APITestCase):
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
         response = self.client.post(
-            "/v1/users/change-password/", {"newPassword": new_password}
+            "/v1/users/{0}".format(self.user_id), {"newPassword": new_password}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_user_password_change_no_jwt(self):
         response = self.client.post(
-            "/v1/users/change-password/", {"newPassword": "eff"}
+            "/v1/users/{0}".format(self.user_id), {"newPassword": "eff"}
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
