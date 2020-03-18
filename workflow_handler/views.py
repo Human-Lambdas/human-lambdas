@@ -4,7 +4,6 @@ from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
     ListAPIView,
-    RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
@@ -19,8 +18,8 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
 
-from .serializers import WorkflowSerializer, TaskSerializer, HookSerializer
-from .models import Workflow, Task, WorkflowHook
+from .serializers import WorkflowSerializer, TaskSerializer
+from .models import Workflow, Task
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -355,32 +354,3 @@ class GetCompletedTaskView(ListAPIView):
 
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
-
-
-class CreateHookView(CreateAPIView):
-    """
-    Retrieve, create, update or destroy webhooks.
-    """
-
-    serializer_class = HookSerializer
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class RUDHookView(RetrieveUpdateDestroyAPIView):
-    """
-    Retrieve, create, update or destroy webhooks.
-    """
-
-    serializer_class = HookSerializer
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
-
-    def get_queryset(self):
-        return WorkflowHook.objects.filter(workflow__pk=self.kwargs["workflow_id"])
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, id=self.kwargs["hook_id"])
-        return obj
