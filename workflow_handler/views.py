@@ -276,6 +276,10 @@ class CreateTaskView(CreateAPIView):
                 status=404,
             )
         request.data["outputs"] = workflow.outputs
+        if "inputs" not in request.data or not request.data["inputs"]:
+            return Response(
+                {"status_code": 400, "errors": [{"message": "No input"}],}, status=400,
+            )
         for task_input in request.data["inputs"]:
             try:
                 workflow_input = next(
