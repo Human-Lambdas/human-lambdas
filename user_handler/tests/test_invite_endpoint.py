@@ -15,14 +15,14 @@ class TestInvite(APITestCase):
         self.preset_user_email = "foo@bar.com"
         self.preset_changed_email = "bar@foo.com"
         self.organization_name = "barinc"
-        self.preset_user_password = "fooword"
+        self.preset_user_password = "foowordbar"
 
         user = User(name=self.preset_user_name, email=self.preset_user_email)
         user.set_password(self.preset_user_password)
         user.save()
 
         response = self.client.post(
-            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]

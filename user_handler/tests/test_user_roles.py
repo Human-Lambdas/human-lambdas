@@ -8,7 +8,7 @@ class TestUserRoles(APITestCase):
     def setUp(self):
         self.admin_email = "foo@bar.com"
         user = User(name="foo", email=self.admin_email)
-        user.set_password("foopwd")
+        user.set_password("foopwdbar")
         user.save()
         self.organization_name = "fooinc"
         organization = Organization(name=self.organization_name)
@@ -18,7 +18,7 @@ class TestUserRoles(APITestCase):
         user.current_organization_id = self.org_id
         user.save()
         response = self.client.post(
-            "/v1/users/token", {"email": "foo@bar.com", "password": "foopwd"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foopwdbar"}
         )
         self.admin_access_token = response.data["access"]
         self.admin_id = user.pk
@@ -27,11 +27,11 @@ class TestUserRoles(APITestCase):
         worker = User(
             name="peter", email=self.worker_email, current_organization_id=self.org_id
         )
-        worker.set_password("pwd")
+        worker.set_password("pwdbarbar")
         worker.save()
         organization.user.add(worker)
         response = self.client.post(
-            "/v1/users/token", {"email": "worker@bar.com", "password": "pwd"}
+            "/v1/users/token", {"email": "worker@bar.com", "password": "pwdbarbar"}
         )
         self.worker_access_token = response.data["access"]
         self.worker_id = worker.pk
