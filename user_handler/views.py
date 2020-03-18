@@ -95,6 +95,7 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
                 status=400,
             )
 
+
 class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
