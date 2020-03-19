@@ -19,19 +19,19 @@ class TestTaskCount(APITestCase):
         self.total_rows = 3
         registration_data = {
             "email": "foo@bar.com",
-            "password": "fooword",
+            "password": "foowordbar",
             "organization": "fooInc",
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register", registration_data)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/api-token/",)
+        response = self.client.get("/v1/users/api-token",)
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
@@ -56,7 +56,7 @@ class TestTaskCount(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -64,7 +64,7 @@ class TestTaskCount(APITestCase):
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/orgs/{0}/workflows/{1}/upload/".format(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(
                     self.org_id, self.workflow_id
                 ),
                 data=data,
@@ -76,15 +76,14 @@ class TestTaskCount(APITestCase):
         self.assertEqual(workflow.n_tasks, self.total_rows)
 
     def test_assigning_task(self):
-        n_tasks = self.total_rows
+        n_tasks = self.total_rows - 1
         for i in range(self.total_rows):
             _ = self.client.get(
-                "/v1/orgs/{}/workflows/{}/tasks/next/".format(
+                "/v1/orgs/{}/workflows/{}/tasks/next".format(
                     self.org_id, self.workflow_id
                 )
             )
             workflow = Workflow.objects.get(pk=self.workflow_id)
-            n_tasks -= 1
             self.assertEqual(workflow.n_tasks, n_tasks)
 
     def test_task_creation(self):
@@ -99,7 +98,7 @@ class TestTaskCount(APITestCase):
         }
         for i in range(5):
             _ = self.client.post(
-                "/v1/orgs/{}/workflows/{}/tasks/create/".format(
+                "/v1/orgs/{}/workflows/{}/tasks/create".format(
                     self.org_id, self.workflow_id
                 ),
                 task_data,

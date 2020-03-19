@@ -38,6 +38,9 @@ HOOK_EVENTS = {
     "task.completed": "workflow_handler.Task.completed",
 }
 
+HOOK_CUSTOM_MODEL = "workflow_handler.WorkflowHook"
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -56,6 +59,9 @@ INSTALLED_APPS = [
     "rest_hooks",
 ]
 
+APPEND_SLASH = False
+
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -145,6 +151,7 @@ else:
     ALLOWED_HOSTS = [
         "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
         "api.humanlambdas.com",
+        "localhost",
     ]
     DEFAULT_PERMISSION = "rest_framework.permissions.IsAuthenticated"
 
@@ -176,7 +183,7 @@ REST_AUTH_SERIALIZERS = {
 REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "user_handler.serializers.UserCreateSerializer",
 }
-
+os.environ.get("SENDGRID_API_KEY")
 LOGGING = {
     "version": 1,
     "handlers": {"console": {"level": "DEBUG", "class": "logging.StreamHandler"}},
@@ -216,3 +223,5 @@ except requests.exceptions.RequestException:
     pass
 if LOCAL_IP and not DEBUG:
     ALLOWED_HOSTS.append(LOCAL_IP)
+
+TASK_EXPIRATION_MIN = 60  # Minutes

@@ -10,7 +10,7 @@ python manage.py migrate
 
 # collect static files
 echo "collect static files"
-python manage.py collectstatic
+python manage.py collectstatic --noinput
 
 # Start server
 echo "Starting server"
