@@ -100,12 +100,20 @@ class TaskSerializer(serializers.ModelSerializer):
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
             err_msg = "Unexpected event {}".format(event)
-            raise exceptions.ValidationError(detail=err_msg, code=400)
+            raise exceptions.ValidationError(detail=err_msg)
         return event
 
     class Meta:
         model = Task
-        fields = ["id", "status", "created_at", "inputs", "outputs"]
+        fields = [
+            "id",
+            "status",
+            "created_at",
+            "inputs",
+            "outputs",
+            "assigned_to",
+            "completed_at",
+        ]
 
     def create(self, validated_data):
         inputs = validated_data["inputs"]
@@ -129,8 +137,8 @@ class TaskSerializer(serializers.ModelSerializer):
             instance_output[itype]["value"] = output[itype]["value"]
         user = self.context["request"].user
         instance.status = "completed"
-        instance.completed_at = timezone.now()  # datetime.datetime.now()
-        instance.completed_by = user
+        instance.completed_at = timezone.now()
+        instance.assigned_to = user
         instance.save()
         instance.task_completed(user)
         return instance
@@ -155,7 +163,7 @@ class HookSerializer(serializers.ModelSerializer):
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
             err_msg = "Unexpected event {}".format(event)
-            raise exceptions.ValidationError(detail=err_msg, code=400)
+            raise exceptions.ValidationError(detail=err_msg)
         return event
 
     class Meta:
@@ -171,9 +179,7 @@ class HookSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
         if WorkflowHook.objects.filter(workflow=workflow).exists():
-            raise serializers.ValidationError(
-                "Webhook to this workflow already exists", code=400
-            )
+            raise serializers.ValidationError("Webhook to this workflow already exists")
         hook = WorkflowHook(
             user=validated_data["user"],
             event="task.completed",

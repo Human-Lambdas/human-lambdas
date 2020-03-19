@@ -1,11 +1,12 @@
 import logging
 import os
 
+from django.utils import timezone
 from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import Workflow, Task
-from user_handler.models import Organization
+from user_handler.models import Organization, User
 
 
 logger = logging.getLogger(__file__)
@@ -14,22 +15,35 @@ _CURRENT_DIR = os.path.dirname(__file__)
 
 
 class TestTasks(APITestCase):
+    def setUserClient(self, email):
+        response = self.client.post(
+            "/v1/users/token", {"email": email, "password": "foowordbar"}
+        )
+        self.access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
         registration_data = {
             "email": "foo@bar.com",
-            "password": "fooword",
+            "password": "foowordbar",
             "organization": "fooInc",
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register", registration_data)
+
+        registration_data["email"] = "foojr@bar.com"
+        _ = self.client.post("/v1/users/register", registration_data)
+        registration_data["email"] = "foo@bar.com"
+
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
@@ -53,7 +67,7 @@ class TestTasks(APITestCase):
             ],
         }
         _ = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
             format="json",
         )
@@ -80,7 +94,7 @@ class TestTasks(APITestCase):
             ],
         }
         _ = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id),
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
             second_workflow_data,
             format="json",
         )
@@ -89,7 +103,7 @@ class TestTasks(APITestCase):
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/orgs/{0}/workflows/{1}/upload/".format(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(
                     self.org_id, self.workflow_id
                 ),
                 data=data,
@@ -98,7 +112,7 @@ class TestTasks(APITestCase):
         with open(self.file_path) as f:
             data = {"file": f}
             response = self.client.post(
-                "/v1/orgs/{0}/workflows/{1}/upload/".format(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(
                     self.org_id, self.second_workflow_id
                 ),
                 data=data,
@@ -107,7 +121,7 @@ class TestTasks(APITestCase):
 
     def test_get_task_list(self):
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/".format(self.org_id, self.workflow_id)
+            "/v1/orgs/{0}/workflows/{1}/tasks".format(self.org_id, self.workflow_id)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(3, len(response.data), response.content)
@@ -200,35 +214,88 @@ class TestTasks(APITestCase):
 
     def test_next_task(self):
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next/".format(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
                 self.org_id, self.workflow_id
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual("pending", response.data["status"], response.content)
+        self.assertEqual("assigned", response.data["status"], response.content)
         task = Task.objects.get(id=response.data["id"])
         self.assertEqual(task.status, "assigned")
 
-    def test_next_task_different_workflow(self):
-        response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next/".format(
-                self.org_id, self.second_workflow_id
-            )
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
-    def test_next_task_without_slash(self):
+    def test_next_task_repeatedly(self):
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
                 self.org_id, self.workflow_id
             )
         )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual("assigned", response.data["status"], response.content)
+
+        task_id = response.data["id"]
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual(response.data["id"], task_id)
+
+        # get next task by client 2 should be different because task_id assigned_at has not expired
+        self.setUserClient("foojr@bar.com")
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertNotEqual(response.data["id"], task_id)
+
+        # unassign from client 2
+        task = Task.objects.get(pk=response.data["id"])
+        task.status = "pending"
+        task.save()
+
+        task = Task.objects.get(pk=task_id)
+        task.assigned_at = timezone.now() - timezone.timedelta(hours=24)
+        task.save()
+
+        # get next task by client 2 should be task_id because assigned_at has expired
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual(response.data["id"], task_id)
+
+        task = Task.objects.get(pk=task_id)
+        user = User.objects.get(email="foo@bar.com")
+        self.assertEqual(task.status, "assigned")
+        self.assertNotEqual(task.assigned_to, user)
+        self.assertIsNotNone(task.assigned_at)
+        self.setUserClient("foo@bar.com")
+
+    def test_next_task_different_workflow(self):
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.second_workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+    def test_next_task_with_slash(self):
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next/".format(
+                self.org_id, self.workflow_id
+            )
+        )
         self.assertEqual(
-            response.status_code, status.HTTP_301_MOVED_PERMANENTLY, response.content
+            response.status_code, status.HTTP_404_NOT_FOUND, response.content
         )
 
     def test_workflow_list_task_count(self):
-        response = self.client.get("/v1/orgs/{}/workflows/".format(self.org_id))
+        response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id))
         for data, expected in zip(response.data, [3, 3]):
             self.assertEqual(data["n_tasks"], expected)
 

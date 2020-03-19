@@ -1,3 +1,5 @@
+from django.utils import timezone
+from django.conf import settings
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
@@ -88,7 +90,13 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
             self.perform_update(serializer)
             return Response(serializer.data)
         return Response(
-            {"error": "You do not have permission to change workflow"}, status=403
+            {
+                "status_code": 403,
+                "errors": [
+                    {"message": "You do not have permission to change workflow"}
+                ],
+            },
+            status=403,
         )
 
 
@@ -112,7 +120,10 @@ class FileUploadView(APIView):
         try:
             process_csv(content, workflow=workflow)
         except Exception as exception:
-            return Response({"error": str(exception)}, status=400)
+            return Response(
+                {"status_code": 400, "errors": [{"message": str(exception)}]},
+                status=400,
+            )
         return Response(status=200)
 
 
@@ -192,21 +203,40 @@ class NextTaskView(APIView):
     def get(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.get_queryset()
+
+        # 1 get assigned to self
+        obj = (
+            queryset.filter(status="assigned").filter(assigned_to=request.user).first()
+        )
+        if obj:
+            task = self.serializer_class(obj).data
+            return Response(task)
+
+        # 2 get assigned to someone else and expired
         with transaction.atomic():
-            obj = (
-                queryset.select_for_update()
-                .filter(Q(status="pending") & Q(workflow=workflow))
-                .first()
-            )
-            if obj:
-                task = self.serializer_class(obj).data
-                obj.status = "assigned"
+            obj = queryset.select_for_update().filter(status="assigned").first()
+            if obj and timezone.now() - obj.assigned_at > timezone.timedelta(
+                minutes=settings.TASK_EXPIRATION_MIN
+            ):
+                obj.assigned_to = request.user
+                obj.assigned_at = timezone.now()
                 obj.save()
-                workflow.n_tasks = F("n_tasks") - 1
-                workflow.save()
+                task = self.serializer_class(obj).data
                 return Response(task)
-            else:
-                return Response(status=204)
+
+        # 3 get first pending
+        with transaction.atomic():
+            obj = queryset.select_for_update().filter(status="pending").first()
+            if not obj:
+                return Response({}, status=204)
+            obj.status = "assigned"
+            obj.assigned_to = request.user
+            obj.assigned_at = timezone.now()
+            obj.save()
+            workflow.n_tasks = F("n_tasks") - 1
+            workflow.save()
+            task = self.serializer_class(obj).data
+            return Response(task)
 
 
 class CreateTaskView(CreateAPIView):
@@ -234,24 +264,40 @@ class CreateTaskView(CreateAPIView):
         if not workflow:
             return Response(
                 {
-                    "Error": "Workflow with id {} was not found".format(
-                        kwargs["workflow_id"]
-                    )
+                    "status_code": 404,
+                    "errors": [
+                        {
+                            "message": "Workflow with id {} was not found".format(
+                                kwargs["workflow_id"]
+                            )
+                        }
+                    ],
                 },
                 status=404,
             )
         request.data["outputs"] = workflow.outputs
+        if "inputs" not in request.data or not request.data["inputs"]:
+            return Response(
+                {"status_code": 400, "errors": [{"message": "No inputs"}]}, status=400,
+            )
         for task_input in request.data["inputs"]:
             try:
                 workflow_input = next(
-                    item for item in workflow.inputs if item["id"] == task_input["id"]
+                    {"name": item["name"], "type": item["type"]}
+                    for item in workflow.inputs
+                    if item["id"] == task_input["id"]
                 )
             except StopIteration:
                 return Response(
                     {
-                        "Error": "Cannot find input with input id: {}".format(
-                            task_input["id"]
-                        )
+                        "status_code": 400,
+                        "errors": [
+                            {
+                                "message": "Cannot find input with input id: {}".format(
+                                    task_input["id"]
+                                )
+                            }
+                        ],
                     },
                     status=400,
                 )
@@ -305,12 +351,12 @@ class GetCompletedTaskView(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        obj = get_list_or_404(self.get_queryset())
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        obj = get_list_or_404(self.get_queryset())
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
 
