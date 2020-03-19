@@ -74,25 +74,30 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         data["is_admin"] = is_admin
         return Response(data)
 
-    def patch(self, request, *args, **kwargs):
-        user = self.request.user
-        changing_user = User.objects.get(pk=user.pk)
-        try:
-            _ = request.data["currentPassword"]
-            _ = request.data["newPassword"]
-        except Exception:
-            return Response(status=400)
-        if changing_user.check_password(request.data["currentPassword"]):
-            changing_user.set_password(request.data["newPassword"])
-            changing_user.save()
-            return Response({"message": "Your password has been changed"}, status=200)
-        else:
-            return Response(
-                {
-                    "error": "The current password provided does not match the user password"
-                },
-                status=400,
-            )
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        # change password work
+        if (request.data.get("currentPassword") or request.data.get("password")):
+            user = self.request.user
+            changing_user = User.objects.get(pk=user.pk)
+            try:
+                _ = request.data["currentPassword"]
+                _ = request.data["password"]
+            except Exception:
+                return Response(status=400)
+            if not changing_user.check_password(request.data["currentPassword"]):
+                return Response(
+                    {
+                        "error": "The current password provided does not match the user password"
+                    },
+                    status=400,
+                )
+        # throw any errors otherwise let through
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 
 class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
