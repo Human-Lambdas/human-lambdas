@@ -4,7 +4,6 @@ from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
     ListAPIView,
-    RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
@@ -19,8 +18,8 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
 
-from .serializers import WorkflowSerializer, TaskSerializer, HookSerializer
-from .models import Workflow, Task, WorkflowHook
+from .serializers import WorkflowSerializer, TaskSerializer
+from .models import Workflow, Task
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -62,12 +61,38 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = WorkflowSerializer
 
+    def get_serializer(self, *args, **kwargs):
+        """
+        Return the serializer instance that should be used for validating and
+        deserializing input, and for serializing output.
+        """
+        serializer_class = self.get_serializer_class()
+        kwargs["context"] = self.get_serializer_context(*args, **kwargs)
+        return serializer_class(*args, **kwargs)
+
+    def get_serializer_context(self, *args, **kwargs):
+        """
+        Extra context provided to the serializer class.
+        """
+        context = {
+            "request": self.request,
+            "format": self.format_kwarg,
+            "view": self,
+        }
+        try:
+            if not kwargs["data"]["webhook"]:
+                context["remove_webhook"] = not kwargs["data"].pop("webhook")
+        except KeyError:
+            pass
+        return context
+
     def get_queryset(self):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
         return Workflow.objects.filter(
             Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
+            & Q(pk=self.kwargs["workflow_id"])
         )
 
     def get_object(self):
@@ -75,8 +100,10 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         return obj
 
     def retrieve(self, request, *args, **kwargs):
-        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
+        obj = get_object_or_404(self.get_queryset())
         workflow = self.serializer_class(obj).data
+        if hasattr(obj, "workflowhook"):
+            workflow["webhook"] = {"target": obj.workflowhook.target}
         return Response(workflow)
 
     def update(self, request, *args, **kwargs):
@@ -359,32 +386,3 @@ class GetCompletedTaskView(ListAPIView):
 
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
-
-
-class CreateHookView(CreateAPIView):
-    """
-    Retrieve, create, update or destroy webhooks.
-    """
-
-    serializer_class = HookSerializer
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class RUDHookView(RetrieveUpdateDestroyAPIView):
-    """
-    Retrieve, create, update or destroy webhooks.
-    """
-
-    serializer_class = HookSerializer
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
-
-    def get_queryset(self):
-        return WorkflowHook.objects.filter(workflow__pk=self.kwargs["workflow_id"])
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, id=self.kwargs["hook_id"])
-        return obj
