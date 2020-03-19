@@ -75,3 +75,15 @@ class TestOrganizations(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["webhook"]["target"], "http://some.url.com")
+
+    def test_webhook_delete(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
+        response = self.client.patch(
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id),
+            {"webhook": False},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(
+            WorkflowHook.objects.filter(workflow__pk=self.workflow_id).count(), 0
+        )

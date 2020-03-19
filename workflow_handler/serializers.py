@@ -103,11 +103,14 @@ class WorkflowSerializer(serializers.ModelSerializer):
         instance.disabled = validated_data.get("disabled", instance.disabled)
         instance.save()
         webhook_data = validated_data.get("webhook")
-        if webhook_data:
+        if webhook_data or self.context.get("remove_webhook"):
             hook_instance = WorkflowHook.objects.get(workflow=instance)
             if hook_instance:
-                hook_instance.target = webhook_data["target"]
-                hook_instance.save()
+                if self.context.get("remove_webhook"):
+                    hook_instance.delete()
+                else:
+                    hook_instance.target = webhook_data["target"]
+                    hook_instance.save()
             else:
                 webhook_data["workflow"] = instance
                 webhook_data["event"] = "task.completed"

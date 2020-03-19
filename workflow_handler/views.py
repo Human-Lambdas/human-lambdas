@@ -61,6 +61,31 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = WorkflowSerializer
 
+    def get_serializer(self, *args, **kwargs):
+        """
+        Return the serializer instance that should be used for validating and
+        deserializing input, and for serializing output.
+        """
+        serializer_class = self.get_serializer_class()
+        kwargs["context"] = self.get_serializer_context(*args, **kwargs)
+        return serializer_class(*args, **kwargs)
+
+    def get_serializer_context(self, *args, **kwargs):
+        """
+        Extra context provided to the serializer class.
+        """
+        context = {
+            "request": self.request,
+            "format": self.format_kwarg,
+            "view": self,
+        }
+        try:
+            if not kwargs["data"]["webhook"]:
+                context["remove_webhook"] = not kwargs["data"].pop("webhook")
+        except KeyError:
+            pass
+        return context
+
     def get_queryset(self):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
