@@ -245,18 +245,7 @@ class SendInviteView(APIView):
                     invite.save()
 
                     invite_link = settings.FRONT_END_BASE_URL
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    print(invite_link)
-
-                    if User.objects.filter(email=email).first() is None:
-=======
                     if not user:
->>>>>>> 8ba5270cf7526a9b3de680266aac66072d0afc87
-=======
-
-                    if not user:
->>>>>>> 743c872877e445abf6b3b34a52299c6c0a75769a
                         invite_link += "invite/{0}".format(token)
                     else:
                         invite_link += "invite/success/{0}".format(token)
