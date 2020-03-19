@@ -16,7 +16,7 @@ class TestInvite(APITestCase):
         self.preset_user_email = "foo@bar.com"
         self.preset_changed_email = "bar@foo.com"
         self.organization_name = "fooinc"
-        self.preset_user_password = "fooword"
+        self.preset_user_password = "foowordbar"
 
         user = User(name=self.preset_user_name, email=self.preset_user_email)
         user.set_password(self.preset_user_password)
@@ -24,7 +24,7 @@ class TestInvite(APITestCase):
         self.user = user
 
         response = self.client.post(
-            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
@@ -82,7 +82,7 @@ class TestInvite(APITestCase):
 
         response = self.client.post(
             "/v1/users/invitation/{0}".format(token),
-            {"name": "sean", "password": "fooword"},
+            {"name": "sean", "password": "foowordbar"},
         )
         self.assertEqual(response.data["message"], "Your account has been created!")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -105,7 +105,7 @@ class TestInvite(APITestCase):
         new_invite.save()
         response = self.client.post(
             "/v1/users/invitation/{0}".format(token),
-            {"name": "sean", "password": "fooword"},
+            {"name": "sean", "password": "foowordbar"},
         )
         self.assertEqual(response.data["message"], "Success!")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -133,9 +133,9 @@ class TestInvite(APITestCase):
 
         response = self.client.post(
             "/v1/users/invitation/{0}".format(token),
-            {"name": "sean", "password": "fooword"},
+            {"name": "sean", "password": "foowordbar"},
         )
-        self.assertEqual(response.data["error"], "this token has expired!")
+        self.assertEqual(response.data["errors"][0]["message"], "this token has expired!")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_invitation_post_call_already_joined_org(self):
@@ -145,9 +145,9 @@ class TestInvite(APITestCase):
         )
         response = self.client.post(
             "/v1/users/invitation/{0}".format(self.token),
-            {"name": "sean", "password": "fooword"},
+            {"name": "sean", "password": "foowordbar"},
         )
         self.assertEqual(
-            response.data["error"], "this organization has already been joined"
+            response.data["errors"][0]["message"], "this organization has already been joined"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

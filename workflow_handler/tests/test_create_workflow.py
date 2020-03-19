@@ -9,7 +9,7 @@ class TestCreateWorkflow(APITestCase):
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
-            "password": "fooword",
+            "password": "foowordbar",
             "organization": "fooInc",
             "is_admin": True,
             "name": "foo",
@@ -17,7 +17,7 @@ class TestCreateWorkflow(APITestCase):
         _ = self.client.post("/v1/users/register", registration_data)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
-            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]

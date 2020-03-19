@@ -13,7 +13,7 @@ class TestOrganizations(APITestCase):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
         self.organization_name = "fooinc"
-        self.preset_user_password = "fooword"
+        self.preset_user_password = "foowordbar"
 
         user = User(name=self.preset_user_name, email=self.preset_user_email)
         user.set_password(self.preset_user_password)

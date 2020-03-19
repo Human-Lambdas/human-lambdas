@@ -7,10 +7,10 @@ from user_handler.models import User
 class TestAPIToken(APITestCase):
     def setUp(self):
         user = User(name="foo", email="foo@bar.com")
-        user.set_password("fooword")
+        user.set_password("foowordbar")
         user.save()
         response = self.client.post(
-            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)

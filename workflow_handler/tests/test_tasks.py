@@ -17,7 +17,7 @@ _CURRENT_DIR = os.path.dirname(__file__)
 class TestTasks(APITestCase):
     def setUserClient(self, email):
         response = self.client.post(
-            "/v1/users/token", {"email": email, "password": "fooword"}
+            "/v1/users/token", {"email": email, "password": "foowordbar"}
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
@@ -26,7 +26,7 @@ class TestTasks(APITestCase):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
         registration_data = {
             "email": "foo@bar.com",
-            "password": "fooword",
+            "password": "foowordbar",
             "organization": "fooInc",
             "is_admin": True,
             "name": "foo",
@@ -39,7 +39,7 @@ class TestTasks(APITestCase):
 
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
-            "/v1/users/token", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)

@@ -90,7 +90,13 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
             self.perform_update(serializer)
             return Response(serializer.data)
         return Response(
-            {"error": "You do not have permission to change workflow"}, status=403
+            {
+                "status_code": 403,
+                "errors": [
+                    {"message": "You do not have permission to change workflow"}
+                ],
+            },
+            status=403,
         )
 
 
@@ -114,7 +120,10 @@ class FileUploadView(APIView):
         try:
             process_csv(content, workflow=workflow)
         except Exception as exception:
-            return Response({"error": str(exception)}, status=400)
+            return Response(
+                {"status_code": 400, "errors": [{"message": str(exception)}]},
+                status=400,
+            )
         return Response(status=200)
 
 
@@ -255,13 +264,22 @@ class CreateTaskView(CreateAPIView):
         if not workflow:
             return Response(
                 {
-                    "Error": "Workflow with id {} was not found".format(
-                        kwargs["workflow_id"]
-                    )
+                    "status_code": 404,
+                    "errors": [
+                        {
+                            "message": "Workflow with id {} was not found".format(
+                                kwargs["workflow_id"]
+                            )
+                        }
+                    ],
                 },
                 status=404,
             )
         request.data["outputs"] = workflow.outputs
+        if "inputs" not in request.data or not request.data["inputs"]:
+            return Response(
+                {"status_code": 400, "errors": [{"message": "No inputs"}]}, status=400,
+            )
         for task_input in request.data["inputs"]:
             try:
                 workflow_input = next(
@@ -272,9 +290,14 @@ class CreateTaskView(CreateAPIView):
             except StopIteration:
                 return Response(
                     {
-                        "Error": "Cannot find input with input id: {}".format(
-                            task_input["id"]
-                        )
+                        "status_code": 400,
+                        "errors": [
+                            {
+                                "message": "Cannot find input with input id: {}".format(
+                                    task_input["id"]
+                                )
+                            }
+                        ],
                     },
                     status=400,
                 )

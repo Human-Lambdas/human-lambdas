@@ -95,7 +95,13 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         user = self.get_object()
         if request.user == user:
-            return Response({"Error": "You cannot change your own role"}, status=403)
+            return Response(
+                {
+                    "status_code": 403,
+                    "errors": [{"message": "You cannot change your own role"}],
+                },
+                status=403,
+            )
         else:
             org = Organization.objects.get(pk=kwargs["org_id"])
             try:
@@ -111,14 +117,25 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                     )
             except KeyError:
                 return Response(
-                    {"error": "payload should have the boolean field 'admin'"},
+                    {
+                        "status_code": 400,
+                        "errors": [
+                            {"message": "payload should have the boolean field 'admin'"}
+                        ],
+                    },
                     status=400,
                 )
 
     def destroy(self, request, *args, **kwargs):
         user = self.get_object()
         if request.user == user:
-            return Response({"Error": "You cannot delete yourself"}, status=403)
+            return Response(
+                {
+                    "status_code": 403,
+                    "errors": [{"message": "You cannot delete yourself"}],
+                },
+                status=403,
+            )
         else:
             all_orgs_member = Organization.objects.filter(user=user)
             if all_orgs_member.count() == 1:
@@ -252,12 +269,16 @@ class SendInviteView(APIView):
                     email
                 )
                 response_text += " and so does not need to be added again. "
-            return Response({"error": response_text}, status=400)
+            return Response(
+                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
+            )
         if len(invalid_email_list) > 0:
             response_text = ""
             for email in invalid_email_list:
                 response_text += "{0} is an invalid email. ".format(email)
-            return Response({"error": response_text}, status=400)
+            return Response(
+                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
+            )
         if len(already_added_email_list) > 0:
             response_text = ""
             for email in already_added_email_list:
@@ -265,7 +286,9 @@ class SendInviteView(APIView):
                     email
                 )
                 response_text += " and so does not need to be added again. "
-            return Response({"error": response_text}, status=400)
+            return Response(
+                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
+            )
 
 
 class InvitationView(APIView):
@@ -273,7 +296,11 @@ class InvitationView(APIView):
         invite = Invitation.objects.filter(token=self.kwargs["invite_token"])
         if not invite.exists():
             return Response(
-                {"error": "no invitation with this token exists"}, status=404
+                {
+                    "status_code": 404,
+                    "errors": [{"message": "no invitation with this token exists"}],
+                },
+                status=404,
             )
         else:
             invitation_email, invitation_org = (
@@ -292,17 +319,33 @@ class InvitationView(APIView):
         invite = Invitation.objects.filter(token=self.kwargs["invite_token"]).first()
         if invite is None:
             return Response(
-                {"error": "no invitation with this token exists"}, status=404
+                {
+                    "status_code": 404,
+                    "errors": [{"message": "no invitation with this token exists"}],
+                },
+                status=404,
             )
         if invite.expires_at < timezone.now():
-            return Response({"error": "this token has expired!"}, status=400)
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "this token has expired!"}],
+                },
+                status=400,
+            )
         else:
             invitation_org = invite.organization
             if Organization.objects.filter(
                 user__email=invite.email, name=str(invitation_org)
             ).exists():
                 return Response(
-                    {"error": "this organization has already been joined"}, status=400
+                    {
+                        "status_code": 400,
+                        "errors": [
+                            {"message": "this organization has already been joined"}
+                        ],
+                    },
+                    status=400,
                 )
             if User.objects.filter(email=invite.email).first() is None:
                 new_user = User(email=invite.email, name=request.data["name"])
