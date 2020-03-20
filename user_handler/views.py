@@ -74,6 +74,33 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         data["is_admin"] = is_admin
         return Response(data)
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        # change password work
+        if request.data.get("currentPassword") or request.data.get("password"):
+            if "currentPassword" not in request.data or "password" not in request.data:
+                error_message = (
+                    "Both the current password and the new password must be provided"
+                )
+                return Response(
+                    {"status_code": 400, "errors": [{"message": error_message}]},
+                    status=400,
+                )
+            if not instance.check_password(request.data["currentPassword"]):
+                error_message = (
+                    "The current password provided does not match the user password"
+                )
+                return Response(
+                    {"status_code": 400, "errors": [{"message": error_message}]},
+                    status=400,
+                )
+        # throw any errors otherwise let through
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
 
 class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)

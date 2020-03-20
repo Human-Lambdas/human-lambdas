@@ -19,6 +19,7 @@ class TestUsers(APITestCase):
         user = User(name=self.preset_user_name, email=self.preset_user_email)
         user.set_password(self.preset_user_password)
         user.save()
+        self.user_id = user.id
         organization = Organization(name=self.organization_name)
         organization.save()
         self.org_id = organization.id
@@ -39,6 +40,51 @@ class TestUsers(APITestCase):
         user.save()
         new_user = User.objects.get(name=self.preset_user_name)
         self.assertEqual(new_user.email, self.preset_changed_email)
+
+    def test_user_password_change(self):
+        new_password = "wordfooword"
+        response = self.client.post(
+            "/v1/users/token",
+            {"email": self.preset_user_email, "password": self.preset_user_password},
+        )
+        access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
+        response = self.client.patch(
+            "/v1/users/{0}".format(self.user_id),
+            {"currentPassword": self.preset_user_password, "password": new_password},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.post(
+            "/v1/users/token",
+            {"email": self.preset_user_email, "password": self.preset_user_password},
+        )
+        # user password has changed so will get a 401
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.post(
+            "/v1/users/token",
+            {"email": self.preset_user_email, "password": new_password},
+        )
+        # can get token with correct password
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_password_change_no_current_password(self):
+        new_password = "wordfoo"
+        response = self.client.post(
+            "/v1/users/token",
+            {"email": self.preset_user_email, "password": self.preset_user_password},
+        )
+        access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
+        response = self.client.patch(
+            "/v1/users/{0}".format(self.user_id), {"password": new_password}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_user_password_change_no_jwt(self):
+        response = self.client.patch(
+            "/v1/users/{0}".format(self.user_id), {"password": "eff"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_user_data_deletion(self):
         user = User.objects.all()
@@ -146,21 +192,6 @@ class TestAPIUserUpdate(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.get("/v1/users/{}".format(self.user_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-
-    def test_update_password(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        data = {"password": self.preset_changed_password}
-        response = self.client.patch("/v1/users/{}".format(self.user_id), data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        response = self.client.post(
-            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
-        )
-        self.assertEqual(response.status_code, 401)
-        response = self.client.post(
-            "/v1/users/token",
-            {"email": "foo@bar.com", "password": self.preset_changed_password},
-        )
-        self.assertEqual(response.status_code, 200)
 
     def test_update_name(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
