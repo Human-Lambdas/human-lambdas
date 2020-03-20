@@ -75,21 +75,36 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         return Response(data)
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
         # change password work
-        if (request.data.get("currentPassword") or request.data.get("password")):
+        if request.data.get("currentPassword") or request.data.get("password"):
             user = self.request.user
             changing_user = User.objects.get(pk=user.pk)
             try:
                 _ = request.data["currentPassword"]
                 _ = request.data["password"]
             except Exception:
-                return Response(status=400)
+                return Response(
+                    {
+                        "status_code": 400,
+                        "errors": [
+                            {
+                                "message": "Both the current password and the new password must be provided"
+                            }
+                        ],
+                    },
+                    status=400,
+                )
             if not changing_user.check_password(request.data["currentPassword"]):
                 return Response(
                     {
-                        "error": "The current password provided does not match the user password"
+                        "status_code": 400,
+                        "errors": [
+                            {
+                                "message": "The current password provided does not match the user password"
+                            }
+                        ],
                     },
                     status=400,
                 )
