@@ -79,14 +79,9 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         instance = self.get_object()
         # change password work
         if request.data.get("currentPassword") or request.data.get("password"):
-            user = self.request.user
-            changing_user = User.objects.get(pk=user.pk)
-            try:
-                _ = request.data["currentPassword"]
-                _ = request.data["password"]
-            except Exception:
-                error_message = "Both the current password and the"
-                error_message += " new password must be provided"
+            if "currentPassword" not in request.data or "password" not in request.data:
+                error_message = "Both the current password and the" \
+                " new password must be provided"
                 return Response(
                     {
                         "status_code": 400,
@@ -98,9 +93,9 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
                     },
                     status=400,
                 )
-            if not changing_user.check_password(request.data["currentPassword"]):
-                error_message = "The current password provided does"
-                error_message += " not match the user password"
+            if not instance.check_password(request.data["currentPassword"]):
+                error_message = "The current password provided does" \
+                " not match the user password"
                 return Response(
                     {
                         "status_code": 400,
