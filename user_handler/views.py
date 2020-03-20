@@ -85,24 +85,28 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
                 _ = request.data["currentPassword"]
                 _ = request.data["password"]
             except Exception:
+                error_message = "Both the current password and the"
+                error_message += " new password must be provided"
                 return Response(
                     {
                         "status_code": 400,
                         "errors": [
                             {
-                                "message": "Both the current password and the new password must be provided"
+                                "message": error_message
                             }
                         ],
                     },
                     status=400,
                 )
             if not changing_user.check_password(request.data["currentPassword"]):
+                error_message = "The current password provided does"
+                error_message += " not match the user password"
                 return Response(
                     {
                         "status_code": 400,
                         "errors": [
                             {
-                                "message": "The current password provided does not match the user password"
+                                "message": error_message
                             }
                         ],
                     },
