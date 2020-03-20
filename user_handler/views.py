@@ -80,31 +80,19 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         # change password work
         if request.data.get("currentPassword") or request.data.get("password"):
             if "currentPassword" not in request.data or "password" not in request.data:
-                error_message = "Both the current password and the" \
-                " new password must be provided"
+                error_message = (
+                    "Both the current password and the" " new password must be provided"
+                )
                 return Response(
-                    {
-                        "status_code": 400,
-                        "errors": [
-                            {
-                                "message": error_message
-                            }
-                        ],
-                    },
+                    {"status_code": 400, "errors": [{"message": error_message}],},
                     status=400,
                 )
             if not instance.check_password(request.data["currentPassword"]):
-                error_message = "The current password provided does" \
-                " not match the user password"
+                error_message = (
+                    "The current password provided does" " not match the user password"
+                )
                 return Response(
-                    {
-                        "status_code": 400,
-                        "errors": [
-                            {
-                                "message": error_message
-                            }
-                        ],
-                    },
+                    {"status_code": 400, "errors": [{"message": error_message}],},
                     status=400,
                 )
         # throw any errors otherwise let through
