@@ -59,6 +59,9 @@ INSTALLED_APPS = [
     "rest_hooks",
 ]
 
+APPEND_SLASH = False
+
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -148,6 +151,7 @@ else:
     ALLOWED_HOSTS = [
         "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
         "api.humanlambdas.com",
+        "localhost",
     ]
     DEFAULT_PERMISSION = "rest_framework.permissions.IsAuthenticated"
 
@@ -179,7 +183,7 @@ REST_AUTH_SERIALIZERS = {
 REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "user_handler.serializers.UserCreateSerializer",
 }
-
+os.environ.get("SENDGRID_API_KEY")
 LOGGING = {
     "version": 1,
     "handlers": {"console": {"level": "DEBUG", "class": "logging.StreamHandler"}},
@@ -208,7 +212,7 @@ if not DEBUG:
         send_default_pii=True,
     )
 
-FRONT_END_BASE_URL = "http://human-lambdas-api.eu-west-2.elasticbeanstalk.com/"
+FRONT_END_BASE_URL = os.getenv("APP_URL")
 
 LOCAL_IP = None
 try:
@@ -219,3 +223,5 @@ except requests.exceptions.RequestException:
     pass
 if LOCAL_IP and not DEBUG:
     ALLOWED_HOSTS.append(LOCAL_IP)
+
+TASK_EXPIRATION_MIN = 60  # Minutes

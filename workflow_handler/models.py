@@ -3,7 +3,6 @@ from django.contrib.postgres.fields import JSONField
 from user_handler.models import User, Organization
 from rest_hooks.signals import hook_event
 from rest_hooks.models import AbstractHook
-from django.forms.models import model_to_dict
 
 
 class Workflow(models.Model):
@@ -25,7 +24,8 @@ class Task(models.Model):
     status = models.CharField(max_length=128, default="pending")
     completed_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    completed_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    assigned_at = models.DateTimeField(null=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
     inputs = JSONField()
     outputs = JSONField()
@@ -39,18 +39,16 @@ class Task(models.Model):
         )
 
     def serialize_hook(self, *args, **kwargs):
-        return model_to_dict(
-            self,
-            fields=[
-                "status",
-                "completed_at",
-                "created_at",
-                "completed_by",
-                "workflow",
-                "inputs",
-                "outputs",
-            ],
-        )
+        return {
+            "id": self.pk,
+            "status": self.status,
+            "completed_at": self.completed_at,
+            "created_at": self.created_at,
+            "assigned_to": self.assigned_to,
+            "workflow_id": self.workflow.pk,
+            "inputs": self.inputs,
+            "outputs": self.outputs,
+        }
 
 
 class WorkflowHook(AbstractHook):

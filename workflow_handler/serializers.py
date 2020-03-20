@@ -32,7 +32,22 @@ def validate_output_structure(validated_data_items):
     return validated_data_items
 
 
+class HookSerializer(serializers.ModelSerializer):
+    def validate_event(self, event):
+        if event not in settings.HOOK_EVENTS:
+            err_msg = "Unexpected event {}".format(event)
+            raise exceptions.ValidationError(detail=err_msg)
+        return event
+
+    class Meta:
+        model = WorkflowHook
+        fields = "__all__"
+        read_only_fields = ("user", "event", "workflow", "id")
+
+
 class WorkflowSerializer(serializers.ModelSerializer):
+    webhook = HookSerializer(required=False)
+
     class Meta:
         model = Workflow
         fields = [
@@ -44,6 +59,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "disabled",
             "n_tasks",
             "created_at",
+            "webhook",
         ]
         extra_kwargs = {
             "disabled": {"write_only": True},
@@ -72,6 +88,11 @@ class WorkflowSerializer(serializers.ModelSerializer):
             outputs=outputs,
         )
         workflow.save()
+        webhook_data = validated_data.get("webhook")
+        if webhook_data:
+            webhook_data["event"] = "task.completed"
+            webhook_data["user"] = user
+            WorkflowHook.objects.create(workflow=workflow, **webhook_data)
         return workflow
 
     def update(self, instance, validated_data):
@@ -81,7 +102,21 @@ class WorkflowSerializer(serializers.ModelSerializer):
         instance.outputs = validated_data.get("outputs", instance.outputs)
         instance.disabled = validated_data.get("disabled", instance.disabled)
         instance.save()
-        return instance
+        webhook_data = validated_data.get("webhook")
+        if webhook_data or self.context.get("remove_webhook"):
+            hook_instance = WorkflowHook.objects.get(workflow=instance)
+            if hook_instance:
+                if self.context.get("remove_webhook"):
+                    hook_instance.delete()
+                else:
+                    hook_instance.target = webhook_data["target"]
+                    hook_instance.save()
+            else:
+                webhook_data["workflow"] = instance
+                webhook_data["event"] = "task.completed"
+                webhook_data["user"] = self.context["request"].user
+                WorkflowHook.objects.create(**webhook_data)
+        return super(WorkflowSerializer, self).update(instance, validated_data)
 
     def validate_inputs(self, data):
         try:
@@ -100,7 +135,7 @@ class TaskSerializer(serializers.ModelSerializer):
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
             err_msg = "Unexpected event {}".format(event)
-            raise exceptions.ValidationError(detail=err_msg, code=400)
+            raise exceptions.ValidationError(detail=err_msg)
         return event
 
     class Meta:
@@ -111,7 +146,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "created_at",
             "inputs",
             "outputs",
-            "completed_by",
+            "assigned_to",
             "completed_at",
         ]
 
@@ -137,8 +172,8 @@ class TaskSerializer(serializers.ModelSerializer):
             instance_output[itype]["value"] = output[itype]["value"]
         user = self.context["request"].user
         instance.status = "completed"
-        instance.completed_at = timezone.now()  # datetime.datetime.now()
-        instance.completed_by = user
+        instance.completed_at = timezone.now()
+        instance.assigned_to = user
         instance.save()
         instance.task_completed(user)
         return instance
@@ -157,36 +192,3 @@ class TaskSerializer(serializers.ModelSerializer):
                 return validate_output_structure(OUTPUT_SCHEMA.validate(data))
         except SchemaError as exception_text:
             raise serializers.ValidationError(exception_text)
-
-
-class HookSerializer(serializers.ModelSerializer):
-    def validate_event(self, event):
-        if event not in settings.HOOK_EVENTS:
-            err_msg = "Unexpected event {}".format(event)
-            raise exceptions.ValidationError(detail=err_msg, code=400)
-        return event
-
-    class Meta:
-        model = WorkflowHook
-        fields = "__all__"
-        read_only_fields = ("user", "event", "workflow", "id")
-
-    def update(self, instance, validated_data):
-        instance.target = validated_data.get("target", instance.target)
-        instance.save()
-        return instance
-
-    def create(self, validated_data):
-        workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
-        if WorkflowHook.objects.filter(workflow=workflow).exists():
-            raise serializers.ValidationError(
-                "Webhook to this workflow already exists", code=400
-            )
-        hook = WorkflowHook(
-            user=validated_data["user"],
-            event="task.completed",
-            target=validated_data["target"],
-            workflow=workflow,
-        )
-        hook.save()
-        return hook

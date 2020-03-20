@@ -9,29 +9,29 @@ class TestCRUDWorkflow(APITestCase):
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
-            "password": "fooword",
+            "password": "foowordbar",
             "organization": "fooInc",
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register", registration_data)
         self.org_id1 = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token1 = response.data["access"]
 
         registration_data = {
             "email": "bar@bar.com",
-            "password": "fooword",
+            "password": "foowordbar",
             "organization": "barInc",
             "is_admin": True,
             "name": "bar",
         }
-        _ = self.client.post("/v1/users/register/", registration_data)
+        _ = self.client.post("/v1/users/register", registration_data)
         self.org_id2 = Organization.objects.get(user__email="bar@bar.com").pk
         response = self.client.post(
-            "/v1/users/token/", {"email": "bar@bar.com", "password": "fooword"}
+            "/v1/users/token", {"email": "bar@bar.com", "password": "foowordbar"}
         )
         self.access_token2 = response.data["access"]
 
@@ -51,7 +51,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id1),
+            "/v1/orgs/{}/workflows/create".format(self.org_id1),
             workflow_data1,
             format="json",
         )
@@ -72,7 +72,7 @@ class TestCRUDWorkflow(APITestCase):
             ],
         }
         response = self.client.post(
-            "/v1/orgs/{}/workflows/create/".format(self.org_id2),
+            "/v1/orgs/{}/workflows/create".format(self.org_id2),
             workflow_data1,
             format="json",
         )
@@ -90,7 +90,7 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_list_workflow1(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token1)
-        response = self.client.get("/v1/orgs/{}/workflows/".format(self.org_id1))
+        response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id1))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
         result_1 = response.data[0]
@@ -99,7 +99,7 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_list_workflow2(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token2)
-        response = self.client.get("/v1/orgs/{}/workflows/".format(self.org_id2))
+        response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id2))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
         result_1 = response.data[0]

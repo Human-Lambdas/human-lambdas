@@ -1,8 +1,9 @@
+from django.utils import timezone
+from django.conf import settings
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
     ListAPIView,
-    RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
@@ -17,8 +18,8 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
 
-from .serializers import WorkflowSerializer, TaskSerializer, HookSerializer
-from .models import Workflow, Task, WorkflowHook
+from .serializers import WorkflowSerializer, TaskSerializer
+from .models import Workflow, Task
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -60,12 +61,38 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = WorkflowSerializer
 
+    def get_serializer(self, *args, **kwargs):
+        """
+        Return the serializer instance that should be used for validating and
+        deserializing input, and for serializing output.
+        """
+        serializer_class = self.get_serializer_class()
+        kwargs["context"] = self.get_serializer_context(*args, **kwargs)
+        return serializer_class(*args, **kwargs)
+
+    def get_serializer_context(self, *args, **kwargs):
+        """
+        Extra context provided to the serializer class.
+        """
+        context = {
+            "request": self.request,
+            "format": self.format_kwarg,
+            "view": self,
+        }
+        try:
+            if not kwargs["data"]["webhook"]:
+                context["remove_webhook"] = not kwargs["data"].pop("webhook")
+        except KeyError:
+            pass
+        return context
+
     def get_queryset(self):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
         return Workflow.objects.filter(
             Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
+            & Q(pk=self.kwargs["workflow_id"])
         )
 
     def get_object(self):
@@ -73,8 +100,10 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         return obj
 
     def retrieve(self, request, *args, **kwargs):
-        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
+        obj = get_object_or_404(self.get_queryset())
         workflow = self.serializer_class(obj).data
+        if hasattr(obj, "workflowhook"):
+            workflow["webhook"] = {"target": obj.workflowhook.target}
         return Response(workflow)
 
     def update(self, request, *args, **kwargs):
@@ -88,7 +117,13 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
             self.perform_update(serializer)
             return Response(serializer.data)
         return Response(
-            {"error": "You do not have permission to change workflow"}, status=403
+            {
+                "status_code": 403,
+                "errors": [
+                    {"message": "You do not have permission to change workflow"}
+                ],
+            },
+            status=403,
         )
 
 
@@ -112,7 +147,10 @@ class FileUploadView(APIView):
         try:
             process_csv(content, workflow=workflow)
         except Exception as exception:
-            return Response({"error": str(exception)}, status=400)
+            return Response(
+                {"status_code": 400, "errors": [{"message": str(exception)}]},
+                status=400,
+            )
         return Response(status=200)
 
 
@@ -192,21 +230,40 @@ class NextTaskView(APIView):
     def get(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.get_queryset()
+
+        # 1 get assigned to self
+        obj = (
+            queryset.filter(status="assigned").filter(assigned_to=request.user).first()
+        )
+        if obj:
+            task = self.serializer_class(obj).data
+            return Response(task)
+
+        # 2 get assigned to someone else and expired
         with transaction.atomic():
-            obj = (
-                queryset.select_for_update()
-                .filter(Q(status="pending") & Q(workflow=workflow))
-                .first()
-            )
-            if obj:
-                task = self.serializer_class(obj).data
-                obj.status = "assigned"
+            obj = queryset.select_for_update().filter(status="assigned").first()
+            if obj and timezone.now() - obj.assigned_at > timezone.timedelta(
+                minutes=settings.TASK_EXPIRATION_MIN
+            ):
+                obj.assigned_to = request.user
+                obj.assigned_at = timezone.now()
                 obj.save()
-                workflow.n_tasks = F("n_tasks") - 1
-                workflow.save()
+                task = self.serializer_class(obj).data
                 return Response(task)
-            else:
-                return Response(status=204)
+
+        # 3 get first pending
+        with transaction.atomic():
+            obj = queryset.select_for_update().filter(status="pending").first()
+            if not obj:
+                return Response({}, status=204)
+            obj.status = "assigned"
+            obj.assigned_to = request.user
+            obj.assigned_at = timezone.now()
+            obj.save()
+            workflow.n_tasks = F("n_tasks") - 1
+            workflow.save()
+            task = self.serializer_class(obj).data
+            return Response(task)
 
 
 class CreateTaskView(CreateAPIView):
@@ -234,24 +291,40 @@ class CreateTaskView(CreateAPIView):
         if not workflow:
             return Response(
                 {
-                    "Error": "Workflow with id {} was not found".format(
-                        kwargs["workflow_id"]
-                    )
+                    "status_code": 404,
+                    "errors": [
+                        {
+                            "message": "Workflow with id {} was not found".format(
+                                kwargs["workflow_id"]
+                            )
+                        }
+                    ],
                 },
                 status=404,
             )
         request.data["outputs"] = workflow.outputs
+        if "inputs" not in request.data or not request.data["inputs"]:
+            return Response(
+                {"status_code": 400, "errors": [{"message": "No inputs"}]}, status=400,
+            )
         for task_input in request.data["inputs"]:
             try:
                 workflow_input = next(
-                    item for item in workflow.inputs if item["id"] == task_input["id"]
+                    {"name": item["name"], "type": item["type"]}
+                    for item in workflow.inputs
+                    if item["id"] == task_input["id"]
                 )
             except StopIteration:
                 return Response(
                     {
-                        "Error": "Cannot find input with input id: {}".format(
-                            task_input["id"]
-                        )
+                        "status_code": 400,
+                        "errors": [
+                            {
+                                "message": "Cannot find input with input id: {}".format(
+                                    task_input["id"]
+                                )
+                            }
+                        ],
                     },
                     status=400,
                 )
@@ -305,40 +378,11 @@ class GetCompletedTaskView(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        obj = get_list_or_404(self.get_queryset())
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        obj = get_list_or_404(self.get_queryset())
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
-
-
-class CreateHookView(CreateAPIView):
-    """
-    Retrieve, create, update or destroy webhooks.
-    """
-
-    serializer_class = HookSerializer
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class RUDHookView(RetrieveUpdateDestroyAPIView):
-    """
-    Retrieve, create, update or destroy webhooks.
-    """
-
-    serializer_class = HookSerializer
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
-
-    def get_queryset(self):
-        return WorkflowHook.objects.filter(workflow__pk=self.kwargs["workflow_id"])
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, id=self.kwargs["hook_id"])
-        return obj

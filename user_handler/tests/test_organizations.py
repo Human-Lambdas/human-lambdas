@@ -13,7 +13,7 @@ class TestOrganizations(APITestCase):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
         self.organization_name = "fooinc"
-        self.preset_user_password = "fooword"
+        self.preset_user_password = "foowordbar"
 
         user = User(name=self.preset_user_name, email=self.preset_user_email)
         user.set_password(self.preset_user_password)
@@ -28,7 +28,7 @@ class TestOrganizations(APITestCase):
 
     def test_get_organization(self):
         response = self.client.post(
-            "/v1/users/token/",
+            "/v1/users/token",
             {"email": "foo@bar.com", "password": self.preset_user_password},
         )
         access_token = response.data["access"]
@@ -39,12 +39,12 @@ class TestOrganizations(APITestCase):
 
     def test_list_organization(self):
         response = self.client.post(
-            "/v1/users/token/",
+            "/v1/users/token",
             {"email": self.preset_user_email, "password": self.preset_user_password},
         )
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
-        response = self.client.get("/v1/orgs/")
+        response = self.client.get("/v1/orgs")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["name"], self.organization_name)
@@ -52,7 +52,7 @@ class TestOrganizations(APITestCase):
 
     def test_get_organization_wrong_user(self):
         response = self.client.post(
-            "/v1/users/token/", {"email": "wrong@bar.com", "password": "wrong_user"}
+            "/v1/users/token", {"email": "wrong@bar.com", "password": "wrong_user"}
         )
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)

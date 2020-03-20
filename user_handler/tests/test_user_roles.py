@@ -8,7 +8,7 @@ class TestUserRoles(APITestCase):
     def setUp(self):
         self.admin_email = "foo@bar.com"
         user = User(name="foo", email=self.admin_email)
-        user.set_password("foopwd")
+        user.set_password("foopwdbar")
         user.save()
         self.organization_name = "fooinc"
         organization = Organization(name=self.organization_name)
@@ -18,7 +18,7 @@ class TestUserRoles(APITestCase):
         user.current_organization_id = self.org_id
         user.save()
         response = self.client.post(
-            "/v1/users/token/", {"email": "foo@bar.com", "password": "foopwd"}
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foopwdbar"}
         )
         self.admin_access_token = response.data["access"]
         self.admin_id = user.pk
@@ -27,18 +27,18 @@ class TestUserRoles(APITestCase):
         worker = User(
             name="peter", email=self.worker_email, current_organization_id=self.org_id
         )
-        worker.set_password("pwd")
+        worker.set_password("pwdbarbar")
         worker.save()
         organization.user.add(worker)
         response = self.client.post(
-            "/v1/users/token/", {"email": "worker@bar.com", "password": "pwd"}
+            "/v1/users/token", {"email": "worker@bar.com", "password": "pwdbarbar"}
         )
         self.worker_access_token = response.data["access"]
         self.worker_id = worker.pk
 
     def test_admin_list_user(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
-        response = self.client.get("/v1/orgs/{0}/users/".format(self.org_id))
+        response = self.client.get("/v1/orgs/{0}/users".format(self.org_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 2)
         self.assertTrue(self.admin_email in [i["email"] for i in response.data])
@@ -46,7 +46,7 @@ class TestUserRoles(APITestCase):
 
     def test_worker_list_user(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.worker_access_token)
-        response = self.client.get("/v1/orgs/{}/users/".format(self.org_id))
+        response = self.client.get("/v1/orgs/{}/users".format(self.org_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
         self.assertTrue(self.admin_email not in [i["email"] for i in response.data])
