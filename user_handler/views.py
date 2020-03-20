@@ -21,7 +21,7 @@ from django.conf import settings
 from django.utils import timezone
 from user_handler.permissions import IsOrgAdmin
 
-from .models import User, Organization, Invitation. ForgottenPassword
+from .models import User, Organization, Invitation, ForgottenPassword
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
 from .utils import SendGridClient
 
@@ -223,10 +223,11 @@ class GetOrganizationView(RetrieveAPIView):
 
 
 class SendForgottenPasswordView(APIView):
-
     def post(self):
         to_hash = str(
-            self.request.data["email"] + str(self.request.data["name"]) + str(datetime.datetime.now())
+            self.request.data["email"]
+            + str(self.request.data["name"])
+            + str(datetime.datetime.now())
         )
         token = hash(to_hash)
 
@@ -234,9 +235,7 @@ class SendForgottenPasswordView(APIView):
         aware_expiry_date = make_aware(naive_expiry_date)
 
         forgotten_password = ForgottenPassword(
-            email=email,
-            token=token,
-            expires_at=aware_expiry_date,
+            email=email, token=token, expires_at=aware_expiry_date,
         )
 
         invite_link = settings.FRONT_END_BASE_URL

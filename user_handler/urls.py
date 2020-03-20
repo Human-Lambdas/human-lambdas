@@ -16,7 +16,11 @@ urlpatterns = [
     path("/token", jwt_views.TokenObtainPairView.as_view(), name="token-obtain-pair"),
     path("/token/refresh", jwt_views.TokenRefreshView.as_view(), name="token-refresh"),
     path("/hello", HelloView.as_view(), name="hello"),
-    path("forgotten-password/", SendForgottenPasswordView.as_view(), name="forgotten-password"),
+    path(
+        "forgotten-password/",
+        SendForgottenPasswordView.as_view(),
+        name="forgotten-password",
+    ),
     path(
         "/invitation/<str:invite_token>",
         InvitationView.as_view(),
