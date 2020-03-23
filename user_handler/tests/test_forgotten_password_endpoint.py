@@ -17,7 +17,7 @@ class TestInvite(APITestCase):
             "email": "sean@humanlambdas.com"
         }
         response = self.client.post(
-            "/v1/users/forgotten-password/", data
+            "/v1/users/forgotten-password", data
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -26,6 +26,6 @@ class TestInvite(APITestCase):
             "email": "aaa.com"
         }
         response = self.client.post(
-            "/v1/users/forgotten-password/", data
+            "/v1/users/forgotten-password", data
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
