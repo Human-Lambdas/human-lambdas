@@ -223,43 +223,47 @@ class GetOrganizationView(RetrieveAPIView):
 
 
 class SendForgottenPasswordView(APIView):
-    def post(self):
-        token = hash(str(
-            self.request.data["email"]
-            + str(self.request.data["name"])
-            + str(timezone.timezone.now())))
+    def post(self, request):
+        if bool(re.fullmatch(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?", request.data["email"])):
+            token = hash(str(
+                request.data["email"]
+                + str(timezone.now())))
 
-        expiry_date = timezone.now() + timezone.timedelta(30)
+            expiry_date = timezone.now() + timezone.timedelta(30)
 
-        forgotten_password = ForgottenPassword(
-            email=self.request.data["email"], token=token, expires_at=expiry_date,
-        )
-
-        password_link = settings.FRONT_END_BASE_URL
-
-        password_link += "/change-password/{0}".format(token)
-
-        render_info = {
-            "password_link": password_link,
-        }
-
-        htmly = get_template("forgottenPassword.html")
-
-        html_content = htmly.render(render_info)
-
-        forgotten_password.save()
-
-        if not settings.DEBUG:
-            message = Mail(
-                from_email="no-reply@humanlambdas.com",
-                to_email=self.request.data["email"],
-                subject="Human Lambdas forgotten password",
-                html_content=html_content,
+            forgotten_password = ForgottenPassword(
+                email=request.data["email"], token=token, expires_at=expiry_date,
             )
-            sg = SendGridClient()
-            sg.send(message)
 
-        return Response(status=200)
+            password_link = settings.FRONT_END_BASE_URL
+            password_link += "/change-password/{0}".format(token)
+
+            render_info = {
+                "password_link": password_link,
+            }
+
+            htmly = get_template("forgottenPassword.html")
+
+            html_content = htmly.render(render_info)
+
+            forgotten_password.save()
+
+            if not settings.DEBUG:
+                message = Mail(
+                    from_email="no-reply@humanlambdas.com",
+                    to_emails=request.data["email"],
+                    subject="Human Lambdas forgotten password",
+                    html_content=html_content,
+                )
+                sg = SendGridClient()
+                sg.send(message)
+
+                return Response(status=200)
+        else:
+            response_text = "This email is not valid"
+            return Response(
+                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
+            )
 
 
 class SendInviteView(APIView):

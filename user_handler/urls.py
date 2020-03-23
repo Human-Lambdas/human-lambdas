@@ -17,7 +17,7 @@ urlpatterns = [
     path("/token/refresh", jwt_views.TokenRefreshView.as_view(), name="token-refresh"),
     path("/hello", HelloView.as_view(), name="hello"),
     path(
-        "forgotten-password/",
+        "/forgotten-password/",
         SendForgottenPasswordView.as_view(),
         name="forgotten-password",
     ),
