@@ -224,26 +224,23 @@ class GetOrganizationView(RetrieveAPIView):
 
 class SendForgottenPasswordView(APIView):
     def post(self):
-        to_hash = str(
+        token = hash(str(
             self.request.data["email"]
             + str(self.request.data["name"])
-            + str(datetime.datetime.now())
-        )
-        token = hash(to_hash)
+            + str(timezone.timezone.now())))
 
-        naive_expiry_date = datetime.datetime.now() + datetime.timedelta(0.5)
-        aware_expiry_date = make_aware(naive_expiry_date)
+        expiry_date = timezone.now() + timezone.timedelta(30)
 
         forgotten_password = ForgottenPassword(
-            email=email, token=token, expires_at=aware_expiry_date,
+            email=self.request.data["email"], token=token, expires_at=expiry_date,
         )
 
-        invite_link = settings.FRONT_END_BASE_URL
+        password_link = settings.FRONT_END_BASE_URL
 
-        invite_link += "/change-password/{0}".format(token)
+        password_link += "/change-password/{0}".format(token)
 
         render_info = {
-            "invite_link": invite_link,
+            "password_link": password_link,
         }
 
         htmly = get_template("forgottenPassword.html")
@@ -259,7 +256,7 @@ class SendForgottenPasswordView(APIView):
                 subject="Human Lambdas forgotten password",
                 html_content=html_content,
             )
-            sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+            sg = SendGridClient()
             sg.send(message)
 
         return Response(status=200)
