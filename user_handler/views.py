@@ -258,7 +258,7 @@ class SendForgottenPasswordView(APIView):
                 sg = SendGridClient()
                 sg.send(message)
 
-                return Response(status=200)
+            return Response(status=200)
         else:
             response_text = "This email is not valid"
             return Response(
