@@ -235,7 +235,7 @@ class SendInviteView(APIView):
         already_added_email_list = []
 
         for email in email_set:
-            if bool(re.fullmatch(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?", email)):
+            if bool(re.fullmatch(r"\"?([-a-zA-Z0-9_.`?{}]+@\w+\.\w+)\"?", email)):
                 # checks the email is valid
                 user = User.objects.filter(email=email).first()
                 organization = Organization.objects.get(pk=kwargs["org_id"])
