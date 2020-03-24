@@ -88,3 +88,11 @@ class TestInvite(APITestCase):
             {"emails": "lambda@sigma.com,foo@foo,bar.com,foo@bar.com",},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_endpoint_call_email_with_underscore(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.post(
+            "/v1/orgs/{0}/invite".format(self.org_id),
+            {"emails": "lam__bda@sigma.com,foo@foo,bar.com,foo@bar.com",},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
