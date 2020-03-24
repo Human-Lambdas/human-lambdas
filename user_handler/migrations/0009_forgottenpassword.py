@@ -6,18 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user_handler', '0008_merge_20200218_0925'),
+        ("user_handler", "0008_merge_20200218_0925"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ForgottenPassword',
+            name="ForgottenPassword",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email', models.EmailField(max_length=254)),
-                ('token', models.CharField(max_length=128)),
-                ('datetime', models.DateTimeField(auto_now=True)),
-                ('expires_at', models.DateTimeField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("email", models.EmailField(max_length=254)),
+                ("token", models.CharField(max_length=128)),
+                ("datetime", models.DateTimeField(auto_now=True)),
+                ("expires_at", models.DateTimeField()),
             ],
         ),
     ]

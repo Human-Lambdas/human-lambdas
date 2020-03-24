@@ -224,10 +224,10 @@ class GetOrganizationView(RetrieveAPIView):
 
 class SendForgottenPasswordView(APIView):
     def post(self, request):
-        if bool(re.fullmatch(r"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$", request.data["email"])):
-            token = hash(str(
-                request.data["email"]
-                + str(timezone.now())))
+        regex = r"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|"
+        regex += r"(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$"
+        if bool(re.fullmatch(regex, request.data["email"],)):
+            token = hash(str(request.data["email"] + str(timezone.now())))
 
             expiry_date = timezone.now() + timezone.timedelta(30)
 
