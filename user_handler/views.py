@@ -262,7 +262,7 @@ class SendInviteView(APIView):
                     message = Mail(
                         from_email="no-reply@humanlambdas.com",
                         to_emails=email,
-                        subject="Human Lambdas workflow invitation",
+                        subject="Human Lambdas invitation",
                         html_content=html_content,
                     )
                     sg = SendGridClient()
