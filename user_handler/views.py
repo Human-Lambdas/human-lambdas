@@ -226,13 +226,8 @@ class SendInviteView(APIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
 
     def post(self, request, *args, **kwargs):
-        stripped_email_list = StringIO("".join(request.data["emails"].split()))
-        reader = csv.reader(stripped_email_list, delimiter=",")
-        email_set = set(next(reader))
-        # convert to set to ignore any duplicated emails
-
-        invalid_email_list = []
-        already_added_email_list = []
+        email_set = set("".join(request.data["emails"].split()).split(","))
+        invalid_email_list, already_added_email_list = [], []
 
         for email in email_set:
             if bool(re.fullmatch(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?", email)):
@@ -241,17 +236,17 @@ class SendInviteView(APIView):
                 organization = Organization.objects.get(pk=kwargs["org_id"])
                 if user not in organization.user.all():
                     token = hash(f"{email}{kwargs['org_id']}{timezone.now()}")
-                    expiry_date = timezone.now() + timezone.timedelta(30)
                     invite = Invitation(
                         email=email,
                         organization=organization,
                         invited_by=request.user,
                         token=token,
-                        expires_at=expiry_date,
+                        expires_at=timezone.now() + timezone.timedelta(30)
                     )
                     invite.save()
 
                     invite_link = settings.FRONT_END_BASE_URL
+
                     if not user:
                         invite_link += "invite/{0}".format(token)
                     else:
@@ -263,11 +258,8 @@ class SendInviteView(APIView):
                         "invite_link": invite_link,
                     }
 
-                    # plain_text = get_template("invite.txt")
-                    htmly = get_template("invite.html")
-
                     # text_content = plain_text.render(render_info)
-                    html_content = htmly.render(render_info)
+                    html_content = get_template("invite.html").render(render_info)
 
                     message = Mail(
                         from_email="no-reply@humanlambdas.com",
