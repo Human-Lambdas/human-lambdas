@@ -1,7 +1,5 @@
 import logging
 import re
-import csv
-from io import StringIO
 
 from sendgrid.helpers.mail import Mail
 from rest_framework.generics import (
