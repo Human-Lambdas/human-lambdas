@@ -320,6 +320,7 @@ class SendInviteView(APIView):
 
 class InvitationView(APIView):
     permission_classes = (AllowAny,)
+
     def get(self, request, *args, **kwargs):
         invite = Invitation.objects.filter(token=self.kwargs["invite_token"])
         if not invite.exists():
