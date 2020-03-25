@@ -19,6 +19,7 @@ from rest_framework.authtoken.models import Token
 from django.template.loader import get_template
 from django.conf import settings
 from django.utils import timezone
+import pytz
 from django.db.models import Q, Sum, Count, F
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task
@@ -87,11 +88,12 @@ class OrgsAbsolute(APIView):
     def get(self, request, *args, **kwargs):
         self.validate_data(request.data)
         queryset = self.get_queryset()
-        time_ranges = self.process_time_range(request.query_params["range"])
+        time_ranges = self.process_time_range(request.query_params.get("range"))
         data = []
+        qtypes = request.query_params.getlist("type")
         for start_time, end_time in time_ranges:
             data_dict = {}
-            for type in request.query_params["type"]:
+            for type in qtypes:
                 if type == "completed":
                     tasks = Task.objects.filter(Q(workflow__organization=queryset.first()) & Q(status="completed") & Q(completed_at__range=[start_time, end_time]))
                     data_dict["completed"] = tasks.count()

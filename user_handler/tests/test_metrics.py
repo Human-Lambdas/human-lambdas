@@ -68,11 +68,11 @@ class TestTaskCount(APITestCase):
     def test_pending_stats(self):
         data ={
             "range": "daily",
-            "type": ["pending", "completed"]
+            "type": ["pending", "completed"],
         }
         response = self.client.get(
             "/v1/orgs/{}/metrics".format(self.org_id),
-            data=data,
+            data,
             # format="json",
         )
 
