@@ -1,16 +1,11 @@
-import logging
 import os
 
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from workflow_handler.models import Workflow, Task
-from user_handler.models import Organization
+from user_handler.models import User, Organization
+from workflow_handler.tests import DATA_PATH
 
-from . import DATA_PATH
-
-
-logger = logging.getLogger(__file__)
 
 class TestTaskCount(APITestCase):
     def setUp(self):
@@ -70,39 +65,15 @@ class TestTaskCount(APITestCase):
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-    def test_total_count(self):
-        workflow = Workflow.objects.get(pk=self.workflow_id)
-        self.assertEqual(workflow.n_tasks, self.total_rows)
-
-    def test_assigning_task(self):
-        n_tasks = self.total_rows - 1
-        for i in range(self.total_rows):
-            _ = self.client.get(
-                "/v1/orgs/{}/workflows/{}/tasks/next".format(
-                    self.org_id, self.workflow_id
-                )
-            )
-            workflow = Workflow.objects.get(pk=self.workflow_id)
-            self.assertEqual(workflow.n_tasks, n_tasks)
-
-    def test_task_creation(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
-        n_tasks = self.total_rows
-        task_data = {
-            "inputs": [
-                {"id": "Alpha", "value": "data1"},
-                {"id": "Beta", "value": "data2"},
-                {"id": "Gamma", "value": "data3"},
-            ]
+    def test_pending_stats(self):
+        data ={
+            "range": "daily",
+            "type": ["pending", "completed"]
         }
-        for i in range(5):
-            _ = self.client.post(
-                "/v1/orgs/{}/workflows/{}/tasks/create".format(
-                    self.org_id, self.workflow_id
-                ),
-                task_data,
-                format="json",
-            )
-            n_tasks += 1
-            workflow = Workflow.objects.get(pk=self.workflow_id)
-            self.assertEqual(workflow.n_tasks, n_tasks)
+        response = self.client.get(
+            "/v1/orgs/{}/metrics".format(self.org_id),
+            data=data,
+            # format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
