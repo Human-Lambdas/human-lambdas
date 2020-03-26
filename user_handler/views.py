@@ -169,7 +169,7 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                 user.delete()
                 return Response({"message": "User was deleted"}, status=204)
             else:
-                org = all_orgs_member.objects.get(pk=kwargs["org_id"])
+                org = all_orgs_member.get(pk=kwargs["org_id"])
                 org.user.remove(user)
                 org.admin.remove(user)
                 return Response(
