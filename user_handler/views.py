@@ -260,7 +260,7 @@ class SendInviteView(APIView):
                     html_content = get_template("invite.html").render(render_info)
 
                     message = Mail(
-                        from_email="no-reply@humanlambdas.com",
+                        from_email=("no-reply@humanlambdas.com", "Human Lambdas"),
                         to_emails=email,
                         subject="Human Lambdas invitation",
                         html_content=html_content,
