@@ -21,7 +21,7 @@ from user_handler.permissions import IsOrgAdmin
 
 from .models import User, Organization, Invitation
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
-from .utils import SendGridClient
+from .utils import SendGridClient, Emails
 
 logger = logging.getLogger(__file__)
 
@@ -228,49 +228,51 @@ class SendInviteView(APIView):
         invalid_email_list, already_added_email_list = [], []
 
         for email in email_set:
-            if bool(re.fullmatch(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?", email)):
-                # checks the email is valid
-                user = User.objects.filter(email=email).first()
-                organization = Organization.objects.get(pk=kwargs["org_id"])
-                if user not in organization.user.all():
-                    token = hash(f"{email}{kwargs['org_id']}{timezone.now()}")
-                    invite = Invitation(
-                        email=email,
-                        organization=organization,
-                        invited_by=request.user,
-                        token=token,
-                        expires_at=timezone.now() + timezone.timedelta(30)
-                    )
-                    invite.save()
-
-                    invite_link = settings.FRONT_END_BASE_URL
-
-                    if not user:
-                        invite_link += "invite/{0}".format(token)
-                    else:
-                        invite_link += "invite/success/{0}".format(token)
-
-                    render_info = {
-                        "organization_name": organization.name,
-                        "invite_sender": request.user.name,
-                        "invite_link": invite_link,
-                    }
-
-                    # text_content = plain_text.render(render_info)
-                    html_content = get_template("invite.html").render(render_info)
-
-                    message = Mail(
-                        from_email=("no-reply@humanlambdas.com", "Human Lambdas"),
-                        to_emails=email,
-                        subject="Human Lambdas invitation",
-                        html_content=html_content,
-                    )
-                    sg = SendGridClient()
-                    sg.send(message)
-                else:
-                    already_added_email_list.append(email)
-            else:
+            if Emails().is_invalid_email(email):
                 invalid_email_list.append(email)
+                break
+
+            user = User.objects.filter(email=email).first()
+            organization = Organization.objects.get(pk=kwargs["org_id"])
+
+            if user in organization.user.all():
+                already_added_email_list.append(email)
+                break
+
+            token = hash(f"{email}{kwargs['org_id']}{timezone.now()}")
+            invite = Invitation(
+                email=email,
+                organization=organization,
+                invited_by=request.user,
+                token=token,
+                expires_at=timezone.now() + timezone.timedelta(30),
+            )
+            invite.save()
+
+            invite_link = settings.FRONT_END_BASE_URL
+
+            if not user:
+                invite_link += "invite/{0}".format(token)
+            else:
+                invite_link += "invite/success/{0}".format(token)
+
+            render_info = {
+                "organization_name": organization.name,
+                "invite_sender": request.user.name,
+                "invite_link": invite_link,
+            }
+
+            # text_content = plain_text.render(render_info)
+            html_content = get_template("invite.html").render(render_info)
+
+            message = Mail(
+                from_email=("no-reply@humanlambdas.com", "Human Lambdas"),
+                to_emails=email,
+                subject="Human Lambdas invitation",
+                html_content=html_content,
+            )
+            sg = SendGridClient()
+            sg.send(message)
 
         # sending responses
         if len(invalid_email_list) == 0 and len(already_added_email_list) == 0:
