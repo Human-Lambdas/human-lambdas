@@ -20,7 +20,7 @@ from user_handler.permissions import IsOrgAdmin
 
 from .models import User, Organization, Invitation
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
-from .utils import SendGridClient, Emails
+from .utils import SendGridClient, is_invalid_email
 
 logger = logging.getLogger(__file__)
 
@@ -227,7 +227,7 @@ class SendInviteView(APIView):
         invalid_email_list, already_added_email_list = [], []
 
         for email in email_set:
-            if Emails().is_invalid_email(email):
+            if is_invalid_email(email):
                 invalid_email_list.append(email)
                 break
 
