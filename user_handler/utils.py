@@ -34,4 +34,3 @@ class Emails(object):
             return False
         else:
             return True
-

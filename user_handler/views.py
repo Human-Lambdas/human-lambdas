@@ -1,5 +1,4 @@
 import logging
-import re
 
 from sendgrid.helpers.mail import Mail
 from rest_framework.generics import (
