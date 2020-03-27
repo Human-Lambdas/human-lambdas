@@ -271,15 +271,15 @@ class SendInviteView(APIView):
                 html_content=html_content,
             )
             sg = SendGridClient()
-            sg.send(message)
+            #sg.send(message)
 
         # sending responses
         if len(invalid_email_list) == 0 and len(already_added_email_list) == 0:
             return Response(
                 {"message": "all emails were successfully added!"}, status=200
             )
+        response_text = ""
         if len(invalid_email_list) > 0 and len(already_added_email_list) > 0:
-            response_text = ""
             for email in invalid_email_list:
                 response_text += "{0} is an invalid email. ".format(email)
             for email in already_added_email_list:
@@ -287,24 +287,18 @@ class SendInviteView(APIView):
                     email
                 )
                 response_text += " and so does not need to be added again. "
-            return Response(
-                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
-            )
-        if len(invalid_email_list) > 0:
+        elif len(invalid_email_list) > 0:
             response_text = ""
             for email in invalid_email_list:
                 response_text += "{0} is an invalid email. ".format(email)
-            return Response(
-                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
-            )
-        if len(already_added_email_list) > 0:
+        elif len(already_added_email_list) > 0:
             response_text = ""
             for email in already_added_email_list:
                 response_text += "{0} is already a part of the organization,".format(
                     email
                 )
                 response_text += " and so does not need to be added again. "
-            return Response(
+        return Response(
                 {"status_code": 400, "errors": [{"message": response_text}]}, status=400
             )
 
