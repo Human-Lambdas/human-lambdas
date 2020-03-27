@@ -252,7 +252,7 @@ class SendForgottenPasswordView(APIView):
                 message = Mail(
                     from_email="no-reply@humanlambdas.com",
                     to_emails=request.data["email"],
-                    subject="Human Lambdas password reset",
+                    subject="Human Lambdas Password Reset",
                     html_content=html_content,
                 )
                 sg = SendGridClient()
