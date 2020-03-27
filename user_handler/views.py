@@ -288,11 +288,9 @@ class SendInviteView(APIView):
                 )
                 response_text += " and so does not need to be added again. "
         elif len(invalid_email_list) > 0:
-            response_text = ""
             for email in invalid_email_list:
                 response_text += "{0} is an invalid email. ".format(email)
         elif len(already_added_email_list) > 0:
-            response_text = ""
             for email in already_added_email_list:
                 response_text += "{0} is already a part of the organization,".format(
                     email
