@@ -5,7 +5,7 @@ from workflow_handler.models import Workflow
 from user_handler.models import Organization
 
 
-class TestCRUDWorkflow(APITestCase):
+class TestListWorkflow(APITestCase):
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
@@ -105,3 +105,27 @@ class TestCRUDWorkflow(APITestCase):
         result_1 = response.data[0]
         self.assertTrue(result_1.pop("id"))
         self.assertEqual(result_1.pop("name"), self.wf_name2)
+
+
+class TestListNoWorkflow(APITestCase):
+    def setUp(self):
+        registration_data = {
+            "email": "foo@bar.com",
+            "password": "foowordbar",
+            "organization": "fooInc",
+            "is_admin": True,
+            "name": "foo",
+        }
+        _ = self.client.post("/v1/users/register", registration_data)
+        self.org_id1 = Organization.objects.get(user__email="foo@bar.com").pk
+        response = self.client.post(
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
+        )
+        self.access_token = response.data["access"]
+
+    def test_list_no_workflow(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id1))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data, [], response.data)
+

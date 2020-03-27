@@ -48,8 +48,8 @@ class ListWorkflowView(ListAPIView):
         )
 
     def list(self, request, *args, **kwargs):
-        obj = get_list_or_404(self.get_queryset())
-        serializer = self.serializer_class(obj, many=True)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 
