@@ -239,46 +239,41 @@ class GetOrganizationView(RetrieveAPIView):
 
 class SendForgottenPasswordView(APIView):
     def post(self, request):
-        regex = r"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|"
-        regex += r"(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$"
-        if bool(re.fullmatch(regex, request.data["email"],)):
-            token = hash(str(request.data["email"] + str(timezone.now())))
-
-            expiry_date = timezone.now() + timezone.timedelta(30)
-
-            forgotten_password = ForgottenPassword(
-                email=request.data["email"], token=token, expires_at=expiry_date,
-            )
-
-            password_link = settings.FRONT_END_BASE_URL
-            password_link += "/change-password/{0}".format(token)
-
-            render_info = {
-                "password_link": password_link,
-            }
-
-            htmly = get_template("forgottenPassword.html")
-
-            html_content = htmly.render(render_info)
-
-            forgotten_password.save()
-
-            if not settings.DEBUG:
-                message = Mail(
-                    from_email="no-reply@humanlambdas.com",
-                    to_emails=request.data["email"],
-                    subject="Human Lambdas Password Reset",
-                    html_content=html_content,
-                )
-                sg = SendGridClient()
-                sg.send(message)
-
-            return Response(status=200)
-        else:
-            response_text = "This email is not valid"
+        if is_invalid_email(request.data["email"]):
             return Response(
-                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "This email is not valid"}],
+                },
+                status=400,
             )
+
+        token = ctypes.c_size_t(hash(request.data["email"] + str(timezone.now()))).value
+        forgotten_password = ForgottenPassword(
+            email=request.data["email"],
+            token=token,
+            expires_at=timezone.now() + timezone.timedelta(15),
+        )
+
+        password_link = "{0}/change-password/{1}".format(settings.FRONT_END_BASE_URL, token)
+
+        html_content = get_template("forgottenPassword.html").render(
+            {"password_link": password_link,}
+        )
+
+        forgotten_password.save()
+
+        if not settings.DEBUG:
+            message = Mail(
+                from_email="no-reply@humanlambdas.com",
+                to_emails=request.data["email"],
+                subject="Human Lambdas Password Reset",
+                html_content=html_content,
+            )
+            sg = SendGridClient()
+            sg.send(message)
+
+        return Response(status=200)
 
 
 class SendInviteView(APIView):
@@ -300,7 +295,9 @@ class SendInviteView(APIView):
                 already_added_email_list.append(email)
                 break
 
-            token = ctypes.c_size_t(hash(f"{email}{kwargs['org_id']}{timezone.now()}")).value
+            token = ctypes.c_size_t(
+                hash(f"{email}{kwargs['org_id']}{timezone.now()}")
+            ).value
             invite = Invitation(
                 email=email,
                 organization=organization,

@@ -11,7 +11,6 @@ logger = logging.getLogger(__file__)
 
 
 class TestInvite(APITestCase):
-
     def test_forgotten_password(self):
         data = {"email": "sean@humanlambdas.com"}
         response = self.client.post("/v1/users/forgotten-password", data)
