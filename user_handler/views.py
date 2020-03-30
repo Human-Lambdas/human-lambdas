@@ -1,7 +1,7 @@
 import logging
+import ctypes
 
 from sendgrid.helpers.mail import Mail
-import ctypes
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
