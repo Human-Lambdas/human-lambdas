@@ -255,10 +255,12 @@ class SendForgottenPasswordView(APIView):
             expires_at=timezone.now() + timezone.timedelta(15),
         )
 
-        password_link = "{0}/change-password/{1}".format(settings.FRONT_END_BASE_URL, token)
+        password_link = "{0}/change-password/{1}".format(
+            settings.FRONT_END_BASE_URL, token
+        )
 
         html_content = get_template("forgottenPassword.html").render(
-            {"password_link": password_link,}
+            {"password_link": password_link}
         )
 
         forgotten_password.save()
