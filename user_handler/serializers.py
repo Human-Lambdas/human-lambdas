@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         name = validated_data["name"]
         password = validated_data["password"]
-        email = validated_data["email"]
+        email = validated_data["email"].lower()
         is_admin = validated_data["is_admin"]
         organization_name = validated_data["organization"]
         user_obj = User(name=name, email=email)
@@ -56,7 +56,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get("name", instance.name)
-        instance.email = validated_data.get("email", instance.email)
+        instance.email = validated_data.get("email", instance.email).lower()
         instance.current_organization_id = validated_data.get(
             "current_organization_id", instance.current_organization_id
         )
