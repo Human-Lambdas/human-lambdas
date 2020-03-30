@@ -87,3 +87,27 @@ class TestOrganizations(APITestCase):
         self.assertEqual(
             WorkflowHook.objects.filter(workflow__pk=self.workflow_id).count(), 0
         )
+
+    def test_invalid_url(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
+        self.workflow_data = {
+            "name": "bar2",
+            "description": "great bar",
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {"options": ["foo1", "bar1"]},
+                }
+            ],
+            "webhook": {"target": "not valid"},
+        }
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            self.workflow_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["errors"][0]["field"], "webhook-->target")
