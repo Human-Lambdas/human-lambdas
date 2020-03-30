@@ -1,6 +1,7 @@
 import logging
 
 from sendgrid.helpers.mail import Mail
+import ctypes
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
@@ -238,7 +239,12 @@ class SendInviteView(APIView):
                 already_added_email_list.append(email)
                 break
 
-            token = hash(f"{email}{kwargs['org_id']}{timezone.now()}")
+            token = ctypes.c_size_t(hash(f"{email}{kwargs['org_id']}{timezone.now()}")).value
+            i = 1
+            while i < 100:
+                if token < 0:
+                    print("NEGETIVE")
+                i += 1
             invite = Invitation(
                 email=email,
                 organization=organization,
