@@ -1,4 +1,5 @@
 import logging
+import ctypes
 
 from sendgrid.helpers.mail import Mail
 from rest_framework.generics import (
@@ -35,6 +36,7 @@ class RegistrationView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
+        serializer.data["status_code"] = 201
         return Response(serializer.data, status=201, headers=headers)
 
 
@@ -69,7 +71,8 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         )
         data = serializer.data
         data["is_admin"] = is_admin
-        return Response(data)
+        data["status_code"] = 200
+        return Response(data, status=200)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
@@ -96,7 +99,8 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return Response(serializer.data)
+        serializer.data["status_code"] = 200
+        return Response(serializer.data, status=200)
 
 
 class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
@@ -132,12 +136,20 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                 if request.data["admin"]:
                     org.admin.add(user)
                     return Response(
-                        {"message": "Users role was changed to admin"}, status=200
+                        {
+                            "status_code": 200,
+                            "message": "Users role was changed to admin",
+                        },
+                        status=200,
                     )
                 else:
                     org.admin.remove(user)
                     return Response(
-                        {"message": "Users role was changed to worker"}, status=200
+                        {
+                            "status_code": 200,
+                            "message": "Users role was changed to worker",
+                        },
+                        status=200,
                     )
             except KeyError:
                 return Response(
@@ -164,13 +176,19 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
             all_orgs_member = Organization.objects.filter(user=user)
             if all_orgs_member.count() == 1:
                 user.delete()
-                return Response({"message": "User was deleted"}, status=204)
+                return Response(
+                    {"status_code": 204, "message": "User was deleted"}, status=204
+                )
             else:
-                org = all_orgs_member.objects.get(pk=kwargs["org_id"])
+                org = all_orgs_member.get(pk=kwargs["org_id"])
                 org.user.remove(user)
                 org.admin.remove(user)
                 return Response(
-                    {"message": "User was deleted from organization"}, status=204
+                    {
+                        "status_code": 204,
+                        "message": "User was deleted from organization",
+                    },
+                    status=204,
                 )
 
 
@@ -238,7 +256,7 @@ class SendInviteView(APIView):
                 already_added_email_list.append(email)
                 break
 
-            token = hash(f"{email}{kwargs['org_id']}{timezone.now()}")
+            token = ctypes.c_size_t(hash(f"{email}{kwargs['org_id']}{timezone.now()}")).value
             invite = Invitation(
                 email=email,
                 organization=organization,
@@ -309,6 +327,7 @@ class InvitationView(APIView):
             )
             return Response(
                 {
+                    "status_code": 204,
                     "invitation_email": invitation_email,
                     "invitation_org": invitation_org,
                 },
@@ -355,6 +374,7 @@ class InvitationView(APIView):
                 invitation_org.user.add(new_user)
                 return Response(
                     {
+                        "status_code": 201,
                         "message": "Your account has been created!",
                         "email": invite.email,
                     },
@@ -363,7 +383,7 @@ class InvitationView(APIView):
             else:
                 user = User.objects.filter(email=invite.email).first()
                 invitation_org.user.add(user)
-                return Response({"message": "Success!"}, status=200)
+                return Response({"status_code": 200, "message": "Success!"}, status=200)
 
 
 class APIAuthToken(APIView):
@@ -377,7 +397,15 @@ class APIAuthToken(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
-        return Response({"token": token.key, "user_id": user.pk, "email": user.email})
+        return Response(
+            {
+                "status_code": 200,
+                "token": token.key,
+                "user_id": user.pk,
+                "email": user.email,
+            },
+            status=200,
+        )
 
 
 class ListOrganizationView(ListAPIView):
