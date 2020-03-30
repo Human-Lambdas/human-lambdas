@@ -265,15 +265,14 @@ class SendForgottenPasswordView(APIView):
 
         forgotten_password.save()
 
-        if not settings.DEBUG:
-            message = Mail(
-                from_email="no-reply@humanlambdas.com",
-                to_emails=request.data["email"],
-                subject="Human Lambdas Password Reset",
-                html_content=html_content,
-            )
-            sg = SendGridClient()
-            sg.send(message)
+        message = Mail(
+            from_email="no-reply@humanlambdas.com",
+            to_emails=request.data["email"],
+            subject="Human Lambdas Password Reset",
+            html_content=html_content,
+        )
+        sg = SendGridClient()
+        sg.send(message)
 
         return Response(status=200)
 
