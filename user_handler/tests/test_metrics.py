@@ -68,12 +68,28 @@ class TestTaskCount(APITestCase):
     def test_pending_stats(self):
         data ={
             "range": "daily",
+            "type": ["pending"],
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics".format(self.org_id),
+            data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(["pending" in idata for idata in response.data]))
+
+    def test_pending_completed_stats(self):
+        data ={
+            "range": "daily",
             "type": ["pending", "completed"],
         }
         response = self.client.get(
             "/v1/orgs/{}/metrics".format(self.org_id),
             data,
-            # format="json",
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(["pending" in idata for idata in response.data]))
+        self.assertTrue(all(["completed" in idata for idata in response.data]))

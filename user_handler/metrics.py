@@ -32,8 +32,43 @@ WEEKS_BACK = 52
 DAYS_BACK = 365
 
 
+def get_completed(start_time, end_time, organization):
+    tasks = Task.objects.filter(Q(workflow__organization=organization) & Q(status="completed") & Q(
+        completed_at__range=[start_time, end_time]))
+    return tasks.count()
+
+
+def get_pending(start_time, end_time, organization):
+    tasks = Task.objects.filter(
+        Q(workflow__organization=organization) & Q(status="pending") & Q(created_at__range=[start_time, end_time]))
+    return tasks.count()
+
+
+def get_aht(start_time, end_time, organization):
+    result = Task.objects.filter(Q(workflow__organization=organization) & Q(status="completed") & Q(
+        created_at__range=[start_time, end_time])).aggregate(
+        aht=Sum(F('completed_at') - F('assigned_at')) / Count('completed_at'))
+    return result
+
+
+def get_tat(start_time, end_time, organization):
+    result = Task.objects.filter(Q(workflow__organization=organization) & Q(status="completed") & Q(
+        created_at__range=[start_time, end_time])).aggregate(
+        aht=Sum(F('completed_at') - F('created_at')) / Count('completed_at'))
+
+    return result
+
+
+METRICS = {
+    "completed": get_completed,
+    "pending": get_pending,
+    "aht": get_aht,
+    "tat": get_tat,
+}
+
+
 def process_monthly():
-    end = timezone.datetime.now()
+    end = timezone.now()
     start = end.replace(day=1,hour=0, minute=0, second=0)
     time_ranges = [(start, end)]
     for _ in range(MONTHS_BACK):
@@ -44,7 +79,7 @@ def process_monthly():
 
 
 def process_weekly():
-    end = timezone.datetime.now()
+    end = timezone.now()
     start = (end - timezone.timedelta(days=end.isoweekday()-1)).replace(hour=0, minute=0, second=0)
     time_ranges = [(start, end)]
     for _ in range(WEEKS_BACK):
@@ -55,7 +90,7 @@ def process_weekly():
 
 
 def process_daily():
-    end = timezone.datetime.now()
+    end = timezone.now()
     start = end.replace(hour=1, minute=1, second=1)
     time_ranges = [(start, end)]
     for _ in range(DAYS_BACK):
@@ -84,32 +119,15 @@ class OrgsAbsolute(APIView):
     def process_time_range(self, range_name):
         return _TIME_RANGE_DICT[range_name]()
 
-
     def get(self, request, *args, **kwargs):
         self.validate_data(request.data)
-        queryset = self.get_queryset()
+        organization = self.get_queryset().first()
         time_ranges = self.process_time_range(request.query_params.get("range"))
         data = []
         qtypes = request.query_params.getlist("type")
         for start_time, end_time in time_ranges:
             data_dict = {}
-            for type in qtypes:
-                if type == "completed":
-                    tasks = Task.objects.filter(Q(workflow__organization=queryset.first()) & Q(status="completed") & Q(completed_at__range=[start_time, end_time]))
-                    data_dict["completed"] = tasks.count()
-                elif type == "pending":
-                    tasks = Task.objects.filter(Q(workflow__organization=queryset.first()) & Q(status="pending") & Q(created_at__range=[start_time, end_time]))
-                    data_dict["pending"] = tasks.count()
-                elif type == "aht":
-                    result = Task.objects.filter(Q(workflow__organization=queryset.first()) & Q(status="completed") & Q(
-                        created_at__range=[start_time, end_time])).aggregate(aht=Sum(F('completed_at')-F('assigned_at'))/Count('completed_at'))
-                    data_dict.update(result)
-                elif type == "tat":
-                    data = Task.objects.filter(Q(workflow__organization=queryset.first()) & Q(status="completed") & Q(
-                        created_at__range=[start_time, end_time])).aggregate(
-                        aht=Sum(F('completed_at') - F('created_at')) / Count('completed_at'))
-                    data_dict.update(result)
-                else:
-                    pass
+            for qtype in qtypes:
+                data_dict[qtype] = METRICS[qtype](start_time, end_time, organization=organization)
             data.append(data_dict)
         return Response(data, status=200)
