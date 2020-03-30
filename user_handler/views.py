@@ -240,11 +240,6 @@ class SendInviteView(APIView):
                 break
 
             token = ctypes.c_size_t(hash(f"{email}{kwargs['org_id']}{timezone.now()}")).value
-            i = 1
-            while i < 100:
-                if token < 0:
-                    print("NEGETIVE")
-                i += 1
             invite = Invitation(
                 email=email,
                 organization=organization,
