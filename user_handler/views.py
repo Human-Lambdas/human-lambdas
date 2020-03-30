@@ -1,7 +1,4 @@
 import logging
-import re
-import csv
-from io import StringIO
 
 from sendgrid.helpers.mail import Mail
 from rest_framework.generics import (
@@ -23,7 +20,7 @@ from user_handler.permissions import IsOrgAdmin
 
 from .models import User, Organization, Invitation
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
-from .utils import SendGridClient
+from .utils import SendGridClient, is_invalid_email
 
 logger = logging.getLogger(__file__)
 
@@ -243,61 +240,55 @@ class SendInviteView(APIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
 
     def post(self, request, *args, **kwargs):
-        stripped_email_list = StringIO("".join(request.data["emails"].split()))
-        reader = csv.reader(stripped_email_list, delimiter=",")
-        email_set = set(next(reader))
-        # convert to set to ignore any duplicated emails
-
-        invalid_email_list = []
-        already_added_email_list = []
+        email_set = set("".join(request.data["emails"].split()).split(","))
+        invalid_email_list, already_added_email_list = [], []
 
         for email in email_set:
-            if bool(re.fullmatch(r"\"?([-a-zA-Z0-9_.`?{}]+@\w+\.\w+)\"?", email)):
-                # checks the email is valid
-                user = User.objects.filter(email=email).first()
-                organization = Organization.objects.get(pk=kwargs["org_id"])
-                if user not in organization.user.all():
-                    token = hash(f"{email}{kwargs['org_id']}{timezone.now()}")
-                    expiry_date = timezone.now() + timezone.timedelta(30)
-                    invite = Invitation(
-                        email=email,
-                        organization=organization,
-                        invited_by=request.user,
-                        token=token,
-                        expires_at=expiry_date,
-                    )
-                    invite.save()
-
-                    invite_link = settings.FRONT_END_BASE_URL
-                    if not user:
-                        invite_link += "invite/{0}".format(token)
-                    else:
-                        invite_link += "invite/success/{0}".format(token)
-
-                    render_info = {
-                        "organization_name": organization.name,
-                        "invite_sender": request.user.name,
-                        "invite_link": invite_link,
-                    }
-
-                    # plain_text = get_template("invite.txt")
-                    htmly = get_template("invite.html")
-
-                    # text_content = plain_text.render(render_info)
-                    html_content = htmly.render(render_info)
-
-                    message = Mail(
-                        from_email="no-reply@humanlambdas.com",
-                        to_emails=email,
-                        subject="Human Lambdas workflow invitation",
-                        html_content=html_content,
-                    )
-                    sg = SendGridClient()
-                    sg.send(message)
-                else:
-                    already_added_email_list.append(email)
-            else:
+            if is_invalid_email(email):
                 invalid_email_list.append(email)
+                break
+
+            user = User.objects.filter(email=email).first()
+            organization = Organization.objects.get(pk=kwargs["org_id"])
+
+            if user in organization.user.all():
+                already_added_email_list.append(email)
+                break
+
+            token = hash(f"{email}{kwargs['org_id']}{timezone.now()}")
+            invite = Invitation(
+                email=email,
+                organization=organization,
+                invited_by=request.user,
+                token=token,
+                expires_at=timezone.now() + timezone.timedelta(30),
+            )
+            invite.save()
+
+            invite_link = settings.FRONT_END_BASE_URL
+
+            if not user:
+                invite_link += "invite/{0}".format(token)
+            else:
+                invite_link += "invite/success/{0}".format(token)
+
+            render_info = {
+                "organization_name": organization.name,
+                "invite_sender": request.user.name,
+                "invite_link": invite_link,
+            }
+
+            # text_content = plain_text.render(render_info)
+            html_content = get_template("invite.html").render(render_info)
+
+            message = Mail(
+                from_email=("no-reply@humanlambdas.com", "Human Lambdas"),
+                to_emails=email,
+                subject="Human Lambdas invitation",
+                html_content=html_content,
+            )
+            sg = SendGridClient()
+            sg.send(message)
 
         # sending responses
         if len(invalid_email_list) == 0 and len(already_added_email_list) == 0:
@@ -305,35 +296,14 @@ class SendInviteView(APIView):
                 {"status_code": 200, "message": "all emails were successfully added!"},
                 status=200,
             )
-        if len(invalid_email_list) > 0 and len(already_added_email_list) > 0:
-            response_text = ""
-            for email in invalid_email_list:
-                response_text += "{0} is an invalid email. ".format(email)
-            for email in already_added_email_list:
-                response_text += "{0} is already a part of the organization,".format(
-                    email
-                )
-                response_text += " and so does not need to be added again. "
-            return Response(
-                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
-            )
-        if len(invalid_email_list) > 0:
-            response_text = ""
-            for email in invalid_email_list:
-                response_text += "{0} is an invalid email. ".format(email)
-            return Response(
-                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
-            )
-        if len(already_added_email_list) > 0:
-            response_text = ""
-            for email in already_added_email_list:
-                response_text += "{0} is already a part of the organization,".format(
-                    email
-                )
-                response_text += " and so does not need to be added again. "
-            return Response(
-                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
-            )
+        response_text = ""
+        for email in invalid_email_list:
+            response_text += "{0} is an invalid email. ".format(email)
+        for email in already_added_email_list:
+            response_text += "{0} is already a part of the organization. ".format(email)
+        return Response(
+            {"status_code": 400, "errors": [{"message": response_text}]}, status=400
+        )
 
 
 class InvitationView(APIView):
