@@ -17,7 +17,7 @@ class TestUtils(APITestCase):
         self.assertFalse(is_invalid_email("valid@valid.com"))
 
     def test_generate_unique_token(self):
-        self.assertNotAlmostEqual(
+        self.assertNotEqual(
             generate_unique_token("one", "two", "three"),
             generate_unique_token("one", "two", "three"),
         )
