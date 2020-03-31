@@ -1,7 +1,9 @@
 import logging
 import re
+import ctypes
 
 from django.conf import settings
+from django.utils import timezone
 from sendgrid import SendGridAPIClient
 
 logger = logging.getLogger(__file__)
@@ -33,3 +35,11 @@ def is_invalid_email(email):
         return False
     else:
         return True
+
+
+def generate_unique_token(*args):
+    to_hash = str(timezone.now())
+    for arg in args:
+        to_hash += str(arg)
+    token = ctypes.c_size_t(hash(to_hash)).value
+    return token

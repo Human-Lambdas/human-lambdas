@@ -1,4 +1,4 @@
-from ..utils import is_invalid_email
+from ..utils import is_invalid_email, generate_unique_token
 from rest_framework.test import APITestCase
 
 
@@ -15,3 +15,9 @@ class TestUtils(APITestCase):
         self.assertFalse(is_invalid_email('""Fred Bloggs"@example.com'))
         self.assertFalse(is_invalid_email("user.nametagsorting@example.com"))
         self.assertFalse(is_invalid_email("valid@valid.com"))
+
+    def test_generate_unique_token(self):
+        self.assertNotAlmostEqual(
+            generate_unique_token("one", "two", "three"),
+            generate_unique_token("one", "two", "three"),
+        )
