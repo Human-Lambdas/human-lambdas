@@ -1,5 +1,4 @@
 import logging
-import ctypes
 
 from sendgrid.helpers.mail import Mail
 from rest_framework.generics import (
@@ -21,7 +20,7 @@ from user_handler.permissions import IsOrgAdmin
 
 from .models import User, Organization, Invitation, ForgottenPassword
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
-from .utils import SendGridClient, is_invalid_email
+from .utils import SendGridClient, is_invalid_email, generate_unique_token
 
 logger = logging.getLogger(__file__)
 
@@ -238,6 +237,8 @@ class GetOrganizationView(RetrieveAPIView):
 
 
 class SendForgottenPasswordView(APIView):
+    permission_classes = (AllowAny,)
+
     def post(self, request):
         if is_invalid_email(request.data["email"]):
             return Response(
@@ -248,7 +249,7 @@ class SendForgottenPasswordView(APIView):
                 status=400,
             )
 
-        token = ctypes.c_size_t(hash(request.data["email"] + str(timezone.now()))).value
+        token = generate_unique_token(request.data["email"])
         forgotten_password = ForgottenPassword(
             email=request.data["email"],
             token=token,
@@ -296,9 +297,7 @@ class SendInviteView(APIView):
                 already_added_email_list.append(email)
                 break
 
-            token = ctypes.c_size_t(
-                hash(f"{email}{kwargs['org_id']}{timezone.now()}")
-            ).value
+            token = generate_unique_token(email, kwargs["org_id"])
             invite = Invitation(
                 email=email,
                 organization=organization,
