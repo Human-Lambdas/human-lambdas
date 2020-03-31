@@ -6,7 +6,7 @@ from user_handler.models import Organization
 from workflow_handler.tests import DATA_PATH
 
 
-class TestTaskCount(APITestCase):
+class TestMetrics(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(DATA_PATH, "test.csv")
         self.total_rows = 3
@@ -75,6 +75,9 @@ class TestTaskCount(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(all(["pending" in idata for idata in response.data]))
+        self.assertEqual(response.data[0]["pending"], 3)
+        for data in response.data[1:]:
+            self.assertEqual(data["pending"], 0)
 
     def test_pending_completed_stats(self):
         data = {
@@ -88,3 +91,5 @@ class TestTaskCount(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(all(["pending" in idata for idata in response.data]))
         self.assertTrue(all(["completed" in idata for idata in response.data]))
+        for data in response.data:
+            self.assertEqual(data["completed"], 0)

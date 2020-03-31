@@ -15,41 +15,40 @@ WEEKS_BACK = 52
 DAYS_BACK = 365
 
 
-def get_completed(start_time, end_time, organization):
+def get_completed(**kwargs):
     tasks = Task.objects.filter(
-        Q(workflow__organization=organization)
+        Q(workflow__organization=kwargs["organization"])
         & Q(status="completed")
-        & Q(completed_at__range=[start_time, end_time])
+        & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     )
     return tasks.count()
 
 
-def get_pending(start_time, end_time, organization):
-    tasks = Task.objects.filter(
-        Q(workflow__organization=organization)
-        & Q(status="pending")
-        & Q(created_at__range=[start_time, end_time])
-    )
-    return tasks.count()
-
-
-def get_aht(start_time, end_time, organization):
+def get_pending(**kwargs):
     result = Task.objects.filter(
-        Q(workflow__organization=organization)
+        Q(workflow__organization=kwargs["organization"])
+        & Q(created_at__lt=kwargs["end_time"])
+    ).aggregate(pending=Count("status") - Count("status", filter=Q(status="completed")))
+    return result["pending"]
+
+
+def get_aht(**kwargs):
+    result = Task.objects.filter(
+        Q(workflow__organization=kwargs["organization"])
         & Q(status="completed")
-        & Q(created_at__range=[start_time, end_time])
+        & Q(created_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(aht=Sum(F("completed_at") - F("assigned_at")) / Count("completed_at"))
-    return result
+    return result["aht"]
 
 
-def get_tat(start_time, end_time, organization):
+def get_tat(**kwargs):
     result = Task.objects.filter(
-        Q(workflow__organization=organization)
+        Q(workflow__organization=kwargs["organization"])
         & Q(status="completed")
-        & Q(created_at__range=[start_time, end_time])
-    ).aggregate(aht=Sum(F("completed_at") - F("created_at")) / Count("completed_at"))
+        & Q(created_at__range=[kwargs["start_time"], kwargs["end_time"]])
+    ).aggregate(tat=Sum(F("completed_at") - F("created_at")) / Count("completed_at"))
 
-    return result
+    return result["tat"]
 
 
 METRICS = {
@@ -127,7 +126,7 @@ class OrgsAbsolute(APIView):
             }
             for qtype in qtypes:
                 data_dict[qtype] = METRICS[qtype](
-                    start_time, end_time, organization=organization
+                    start_time=start_time, end_time=end_time, organization=organization
                 )
             data.append(data_dict)
         return Response(data, status=200)
