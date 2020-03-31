@@ -128,4 +128,3 @@ class TestListNoWorkflow(APITestCase):
         response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id1))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data, [], response.data)
-
