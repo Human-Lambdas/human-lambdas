@@ -25,7 +25,6 @@ urlpatterns = [
     ),
     path("/<int:org_id>/workflows", include("workflow_handler.urls")),
     path("/<int:org_id>/invite", SendInviteView.as_view(), name="send-invite"),
-
     #  metrics
-    path("/<int:org_id>/metrics", OrgsAbsolute.as_view(), name="org-metrics")
+    path("/<int:org_id>/metrics", OrgsAbsolute.as_view(), name="org-metrics"),
 ]

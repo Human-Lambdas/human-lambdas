@@ -2,8 +2,7 @@ import os
 
 from rest_framework.test import APITestCase
 from rest_framework import status
-
-from user_handler.models import User, Organization
+from user_handler.models import Organization
 from workflow_handler.tests import DATA_PATH
 
 
@@ -66,28 +65,24 @@ class TestTaskCount(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_pending_stats(self):
-        data ={
+        data = {
             "range": "daily",
             "type": ["pending"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(all(["pending" in idata for idata in response.data]))
 
     def test_pending_completed_stats(self):
-        data ={
+        data = {
             "range": "daily",
             "type": ["pending", "completed"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
