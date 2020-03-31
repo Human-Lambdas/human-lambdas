@@ -120,6 +120,7 @@ class TestAPIRegistration(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
+
 class TestAPIUserCRUD(APITestCase):
     def setUp(self):
         response = self.client.post(
