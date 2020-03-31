@@ -48,8 +48,8 @@ class ListWorkflowView(ListAPIView):
         )
 
     def list(self, request, *args, **kwargs):
-        obj = get_list_or_404(self.get_queryset())
-        serializer = self.serializer_class(obj, many=True)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -151,7 +151,9 @@ class FileUploadView(APIView):
                 {"status_code": 400, "errors": [{"message": str(exception)}]},
                 status=400,
             )
-        return Response(status=200)
+        return Response(
+            {"status_code": 200, "message": "File was uploaded!"}, status=200
+        )
 
 
 class ListTaskView(ListAPIView):
@@ -206,7 +208,8 @@ class RUDTaskView(RetrieveUpdateAPIView):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
         task = self.serializer_class(obj).data
-        return Response(task)
+        task["status_code"] = 200
+        return Response(task, status=200)
 
     def perform_update(self, serializer, *args, **kwargs):
         serializer.save(owner=self.request.user)
@@ -237,7 +240,8 @@ class NextTaskView(APIView):
         )
         if obj:
             task = self.serializer_class(obj).data
-            return Response(task)
+            task["status_code"] = 200
+            return Response(task, status=200)
 
         # 2 get assigned to someone else and expired
         with transaction.atomic():
@@ -249,13 +253,14 @@ class NextTaskView(APIView):
                 obj.assigned_at = timezone.now()
                 obj.save()
                 task = self.serializer_class(obj).data
-                return Response(task)
+                task["status_code"] = 200
+                return Response(task, status=200)
 
         # 3 get first pending
         with transaction.atomic():
             obj = queryset.select_for_update().filter(status="pending").first()
             if not obj:
-                return Response({}, status=204)
+                return Response({"status_code": 204}, status=204)
             obj.status = "assigned"
             obj.assigned_to = request.user
             obj.assigned_at = timezone.now()
@@ -263,7 +268,8 @@ class NextTaskView(APIView):
             workflow.n_tasks = F("n_tasks") - 1
             workflow.save()
             task = self.serializer_class(obj).data
-            return Response(task)
+            task["status_code"] = 200
+            return Response(task, status=200)
 
 
 class CreateTaskView(CreateAPIView):
@@ -345,11 +351,13 @@ class TaskPagination(LimitOffsetPagination):
     def get_paginated_response(self, data):
         return Response(
             {
+                "status_code": 200,
                 "next": self.get_next_link(),
                 "previous": self.get_previous_link(),
                 "count": self.count,
                 "tasks": data,
-            }
+            },
+            status=200,
         )
 
 

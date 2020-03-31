@@ -104,8 +104,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
         instance.save()
         webhook_data = validated_data.get("webhook")
         if webhook_data or self.context.get("remove_webhook"):
-            hook_instance = WorkflowHook.objects.get(workflow=instance)
-            if hook_instance:
+            hook_instance = WorkflowHook.objects.filter(workflow=instance)
+            if hook_instance.exists():
+                hook_instance = hook_instance.first()
                 if self.context.get("remove_webhook"):
                     hook_instance.delete()
                 else:
