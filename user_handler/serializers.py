@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         max_length=128, allow_blank=False, write_only=True
     )
     is_admin = serializers.BooleanField(write_only=True)
-    password = serializers.CharField(min_length=8)
+    password = serializers.CharField(min_length=8, write_only=True)
 
     class Meta:
         model = User
