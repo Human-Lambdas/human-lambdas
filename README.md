@@ -8,6 +8,14 @@ Backend to accessing and utilizing Human Lambdas platform.
 $ git clone https://github.com/Human-Lambdas/hl-rest-api.git && cd hl-rest-api
 ```
 
+## Committing
+You will need to install pre-commit through, and run:
+```
+pre-commit install
+```
+
+Future commits will now be linted with black and flake8
+
 ## Running API locally with Docker-Compose
 You will need to install `docker` and `docker-compose` to be able to run the API locally. 
 Once you have installed them all you have to do is to run the following command:
