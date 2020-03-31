@@ -19,7 +19,7 @@ from django.conf import settings
 from django.utils import timezone
 from user_handler.permissions import IsOrgAdmin
 
-from .models import User, Organization, Invitation
+from .models import User, Organization, Invitation, ForgottenPassword
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
 from .utils import SendGridClient, is_invalid_email
 
@@ -237,6 +237,46 @@ class GetOrganizationView(RetrieveAPIView):
         return obj
 
 
+class SendForgottenPasswordView(APIView):
+    def post(self, request):
+        if is_invalid_email(request.data["email"]):
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "This email is not valid"}],
+                },
+                status=400,
+            )
+
+        token = ctypes.c_size_t(hash(request.data["email"] + str(timezone.now()))).value
+        forgotten_password = ForgottenPassword(
+            email=request.data["email"],
+            token=token,
+            expires_at=timezone.now() + timezone.timedelta(15),
+        )
+
+        password_link = "{0}/change-password/{1}".format(
+            settings.FRONT_END_BASE_URL, token
+        )
+
+        html_content = get_template("forgottenPassword.html").render(
+            {"password_link": password_link}
+        )
+
+        forgotten_password.save()
+
+        message = Mail(
+            from_email="no-reply@humanlambdas.com",
+            to_emails=request.data["email"],
+            subject="Human Lambdas Password Reset",
+            html_content=html_content,
+        )
+        sg = SendGridClient()
+        sg.send(message)
+
+        return Response(status=200)
+
+
 class SendInviteView(APIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
 
@@ -256,7 +296,9 @@ class SendInviteView(APIView):
                 already_added_email_list.append(email)
                 break
 
-            token = ctypes.c_size_t(hash(f"{email}{kwargs['org_id']}{timezone.now()}")).value
+            token = ctypes.c_size_t(
+                hash(f"{email}{kwargs['org_id']}{timezone.now()}")
+            ).value
             invite = Invitation(
                 email=email,
                 organization=organization,
