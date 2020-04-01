@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.utils import timezone
-from django.db.models import Q, Sum, Count, F
+from django.db.models import Q, Sum, Count, F, DateTimeField, DurationField, Avg
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task
 
@@ -36,8 +36,8 @@ def get_aht(**kwargs):
     result = Task.objects.filter(
         Q(workflow__organization=kwargs["organization"])
         & Q(status="completed")
-        & Q(created_at__range=[kwargs["start_time"], kwargs["end_time"]])
-    ).aggregate(aht=Sum(F("completed_at") - F("assigned_at")) / Count("completed_at"))
+        & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
+    ).aggregate(aht=Avg(F("completed_at") - F("assigned_at")))
     return result["aht"]
 
 
@@ -45,8 +45,8 @@ def get_tat(**kwargs):
     result = Task.objects.filter(
         Q(workflow__organization=kwargs["organization"])
         & Q(status="completed")
-        & Q(created_at__range=[kwargs["start_time"], kwargs["end_time"]])
-    ).aggregate(tat=Sum(F("completed_at") - F("created_at")) / Count("completed_at"))
+        & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
+    ).aggregate(tat=Avg(F("completed_at") - F("created_at")))
 
     return result["tat"]
 
