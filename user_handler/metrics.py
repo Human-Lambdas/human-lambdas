@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.utils import timezone
-from django.db.models import Q, Sum, Count, F, DateTimeField, DurationField, Avg
+from django.db.models import Q, Count, F, Avg
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task
 
