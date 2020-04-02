@@ -10,7 +10,9 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.authtoken.models import Token
 from django.template.loader import get_template
@@ -348,10 +350,10 @@ class SendInviteView(CreateAPIView):
         )
 
 
-class InvitationView(CreateAPIView, RetrieveAPIView):
+class InvitationView(RetrieveModelMixin, CreateModelMixin, GenericAPIView):
     permission_classes = (AllowAny,)
 
-    def get(self, request, *args, **kwargs):
+    def retrieve(self, request, *args, **kwargs):
         invite = Invitation.objects.filter(token=self.kwargs["invite_token"])
         if not invite.exists():
             return Response(
