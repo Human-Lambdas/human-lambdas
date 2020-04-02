@@ -9,7 +9,11 @@ $ git clone https://github.com/Human-Lambdas/hl-rest-api.git && cd hl-rest-api
 ```
 
 ## Committing
-You will need to install pre-commit through, and run:
+You will need to install pre-commit with:
+```
+pip install pre-commit
+```
+and run:
 ```
 pre-commit install
 ```
