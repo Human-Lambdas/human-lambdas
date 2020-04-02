@@ -236,10 +236,10 @@ class GetOrganizationView(RetrieveAPIView):
         return obj
 
 
-class SendForgottenPasswordView(APIView):
+class SendForgottenPasswordView(CreateAPIView):
     permission_classes = (AllowAny,)
 
-    def post(self, request):
+    def create(self, request):
         if is_invalid_email(request.data["email"]):
             return Response(
                 {
@@ -278,10 +278,10 @@ class SendForgottenPasswordView(APIView):
         return Response(status=200)
 
 
-class SendInviteView(APIView):
+class SendInviteView(CreateAPIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         email_set = set("".join(request.data["emails"].split()).split(","))
         invalid_email_list, already_added_email_list = [], []
 
@@ -348,7 +348,7 @@ class SendInviteView(APIView):
         )
 
 
-class InvitationView(APIView):
+class InvitationView(CreateAPIView, RetrieveAPIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, *args, **kwargs):
