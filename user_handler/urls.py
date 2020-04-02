@@ -8,6 +8,7 @@ from .views import (
     RetrieveUpdateUserView,
     APIAuthToken,
     SendForgottenPasswordView,
+    ForgottenPasswordView,
 )
 
 
@@ -20,6 +21,11 @@ urlpatterns = [
         "/forgotten-password",
         SendForgottenPasswordView.as_view(),
         name="forgotten-password",
+    ),
+    path(
+        "/forgotten-password-token/<str:forgotten_password_token>",
+        ForgottenPasswordView.as_view(),
+        name="forgotten-password-token",
     ),
     path(
         "/invitation/<str:invite_token>",

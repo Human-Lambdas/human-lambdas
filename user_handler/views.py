@@ -275,7 +275,31 @@ class SendForgottenPasswordView(APIView):
         sg = SendGridClient()
         sg.send(message)
 
-        return Response(status=200)
+        return Response(
+            {"status_code": 200, "message": "We have sent an email to this address"},
+            status=200,
+        )
+
+
+class ForgottenPasswordView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, *args, **kwargs):
+        forgotten_password = ForgottenPassword.objects.filter(
+            token=self.kwargs["forgotten_password_token"]
+        )
+        if forgotten_password.exists():
+            return Response({"status_code": 200}, status=200,)
+        else:
+            return Response(
+                {
+                    "status_code": 404,
+                    "errors": [
+                        {"message": "this forgotten password token is not valid"}
+                    ],
+                },
+                status=404,
+            )
 
 
 class SendInviteView(APIView):
