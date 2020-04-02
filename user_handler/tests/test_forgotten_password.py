@@ -37,6 +37,6 @@ class TestInvite(APITestCase):
         )
         forgotten_password.save()
         response = self.client.get(
-            "/v1/users/forgotten-password-token/thisisasampletoken"
+            "/v1/users/forgotten-password-token/{0}".format(token)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
