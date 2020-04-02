@@ -312,14 +312,14 @@ class SendInviteView(APIView):
         for email in email_set:
             if is_invalid_email(email):
                 invalid_email_list.append(email)
-                break
+                continue
 
             user = User.objects.filter(email=email).first()
             organization = Organization.objects.get(pk=kwargs["org_id"])
 
             if user in organization.user.all():
                 already_added_email_list.append(email)
-                break
+                continue
 
             token = generate_unique_token(email, kwargs["org_id"])
             invite = Invitation(
