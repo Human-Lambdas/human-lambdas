@@ -1,4 +1,5 @@
 import logging
+import analytics
 
 from rest_framework import serializers
 
@@ -47,6 +48,16 @@ class UserSerializer(serializers.ModelSerializer):
         else:
             organization_obj = Organization(name=organization_name)
             organization_obj.save()
+            analytics.identify(
+                user_obj.pk,
+                {
+                    "org_id": organization_obj.pk,
+                    "org_name": organization_obj.name,
+                    "user_id": user_obj.pk,
+                    "user_email": user_obj.email,
+                },
+            )
+            analytics.track(user_obj.pk, "Org Created")
         organization_obj.user.add(user_obj)
         if is_admin:
             organization_obj.admin.add(user_obj)
