@@ -44,7 +44,7 @@ class Task(models.Model):
             "status": self.status,
             "completed_at": self.completed_at,
             "created_at": self.created_at,
-            "assigned_to": self.assigned_to,
+            "assigned_to": str(self.assigned_to),
             "workflow_id": self.workflow.pk,
             "inputs": self.inputs,
             "outputs": self.outputs,

@@ -10,7 +10,7 @@ from user_handler.models import User, Organization
 logger = logging.getLogger(__file__)
 
 
-class TestOrganizations(APITestCase):
+class TestWebhook(APITestCase):
     def setUp(self):
         self.preset_user_name = "foo"
         self.preset_user_email = "foo@bar.com"
@@ -135,3 +135,106 @@ class TestOrganizations(APITestCase):
         self.assertEqual(
             WorkflowHook.objects.get(workflow__pk=self.workflow_id).target, new_url
         )
+
+import os
+
+from workflow_handler.models import Workflow, Task
+
+
+logger = logging.getLogger(__file__)
+
+_CURRENT_DIR = os.path.dirname(__file__)
+
+
+class TestWebhookTasks(APITestCase):
+    def setUserClient(self, email):
+        response = self.client.post(
+            "/v1/users/token", {"email": email, "password": "foowordbar"}
+        )
+        self.access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
+    def setUp(self):
+        self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
+        registration_data = {
+            "email": "foo@bar.com",
+            "password": "foowordbar",
+            "organization": "fooInc",
+            "is_admin": True,
+            "name": "foo",
+        }
+        _ = self.client.post("/v1/users/register", registration_data)
+
+        registration_data["email"] = "foojr@bar.com"
+        _ = self.client.post("/v1/users/register", registration_data)
+        registration_data["email"] = "foo@bar.com"
+
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
+        response = self.client.post(
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
+        )
+        self.access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
+        workflow_data = {
+            "name": "uploader",
+            "description": "great wf",
+            "inputs": [
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ],
+            "webhook": {"target": "https://en9sk43hft479.x.pipedream.net"},
+        }
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        self.workflow_id = Workflow.objects.get(name="uploader").id
+        with open(self.file_path) as f:
+            data = {"file": f}
+            response = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(
+                    self.org_id, self.workflow_id
+                ),
+                data=data,
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+
+    def test_complete_single_selection_task(self):
+        workflow = Workflow.objects.get(id=self.workflow_id)
+        tasks = Task.objects.filter(workflow=workflow).all()
+        output_values = ["foo1", "bar1"]
+        expected_outputs = workflow.outputs
+        for output_value, task in zip(output_values, tasks):
+            exp_output = next(item for item in expected_outputs if item["id"] == "foo")
+            exp_output[exp_output["type"]]["value"] = output_value
+            output_list = [{"id": "foo", "single-selection": {"value": output_value}}]
+            data = {"outputs": output_list}
+            response = self.client.patch(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                    self.org_id, self.workflow_id, task.id
+                ),
+                data=data,
+                format="json",
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+            self.assertEqual("completed", response.data["status"])
+            self.assertEqual(expected_outputs, response.data["outputs"])
+            self.assertEqual("completed", Task.objects.get(id=task.id).status)
