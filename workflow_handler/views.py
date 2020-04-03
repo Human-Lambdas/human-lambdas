@@ -310,11 +310,12 @@ class CreateTaskView(CreateAPIView):
                 },
                 status=404,
             )
-        analytics.track(
-            request.user.pk,
-            "Task Create Attempt",
-            {"workflow_id": workflow.id, "source": "API"},
-        )
+        if not settings.DEBUG:
+            analytics.track(
+                request.user.pk,
+                "Task Create Attempt",
+                {"workflow_id": workflow.id, "source": "API"},
+            )
         request.data["outputs"] = workflow.outputs
         if "inputs" not in request.data or not request.data["inputs"]:
             return Response(
@@ -344,11 +345,12 @@ class CreateTaskView(CreateAPIView):
             task_input.update(workflow_input)
         workflow.n_tasks = F("n_tasks") + 1
         workflow.save()
-        analytics.track(
-            request.user.pk,
-            "Task Create Success",
-            {"workflow_id": workflow.id, "source": "API"},
-        )
+        if not settings.DEBUG:
+            analytics.track(
+                request.user.pk,
+                "Task Create Success",
+                {"workflow_id": workflow.id, "source": "API"},
+            )
         return self.create(request, *args, **kwargs)
 
 

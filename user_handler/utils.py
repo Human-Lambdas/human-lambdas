@@ -47,6 +47,8 @@ def generate_unique_token(*args):
 
 
 def register_events(user_obj, organization_obj, existing_org):
+    if settings.DEBUG:
+        return
     analytics.identify(
         user_obj.pk,
         {
