@@ -1,7 +1,4 @@
 import logging
-import re
-import csv
-from io import StringIO
 
 from sendgrid.helpers.mail import Mail
 from rest_framework.generics import (
@@ -21,9 +18,9 @@ from django.conf import settings
 from django.utils import timezone
 from user_handler.permissions import IsOrgAdmin
 
-from .models import User, Organization, Invitation
+from .models import User, Organization, Invitation, ForgottenPassword
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
-from .utils import SendGridClient
+from .utils import SendGridClient, is_invalid_email, generate_unique_token
 
 logger = logging.getLogger(__file__)
 
@@ -38,6 +35,7 @@ class RegistrationView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
+        serializer.data["status_code"] = 201
         return Response(serializer.data, status=201, headers=headers)
 
 
@@ -72,7 +70,8 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         )
         data = serializer.data
         data["is_admin"] = is_admin
-        return Response(data)
+        data["status_code"] = 200
+        return Response(data, status=200)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
@@ -99,7 +98,8 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return Response(serializer.data)
+        serializer.data["status_code"] = 200
+        return Response(serializer.data, status=200)
 
 
 class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
@@ -135,12 +135,20 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                 if request.data["admin"]:
                     org.admin.add(user)
                     return Response(
-                        {"message": "Users role was changed to admin"}, status=200
+                        {
+                            "status_code": 200,
+                            "message": "Users role was changed to admin",
+                        },
+                        status=200,
                     )
                 else:
                     org.admin.remove(user)
                     return Response(
-                        {"message": "Users role was changed to worker"}, status=200
+                        {
+                            "status_code": 200,
+                            "message": "Users role was changed to worker",
+                        },
+                        status=200,
                     )
             except KeyError:
                 return Response(
@@ -167,13 +175,19 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
             all_orgs_member = Organization.objects.filter(user=user)
             if all_orgs_member.count() == 1:
                 user.delete()
-                return Response({"message": "User was deleted"}, status=204)
+                return Response(
+                    {"status_code": 204, "message": "User was deleted"}, status=204
+                )
             else:
-                org = all_orgs_member.objects.get(pk=kwargs["org_id"])
+                org = all_orgs_member.get(pk=kwargs["org_id"])
                 org.user.remove(user)
                 org.admin.remove(user)
                 return Response(
-                    {"message": "User was deleted from organization"}, status=204
+                    {
+                        "status_code": 204,
+                        "message": "User was deleted from organization",
+                    },
+                    status=204,
                 )
 
 
@@ -222,100 +236,140 @@ class GetOrganizationView(RetrieveAPIView):
         return obj
 
 
+class SendForgottenPasswordView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        if is_invalid_email(request.data["email"]):
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "This email is not valid"}],
+                },
+                status=400,
+            )
+
+        token = generate_unique_token(request.data["email"])
+        forgotten_password = ForgottenPassword(
+            email=request.data["email"],
+            token=token,
+            expires_at=timezone.now() + timezone.timedelta(15),
+        )
+
+        password_link = "{0}/change-password/{1}".format(
+            settings.FRONT_END_BASE_URL, token
+        )
+
+        html_content = get_template("forgottenPassword.html").render(
+            {"password_link": password_link}
+        )
+
+        forgotten_password.save()
+
+        message = Mail(
+            from_email="no-reply@humanlambdas.com",
+            to_emails=request.data["email"],
+            subject="Human Lambdas Password Reset",
+            html_content=html_content,
+        )
+        sg = SendGridClient()
+        sg.send(message)
+
+        return Response(
+            {"status_code": 200, "message": "We have sent an email to this address"},
+            status=200,
+        )
+
+
+class ForgottenPasswordView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, *args, **kwargs):
+        forgotten_password = ForgottenPassword.objects.filter(
+            token=self.kwargs["forgotten_password_token"]
+        )
+        if forgotten_password.exists():
+            return Response({"status_code": 200}, status=200,)
+        else:
+            return Response(
+                {
+                    "status_code": 404,
+                    "errors": [
+                        {"message": "this forgotten password token is not valid"}
+                    ],
+                },
+                status=404,
+            )
+
+
 class SendInviteView(APIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
 
     def post(self, request, *args, **kwargs):
-        stripped_email_list = StringIO("".join(request.data["emails"].split()))
-        reader = csv.reader(stripped_email_list, delimiter=",")
-        email_set = set(next(reader))
-        # convert to set to ignore any duplicated emails
-
-        invalid_email_list = []
-        already_added_email_list = []
+        email_set = set("".join(request.data["emails"].split()).split(","))
+        invalid_email_list, already_added_email_list = [], []
 
         for email in email_set:
-            if bool(re.fullmatch(r"\"?([-a-zA-Z0-9_.`?{}]+@\w+\.\w+)\"?", email)):
-                # checks the email is valid
-                user = User.objects.filter(email=email).first()
-                organization = Organization.objects.get(pk=kwargs["org_id"])
-                if user not in organization.user.all():
-                    token = hash(f"{email}{kwargs['org_id']}{timezone.now()}")
-                    expiry_date = timezone.now() + timezone.timedelta(30)
-                    invite = Invitation(
-                        email=email,
-                        organization=organization,
-                        invited_by=request.user,
-                        token=token,
-                        expires_at=expiry_date,
-                    )
-                    invite.save()
-
-                    invite_link = settings.FRONT_END_BASE_URL
-                    if not user:
-                        invite_link += "invite/{0}".format(token)
-                    else:
-                        invite_link += "invite/success/{0}".format(token)
-
-                    render_info = {
-                        "organization_name": organization.name,
-                        "invite_sender": request.user.name,
-                        "invite_link": invite_link,
-                    }
-
-                    # plain_text = get_template("invite.txt")
-                    htmly = get_template("invite.html")
-
-                    # text_content = plain_text.render(render_info)
-                    html_content = htmly.render(render_info)
-
-                    message = Mail(
-                        from_email="no-reply@humanlambdas.com",
-                        to_emails=email,
-                        subject="Human Lambdas workflow invitation",
-                        html_content=html_content,
-                    )
-                    sg = SendGridClient()
-                    sg.send(message)
-                else:
-                    already_added_email_list.append(email)
-            else:
+            if is_invalid_email(email):
                 invalid_email_list.append(email)
+                continue
+
+            user = User.objects.filter(email=email).first()
+            organization = Organization.objects.get(pk=kwargs["org_id"])
+
+            if user in organization.user.all():
+                already_added_email_list.append(email)
+                continue
+
+            token = generate_unique_token(email, kwargs["org_id"])
+            invite = Invitation(
+                email=email,
+                organization=organization,
+                invited_by=request.user,
+                token=token,
+                expires_at=timezone.now() + timezone.timedelta(30),
+            )
+            invite.save()
+
+            invite_link = settings.FRONT_END_BASE_URL
+
+            if not user:
+                invite_link += "invite/{0}".format(token)
+            else:
+                invite_link += "invite/success/{0}".format(token)
+
+            render_info = {
+                "organization_name": organization.name,
+                "invite_sender": request.user.name,
+                "invite_link": invite_link,
+            }
+
+            # text_content = plain_text.render(render_info)
+            html_content = get_template("invite.html").render(render_info)
+
+            message = Mail(
+                from_email=("no-reply@humanlambdas.com", "Human Lambdas"),
+                to_emails=email,
+                subject="Human Lambdas invitation",
+                html_content=html_content,
+            )
+            sg = SendGridClient()
+            sg.send(message)
 
         # sending responses
         if len(invalid_email_list) == 0 and len(already_added_email_list) == 0:
             return Response(
-                {"message": "all emails were successfully added!"}, status=200
+                {"status_code": 200, "message": "all emails were successfully added!"},
+                status=200,
             )
-        if len(invalid_email_list) > 0 and len(already_added_email_list) > 0:
-            response_text = ""
-            for email in invalid_email_list:
-                response_text += "{0} is an invalid email. ".format(email)
-            for email in already_added_email_list:
-                response_text += "{0} is already a part of the organization,".format(
-                    email
-                )
-                response_text += " and so does not need to be added again. "
-            return Response(
-                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
-            )
-        if len(invalid_email_list) > 0:
-            response_text = ""
-            for email in invalid_email_list:
-                response_text += "{0} is an invalid email. ".format(email)
-            return Response(
-                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
-            )
-        if len(already_added_email_list) > 0:
-            response_text = ""
-            for email in already_added_email_list:
-                response_text += "{0} is already a part of the organization,".format(
-                    email
-                )
-                response_text += " and so does not need to be added again. "
-            return Response(
-                {"status_code": 400, "errors": [{"message": response_text}]}, status=400
-            )
+        response_text = ""
+        for email in invalid_email_list:
+            response_text += "{0} is an invalid email. ".format(email)
+        for email in already_added_email_list:
+            response_text += "{0} is already a part of the organization. ".format(email)
+        return Response(
+            {"status_code": 400, "errors": [{"message": response_text}]}, status=400
+        )
 
 
 class InvitationView(APIView):
@@ -338,6 +392,7 @@ class InvitationView(APIView):
             )
             return Response(
                 {
+                    "status_code": 204,
                     "invitation_email": invitation_email,
                     "invitation_org": invitation_org,
                 },
@@ -384,6 +439,7 @@ class InvitationView(APIView):
                 invitation_org.user.add(new_user)
                 return Response(
                     {
+                        "status_code": 201,
                         "message": "Your account has been created!",
                         "email": invite.email,
                     },
@@ -392,7 +448,7 @@ class InvitationView(APIView):
             else:
                 user = User.objects.filter(email=invite.email).first()
                 invitation_org.user.add(user)
-                return Response({"message": "Success!"}, status=200)
+                return Response({"status_code": 200, "message": "Success!"}, status=200)
 
 
 class APIAuthToken(APIView):
@@ -406,7 +462,15 @@ class APIAuthToken(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
-        return Response({"token": token.key, "user_id": user.pk, "email": user.email})
+        return Response(
+            {
+                "status_code": 200,
+                "token": token.key,
+                "user_id": user.pk,
+                "email": user.email,
+            },
+            status=200,
+        )
 
 
 class ListOrganizationView(ListAPIView):

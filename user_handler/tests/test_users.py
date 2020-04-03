@@ -105,6 +105,7 @@ class TestAPIRegistration(APITestCase):
             },
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertFalse("password" in response.data)
 
     def test_registration_short_password(self):
         response = self.client.post(
@@ -158,6 +159,12 @@ class TestAPIjwt(APITestCase):
     def test_token(self):
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response)
+
+    def test_refresh(self):
+        response = self.client.post(
+            "/v1/users/token/refresh", {"refresh": self.refresh}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 

@@ -86,3 +86,13 @@ class Invitation(models.Model):
 
     def __str__(self):
         return "{0}_invite_to_{1}".format(self.email, self.organization)
+
+
+class ForgottenPassword(models.Model):
+    email = models.EmailField()
+    token = models.CharField(max_length=128)
+    datetime = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField()
+
+    def __str__(self):
+        return "{0}_forgotten_password".format(self.email)
