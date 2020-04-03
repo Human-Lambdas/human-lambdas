@@ -1,13 +1,16 @@
 import logging
+import os
 
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from workflow_handler.models import WorkflowHook
+from workflow_handler.models import WorkflowHook, Workflow, Task
 from user_handler.models import User, Organization
 
 
 logger = logging.getLogger(__file__)
+
+_CURRENT_DIR = os.path.dirname(__file__)
 
 
 class TestWebhook(APITestCase):
@@ -135,15 +138,6 @@ class TestWebhook(APITestCase):
         self.assertEqual(
             WorkflowHook.objects.get(workflow__pk=self.workflow_id).target, new_url
         )
-
-import os
-
-from workflow_handler.models import Workflow, Task
-
-
-logger = logging.getLogger(__file__)
-
-_CURRENT_DIR = os.path.dirname(__file__)
 
 
 class TestWebhookTasks(APITestCase):
