@@ -304,3 +304,29 @@ class TestTasks(APITestCase):
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id)
         )
         self.assertEqual(response.data["n_tasks"], 3)
+
+    def test_change_outputs_retrieve_task(self):
+        workflow = Workflow.objects.get(id=self.workflow_id)
+        workflow.outputs[0]["name"] = "new_name"
+        workflow.save()
+        tasks = Task.objects.filter(workflow=workflow).all()
+        for task in tasks:
+            response = self.client.get(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                    self.org_id, self.workflow_id, task.id
+                )
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+            self.assertEqual(response.data["outputs"][0]["name"], "new_name")
+
+    def test_next_task_change_outputs(self):
+        workflow = Workflow.objects.get(id=self.workflow_id)
+        workflow.outputs[0]["name"] = "new_name"
+        workflow.save()
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual(response.data["outputs"][0]["name"], "new_name")
