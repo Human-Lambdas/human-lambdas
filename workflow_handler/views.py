@@ -20,6 +20,7 @@ from user_handler.permissions import IsOrgAdmin
 
 from .serializers import WorkflowSerializer, TaskSerializer
 from .models import Workflow, Task
+from .utils import sync_workflow_task
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -207,6 +208,7 @@ class RUDTaskView(RetrieveUpdateAPIView):
         workflow = Workflow.objects.get(id=self.kwargs["workflow_id"])
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
+        sync_workflow_task(workflow, obj)
         task = self.serializer_class(obj).data
         task["status_code"] = 200
         return Response(task, status=200)
@@ -239,6 +241,7 @@ class NextTaskView(APIView):
             queryset.filter(status="assigned").filter(assigned_to=request.user).first()
         )
         if obj:
+            sync_workflow_task(workflow, obj)
             task = self.serializer_class(obj).data
             task["status_code"] = 200
             return Response(task, status=200)
@@ -252,6 +255,7 @@ class NextTaskView(APIView):
                 obj.assigned_to = request.user
                 obj.assigned_at = timezone.now()
                 obj.save()
+                sync_workflow_task(workflow, obj)
                 task = self.serializer_class(obj).data
                 task["status_code"] = 200
                 return Response(task, status=200)
@@ -265,6 +269,7 @@ class NextTaskView(APIView):
             obj.assigned_to = request.user
             obj.assigned_at = timezone.now()
             obj.save()
+            sync_workflow_task(workflow, obj)
             workflow.n_tasks = F("n_tasks") - 1
             workflow.save()
             task = self.serializer_class(obj).data

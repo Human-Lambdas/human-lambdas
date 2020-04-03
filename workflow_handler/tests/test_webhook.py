@@ -112,7 +112,6 @@ class TestOrganizations(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["errors"][0]["field"], "webhook-->target")
 
-
     def test_webhook_delete_and_recreate(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         response = self.client.patch(
