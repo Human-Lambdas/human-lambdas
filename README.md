@@ -180,10 +180,6 @@ To retrieve a specific workflow you can do so by calling `GET` to `/orgs/<org-id
 ```
 Remember you will only have permission to retrieve and update the workflows which are part of your organization.
 
-## Upload CSV files
-
-To upload CSV files you have to `POST` a message including the file to `/orgs/<org-id>/workflows/<workflow-id>/upload/`
-
 ## Retrieve and UpdateTask
 
 To retrieve a task you can either call a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/next/` and this will give a incomplete task. 
