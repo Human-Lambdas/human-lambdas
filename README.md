@@ -71,12 +71,6 @@ python manage.py createsuperuser
 ```
 and it will ask for your user credentials and then set up the user account.  
 
-## Registration Endpoint
-To register a user you have to `POST` to `/users/register` with the following payload: 
-```
-{'name': <str>, 'email': <str>, 'password': <str>, 'organization': <str>, 'is_admin': <bool>}
-```
-
 ## Retrieve and Update User Endpoint
 To retrieve a user info you have to `GET` to `/users/<userd-id>`  and to update a user you use instead `PATCH` to the same endpoint along with a payload including the data you want to update. Here is an example of the payload to update the password of a user:
 
