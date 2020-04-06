@@ -78,29 +78,6 @@ To retrieve a user info you have to `GET` to `/users/<userd-id>`  and to update 
 {'password': <str>}
 ``` 
 
-
-## JWT Endpoint
-To get the `access` and `refresh` token you need to `POST` to `/users/token` with the following payload: 
-```
-{'email': <str>, 'password': <str>,}
-```
-and if the information is correct it will return two tokens in the following message: 
-```
-{'refresh': <str>, 'access': <str>}
-```
-
-To refresh and get the new access token you will `POST` the following to `/users/token/refresh`:
-
-```
-{'refresh': <str> }
-``` 
-
-And it will respond with the `access` token: 
-
-```
-{'access': <str> }
-``` 
-
 ## Retrieve and Update Workflow
 
 To retrieve a specific workflow you can do so by calling `GET` to `/orgs/<org-id>/workflows/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
