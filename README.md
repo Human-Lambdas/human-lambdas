@@ -85,9 +85,3 @@ To retrieve a specific workflow you can do so by calling `GET` to `/orgs/<org-id
 {"description": "This is the new updated description of an existing workflow"}
 ```
 Remember you will only have permission to retrieve and update the workflows which are part of your organization.
-
-## Retrieve and UpdateTask
-
-To retrieve a task you can either call a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/next/` and this will give a incomplete task. 
-
-Another way is to retrieve a specific task and that is by doing a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/<task-id>`, if you do a `PATCH` to this endpoint you will be able to update the task. You will only be able to update the output.
