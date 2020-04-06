@@ -17,12 +17,11 @@ from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
+import analytics
 
 from .serializers import WorkflowSerializer, TaskSerializer
 from .models import Workflow, Task
 from .utils import sync_workflow_task
-
-import analytics
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -300,7 +299,7 @@ class CreateTaskView(CreateAPIView):
         )
 
     def post(self, request, *args, **kwargs):
-        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
+        workflow = Workflow.objects.filter(id=kwargs["workflow_id"]).first()
         if not workflow:
             return Response(
                 {

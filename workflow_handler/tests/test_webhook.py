@@ -208,7 +208,6 @@ class TestWebhookTasks(APITestCase):
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-
     def test_complete_single_selection_task(self):
         workflow = Workflow.objects.get(id=self.workflow_id)
         tasks = Task.objects.filter(workflow=workflow).all()
