@@ -303,12 +303,14 @@ class ForgottenPasswordView(APIView):
 
     def post(self, request, *args, **kwargs):
         forgotten_password = ForgottenPassword.objects.filter(token=kwargs["token"])
+        if self.request["password"] is None:
+            return Response(status=400)
         if forgotten_password.first() is None:
             return Response(status=400)
         user = User.objects.filter(email=forgotten_password.email)
         if user.first() is None:
             return Response(status=400)
-        user.set_password(self.request["password"])
+        user.first().set_password(self.request["password"])
         return Response(status=200)
 
 
