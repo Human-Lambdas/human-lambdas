@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from django.test.utils import override_settings
 from django.utils import timezone
-from user_handler.models import ForgottenPassword
+from user_handler.models import ForgottenPassword, User
 
 logger = logging.getLogger(__file__)
 
@@ -41,6 +41,7 @@ class TestInvite(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    # post endpoint after this line
     def test_forgotten_password_post_wrong_token(self):
         token = "thisisaanothersampletoken"
         forgotten_password = ForgottenPassword(
@@ -82,3 +83,29 @@ class TestInvite(APITestCase):
             {"password": "short"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # expiry
+    def test_forgotten_password_post(self):
+        token, email, password = (
+            "thisisthecorrectsampletoken",
+            "foo@bar.com",
+            "foofoofoo",
+        )
+        user = User(name="sample", email=email, password=password)
+        user.save()
+        forgotten_password = ForgottenPassword(
+            email=email,
+            token=token,
+            expires_at=timezone.now() + timezone.timedelta(15),
+        )
+        forgotten_password.save()
+        response = self.client.post(
+            "/v1/users/forgotten-password-token/{0}".format(token),
+            {"password": "feefeefee"},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.post(
+            "/v1/users/token", {"email": email, "password": password}
+        )
+        print(response)
+        print(response.data)

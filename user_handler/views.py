@@ -330,8 +330,7 @@ class ForgottenPasswordView(APIView):
                 {"status_code": 400, "errors": [{"message": "an error occurred"}]},
                 status=400,
             )
-        user.first().set_password(self.request.data["password"])
-        user.first().save()
+        # change password
         return Response(status=200)
 
 
