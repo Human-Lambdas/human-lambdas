@@ -324,6 +324,14 @@ class ForgottenPasswordView(APIView):
                 },
                 status=400,
             )
+        if forgotten_password.first().expires_at < timezone.now():
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "this token has expired!"}],
+                },
+                status=400,
+            )
         user = User.objects.filter(email=forgotten_password.first().email)
         if user.first() is None:
             return Response(
