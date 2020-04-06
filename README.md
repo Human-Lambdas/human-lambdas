@@ -71,13 +71,6 @@ python manage.py createsuperuser
 ```
 and it will ask for your user credentials and then set up the user account.  
 
-## Retrieve and Update User Endpoint
-To retrieve a user info you have to `GET` to `/users/<userd-id>`  and to update a user you use instead `PATCH` to the same endpoint along with a payload including the data you want to update. Here is an example of the payload to update the password of a user:
-
-```
-{'password': <str>}
-``` 
-
 ## Retrieve and Update Workflow
 
 To retrieve a specific workflow you can do so by calling `GET` to `/orgs/<org-id>/workflows/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
