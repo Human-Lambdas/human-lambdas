@@ -172,10 +172,6 @@ Below are the different output sections formats:
 {}
 ```
 
-## List Workflows
-
-To get a list of the workflows in your organization you can do a `GET` call to `/orgs/<org-id>/workflows/`.
-
 ## Retrieve and Update Workflow
 
 To retrieve a specific workflow you can do so by calling `GET` to `/orgs/<org-id>/workflows/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
