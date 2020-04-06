@@ -303,14 +303,35 @@ class ForgottenPasswordView(APIView):
 
     def post(self, request, *args, **kwargs):
         forgotten_password = ForgottenPassword.objects.filter(token=kwargs["token"])
-        if self.request["password"] is None:
-            return Response(status=400)
         if forgotten_password.first() is None:
-            return Response(status=400)
-        user = User.objects.filter(email=forgotten_password.email)
+            return Response(
+                {"status_code": 400, "errors": [{"message": "this token is invalid"}]},
+                status=400,
+            )
+        if "password" not in self.request.data:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "no password has been attached"}],
+                },
+                status=400,
+            )
+        if len(self.request.data["password"]) < 8:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "passwords must be at least 8 characters"}],
+                },
+                status=400,
+            )
+        user = User.objects.filter(email=forgotten_password.first().email)
         if user.first() is None:
-            return Response(status=400)
-        user.first().set_password(self.request["password"])
+            return Response(
+                {"status_code": 400, "errors": [{"message": "an error occurred"}]},
+                status=400,
+            )
+        user.first().set_password(self.request.data["password"])
+        user.first().save()
         return Response(status=200)
 
 

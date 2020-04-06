@@ -51,7 +51,34 @@ class TestInvite(APITestCase):
         forgotten_password.save()
         response = self.client.post(
             "/v1/users/forgotten-password-token/{0}".format(token),
-            {"email": "alpha@beta.com"},
+            {"password": "longlong"},
         )
-        print(response)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_forgotten_password_post_no_password(self):
+        token = "thisisaanothersampletoken"
+        forgotten_password = ForgottenPassword(
+            email="foowordfoo@bar.com",
+            token=token,
+            expires_at=timezone.now() + timezone.timedelta(15),
+        )
+        forgotten_password.save()
+        response = self.client.post(
+            "/v1/users/forgotten-password-token/{0}".format(token),
+            {"password": "longlong"},
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_forgotten_password_post_short_password(self):
+        token = "thisisaanothersampletoken"
+        forgotten_password = ForgottenPassword(
+            email="foowordfoo@bar.com",
+            token=token,
+            expires_at=timezone.now() + timezone.timedelta(15),
+        )
+        forgotten_password.save()
+        response = self.client.post(
+            "/v1/users/forgotten-password-token/{0}".format(token),
+            {"password": "short"},
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
