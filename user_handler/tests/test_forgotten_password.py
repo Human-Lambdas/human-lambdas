@@ -99,10 +99,11 @@ class TestInvite(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_forgotten_password_post(self):
-        token, email, password = (
+        token, email, password, new_password = (
             "thisisthecorrectsampletoken",
             "foo@bar.com",
             "foofoofoo",
+            "feefeefee",
         )
         user = User(name="sample", email=email, password=password)
         user.save()
@@ -114,11 +115,10 @@ class TestInvite(APITestCase):
         forgotten_password.save()
         response = self.client.post(
             "/v1/users/forgotten-password-token/{0}".format(token),
-            {"password": "feefeefee"},
+            {"password": new_password},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.post(
-            "/v1/users/token", {"email": email, "password": password}
+            "/v1/users/token", {"email": email, "password": new_password}
         )
-        print(response)
-        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
