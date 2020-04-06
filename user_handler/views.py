@@ -286,7 +286,7 @@ class ForgottenPasswordView(APIView):
 
     def get(self, request, *args, **kwargs):
         forgotten_password = ForgottenPassword.objects.filter(
-            token=self.kwargs["forgotten_password_token"]
+            token=self.kwargs["token"]
         )
         if forgotten_password.exists():
             return Response({"status_code": 200}, status=200,)
@@ -300,6 +300,16 @@ class ForgottenPasswordView(APIView):
                 },
                 status=404,
             )
+
+    def post(self, request, *args, **kwargs):
+        forgotten_password = ForgottenPassword.objects.filter(token=kwargs["token"])
+        if forgotten_password.first() is None:
+            return Response(status=400)
+        user = User.objects.filter(email=forgotten_password.email)
+        if user.first() is None:
+            return Response(status=400)
+        user.set_password(self.request["password"])
+        return Response(status=200)
 
 
 class SendInviteView(APIView):
