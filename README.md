@@ -188,11 +188,6 @@ Remember you will only have permission to retrieve and update the workflows whic
 
 To upload CSV files you have to `POST` a message including the file to `/orgs/<org-id>/workflows/<workflow-id>/upload/`
 
-
-## Get list of Tasks
-
-To get the list of tasks in a given workflow you should do call a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/`
-
 ## Retrieve and UpdateTask
 
 To retrieve a task you can either call a `GET` to the endpoint `/orgs/<org-id>/workflows/<workflow-id>/tasks/next/` and this will give a incomplete task. 
