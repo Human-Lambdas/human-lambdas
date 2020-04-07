@@ -303,7 +303,7 @@ class ForgottenPasswordView(APIView):
 
     def post(self, request, *args, **kwargs):
         forgotten_password = ForgottenPassword.objects.filter(token=kwargs["token"])
-        if forgotten_password.first() is None:
+        if not forgotten_password.exists():
             return Response(
                 {"status_code": 400, "errors": [{"message": "this token is invalid"}]},
                 status=400,
@@ -333,7 +333,7 @@ class ForgottenPasswordView(APIView):
                 status=400,
             )
         user = User.objects.filter(email=forgotten_password.first().email)
-        if user.first() is None:
+        if not user.exists():
             return Response(
                 {"status_code": 400, "errors": [{"message": "an error occurred"}]},
                 status=400,

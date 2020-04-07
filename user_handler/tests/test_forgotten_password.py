@@ -10,6 +10,17 @@ logger = logging.getLogger(__file__)
 
 
 class TestInvite(APITestCase):
+    def setUp(self):
+        self.valid_token = "thisisavalidtoken"
+        user = User(name="test", email="foowordfoo@bar.com")
+        user.save()
+        forgotten_password = ForgottenPassword(
+            email="foowordfoo@bar.com",
+            token=self.valid_token,
+            expires_at=timezone.now() + timezone.timedelta(15),
+        )
+        forgotten_password.save()
+
     @override_settings(DEBUG=True)
     def test_forgotten_password(self):
         data = {"email": "sean@humanlambdas.com"}
@@ -29,57 +40,28 @@ class TestInvite(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_forgotten_password_good_token(self):
-        token = "thisisasampletoken"
-        forgotten_password = ForgottenPassword(
-            email="foowordfoo@bar.com",
-            token=token,
-            expires_at=timezone.now() + timezone.timedelta(15),
-        )
-        forgotten_password.save()
         response = self.client.get(
-            "/v1/users/forgotten-password-token/{0}".format(token)
+            "/v1/users/forgotten-password-token/{0}".format(self.valid_token)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # post endpoint after this line
     def test_forgotten_password_post_wrong_token(self):
-        token = "thisisaanothersampletoken"
-        forgotten_password = ForgottenPassword(
-            email="foowordfoo@bar.com",
-            token=token,
-            expires_at=timezone.now() + timezone.timedelta(15),
-        )
-        forgotten_password.save()
         response = self.client.post(
-            "/v1/users/forgotten-password-token/{0}".format(token),
+            "/v1/users/forgotten-password-token/{0}".format("thisisnotavalidtoken"),
             {"password": "longlong"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_forgotten_password_post_no_password(self):
-        token = "thisisaanothersampletoken"
-        forgotten_password = ForgottenPassword(
-            email="foowordfoo@bar.com",
-            token=token,
-            expires_at=timezone.now() + timezone.timedelta(15),
-        )
-        forgotten_password.save()
         response = self.client.post(
-            "/v1/users/forgotten-password-token/{0}".format(token),
-            {"password": "longlong"},
+            "/v1/users/forgotten-password-token/{0}".format(self.valid_token),
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_forgotten_password_post_short_password(self):
-        token = "thisisaanothersampletoken"
-        forgotten_password = ForgottenPassword(
-            email="foowordfoo@bar.com",
-            token=token,
-            expires_at=timezone.now() + timezone.timedelta(15),
-        )
-        forgotten_password.save()
         response = self.client.post(
-            "/v1/users/forgotten-password-token/{0}".format(token),
+            "/v1/users/forgotten-password-token/{0}".format(self.valid_token),
             {"password": "short"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -89,7 +71,7 @@ class TestInvite(APITestCase):
         forgotten_password = ForgottenPassword(
             email="foowordfoo@bar.com",
             token=token,
-            expires_at=timezone.now() + timezone.timedelta(15),
+            expires_at=timezone.now() - timezone.timedelta(15),
         )
         forgotten_password.save()
         response = self.client.post(
