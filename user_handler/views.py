@@ -341,7 +341,10 @@ class ForgottenPasswordView(APIView):
         user_to_change = user.first()
         user_to_change.set_password(self.request.data["password"])
         user_to_change.save()
-        return Response(status=200)
+        return Response(
+            {"status_code": 200, "message": "your password has been reset!"},
+            status=200,
+        )
 
 
 class SendInviteView(APIView):
