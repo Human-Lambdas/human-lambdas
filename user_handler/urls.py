@@ -24,7 +24,7 @@ urlpatterns = [
         name="forgotten-password",
     ),
     path(
-        "/forgotten-password-token/<str:forgotten_password_token>",
+        "/forgotten-password-token/<str:token>",
         ForgottenPasswordView.as_view(),
         name="forgotten-password-token",
     ),
