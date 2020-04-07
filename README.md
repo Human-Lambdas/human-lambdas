@@ -70,11 +70,3 @@ To create a superuser you run the following command in the container:
 python manage.py createsuperuser
 ```
 and it will ask for your user credentials and then set up the user account.  
-
-## Retrieve and Update Workflow
-
-To retrieve a specific workflow you can do so by calling `GET` to `/orgs/<org-id>/workflows/<workflow-id>`. To update the workflow you call the same endpoint but use `PATCH` instead along with a payload including the attributes you want to update. Below is an example of a payload for updating the description of a workflow:
-```
-{"description": "This is the new updated description of an existing workflow"}
-```
-Remember you will only have permission to retrieve and update the workflows which are part of your organization.
