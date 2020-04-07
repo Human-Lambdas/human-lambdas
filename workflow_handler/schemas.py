@@ -20,7 +20,7 @@ TASK_INPUT_SCHEMA = Schema(
             "name": And(str, len),
             "type": Or("text", "image"),
             Optional("layout"): dict,
-            "value": And(str, len),
+            "value": str,
         }
     ],
     ignore_extra_keys=True,

@@ -1,8 +1,8 @@
 import logging
 import re
 import ctypes
-import analytics
 
+import analytics
 from django.conf import settings
 from django.utils import timezone
 from sendgrid import SendGridAPIClient

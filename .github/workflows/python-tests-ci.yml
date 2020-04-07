@@ -57,5 +57,6 @@ jobs:
         SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
         DEBUG: True
         APP_URL: https://app.humanlambdas.com/
+        SEGMENT_KEY: $${{ secrets.SEGMENT_KEY }}
 
 
