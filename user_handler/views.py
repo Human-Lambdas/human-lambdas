@@ -493,7 +493,10 @@ class InvitationView(APIView):
             else:
                 user = User.objects.filter(email=invite.email).first()
                 invitation_org.user.add(user)
-                return Response({"status_code": 200, "message": "Success!"}, status=200)
+                return Response(
+                    {"status_code": 200, "message": "Success!", "email": invite.email},
+                    status=200,
+                )
 
 
 class APIAuthToken(APIView):
