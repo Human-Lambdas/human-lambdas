@@ -9,7 +9,7 @@ def sync_workflow_task(workflow, task):
             el["value"] for el in task.inputs if el["id"] == workflow_input["id"]
         ]
         final_input["value"] = (
-            "" if len(potential_input_value) == 0 else potential_input_value[0]
+            "" if not potential_input_value else potential_input_value[0]
         )
         if "layout" in workflow_input:
             final_input["layout"] = workflow_input["layout"]
