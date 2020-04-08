@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.utils import timezone
 from django.db.models import Q, Count, F, Avg
 from user_handler.permissions import IsOrgAdmin
-from workflow_handler.models import Task
+from workflow_handler.models import Task, Workflow
 
 from .models import Organization
 
@@ -18,6 +18,7 @@ DAYS_BACK = 365
 def get_completed(**kwargs):
     tasks = Task.objects.filter(
         Q(workflow__organization=kwargs["organization"])
+        & Q(workflow=kwargs["workflow"])
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     )
@@ -27,6 +28,7 @@ def get_completed(**kwargs):
 def get_pending(**kwargs):
     result = Task.objects.filter(
         Q(workflow__organization=kwargs["organization"])
+        & Q(workflow=kwargs["workflow"])
         & Q(created_at__lt=kwargs["end_time"])
     ).aggregate(pending=Count("status") - Count("status", filter=Q(status="completed")))
     return result["pending"]
@@ -35,6 +37,7 @@ def get_pending(**kwargs):
 def get_aht(**kwargs):
     result = Task.objects.filter(
         Q(workflow__organization=kwargs["organization"])
+        & Q(workflow=kwargs["workflow"])
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(aht=Avg(F("completed_at") - F("assigned_at")))
@@ -44,6 +47,7 @@ def get_aht(**kwargs):
 def get_tat(**kwargs):
     result = Task.objects.filter(
         Q(workflow__organization=kwargs["organization"])
+        & Q(workflow=kwargs["workflow"])
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(tat=Avg(F("completed_at") - F("created_at")))
@@ -124,9 +128,14 @@ class OrgsAbsolute(APIView):
                 "date": end_time,
                 "id": uuid4().hex,
             }
-            for qtype in qtypes:
-                data_dict[qtype] = METRICS[qtype](
-                    start_time=start_time, end_time=end_time, organization=organization
-                )
-            data.append(data_dict)
+            for workflow in Workflow.objects.filter(organization=organization).all():
+                for qtype in qtypes:
+                    data_dict[qtype] = METRICS[qtype](
+                        start_time=start_time,
+                        end_time=end_time,
+                        organization=organization,
+                        workflow=workflow,
+                    )
+                data_dict["name"] = workflow.name
+                data.append(data_dict)
         return Response(data, status=200)
