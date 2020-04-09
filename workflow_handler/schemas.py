@@ -45,8 +45,11 @@ UPDATE_OUTPUT_SCHEMA = Schema(
     [
         {
             "id": And(str, len),
+            "name": And(str, len),
+            "type": Or("binary", "text", "single-selection", "multiple-selection"),
             Or("binary", "text", "single-selection", "multiple-selection"): {
-                "value": Or(bool, And(str, len), And(list, len))
+                "value": Or(bool, And(str, len), And(list, len)),
+                "options": list,
             },
         }
     ],

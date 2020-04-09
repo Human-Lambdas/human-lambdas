@@ -160,7 +160,20 @@ class TestTasks(APITestCase):
         for output_value, task in zip(output_values, tasks):
             exp_output = next(item for item in expected_outputs if item["id"] == "foo")
             exp_output[exp_output["type"]]["value"] = output_value
-            output_list = [{"id": "foo", "single-selection": {"value": output_value}}]
+            output_list = [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "value": output_value,
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ]
             data = {"inputs": task.inputs, "outputs": output_list}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
@@ -183,7 +196,20 @@ class TestTasks(APITestCase):
         for output_value, task in zip(output_values, tasks):
             exp_output = next(item for item in expected_outputs if item["id"] == "bar")
             exp_output[exp_output["type"]]["value"] = output_value
-            output_list = [{"id": "bar", "multiple-selection": {"value": output_value}}]
+            output_list = [
+                {
+                    "id": "bar",
+                    "name": "bar",
+                    "type": "multiple-selection",
+                    "multiple-selection": {
+                        "value": output_value,
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ]
             data = {"inputs": task.inputs, "outputs": output_list}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(

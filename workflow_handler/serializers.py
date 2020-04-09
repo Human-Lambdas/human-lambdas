@@ -164,19 +164,20 @@ class TaskSerializer(serializers.ModelSerializer):
         outputs = validated_data.get("outputs")
         if not outputs:
             raise serializers.ValidationError("You can only update outputs of tasks")
-        for output in outputs:
+        """for output in outputs:
             instance_output = next(
                 item for item in instance.outputs if item["id"] == output["id"]
             )
             itype = instance_output["type"]
             if itype not in instance_output:
                 instance_output[itype] = {}
-            instance_output[itype]["value"] = output[itype]["value"]
+            instance_output[itype]["value"] = output[itype]["value"]"""
         user = self.context["request"].user
         instance.status = "completed"
         instance.completed_at = timezone.now()
         instance.assigned_to = user
         instance.inputs = inputs
+        instance.outputs = outputs
         instance.save()
         instance.task_completed(user)
         return instance
