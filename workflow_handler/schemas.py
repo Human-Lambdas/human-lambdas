@@ -49,7 +49,7 @@ UPDATE_OUTPUT_SCHEMA = Schema(
             "type": Or("binary", "text", "single-selection", "multiple-selection"),
             Or("binary", "text", "single-selection", "multiple-selection"): {
                 "value": Or(bool, And(str, len), And(list, len)),
-                "options": list,
+                Optional("options"): list,
             },
         }
     ],
