@@ -389,7 +389,6 @@ class SendInviteView(APIView):
                 "invite_link": invite_link,
             }
 
-            # text_content = plain_text.render(render_info)
             html_content = get_template("invite.html").render(render_info)
 
             message = Mail(
