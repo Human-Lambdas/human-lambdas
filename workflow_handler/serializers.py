@@ -160,6 +160,7 @@ class TaskSerializer(serializers.ModelSerializer):
         return task
 
     def update(self, instance, validated_data):
+        inputs = validated_data.get("inputs")
         outputs = validated_data.get("outputs")
         if not outputs:
             raise serializers.ValidationError("You can only update outputs of tasks")
@@ -175,6 +176,7 @@ class TaskSerializer(serializers.ModelSerializer):
         instance.status = "completed"
         instance.completed_at = timezone.now()
         instance.assigned_to = user
+        instance.inputs = inputs
         instance.save()
         instance.task_completed(user)
         return instance

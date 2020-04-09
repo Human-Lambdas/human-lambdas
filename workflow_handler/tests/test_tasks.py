@@ -161,7 +161,7 @@ class TestTasks(APITestCase):
             exp_output = next(item for item in expected_outputs if item["id"] == "foo")
             exp_output[exp_output["type"]]["value"] = output_value
             output_list = [{"id": "foo", "single-selection": {"value": output_value}}]
-            data = {"outputs": output_list}
+            data = {"inputs": task.inputs, "outputs": output_list}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.id
@@ -184,7 +184,7 @@ class TestTasks(APITestCase):
             exp_output = next(item for item in expected_outputs if item["id"] == "bar")
             exp_output[exp_output["type"]]["value"] = output_value
             output_list = [{"id": "bar", "multiple-selection": {"value": output_value}}]
-            data = {"outputs": output_list}
+            data = {"inputs": task.inputs, "outputs": output_list}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.second_workflow_id, task.id
