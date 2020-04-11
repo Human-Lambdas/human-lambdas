@@ -77,12 +77,19 @@ class Organization(models.Model):
 
 
 class Invitation(models.Model):
+    def __eq__(self, other):
+        return self.email == other.email and self.organization == other.organization
+
+    def __hash__(self):
+        return hash((self.email, self.organization))
+
     email = models.EmailField()
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     invited_by = models.ForeignKey(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=128)
     datetime = models.DateTimeField(auto_now=True)
     expires_at = models.DateTimeField()
+    admin = models.BooleanField(default=False)
 
     def __str__(self):
         return "{0}_invite_to_{1}".format(self.email, self.organization)

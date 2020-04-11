@@ -350,6 +350,23 @@ class ForgottenPasswordView(APIView):
 class SendInviteView(APIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
 
+    def get(self, request, *args, **kwargs):
+        invited_users = set(
+            Invitation.objects.filter(organization__pk=self.kwargs["org_id"])
+        )
+        invited_users_cleaned = []
+        for invited_user in invited_users:
+            invited_users_cleaned.append(
+                {
+                    "email": invited_user.email,
+                    "pending": True,
+                    "is_admin": invited_user.admin,
+                }
+            )
+        return Response(
+            {"status_code": 200, "invited_users": invited_users_cleaned}, status=200
+        )
+
     def post(self, request, *args, **kwargs):
         email_set = set("".join(request.data["emails"].split()).split(","))
         invalid_email_list, already_added_email_list = [], []

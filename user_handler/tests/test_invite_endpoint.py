@@ -105,3 +105,8 @@ class TestInvite(APITestCase):
             {"emails": "lam__bda@sigma.com,foo@foobarinc.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_endpoint_call_get(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/v1/orgs/{0}/invite".format(self.org_id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
