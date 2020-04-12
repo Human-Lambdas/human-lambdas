@@ -432,6 +432,24 @@ class SendInviteView(APIView):
             {"status_code": 400, "errors": [{"message": response_text}]}, status=400
         )
 
+    def delete(self, request, *args, **kwargs):
+        invites = Invitation.objects.filter(
+            email=self.request.data["email"], organization__pk=self.kwargs["org_id"]
+        )
+        if len(invites) == 0:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [
+                        {"message": "There are no invitations from to user to delete"}
+                    ],
+                },
+                status=400,
+            )
+        for invite in invites:
+            invite.delete()
+        return Response()
+
 
 class InvitationView(APIView):
     permission_classes = (AllowAny,)
@@ -442,7 +460,11 @@ class InvitationView(APIView):
             return Response(
                 {
                     "status_code": 404,
-                    "errors": [{"message": "no invitation with this token exists"}],
+                    "errors": [
+                        {
+                            "message": "this invitation has either been revoked, or is invalid"
+                        }
+                    ],
                 },
                 status=404,
             )
