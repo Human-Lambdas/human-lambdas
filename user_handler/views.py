@@ -437,7 +437,7 @@ class SendInviteView(APIView):
             email=self.request.data["email"], organization__pk=self.kwargs["org_id"]
         )
 
-        if invites.exists():
+        if not invites.exists():
             return Response(
                 {
                     "status_code": 400,
@@ -457,7 +457,7 @@ class SendInviteView(APIView):
         invites = Invitation.objects.filter(
             email=self.request.data["email"], organization__pk=self.kwargs["org_id"]
         )
-        if invites.exists():
+        if not invites.exists():
             return Response(
                 {
                     "status_code": 400,
