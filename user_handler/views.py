@@ -441,7 +441,7 @@ class SendInviteView(APIView):
                 {
                     "status_code": 400,
                     "errors": [
-                        {"message": "There are no invitations to this user to update"}
+                        {"message": "there are no invitations to this user to update"}
                     ],
                 },
                 status=400,
@@ -540,7 +540,9 @@ class InvitationView(APIView):
                 new_user.set_password(request.data["password"])
                 new_user.current_organization_id = invitation_org.id
                 new_user.save()
-                invitation_org.user.add(new_user)
+                invitation_org.admin.add(
+                    new_user
+                ) if invite.admin else invitation_org.user.add(new_user)
                 return Response(
                     {
                         "status_code": 201,
@@ -551,7 +553,9 @@ class InvitationView(APIView):
                 )
             else:
                 user = User.objects.filter(email=invite.email).first()
-                invitation_org.user.add(user)
+                invitation_org.admin.add(
+                    user
+                ) if invite.admin else invitation_org.user.add(user)
                 return Response(
                     {"status_code": 200, "message": "Success!", "email": invite.email},
                     status=200,
