@@ -432,6 +432,46 @@ class SendInviteView(APIView):
             {"status_code": 400, "errors": [{"message": response_text}]}, status=400
         )
 
+    def patch(self, request, *args, **kwargs):
+        invites = Invitation.objects.filter(
+            email=self.request.data["email"], organization__pk=self.kwargs["org_id"]
+        )
+
+        if len(invites) == 0:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [
+                        {"message": "There are no invitations to this user to update"}
+                    ],
+                },
+                status=400,
+            )
+        for invite in invites:
+            invite.admin = True if self.request.data["admin"] else False
+            invite.save()
+        response_text = "this invitation has now been set to admin status"
+        return Response({"status_code": 200, "message": response_text}, status=200)
+
+    def delete(self, request, *args, **kwargs):
+        invites = Invitation.objects.filter(
+            email=self.request.data["email"], organization__pk=self.kwargs["org_id"]
+        )
+        if len(invites) == 0:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [
+                        {"message": "There are no invitations to this user to delete"}
+                    ],
+                },
+                status=400,
+            )
+        for invite in invites:
+            invite.delete()
+        response_text = "this invite has now been deleted"
+        return Response({"status_code": 200, "message": response_text}, status=200)
+
 
 class InvitationView(APIView):
     permission_classes = (AllowAny,)
