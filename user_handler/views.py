@@ -436,7 +436,6 @@ class SendInviteView(APIView):
         invites = Invitation.objects.filter(
             email=self.request.data["email"], organization__pk=self.kwargs["org_id"]
         )
-
         if not invites.exists():
             return Response(
                 {
@@ -462,7 +461,7 @@ class SendInviteView(APIView):
                 {
                     "status_code": 400,
                     "errors": [
-                        {"message": "There are no invitations to this user to delete"}
+                        {"message": "there are no invitations to this user to delete"}
                     ],
                 },
                 status=400,
