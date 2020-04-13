@@ -540,7 +540,7 @@ class InvitationView(APIView):
                 new_user.set_password(request.data["password"])
                 new_user.current_organization_id = invitation_org.id
                 new_user.save()
-                invitation_org.admin.add(
+                invitation_org.add_admin(
                     new_user
                 ) if invite.admin else invitation_org.user.add(new_user)
                 return Response(
@@ -553,7 +553,7 @@ class InvitationView(APIView):
                 )
             else:
                 user = User.objects.filter(email=invite.email).first()
-                invitation_org.admin.add(
+                invitation_org.add_admin(
                     user
                 ) if invite.admin else invitation_org.user.add(user)
                 return Response(
