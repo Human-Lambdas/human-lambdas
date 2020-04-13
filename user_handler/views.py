@@ -482,7 +482,11 @@ class InvitationView(APIView):
             return Response(
                 {
                     "status_code": 404,
-                    "errors": [{"message": "no invitation with this token exists"}],
+                    "errors": [
+                        {
+                            "message": "this invitation has either been revoked, or is invalid"
+                        }
+                    ],
                 },
                 status=404,
             )
