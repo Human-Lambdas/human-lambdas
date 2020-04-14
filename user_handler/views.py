@@ -449,7 +449,10 @@ class SendInviteView(APIView):
         for invite in invites:
             invite.admin = True if self.request.data["admin"] else False
             invite.save()
-        response_text = "this invitation has now been set to admin status"
+        if self.request.data["admin"]:
+            response_text = "this invitation has now been set to admin status"
+        else:
+            response_text = "this invitation has now been set to worker status"
         return Response({"status_code": 200, "message": response_text}, status=200)
 
     def delete(self, request, *args, **kwargs):
