@@ -37,9 +37,8 @@ DEBUG = False if os.getenv("DEBUG") == "False" else True
 HOOK_EVENTS = {
     "task.completed": "workflow_handler.Task.completed",
 }
-
 HOOK_CUSTOM_MODEL = "workflow_handler.WorkflowHook"
-
+HOOK_FINDER = "workflow_handler.utils.find_and_fire_hook"
 
 # Application definition
 
