@@ -17,6 +17,7 @@ from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
+import analytics
 
 from .serializers import WorkflowSerializer, TaskSerializer
 from .models import Workflow, Task
@@ -305,7 +306,7 @@ class CreateTaskView(CreateAPIView):
         )
 
     def post(self, request, *args, **kwargs):
-        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
+        workflow = Workflow.objects.filter(id=kwargs["workflow_id"]).first()
         if not workflow:
             return Response(
                 {
@@ -319,6 +320,12 @@ class CreateTaskView(CreateAPIView):
                     ],
                 },
                 status=404,
+            )
+        if not settings.DEBUG:
+            analytics.track(
+                request.user.pk,
+                "Task Create Attempt",
+                {"workflow_id": workflow.id, "source": "API"},
             )
         request.data["outputs"] = workflow.outputs
         if "inputs" not in request.data or not request.data["inputs"]:
@@ -349,6 +356,12 @@ class CreateTaskView(CreateAPIView):
             task_input.update(workflow_input)
         workflow.n_tasks = F("n_tasks") + 1
         workflow.save()
+        if not settings.DEBUG:
+            analytics.track(
+                request.user.pk,
+                "Task Create Success",
+                {"workflow_id": workflow.id, "source": "API"},
+            )
         return self.create(request, *args, **kwargs)
 
 

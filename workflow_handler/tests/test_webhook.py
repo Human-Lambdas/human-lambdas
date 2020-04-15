@@ -207,6 +207,34 @@ class TestWebhookTasks(APITestCase):
                 data=data,
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        workflow_data = {
+            "name": "uploader2",
+            "description": "great wf",
+            "inputs": [
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ],
+            "webhook": {"target": "https://en9sk43hft479.x.pipedream.net"},
+        }
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
 
     def test_complete_single_selection_task(self):
         workflow = Workflow.objects.get(id=self.workflow_id)
@@ -216,8 +244,21 @@ class TestWebhookTasks(APITestCase):
         for output_value, task in zip(output_values, tasks):
             exp_output = next(item for item in expected_outputs if item["id"] == "foo")
             exp_output[exp_output["type"]]["value"] = output_value
-            output_list = [{"id": "foo", "single-selection": {"value": output_value}}]
-            data = {"outputs": output_list}
+            output_list = [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "value": output_value,
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ]
+            data = {"inputs": task.inputs, "outputs": output_list}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.id
@@ -230,3 +271,13 @@ class TestWebhookTasks(APITestCase):
             self.assertEqual("completed", response.data["status"])
             self.assertEqual(expected_outputs, response.data["outputs"])
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
+
+    def test_find_and_fire(self):
+        workflow  = Workflow.objects.get(pk=self.workflow_id)
+        filters = {
+            "event": "task.completed",
+            "workflow": workflow,
+        }
+        hooks = WorkflowHook.objects.filter(**filters)
+        self.assertEqual(len(hooks), 1)
+

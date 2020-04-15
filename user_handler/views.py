@@ -286,7 +286,7 @@ class ForgottenPasswordView(APIView):
 
     def get(self, request, *args, **kwargs):
         forgotten_password = ForgottenPassword.objects.filter(
-            token=self.kwargs["forgotten_password_token"]
+            token=self.kwargs["token"]
         )
         if forgotten_password.exists():
             return Response({"status_code": 200}, status=200,)
@@ -301,9 +301,71 @@ class ForgottenPasswordView(APIView):
                 status=404,
             )
 
+    def post(self, request, *args, **kwargs):
+        forgotten_password = ForgottenPassword.objects.filter(token=kwargs["token"])
+        if not forgotten_password.exists():
+            return Response(
+                {"status_code": 400, "errors": [{"message": "this token is invalid"}]},
+                status=400,
+            )
+        if "password" not in self.request.data:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "no password has been attached"}],
+                },
+                status=400,
+            )
+        if len(self.request.data["password"]) < 8:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "passwords must be at least 8 characters"}],
+                },
+                status=400,
+            )
+        if forgotten_password.first().expires_at < timezone.now():
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "this token has expired!"}],
+                },
+                status=400,
+            )
+        user = User.objects.filter(email=forgotten_password.first().email)
+        if not user.exists():
+            return Response(
+                {"status_code": 400, "errors": [{"message": "an error occurred"}]},
+                status=400,
+            )
+        user_to_change = user.first()
+        user_to_change.set_password(self.request.data["password"])
+        user_to_change.save()
+        return Response(
+            {"status_code": 200, "message": "your password has been reset!"},
+            status=200,
+        )
+
 
 class SendInviteView(APIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
+
+    def get(self, request, *args, **kwargs):
+        invited_users = set(
+            Invitation.objects.filter(organization__pk=self.kwargs["org_id"])
+        )
+        invited_users_cleaned = []
+        for invited_user in invited_users:
+            invited_users_cleaned.append(
+                {
+                    "email": invited_user.email,
+                    "pending": True,
+                    "is_admin": invited_user.admin,
+                }
+            )
+        return Response(
+            {"status_code": 200, "invited_users": invited_users_cleaned}, status=200
+        )
 
     def post(self, request, *args, **kwargs):
         email_set = set("".join(request.data["emails"].split()).split(","))
@@ -344,7 +406,6 @@ class SendInviteView(APIView):
                 "invite_link": invite_link,
             }
 
-            # text_content = plain_text.render(render_info)
             html_content = get_template("invite.html").render(render_info)
 
             message = Mail(
@@ -371,6 +432,48 @@ class SendInviteView(APIView):
             {"status_code": 400, "errors": [{"message": response_text}]}, status=400
         )
 
+    def patch(self, request, *args, **kwargs):
+        invites = Invitation.objects.filter(
+            email=self.request.data["email"], organization__pk=self.kwargs["org_id"]
+        )
+        if not invites.exists():
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [
+                        {"message": "there are no invitations to this user to update"}
+                    ],
+                },
+                status=400,
+            )
+        for invite in invites:
+            invite.admin = True if self.request.data["admin"] else False
+            invite.save()
+        if self.request.data["admin"]:
+            response_text = "this invitation has now been set to admin status"
+        else:
+            response_text = "this invitation has now been set to worker status"
+        return Response({"status_code": 200, "message": response_text}, status=200)
+
+    def delete(self, request, *args, **kwargs):
+        invites = Invitation.objects.filter(
+            email=self.request.data["email"], organization__pk=self.kwargs["org_id"]
+        )
+        if not invites.exists():
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [
+                        {"message": "there are no invitations to this user to delete"}
+                    ],
+                },
+                status=400,
+            )
+        for invite in invites:
+            invite.delete()
+        response_text = "this invite has now been deleted"
+        return Response({"status_code": 200, "message": response_text}, status=200)
+
 
 class InvitationView(APIView):
     permission_classes = (AllowAny,)
@@ -381,7 +484,11 @@ class InvitationView(APIView):
             return Response(
                 {
                     "status_code": 404,
-                    "errors": [{"message": "no invitation with this token exists"}],
+                    "errors": [
+                        {
+                            "message": "this invitation has either been revoked, or is invalid"
+                        }
+                    ],
                 },
                 status=404,
             )
@@ -436,7 +543,9 @@ class InvitationView(APIView):
                 new_user.set_password(request.data["password"])
                 new_user.current_organization_id = invitation_org.id
                 new_user.save()
-                invitation_org.user.add(new_user)
+                invitation_org.add_admin(
+                    new_user
+                ) if invite.admin else invitation_org.user.add(new_user)
                 return Response(
                     {
                         "status_code": 201,
@@ -447,8 +556,13 @@ class InvitationView(APIView):
                 )
             else:
                 user = User.objects.filter(email=invite.email).first()
-                invitation_org.user.add(user)
-                return Response({"status_code": 200, "message": "Success!"}, status=200)
+                invitation_org.add_admin(
+                    user
+                ) if invite.admin else invitation_org.user.add(user)
+                return Response(
+                    {"status_code": 200, "message": "Success!", "email": invite.email},
+                    status=200,
+                )
 
 
 class APIAuthToken(APIView):

@@ -160,8 +160,21 @@ class TestTasks(APITestCase):
         for output_value, task in zip(output_values, tasks):
             exp_output = next(item for item in expected_outputs if item["id"] == "foo")
             exp_output[exp_output["type"]]["value"] = output_value
-            output_list = [{"id": "foo", "single-selection": {"value": output_value}}]
-            data = {"outputs": output_list}
+            output_list = [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "value": output_value,
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ]
+            data = {"inputs": task.inputs, "outputs": output_list}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.id
@@ -183,8 +196,21 @@ class TestTasks(APITestCase):
         for output_value, task in zip(output_values, tasks):
             exp_output = next(item for item in expected_outputs if item["id"] == "bar")
             exp_output[exp_output["type"]]["value"] = output_value
-            output_list = [{"id": "bar", "multiple-selection": {"value": output_value}}]
-            data = {"outputs": output_list}
+            output_list = [
+                {
+                    "id": "bar",
+                    "name": "bar",
+                    "type": "multiple-selection",
+                    "multiple-selection": {
+                        "value": output_value,
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ]
+            data = {"inputs": task.inputs, "outputs": output_list}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.second_workflow_id, task.id
@@ -330,3 +356,15 @@ class TestTasks(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(response.data["outputs"][0]["name"], "new_name")
+
+    def test_next_task_change_inputs(self):
+        workflow = Workflow.objects.get(id=self.workflow_id)
+        workflow.inputs[0]["name"] = "new_name"
+        workflow.save()
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual(response.data["inputs"][0]["name"], "new_name")
