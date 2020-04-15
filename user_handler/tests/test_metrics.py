@@ -305,3 +305,18 @@ class TestWorkflowMetrics(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
+
+    def test_only_non_disabled_workflows(self):
+        workflow = Workflow.objects.get(pk=self.workflow_id2)
+        workflow.disabled = True
+        workflow.save()
+
+        data = {
+            "range": "monthly",
+            "type": ["pending"],
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["pending"], 3)
