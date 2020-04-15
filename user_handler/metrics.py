@@ -119,23 +119,29 @@ class OrgsAbsolute(APIView):
 
     def get(self, request, *args, **kwargs):
         self.validate_data(request.data)
-        organization = self.get_queryset().first()
-        time_ranges = self.process_time_range(request.query_params.get("range"))
         data = []
         qtypes = request.query_params.getlist("type")
-        for start_time, end_time in time_ranges:
-            data_dict = {
-                "date": end_time,
-                "id": uuid4().hex,
-            }
-            for workflow in Workflow.objects.filter(organization=organization).all():
-                for qtype in qtypes:
-                    data_dict[qtype] = METRICS[qtype](
-                        start_time=start_time,
-                        end_time=end_time,
-                        organization=organization,
-                        workflow=workflow,
-                    )
-                data_dict["name"] = workflow.name
-                data.append(data_dict)
+        if any([qtype in METRICS for qtype in qtypes]):
+            organization = self.get_queryset().first()
+            time_ranges = self.process_time_range(request.query_params.get("range"))
+            for start_time, end_time in time_ranges:
+                for workflow in Workflow.objects.filter(
+                    organization=organization
+                ).all():
+                    data_dict = {
+                        "date": end_time,
+                        "id": uuid4().hex,
+                    }
+                    for qtype in qtypes:
+                        try:
+                            data_dict[qtype] = METRICS[qtype](
+                                start_time=start_time,
+                                end_time=end_time,
+                                organization=organization,
+                                workflow=workflow,
+                            )
+                        except KeyError:
+                            continue
+                    data_dict["name"] = workflow.name
+                    data.append(data_dict)
         return Response(data, status=200)
