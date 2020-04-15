@@ -208,6 +208,35 @@ class TestWebhookTasks(APITestCase):
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
+        workflow_data = {
+            "name": "uploader2",
+            "description": "great wf",
+            "inputs": [
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ],
+            "webhook": {"target": "https://en9sk43hft479.x.pipedream.net"},
+        }
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+
     def test_complete_single_selection_task(self):
         workflow = Workflow.objects.get(id=self.workflow_id)
         tasks = Task.objects.filter(workflow=workflow).all()
@@ -243,3 +272,13 @@ class TestWebhookTasks(APITestCase):
             self.assertEqual("completed", response.data["status"])
             self.assertEqual(expected_outputs, response.data["outputs"])
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
+
+    def test_find_and_fire(self):
+        workflow  = Workflow.objects.get(pk=self.workflow_id)
+        filters = {
+            "event": "task.completed",
+            "workflow": workflow,
+        }
+        hooks = WorkflowHook.objects.filter(**filters)
+        self.assertEqual(len(hooks), 1)
+

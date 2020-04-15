@@ -1,3 +1,6 @@
+from .models import WorkflowHook
+
+
 def sync_workflow_task(workflow, task):
     inputs = []
     for workflow_input in workflow.inputs:
@@ -17,3 +20,13 @@ def sync_workflow_task(workflow, task):
     task.inputs = inputs
     if task.outputs != workflow.outputs:
         task.outputs = workflow.outputs
+
+
+def find_and_fire_hook(event_name, instance, **kwargs):
+    filters = {
+        "event": event_name,
+        "workflow": instance.workflow,
+    }
+    hooks = WorkflowHook.objects.filter(**filters)
+    for hook in hooks:
+        hook.deliver_hook(instance)
