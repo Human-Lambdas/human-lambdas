@@ -41,7 +41,8 @@ def get_aht(**kwargs):
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(aht=Avg(F("completed_at") - F("assigned_at")))
-    return result["aht"]
+    aht = result["aht"]
+    return aht if aht else 0
 
 
 def get_tat(**kwargs):
@@ -51,8 +52,8 @@ def get_tat(**kwargs):
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(tat=Avg(F("completed_at") - F("created_at")))
-
-    return result["tat"]
+    tat = result["tat"]
+    return tat if tat else 0
 
 
 METRICS = {

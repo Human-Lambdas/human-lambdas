@@ -183,6 +183,9 @@ class TestComplexMetrics(APITestCase):
         self.assertEqual(response.data[0]["completed"], 1)
         self.assertEqual(response.data[0]["aht"], completed_at - assigned_at)
         self.assertEqual(response.data[0]["tat"], completed_at - created_at)
+        for idata in response.data[1:]:
+            self.assertEqual(idata["aht"], 0)
+            self.assertEqual(idata["tat"], 0)
 
 
 class TestWorkflowMetrics(APITestCase):
