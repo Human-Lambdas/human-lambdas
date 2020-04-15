@@ -18,6 +18,8 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
 import analytics
+import csv
+import io
 
 from .serializers import WorkflowSerializer, TaskSerializer
 from .models import Workflow, Task
@@ -412,3 +414,44 @@ class GetCompletedTaskView(ListAPIView):
 
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
+
+
+class GetCompletedTaskInternalView(ListAPIView):
+    """
+    Internal API View for getting all the Tasks
+    """
+
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow__in=workflows)
+            & Q(workflow=self.kwargs["workflow_id"])
+            & Q(status="completed")
+        )
+
+    def list(self, request, *args, **kwargs):
+        tasks = get_list_or_404(self.get_queryset())
+        alpha = io.StringIO()
+        writer = csv.writer(alpha, quoting=csv.QUOTE_NONNUMERIC)
+        title_passed = False
+        for task in tasks:
+            if title_passed is True:
+                # writer.writerow([1, 2])
+                writer.writerow([task_input["value"] for task_input in task.inputs])
+            else:
+                writer.writerow([task_input["id"] for task_input in task.inputs])
+                title_passed = True
+        print(alpha.getvalue())
+        string_to_return = repr(alpha.getvalue())
+        print(string_to_return)
+        return Response(
+            {"status_code": 200, "completed_tasks": string_to_return}, status=200
+        )
