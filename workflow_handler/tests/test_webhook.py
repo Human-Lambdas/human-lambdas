@@ -207,7 +207,6 @@ class TestWebhookTasks(APITestCase):
                 data=data,
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
         workflow_data = {
             "name": "uploader2",
             "description": "great wf",

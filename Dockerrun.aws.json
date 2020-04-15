@@ -13,5 +13,10 @@
       "HostDirectory": "/var/www/static",
       "ContainerDirectory": "/code/static"
     }
+  ],
+  "Ports": [
+    {
+      "ContainerPort": 8000
+    }
   ]
 }

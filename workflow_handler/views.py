@@ -250,8 +250,11 @@ class NextTaskView(APIView):
         # 2 get assigned to someone else and expired
         with transaction.atomic():
             obj = queryset.select_for_update().filter(status="assigned").first()
-            if obj and timezone.now() - obj.assigned_at > timezone.timedelta(
-                minutes=settings.TASK_EXPIRATION_MIN
+            if (
+                obj
+                and obj.assigned_at
+                and timezone.now() - obj.assigned_at
+                > timezone.timedelta(minutes=settings.TASK_EXPIRATION_MIN)
             ):
                 obj.assigned_to = request.user
                 obj.assigned_at = timezone.now()
@@ -260,6 +263,10 @@ class NextTaskView(APIView):
                 task = self.serializer_class(obj).data
                 task["status_code"] = 200
                 return Response(task, status=200)
+            elif obj and not obj.assigned_at:
+                # temporary fix for tasks which are assigned but do not have assigned_at
+                obj.assigned_at = timezone.now()
+                obj.save()
 
         # 3 get first pending
         with transaction.atomic():
