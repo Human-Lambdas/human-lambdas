@@ -285,10 +285,6 @@ class TestWorkflowMetrics(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_workflow_names(self):
-        wf_names = [
-            Workflow.objects.get(pk=self.workflow_id).name,
-            Workflow.objects.get(pk=self.workflow_id2).name,
-        ]
         data = {
             "range": "monthly",
             "type": ["pending"],
@@ -297,13 +293,7 @@ class TestWorkflowMetrics(APITestCase):
             "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2 * (12 + 1))
-        response_names = []
-        for ic, idata in enumerate(response.data):
-            self.assertIn(idata["name"], wf_names)
-            response_names.append(idata["name"])
-        for wf_name in wf_names:
-            self.assertIn(wf_name, response_names)
+        self.assertEqual(len(response.data), 12 + 1)
 
     def test_wrong_type(self):
         data = {
