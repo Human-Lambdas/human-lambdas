@@ -536,7 +536,7 @@ class InvitationView(APIView):
                     },
                     status=400,
                 )
-            if User.objects.filter(email=invite.email).first() is None:
+            if not User.objects.filter(email=invite.email).exists():
                 new_user = User(
                     email=invite.email,
                     name=request.data["name"],
