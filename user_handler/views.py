@@ -265,7 +265,7 @@ class SendForgottenPasswordView(APIView):
         forgotten_password.save()
 
         message = Mail(
-            from_email="no-reply@humanlambdas.com",
+            from_email=("no-reply@humanlambdas.com", "Human Lambdas"),
             to_emails=request.data["email"],
             subject="Human Lambdas Password Reset",
             html_content=html_content,
