@@ -11,8 +11,8 @@ from workflow_handler.models import Task
 from .models import Organization
 
 MONTHS_BACK = 12
-WEEKS_BACK = 52
-DAYS_BACK = 365
+WEEKS_BACK = 14
+DAYS_BACK = 28
 
 
 def get_completed(**kwargs):
@@ -42,7 +42,7 @@ def get_aht(**kwargs):
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(aht=Avg(F("completed_at") - F("assigned_at")))
     aht = result["aht"]
-    return aht if aht else 0
+    return aht / 1000 if aht else 0
 
 
 def get_tat(**kwargs):
@@ -53,7 +53,7 @@ def get_tat(**kwargs):
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(tat=Avg(F("completed_at") - F("created_at")))
     tat = result["tat"]
-    return tat if tat else 0
+    return tat / 1000 if tat else 0
 
 
 METRICS = {
