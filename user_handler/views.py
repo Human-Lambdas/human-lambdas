@@ -256,9 +256,7 @@ class SendForgottenPasswordView(APIView):
             expires_at=timezone.now() + timezone.timedelta(15),
         )
 
-        password_link = "{0}/change-password/{1}".format(
-            settings.FRONT_END_BASE_URL, token
-        )
+        password_link = "{0}forgot/{1}".format(settings.FRONT_END_BASE_URL, token)
 
         html_content = get_template("forgottenPassword.html").render(
             {"password_link": password_link}
@@ -539,9 +537,12 @@ class InvitationView(APIView):
                     status=400,
                 )
             if User.objects.filter(email=invite.email).first() is None:
-                new_user = User(email=invite.email, name=request.data["name"])
+                new_user = User(
+                    email=invite.email,
+                    name=request.data["name"],
+                    current_organization_id=invitation_org.id,
+                )
                 new_user.set_password(request.data["password"])
-                new_user.current_organization_id = invitation_org.id
                 new_user.save()
                 invitation_org.add_admin(
                     new_user
