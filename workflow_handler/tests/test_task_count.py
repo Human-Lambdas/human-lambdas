@@ -7,15 +7,14 @@ from rest_framework import status
 from workflow_handler.models import Workflow, Task
 from user_handler.models import Organization
 
+from . import DATA_PATH
+
 
 logger = logging.getLogger(__file__)
 
-_CURRENT_DIR = os.path.dirname(__file__)
-
-
 class TestTaskCount(APITestCase):
     def setUp(self):
-        self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
+        self.file_path = os.path.join(DATA_PATH, "test.csv")
         self.total_rows = 3
         registration_data = {
             "email": "foo@bar.com",
