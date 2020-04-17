@@ -33,7 +33,7 @@ class TestInvite(APITestCase):
         organization.save()
         self.organization = organization
         self.org_id = organization.id
-        organization.user.add(user)
+        organization.add_admin(user)
 
         self.existing_recipient, time = (
             "lambda@sigma.com",
@@ -66,7 +66,7 @@ class TestInvite(APITestCase):
     def test_invitation_post_call_new_user(self):
         recipient = "new@user.com"
         _ = self.client.post(
-            "/v1/users/invite", {"emails": recipient, "organization_id": self.org_id,},
+            "/v1/users/invite", {"emails": recipient, "organization_id": self.org_id},
         )
 
         token = hash(str(recipient) + str(self.org_id) + str(datetime.datetime.now()))
@@ -92,7 +92,7 @@ class TestInvite(APITestCase):
         new_user.save()
         _ = self.client.post(
             "/v1/users/invite",
-            {"emails": "new@user.com", "organization_id": self.org_id,},
+            {"emails": "new@user.com", "organization_id": self.org_id},
         )
         token = "s8ni3fisme03msi0s3emimc"
         new_invite = Invitation(
@@ -113,7 +113,7 @@ class TestInvite(APITestCase):
     def test_invitation_expiration_30_days(self):
         _ = self.client.post(
             "/v1/users/invite",
-            {"emails": self.existing_recipient, "organization_id": self.org_id,},
+            {"emails": self.existing_recipient, "organization_id": self.org_id},
         )
 
         token = hash(
@@ -143,7 +143,7 @@ class TestInvite(APITestCase):
     def test_invitation_post_call_already_joined_org(self):
         _ = self.client.post(
             "/v1/users/invite",
-            {"emails": self.existing_recipient, "organization_id": self.org_id,},
+            {"emails": self.existing_recipient, "organization_id": self.org_id},
         )
         response = self.client.post(
             "/v1/users/invitation/{0}".format(self.token),
@@ -154,3 +154,60 @@ class TestInvite(APITestCase):
             "this organization has already been joined",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_invitation_post_deletes_invites_after_new_user(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        recipient = "new@user.com"
+        _ = self.client.post(
+            "/v1/users/invite", {"emails": recipient, "organization_id": self.org_id},
+        )
+
+        token = hash(str(recipient) + str(self.org_id) + str(datetime.datetime.now()))
+
+        new_user_invite = Invitation(
+            email=recipient,
+            organization=self.organization,
+            invited_by=self.user,
+            token=token,
+            expires_at=make_aware(datetime.datetime.now() + datetime.timedelta(30)),
+        )
+        new_user_invite.save()
+
+        response = self.client.post(
+            "/v1/users/invitation/{0}".format(token),
+            {"name": "sean", "password": "foowordbar"},
+        )
+        self.assertEqual(response.data["message"], "Your account has been created!")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.get("/v1/orgs/{0}/invite".format(self.org_id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for invite in response.data["invited_users"]:
+            self.assertNotEqual(invite["email"], recipient)
+
+    def test_invitation_post_deletes_invites_after_existing_user(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        new_user = User(email="new@user.com")
+        new_user.save()
+        _ = self.client.post(
+            "/v1/users/invite",
+            {"emails": "new@user.com", "organization_id": self.org_id},
+        )
+        token = "s8ni3fisme03msi0s3emimc"
+        new_invite = Invitation(
+            email="new@user.com",
+            organization=self.organization,
+            invited_by=self.user,
+            token=token,
+            expires_at=make_aware(datetime.datetime.now() + datetime.timedelta(30)),
+        )
+        new_invite.save()
+        response = self.client.post(
+            "/v1/users/invitation/{0}".format(token),
+            {"name": "sean", "password": "foowordbar"},
+        )
+        self.assertEqual(response.data["message"], "Success!")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get("/v1/orgs/{0}/invite".format(self.org_id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for invite in response.data["invited_users"]:
+            self.assertNotEqual(invite["email"], "new@user.com")

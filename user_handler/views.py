@@ -547,6 +547,11 @@ class InvitationView(APIView):
                 invitation_org.add_admin(
                     new_user
                 ) if invite.admin else invitation_org.user.add(new_user)
+                invites_to_delete = Invitation.objects.filter(
+                    organization__pk=invitation_org.id, email=invite.email
+                )
+                for invite_to_delete in invites_to_delete:
+                    invite_to_delete.delete()
                 return Response(
                     {
                         "status_code": 201,
@@ -560,6 +565,11 @@ class InvitationView(APIView):
                 invitation_org.add_admin(
                     user
                 ) if invite.admin else invitation_org.user.add(user)
+                invites_to_delete = Invitation.objects.filter(
+                    organization__pk=invitation_org.id, email=invite.email
+                )
+                for invite_to_delete in invites_to_delete:
+                    invite_to_delete.delete()
                 return Response(
                     {"status_code": 200, "message": "Success!", "email": invite.email},
                     status=200,
