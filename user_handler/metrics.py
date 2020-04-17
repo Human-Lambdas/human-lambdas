@@ -29,8 +29,9 @@ def get_pending(**kwargs):
     result = Task.objects.filter(
         Q(workflow__organization=kwargs["organization"])
         & Q(workflow__disabled=False)
-        & Q(created_at__lt=kwargs["end_time"])
-    ).aggregate(pending=Count("status") - Count("status", filter=Q(status="completed")))
+        & Q(created_at__lte=kwargs["end_time"])
+        & Q(Q(completed_at__gt=kwargs["end_time"]) | Q(completed_at=None))
+    ).aggregate(pending=Count("status"))
     return result["pending"]
 
 
