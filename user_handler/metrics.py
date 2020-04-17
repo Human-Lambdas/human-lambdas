@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.utils import timezone
-from django.db.models import Q, Count, F, Avg
+from django.db.models import Q, F, Avg
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task
 
@@ -29,9 +29,10 @@ def get_pending(**kwargs):
     result = Task.objects.filter(
         Q(workflow__organization=kwargs["organization"])
         & Q(workflow__disabled=False)
-        & Q(created_at__lt=kwargs["end_time"])
-    ).aggregate(pending=Count("status") - Count("status", filter=Q(status="completed")))
-    return result["pending"]
+        & Q(created_at__lte=kwargs["end_time"])
+        & Q(Q(completed_at__gt=kwargs["end_time"]) | Q(completed_at=None))
+    ).count()
+    return result
 
 
 def get_aht(**kwargs):
