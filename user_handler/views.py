@@ -497,7 +497,7 @@ class InvitationView(APIView):
             )
             return Response(
                 {
-                    "status_code": 204,
+                    "status_code": 200,
                     "invitation_email": invitation_email,
                     "invitation_org": invitation_org,
                 },
