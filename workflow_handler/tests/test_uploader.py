@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import Workflow, Task
-from workflow_handler.csv2task import validate_keys, process_csv
+from workflow_handler.csv_utils import validate_keys, process_csv
 
 
 logger = logging.getLogger(__file__)
@@ -179,10 +179,10 @@ class TestCSV2Task(TestCase):
             name="example",
             description="description",
             inputs=[
-                {"id": "alpha", "name": "alpha", "type": "text",},
-                {"id": "beta", "name": "beta", "type": "text",},
-                {"id": "gamma", "name": "gamma", "type": "text",},
-                {"id": "delta", "name": "delta", "type": "text",},
+                {"id": "alpha", "name": "alpha", "type": "text"},
+                {"id": "beta", "name": "beta", "type": "text"},
+                {"id": "gamma", "name": "gamma", "type": "text"},
+                {"id": "delta", "name": "delta", "type": "text"},
             ],
             outputs=[{"id": "binary", "name": "binary", "type": "binary"}],
             organization=org,
@@ -208,14 +208,14 @@ class TestCSV2Task(TestCase):
         title_row = next(csv.reader(self.test_csv_file))
         try:
             validate_keys(title_row, self.sample_workflow)
-        except Exception as e:
+        except Exception:
             self.fail("An error has occurred")
 
     def test_validate_keys_extra_columns(self):
         title_row = next(csv.reader(self.test_csv_file_extra_columns))
         try:
             validate_keys(title_row, self.sample_workflow)
-        except Exception as e:
+        except Exception:
             self.fail("An error has occurred")
 
     def test_process_csv(self):

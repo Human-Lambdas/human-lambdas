@@ -11,7 +11,7 @@ from user_handler.models import Organization
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from workflow_handler.csv2task import process_csv
+from workflow_handler.csv_utils import process_csv, task_list_to_csv_string
 from django.db import transaction
 from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
@@ -419,3 +419,32 @@ class GetCompletedTaskView(ListAPIView):
 
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
+
+
+class GetCompletedTaskInternalView(ListAPIView):
+    """
+    Internal API View for getting all the Tasks
+    """
+
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow__in=workflows)
+            & Q(workflow=self.kwargs["workflow_id"])
+            & Q(status="completed")
+        )
+
+    def list(self, request, *args, **kwargs):
+        tasks = get_list_or_404(self.get_queryset())
+        return Response(
+            {"status_code": 200, "completed_tasks": task_list_to_csv_string(tasks)},
+            status=200,
+        )
