@@ -96,17 +96,3 @@ class TestTaskList(APITestCase):
         task = Task.objects.filter(status="completed").first()
         result = task.serialize_hook()
         self.assertEqual(result["id"], task.pk)
-
-    def test_list_completed_task_internal(self):
-        response = self.client.post(
-            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
-        )
-        self.access_token = response.data["access"]
-        self.refresh = response.data["refresh"]
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/completed-internal".format(
-                self.org_id, self.workflow_id
-            )
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
