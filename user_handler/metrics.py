@@ -45,6 +45,7 @@ def get_aht(**kwargs):
     aht = result["aht"]
     return aht / timezone.timedelta(seconds=1) if aht else 0
 
+
 def get_tat(**kwargs):
     result = Task.objects.filter(
         Q(workflow__organization=kwargs["organization"])
