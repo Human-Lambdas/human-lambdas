@@ -4,6 +4,8 @@ from user_handler.models import User, Organization
 from rest_hooks.signals import hook_event
 from rest_hooks.models import AbstractHook
 
+FORMATTED_INPUT = ["id", "name", "value", "type"]
+
 
 class Workflow(models.Model):
     name = models.CharField(max_length=128)
@@ -38,7 +40,11 @@ class Task(models.Model):
             sender=self.__class__, action="completed", instance=self, user=user
         )
 
-    def serialize_hook(self, *args, **kwargs):
+    def get_formatted_task(self):
+        inputs = [
+            {f_inp: inp_item[f_inp] for f_inp in FORMATTED_INPUT}
+            for inp_item in self.inputs
+        ]
         return {
             "id": self.pk,
             "status": self.status,
@@ -46,9 +52,12 @@ class Task(models.Model):
             "created_at": self.created_at,
             "assigned_to": str(self.assigned_to),
             "workflow_id": self.workflow.pk,
-            "inputs": self.inputs,
+            "inputs": inputs,
             "outputs": self.outputs,
         }
+
+    def serialize_hook(self, *args, **kwargs):
+        return self.get_formatted_task()
 
 
 class WorkflowHook(AbstractHook):

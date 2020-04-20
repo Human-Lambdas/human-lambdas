@@ -188,3 +188,8 @@ class TaskSerializer(serializers.ModelSerializer):
                 return validate_output_structure(OUTPUT_SCHEMA.validate(data))
         except SchemaError as exception_text:
             raise serializers.ValidationError(exception_text)
+
+
+class CompletedTaskSerializer(TaskSerializer):
+    def to_representation(self, instance):
+        return instance.get_formatted_task()
