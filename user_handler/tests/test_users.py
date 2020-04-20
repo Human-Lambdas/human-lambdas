@@ -162,6 +162,12 @@ class TestAPIjwt(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
+    def test_refresh(self):
+        response = self.client.post(
+            "/v1/users/token/refresh", {"refresh": self.refresh}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response)
+
     def test_authorization(self):
         headers = {"Authorization": "Bearer {}".format(self.access_token)}
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)

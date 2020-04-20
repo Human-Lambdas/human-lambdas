@@ -37,9 +37,8 @@ DEBUG = False if os.getenv("DEBUG") == "False" else True
 HOOK_EVENTS = {
     "task.completed": "workflow_handler.Task.completed",
 }
-
 HOOK_CUSTOM_MODEL = "workflow_handler.WorkflowHook"
-
+HOOK_FINDER = "workflow_handler.utils.find_and_fire_hook"
 
 # Application definition
 
@@ -183,7 +182,7 @@ REST_AUTH_SERIALIZERS = {
 REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "user_handler.serializers.UserCreateSerializer",
 }
-os.environ.get("SENDGRID_API_KEY")
+
 LOGGING = {
     "version": 1,
     "handlers": {"console": {"level": "DEBUG", "class": "logging.StreamHandler"}},
@@ -225,3 +224,5 @@ if LOCAL_IP and not DEBUG:
     ALLOWED_HOSTS.append(LOCAL_IP)
 
 TASK_EXPIRATION_MIN = 60  # Minutes
+
+SEGMENT_KEY = os.environ.get("SEGMENT_KEY")

@@ -29,6 +29,7 @@ services:
       SENTRY_PROJECT: ${SENTRY_PROJECT}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
       APP_URL: ${APP_URL}
+      SEGMENT_KEY: ${SEGMENT_KEY}
     volumes:
       - .:/code
     ports:

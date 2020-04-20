@@ -3,6 +3,7 @@ import logging
 from rest_framework import serializers
 
 from .models import User, Organization
+from .utils import register_events
 
 logger = logging.getLogger(__file__)
 
@@ -42,16 +43,21 @@ class UserSerializer(serializers.ModelSerializer):
         user_obj.set_password(password)
         user_obj.save()
         organization_obj = Organization.objects.filter(name=organization_name)
-        if organization_obj.exists():
+        existing_org = organization_obj.exists()
+        if existing_org:
             organization_obj = organization_obj.first()
         else:
             organization_obj = Organization(name=organization_name)
             organization_obj.save()
+
         organization_obj.user.add(user_obj)
         if is_admin:
             organization_obj.admin.add(user_obj)
         user_obj.current_organization_id = organization_obj.pk
         user_obj.save()
+
+        register_events(user_obj, organization_obj, existing_org)
+
         return user_obj
 
     def update(self, instance, validated_data):

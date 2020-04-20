@@ -17,9 +17,11 @@ from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
+import analytics
 
 from .serializers import WorkflowSerializer, TaskSerializer
 from .models import Workflow, Task
+from .utils import sync_workflow_task
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -207,6 +209,7 @@ class RUDTaskView(RetrieveUpdateAPIView):
         workflow = Workflow.objects.get(id=self.kwargs["workflow_id"])
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
+        sync_workflow_task(workflow, obj)
         task = self.serializer_class(obj).data
         task["status_code"] = 200
         return Response(task, status=200)
@@ -239,6 +242,7 @@ class NextTaskView(APIView):
             queryset.filter(status="assigned").filter(assigned_to=request.user).first()
         )
         if obj:
+            sync_workflow_task(workflow, obj)
             task = self.serializer_class(obj).data
             task["status_code"] = 200
             return Response(task, status=200)
@@ -246,15 +250,23 @@ class NextTaskView(APIView):
         # 2 get assigned to someone else and expired
         with transaction.atomic():
             obj = queryset.select_for_update().filter(status="assigned").first()
-            if obj and timezone.now() - obj.assigned_at > timezone.timedelta(
-                minutes=settings.TASK_EXPIRATION_MIN
+            if (
+                obj
+                and obj.assigned_at
+                and timezone.now() - obj.assigned_at
+                > timezone.timedelta(minutes=settings.TASK_EXPIRATION_MIN)
             ):
                 obj.assigned_to = request.user
                 obj.assigned_at = timezone.now()
                 obj.save()
+                sync_workflow_task(workflow, obj)
                 task = self.serializer_class(obj).data
                 task["status_code"] = 200
                 return Response(task, status=200)
+            elif obj and not obj.assigned_at:
+                # temporary fix for tasks which are assigned but do not have assigned_at
+                obj.assigned_at = timezone.now()
+                obj.save()
 
         # 3 get first pending
         with transaction.atomic():
@@ -265,6 +277,7 @@ class NextTaskView(APIView):
             obj.assigned_to = request.user
             obj.assigned_at = timezone.now()
             obj.save()
+            sync_workflow_task(workflow, obj)
             workflow.n_tasks = F("n_tasks") - 1
             workflow.save()
             task = self.serializer_class(obj).data
@@ -293,7 +306,7 @@ class CreateTaskView(CreateAPIView):
         )
 
     def post(self, request, *args, **kwargs):
-        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
+        workflow = Workflow.objects.filter(id=kwargs["workflow_id"]).first()
         if not workflow:
             return Response(
                 {
@@ -307,6 +320,12 @@ class CreateTaskView(CreateAPIView):
                     ],
                 },
                 status=404,
+            )
+        if not settings.DEBUG:
+            analytics.track(
+                request.user.pk,
+                "Task Create Attempt",
+                {"workflow_id": workflow.id, "source": "API"},
             )
         request.data["outputs"] = workflow.outputs
         if "inputs" not in request.data or not request.data["inputs"]:
@@ -337,6 +356,12 @@ class CreateTaskView(CreateAPIView):
             task_input.update(workflow_input)
         workflow.n_tasks = F("n_tasks") + 1
         workflow.save()
+        if not settings.DEBUG:
+            analytics.track(
+                request.user.pk,
+                "Task Create Success",
+                {"workflow_id": workflow.id, "source": "API"},
+            )
         return self.create(request, *args, **kwargs)
 
 

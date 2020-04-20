@@ -20,7 +20,7 @@ TASK_INPUT_SCHEMA = Schema(
             "name": And(str, len),
             "type": Or("text", "image"),
             Optional("layout"): dict,
-            "value": And(str, len),
+            "value": str,
         }
     ],
     ignore_extra_keys=True,
@@ -45,8 +45,11 @@ UPDATE_OUTPUT_SCHEMA = Schema(
     [
         {
             "id": And(str, len),
+            "name": And(str, len),
+            "type": Or("binary", "text", "single-selection", "multiple-selection"),
             Or("binary", "text", "single-selection", "multiple-selection"): {
-                "value": Or(bool, And(str, len), And(list, len))
+                "value": Or(bool, And(str, len), And(list, len)),
+                Optional("options"): list,
             },
         }
     ],
