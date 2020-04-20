@@ -181,8 +181,14 @@ class TestComplexMetrics(APITestCase):
         self.assertTrue(all(["tat" in idata for idata in response.data]))
         self.assertTrue(all(["completed" in idata for idata in response.data]))
         self.assertEqual(response.data[0]["completed"], 1)
-        self.assertEqual(response.data[0]["aht"], (completed_at - assigned_at) / 1000)
-        self.assertEqual(response.data[0]["tat"], (completed_at - created_at) / 1000)
+        self.assertEqual(
+            response.data[0]["aht"],
+            (completed_at - assigned_at) / timezone.timedelta(seconds=1),
+        )
+        self.assertEqual(
+            response.data[0]["tat"],
+            (completed_at - created_at) / timezone.timedelta(seconds=1),
+        )
         for idata in response.data[1:]:
             self.assertEqual(idata["aht"], 0)
             self.assertEqual(idata["tat"], 0)
