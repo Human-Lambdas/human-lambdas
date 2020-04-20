@@ -50,13 +50,14 @@ def task_list_to_csv_string(task_list):
     writer = csv.writer(empty_csv, quoting=csv.QUOTE_NONNUMERIC)
     title_passed = False
     for task in task_list:
+        print(task.__dict__)
         if title_passed is True:
-            # writer.writerow([1, 2])
             writer.writerow([task_input["value"] for task_input in task.inputs])
         else:
             writer.writerow([task_input["id"] for task_input in task.inputs])
+            writer.writerow([task_input["value"] for task_input in task.inputs])
             title_passed = True
     print(empty_csv.getvalue())
     string_to_return = repr(empty_csv.getvalue())
-    print(string_to_return)
+    # print(string_to_return)
     return string_to_return

@@ -4,13 +4,14 @@ import os
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from workflow_handler.models import Workflow, Task
+from workflow_handler.models import Workflow
 from user_handler.models import Organization
 
 from . import DATA_PATH
 
 
 logger = logging.getLogger(__file__)
+
 
 class TestTaskCount(APITestCase):
     def setUp(self):
@@ -106,3 +107,45 @@ class TestTaskCount(APITestCase):
             n_tasks += 1
             workflow = Workflow.objects.get(pk=self.workflow_id)
             self.assertEqual(workflow.n_tasks, n_tasks)
+
+    def test_list_completed_task_internal(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        for i in range(self.total_rows):
+            response = self.client.get(
+                "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                    self.org_id, self.workflow_id
+                ),
+                format="json",
+            )
+            print(response.data)
+            output_list = [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "value": "{0}".format(i),  # output_value,
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ]
+            task = response.data
+            response_data = {"inputs": task["inputs"], "outputs": output_list}
+            response = self.client.patch(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                    self.org_id, self.workflow_id, task["id"]
+                ),
+                data=response_data,
+                format="json",
+            )
+
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/{}/tasks/completed-internal".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
