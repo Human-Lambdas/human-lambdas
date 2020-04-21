@@ -19,7 +19,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
 import analytics
 
-from .serializers import WorkflowSerializer, TaskSerializer
+from .serializers import WorkflowSerializer, TaskSerializer, CompletedTaskSerializer
 from .models import Workflow, Task
 from .utils import sync_workflow_task
 
@@ -398,7 +398,7 @@ class GetCompletedTaskView(ListAPIView):
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = TaskSerializer
+    serializer_class = CompletedTaskSerializer
     pagination_class = TaskPagination
 
     def get_queryset(self):
