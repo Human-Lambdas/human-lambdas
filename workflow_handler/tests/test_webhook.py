@@ -273,11 +273,10 @@ class TestWebhookTasks(APITestCase):
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
 
     def test_find_and_fire(self):
-        workflow  = Workflow.objects.get(pk=self.workflow_id)
+        workflow = Workflow.objects.get(pk=self.workflow_id)
         filters = {
             "event": "task.completed",
             "workflow": workflow,
         }
         hooks = WorkflowHook.objects.filter(**filters)
         self.assertEqual(len(hooks), 1)
-
