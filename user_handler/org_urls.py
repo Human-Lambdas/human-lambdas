@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from .metrics import OrganizationMetrics, WorkflowMetrics
+from .metrics import OrganizationMetrics, WorkflowMetrics, WorkerMetrics
 from .views import (
     GetOrganizationView,
     ListOrganizationView,
@@ -28,6 +28,11 @@ urlpatterns = [
     #  metrics
     path("/<int:org_id>/metrics", OrganizationMetrics.as_view(), name="org-metrics"),
     path(
-        "/<int:org_id>/metrics/workflows", WorkflowMetrics.as_view(), name="org-metrics"
+        "/<int:org_id>/metrics/workflows",
+        WorkflowMetrics.as_view(),
+        name="workflow-metrics",
+    ),
+    path(
+        "/<int:org_id>/metrics/workers", WorkerMetrics.as_view(), name="worker-metrics"
     ),
 ]

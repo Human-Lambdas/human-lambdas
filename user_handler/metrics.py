@@ -8,7 +8,7 @@ from django.db.models import Q, F, Avg
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
 
-from .models import Organization
+from .models import Organization, User
 
 MONTHS_BACK = 12
 WEEKS_BACK = 14
@@ -21,6 +21,8 @@ def process_kwargs(**kwargs):
     )
     if "workflow" in kwargs:
         query = query & Q(workflow=kwargs["workflow"])
+    if "worker" in kwargs:
+        query = query & Q(assigned_to=kwargs["worker"])
     return query
 
 
@@ -192,6 +194,52 @@ class WorkflowMetrics(APIView):
                             end_time=end_time,
                             organization=organization,
                             workflow=workflow,
+                        )
+                    except KeyError:
+                        continue
+                data.append(data_dict)
+        return Response(data, status=200)
+
+
+class WorkerMetrics(APIView):
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
+
+    def get_queryset(self):
+        return Organization.objects.filter(pk=self.kwargs["org_id"])
+
+    def validate_data(self, data):
+        pass
+
+    def process_time_range(self, range_name):
+        return _TIME_RANGE_DICT[range_name]()
+
+    def get(self, request, *args, **kwargs):
+        self.validate_data(request.data)
+        data = []
+        qtype = request.query_params.get("type")
+        worker_id = request.query_params.get("worker_id")
+        if qtype in METRICS:
+            organization = self.get_queryset().first()
+            if worker_id:
+                users = User.objects.filter(
+                    organization=organization, pk=worker_id,
+                ).all()
+            else:
+                users = User.objects.filter(organization=organization).all()
+            time_ranges = self.process_time_range(request.query_params.get("range"))
+            for start_time, end_time in time_ranges:
+                data_dict = {
+                    "date": end_time,
+                    "id": uuid4().hex,
+                }
+
+                for user in users:
+                    try:
+                        data_dict[user.pk] = METRICS[qtype](
+                            start_time=start_time,
+                            end_time=end_time,
+                            organization=organization,
+                            worker=user,
                         )
                     except KeyError:
                         continue
