@@ -169,8 +169,15 @@ class WorkflowMetrics(APIView):
         self.validate_data(request.data)
         data = []
         qtype = request.query_params.get("type")
+        workflow_id = request.query_params.get("workflow_id")
         if qtype in METRICS:
             organization = self.get_queryset().first()
+            if workflow_id:
+                workflows = Workflow.objects.filter(
+                    organization=organization, pk=workflow_id,
+                ).all()
+            else:
+                workflows = Workflow.objects.filter(organization=organization).all()
             time_ranges = self.process_time_range(request.query_params.get("range"))
             for start_time, end_time in time_ranges:
                 data_dict = {
@@ -178,9 +185,7 @@ class WorkflowMetrics(APIView):
                     "id": uuid4().hex,
                 }
 
-                for workflow in Workflow.objects.filter(
-                    organization=organization
-                ).all():
+                for workflow in workflows:
                     try:
                         data_dict[workflow.name] = METRICS[qtype](
                             start_time=start_time,
