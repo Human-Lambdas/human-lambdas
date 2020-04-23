@@ -527,7 +527,11 @@ class TestWorkflowMetrics(APITestCase):
     def test_workflow_all_ids(self):
         wf1_name = Workflow.objects.get(pk=self.workflow_id).name
         wf2_name = Workflow.objects.get(pk=self.workflow_id2).name
-        data = {"range": "monthly", "type": "pending", "workflow_id": [self.workflow_id, self.workflow_id2]}
+        data = {
+            "range": "monthly",
+            "type": "pending",
+            "workflow_id": [self.workflow_id, self.workflow_id2],
+        }
         response = self.client.get(
             "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
@@ -611,18 +615,7 @@ class TestWorkermetrics(APITestCase):
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-    def test_workflow_pending(self):
-        data = {
-            "range": "monthly",
-            "type": "pending",
-        }
-        response = self.client.get(
-            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 12 + 1)
-
-    def test_workflow_complex(self):
+    def test_worker_complex(self):
         worker = User.objects.get(email="foo@bar.com")
         assigned_at = timezone.now() - timezone.timedelta(days=7)
         completed_at = timezone.now() - timezone.timedelta(minutes=1)
@@ -664,25 +657,9 @@ class TestWorkermetrics(APITestCase):
         for idata in response.data[1:]:
             self.assertEqual(idata[worker.pk], 0)
 
-        data = {
-            "range": "monthly",
-            "type": "tat",
-        }
-        response = self.client.get(
-            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.assertEqual(
-            response.data[0][worker.pk],
-            (completed_at - created_at) / timezone.timedelta(seconds=1),
-        )
-        for idata in response.data[1:]:
-            self.assertEqual(idata[worker.pk], 0)
-
     def test_workflow_id(self):
         worker = User.objects.get(email="foo@bar.com")
-        data = {"range": "monthly", "type": "pending", "worker_id": worker.pk}
+        data = {"range": "monthly", "type": "completed", "worker_id": worker.pk}
         response = self.client.get(
             "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
         )

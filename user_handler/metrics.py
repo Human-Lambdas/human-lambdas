@@ -75,6 +75,11 @@ METRICS = {
     "tat": get_tat,
 }
 
+WORKER_METRICS = {
+    "completed": get_completed,
+    "aht": get_aht,
+}
+
 
 def process_monthly():
     end = timezone.now()
@@ -218,7 +223,7 @@ class WorkerMetrics(APIView):
         data = []
         qtype = request.query_params.get("type")
         worker_id = request.query_params.get("worker_id")
-        if qtype in METRICS:
+        if qtype in WORKER_METRICS:
             organization = self.get_queryset().first()
             if worker_id:
                 users = User.objects.filter(
@@ -235,7 +240,7 @@ class WorkerMetrics(APIView):
 
                 for user in users:
                     try:
-                        data_dict[user.pk] = METRICS[qtype](
+                        data_dict[user.pk] = WORKER_METRICS[qtype](
                             start_time=start_time,
                             end_time=end_time,
                             organization=organization,
