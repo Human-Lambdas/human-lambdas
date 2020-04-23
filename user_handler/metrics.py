@@ -222,12 +222,12 @@ class WorkerMetrics(APIView):
         self.validate_data(request.data)
         data = []
         qtype = request.query_params.get("type")
-        worker_id = request.query_params.get("worker_id")
+        worker_id = request.query_params.getlist("worker_id")
         if qtype in WORKER_METRICS:
             organization = self.get_queryset().first()
             if worker_id:
                 users = User.objects.filter(
-                    organization=organization, pk=worker_id,
+                    organization=organization, pk__in=worker_id,
                 ).all()
             else:
                 users = User.objects.filter(organization=organization).all()
