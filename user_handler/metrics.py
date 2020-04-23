@@ -171,12 +171,12 @@ class WorkflowMetrics(APIView):
         self.validate_data(request.data)
         data = []
         qtype = request.query_params.get("type")
-        workflow_id = request.query_params.get("workflow_id")
+        workflow_ids = request.query_params.getlist("workflow_id")
         if qtype in METRICS:
             organization = self.get_queryset().first()
-            if workflow_id:
+            if workflow_ids:
                 workflows = Workflow.objects.filter(
-                    organization=organization, pk=workflow_id,
+                    organization=organization, pk__in=workflow_ids,
                 ).all()
             else:
                 workflows = Workflow.objects.filter(organization=organization).all()

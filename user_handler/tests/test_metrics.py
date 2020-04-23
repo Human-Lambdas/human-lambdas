@@ -524,8 +524,36 @@ class TestWorkflowMetrics(APITestCase):
             self.assertIn(wf1_name, idata)
             self.assertNotIn(wf2_name, idata)
 
+    def test_workflow_all_ids(self):
+        wf1_name = Workflow.objects.get(pk=self.workflow_id).name
+        wf2_name = Workflow.objects.get(pk=self.workflow_id2).name
+        data = {"range": "monthly", "type": "pending", "workflow_id": [self.workflow_id, self.workflow_id2]}
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 12 + 1)
+        for idata in response.data:
+            self.assertIn(wf1_name, idata)
+            self.assertIn(wf2_name, idata)
 
-class TestWorkflowMetrics(APITestCase):
+    def test_only_non_disabled_workflows(self):
+        workflow = Workflow.objects.get(pk=self.workflow_id2)
+        workflow.disabled = True
+        workflow.save()
+
+        data = {
+            "range": "monthly",
+            "type": ["pending"],
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["pending"], 3)
+
+
+class TestWorkermetrics(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(DATA_PATH, "test.csv")
         self.total_rows = 3
