@@ -240,7 +240,7 @@ class WorkerMetrics(APIView):
 
                 for user in users:
                     try:
-                        data_dict[user.pk] = WORKER_METRICS[qtype](
+                        data_dict[user.name] = WORKER_METRICS[qtype](
                             start_time=start_time,
                             end_time=end_time,
                             organization=organization,

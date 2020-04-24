@@ -638,7 +638,7 @@ class TestWorkermetrics(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 12 + 1)
         self.assertEqual(
-            response.data[0][worker.pk], 1,
+            response.data[0][worker.name], 1,
         )
 
         data = {
@@ -651,11 +651,11 @@ class TestWorkermetrics(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(
-            response.data[0][worker.pk],
+            response.data[0][worker.name],
             (completed_at - assigned_at) / timezone.timedelta(seconds=1),
         )
         for idata in response.data[1:]:
-            self.assertEqual(idata[worker.pk], 0)
+            self.assertEqual(idata[worker.name], 0)
 
     def test_workflow_id(self):
         worker = User.objects.get(email="foo@bar.com")
@@ -666,4 +666,4 @@ class TestWorkermetrics(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 12 + 1)
         for idata in response.data:
-            self.assertIn(worker.pk, idata)
+            self.assertIn(worker.name, idata)
