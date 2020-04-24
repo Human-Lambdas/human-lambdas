@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from .metrics import OrgsAbsolute
+from .metrics import OrganizationMetrics, WorkflowMetrics, WorkerMetrics
 from .views import (
     GetOrganizationView,
     ListOrganizationView,
@@ -26,5 +26,13 @@ urlpatterns = [
     path("/<int:org_id>/workflows", include("workflow_handler.urls")),
     path("/<int:org_id>/invite", SendInviteView.as_view(), name="send-invite"),
     #  metrics
-    path("/<int:org_id>/metrics", OrgsAbsolute.as_view(), name="org-metrics"),
+    path("/<int:org_id>/metrics", OrganizationMetrics.as_view(), name="org-metrics"),
+    path(
+        "/<int:org_id>/metrics/workflows",
+        WorkflowMetrics.as_view(),
+        name="workflow-metrics",
+    ),
+    path(
+        "/<int:org_id>/metrics/workers", WorkerMetrics.as_view(), name="worker-metrics"
+    ),
 ]
