@@ -1,7 +1,7 @@
 name: Deploy-Staging-AWS-ElasticBeanstalk
 env:
   EB_APPLICATION_NAME       : "human-lambdas"
-  EB_ENVIRONMENT_NAME       : "human-lambdas-stg-api"
+  EB_ENVIRONMENT_NAME       : "human-lambdas-api-stg"
   AWS_REGION_NAME           : "eu-west-2"
   DEPLOY_PACKAGE_NAME       : "hl-rest-api-${{ github.sha }}.zip"
   EB_PACKAGE_S3_BUCKET_NAME : "hl-rest-api-bundles-stg"
