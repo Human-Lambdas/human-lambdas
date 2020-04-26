@@ -6,19 +6,30 @@ from rest_framework.response import Response
 from django.utils import timezone
 from django.db.models import Q, F, Avg
 from user_handler.permissions import IsOrgAdmin
-from workflow_handler.models import Task
+from workflow_handler.models import Task, Workflow
 
-from .models import Organization
+from .models import Organization, User
 
 MONTHS_BACK = 12
 WEEKS_BACK = 14
 DAYS_BACK = 28
 
 
+def process_kwargs(**kwargs):
+    query = Q(workflow__organization=kwargs["organization"]) & Q(
+        workflow__disabled=False
+    )
+    if "workflow" in kwargs:
+        query = query & Q(workflow=kwargs["workflow"])
+    if "worker" in kwargs:
+        query = query & Q(assigned_to=kwargs["worker"])
+    return query
+
+
 def get_completed(**kwargs):
+    basic_query = process_kwargs(**kwargs)
     tasks = Task.objects.filter(
-        Q(workflow__organization=kwargs["organization"])
-        & Q(workflow__disabled=False)
+        basic_query
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     )
@@ -26,9 +37,9 @@ def get_completed(**kwargs):
 
 
 def get_pending(**kwargs):
+    basic_query = process_kwargs(**kwargs)
     result = Task.objects.filter(
-        Q(workflow__organization=kwargs["organization"])
-        & Q(workflow__disabled=False)
+        basic_query
         & Q(created_at__lte=kwargs["end_time"])
         & Q(Q(completed_at__gt=kwargs["end_time"]) | Q(completed_at=None))
     ).count()
@@ -36,9 +47,9 @@ def get_pending(**kwargs):
 
 
 def get_aht(**kwargs):
+    basic_query = process_kwargs(**kwargs)
     result = Task.objects.filter(
-        Q(workflow__organization=kwargs["organization"])
-        & Q(workflow__disabled=False)
+        basic_query
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(aht=Avg(F("completed_at") - F("assigned_at")))
@@ -47,9 +58,9 @@ def get_aht(**kwargs):
 
 
 def get_tat(**kwargs):
+    basic_query = process_kwargs(**kwargs)
     result = Task.objects.filter(
-        Q(workflow__organization=kwargs["organization"])
-        & Q(workflow__disabled=False)
+        basic_query
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(tat=Avg(F("completed_at") - F("created_at")))
@@ -62,6 +73,11 @@ METRICS = {
     "pending": get_pending,
     "aht": get_aht,
     "tat": get_tat,
+}
+
+WORKER_METRICS = {
+    "completed": get_completed,
+    "aht": get_aht,
 }
 
 
@@ -107,7 +123,7 @@ _TIME_RANGE_DICT = {
 }
 
 
-class OrgsAbsolute(APIView):
+class OrganizationMetrics(APIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
 
     def get_queryset(self):
@@ -137,6 +153,98 @@ class OrgsAbsolute(APIView):
                             start_time=start_time,
                             end_time=end_time,
                             organization=organization,
+                        )
+                    except KeyError:
+                        continue
+                data.append(data_dict)
+        return Response(data, status=200)
+
+
+class WorkflowMetrics(APIView):
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
+
+    def get_queryset(self):
+        return Organization.objects.filter(pk=self.kwargs["org_id"])
+
+    def validate_data(self, data):
+        pass
+
+    def process_time_range(self, range_name):
+        return _TIME_RANGE_DICT[range_name]()
+
+    def get(self, request, *args, **kwargs):
+        self.validate_data(request.data)
+        data = []
+        qtype = request.query_params.get("type")
+        workflow_ids = request.query_params.getlist("workflow_id")
+        if qtype in METRICS:
+            organization = self.get_queryset().first()
+            if workflow_ids:
+                workflows = Workflow.objects.filter(
+                    organization=organization, pk__in=workflow_ids,
+                ).all()
+            else:
+                workflows = Workflow.objects.filter(organization=organization).all()
+            time_ranges = self.process_time_range(request.query_params.get("range"))
+            for start_time, end_time in time_ranges:
+                data_dict = {
+                    "date": end_time,
+                    "id": uuid4().hex,
+                }
+
+                for workflow in workflows:
+                    try:
+                        data_dict[workflow.name] = METRICS[qtype](
+                            start_time=start_time,
+                            end_time=end_time,
+                            organization=organization,
+                            workflow=workflow,
+                        )
+                    except KeyError:
+                        continue
+                data.append(data_dict)
+        return Response(data, status=200)
+
+
+class WorkerMetrics(APIView):
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
+
+    def get_queryset(self):
+        return Organization.objects.filter(pk=self.kwargs["org_id"])
+
+    def validate_data(self, data):
+        pass
+
+    def process_time_range(self, range_name):
+        return _TIME_RANGE_DICT[range_name]()
+
+    def get(self, request, *args, **kwargs):
+        self.validate_data(request.data)
+        data = []
+        qtype = request.query_params.get("type")
+        worker_id = request.query_params.getlist("worker_id")
+        if qtype in WORKER_METRICS:
+            organization = self.get_queryset().first()
+            if worker_id:
+                users = User.objects.filter(
+                    organization=organization, pk__in=worker_id,
+                ).all()
+            else:
+                users = User.objects.filter(organization=organization).all()
+            time_ranges = self.process_time_range(request.query_params.get("range"))
+            for start_time, end_time in time_ranges:
+                data_dict = {
+                    "date": end_time,
+                    "id": uuid4().hex,
+                }
+
+                for user in users:
+                    try:
+                        data_dict[user.name] = WORKER_METRICS[qtype](
+                            start_time=start_time,
+                            end_time=end_time,
+                            organization=organization,
+                            worker=user,
                         )
                     except KeyError:
                         continue

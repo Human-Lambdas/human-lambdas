@@ -163,7 +163,7 @@ class TestComplexMetrics(APITestCase):
         task = Task.objects.first()
         task.status = "completed"
         task.assigned_at = assigned_at
-        task.completed_by = User.objects.get(email="foo@bar.com")
+        task.assigned_to = User.objects.get(email="foo@bar.com")
         task.completed_at = completed_at
         task.created_at = created_at
         task.save()
@@ -194,7 +194,7 @@ class TestComplexMetrics(APITestCase):
             self.assertEqual(idata["tat"], 0)
 
 
-class TestWorkflowMetrics(APITestCase):
+class TestQueryMetrics(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(DATA_PATH, "test.csv")
         self.total_rows = 3
@@ -326,3 +326,344 @@ class TestWorkflowMetrics(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]["pending"], 3)
+
+
+class TestWorkflowMetrics(APITestCase):
+    def setUp(self):
+        self.file_path = os.path.join(DATA_PATH, "test.csv")
+        self.total_rows = 3
+        registration_data = {
+            "email": "foo@bar.com",
+            "password": "foowordbar",
+            "organization": "fooInc",
+            "is_admin": True,
+            "name": "foo",
+        }
+        _ = self.client.post("/v1/users/register", registration_data)
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
+        response = self.client.post(
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
+        )
+        self.access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/v1/users/api-token",)
+        self.token = response.data["token"]
+        workflow_data = {
+            "name": "uploader",
+            "description": "great wf",
+            "inputs": [
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ],
+        }
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        self.workflow_id = response.data["id"]
+        with open(self.file_path) as f:
+            data = {"file": f}
+            response = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(
+                    self.org_id, self.workflow_id
+                ),
+                data=data,
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        workflow_data = {
+            "name": "uploader2",
+            "description": "greater wf",
+            "inputs": [
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ],
+        }
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        self.workflow_id2 = response.data["id"]
+        with open(self.file_path) as f:
+            data = {"file": f}
+            response = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(
+                    self.org_id, self.workflow_id2
+                ),
+                data=data,
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+    def test_workflow_pending(self):
+        wf_names = [
+            Workflow.objects.get(pk=self.workflow_id).name,
+            Workflow.objects.get(pk=self.workflow_id2).name,
+        ]
+        data = {
+            "range": "monthly",
+            "type": "pending",
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 12 + 1)
+        for idata in response.data:
+            for wf_name in wf_names:
+                self.assertIn(wf_name, idata)
+
+    def test_workflow_complex(self):
+        wf1 = Workflow.objects.get(pk=self.workflow_id)
+        wf2 = Workflow.objects.get(pk=self.workflow_id2)
+        wf1_name = wf1.name
+        wf2_name = wf2.name
+        assigned_at = timezone.now() - timezone.timedelta(days=7)
+        completed_at = timezone.now() - timezone.timedelta(minutes=1)
+        created_at = assigned_at - timezone.timedelta(days=1)
+        task = Task.objects.filter(workflow=wf1).first()
+        task.status = "completed"
+        task.assigned_at = assigned_at
+        task.assigned_to = User.objects.get(email="foo@bar.com")
+        task.completed_at = completed_at
+        task.created_at = created_at
+        task.save()
+
+        data = {
+            "range": "monthly",
+            "type": ["completed"],
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 12 + 1)
+        self.assertEqual(
+            response.data[0][wf1_name], 1,
+        )
+        self.assertEqual(response.data[0][wf2_name], 0)
+        for idata in response.data[1:]:
+            self.assertEqual(idata[wf1_name], 0)
+            self.assertEqual(idata[wf2_name], 0)
+
+        data = {
+            "range": "monthly",
+            "type": "aht",
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(
+            response.data[0][wf1_name],
+            (completed_at - assigned_at) / timezone.timedelta(seconds=1),
+        )
+        self.assertEqual(response.data[0][wf2_name], 0)
+        for idata in response.data[1:]:
+            self.assertEqual(idata[wf1_name], 0)
+            self.assertEqual(idata[wf2_name], 0)
+
+        data = {
+            "range": "monthly",
+            "type": "tat",
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(
+            response.data[0][wf1_name],
+            (completed_at - created_at) / timezone.timedelta(seconds=1),
+        )
+        self.assertEqual(response.data[0][wf2_name], 0)
+        for idata in response.data[1:]:
+            self.assertEqual(idata[wf1_name], 0)
+            self.assertEqual(idata[wf2_name], 0)
+
+    def test_workflow_id(self):
+        wf1_name = Workflow.objects.get(pk=self.workflow_id).name
+        wf2_name = Workflow.objects.get(pk=self.workflow_id2).name
+        data = {"range": "monthly", "type": "pending", "workflow_id": self.workflow_id}
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 12 + 1)
+        for idata in response.data:
+            self.assertIn(wf1_name, idata)
+            self.assertNotIn(wf2_name, idata)
+
+    def test_workflow_all_ids(self):
+        wf1_name = Workflow.objects.get(pk=self.workflow_id).name
+        wf2_name = Workflow.objects.get(pk=self.workflow_id2).name
+        data = {
+            "range": "monthly",
+            "type": "pending",
+            "workflow_id": [self.workflow_id, self.workflow_id2],
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 12 + 1)
+        for idata in response.data:
+            self.assertIn(wf1_name, idata)
+            self.assertIn(wf2_name, idata)
+
+    def test_only_non_disabled_workflows(self):
+        workflow = Workflow.objects.get(pk=self.workflow_id2)
+        workflow.disabled = True
+        workflow.save()
+
+        data = {
+            "range": "monthly",
+            "type": ["pending"],
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["pending"], 3)
+
+
+class TestWorkermetrics(APITestCase):
+    def setUp(self):
+        self.file_path = os.path.join(DATA_PATH, "test.csv")
+        self.total_rows = 3
+        registration_data = {
+            "email": "foo@bar.com",
+            "password": "foowordbar",
+            "organization": "fooInc",
+            "is_admin": True,
+            "name": "foo",
+        }
+        _ = self.client.post("/v1/users/register", registration_data)
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
+        response = self.client.post(
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
+        )
+        self.access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/v1/users/api-token",)
+        self.token = response.data["token"]
+        workflow_data = {
+            "name": "uploader",
+            "description": "great wf",
+            "inputs": [
+                {"id": "Alpha", "name": "alpha", "type": "text"},
+                {"id": "Beta", "name": "beta", "type": "text"},
+                {"id": "Gamma", "name": "gamma", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "options": [
+                            {"id": "foo2", "name": "foo2"},
+                            {"id": "bar2", "name": "bar2"},
+                        ],
+                    },
+                }
+            ],
+        }
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        self.workflow_id = response.data["id"]
+        with open(self.file_path) as f:
+            data = {"file": f}
+            response = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(
+                    self.org_id, self.workflow_id
+                ),
+                data=data,
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+    def test_worker_complex(self):
+        worker = User.objects.get(email="foo@bar.com")
+        assigned_at = timezone.now() - timezone.timedelta(days=7)
+        completed_at = timezone.now() - timezone.timedelta(minutes=1)
+        created_at = assigned_at - timezone.timedelta(days=1)
+        task = Task.objects.first()
+        task.status = "completed"
+        task.assigned_at = assigned_at
+        task.assigned_to = worker
+        task.completed_at = completed_at
+        task.created_at = created_at
+        task.save()
+
+        data = {
+            "range": "monthly",
+            "type": ["completed"],
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 12 + 1)
+        self.assertEqual(
+            response.data[0][worker.name], 1,
+        )
+
+        data = {
+            "range": "monthly",
+            "type": "aht",
+        }
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(
+            response.data[0][worker.name],
+            (completed_at - assigned_at) / timezone.timedelta(seconds=1),
+        )
+        for idata in response.data[1:]:
+            self.assertEqual(idata[worker.name], 0)
+
+    def test_workflow_id(self):
+        worker = User.objects.get(email="foo@bar.com")
+        data = {"range": "monthly", "type": "completed", "worker_id": worker.pk}
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 12 + 1)
+        for idata in response.data:
+            self.assertIn(worker.name, idata)
