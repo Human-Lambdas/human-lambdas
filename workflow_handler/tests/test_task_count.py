@@ -124,7 +124,7 @@ class TestTaskCount(APITestCase):
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {
-                        "value": "{0}".format(i),  # output_value,
+                        "value": "{0}".format(i),
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
