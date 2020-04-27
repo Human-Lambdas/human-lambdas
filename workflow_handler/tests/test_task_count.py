@@ -117,14 +117,14 @@ class TestTaskCount(APITestCase):
                 ),
                 format="json",
             )
-            print(response.data)
+            value = "foo2" if i % 2 == 0 else "bar2"
             output_list = [
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {
-                        "value": "{0}".format(i),
+                        "value": value,
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -147,5 +147,4 @@ class TestTaskCount(APITestCase):
                 self.org_id, self.workflow_id
             )
         )
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

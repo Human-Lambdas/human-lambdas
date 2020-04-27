@@ -46,8 +46,8 @@ def process_csv(csv_file, workflow):
 
 
 def task_list_to_csv_string(task_list):
-    empty_csv = io.StringIO()
-    writer = csv.writer(empty_csv, quoting=csv.QUOTE_NONNUMERIC)
+    completed_csv = io.StringIO()
+    writer = csv.writer(completed_csv, quoting=csv.QUOTE_NONNUMERIC)
     title_passed = False
     for task in task_list:
         print(task.__dict__)
@@ -55,7 +55,6 @@ def task_list_to_csv_string(task_list):
             # refactor to double list comprehension
             row = [task_input["value"] for task_input in task.inputs]
             for task_output in task.outputs:
-                print(task_output[task_output["type"]])
                 row.append(task_output[task_output["type"]]["value"])
             writer.writerow(row)
         else:
@@ -65,11 +64,9 @@ def task_list_to_csv_string(task_list):
             writer.writerow(row)
             row = [task_input["value"] for task_input in task.inputs]
             for task_output in task.outputs:
-                print(task_output[task_output["type"]])
                 row.append(task_output[task_output["type"]]["value"])
             writer.writerow(row)
             title_passed = True
-    print(empty_csv.getvalue())
-    string_to_return = repr(empty_csv.getvalue())
-    # print(string_to_return)
+    print(completed_csv.getvalue())
+    string_to_return = repr(completed_csv.getvalue())
     return string_to_return
