@@ -78,8 +78,8 @@ class TestMetrics(APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertTrue(all(["pending" in idata for idata in response.data]))
-            self.assertEqual(response.data[0]["pending"], 3)
-            for data in response.data[1:]:
+            self.assertEqual(response.data[-1]["pending"], 3)
+            for data in response.data[:-1]:
                 self.assertEqual(data["pending"], 0)
 
     def test_pending_completed_stats(self):
@@ -180,16 +180,16 @@ class TestComplexMetrics(APITestCase):
         self.assertTrue(all(["aht" in idata for idata in response.data]))
         self.assertTrue(all(["tat" in idata for idata in response.data]))
         self.assertTrue(all(["completed" in idata for idata in response.data]))
-        self.assertEqual(response.data[0]["completed"], 1)
+        self.assertEqual(response.data[-1]["completed"], 1)
         self.assertEqual(
-            response.data[0]["aht"],
+            response.data[-1]["aht"],
             (completed_at - assigned_at) / timezone.timedelta(seconds=1),
         )
         self.assertEqual(
-            response.data[0]["tat"],
+            response.data[-1]["tat"],
             (completed_at - created_at) / timezone.timedelta(seconds=1),
         )
-        for idata in response.data[1:]:
+        for idata in response.data[:-1]:
             self.assertEqual(idata["aht"], 0)
             self.assertEqual(idata["tat"], 0)
 
@@ -325,7 +325,7 @@ class TestQueryMetrics(APITestCase):
             "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[0]["pending"], 3)
+        self.assertEqual(response.data[-1]["pending"], 3)
 
 
 class TestWorkflowMetrics(APITestCase):
@@ -468,28 +468,28 @@ class TestWorkflowMetrics(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["completed"]), 12 + 1)
         self.assertEqual(
-            response.data["completed"][0][wf1_name], 1,
+            response.data["completed"][-1][wf1_name], 1,
         )
-        self.assertEqual(response.data["completed"][0][wf2_name], 0)
-        for idata in response.data["completed"][1:]:
+        self.assertEqual(response.data["completed"][-1][wf2_name], 0)
+        for idata in response.data["completed"][:-1]:
             self.assertEqual(idata[wf1_name], 0)
             self.assertEqual(idata[wf2_name], 0)
 
         self.assertEqual(
-            response.data["aht"][0][wf1_name],
+            response.data["aht"][-1][wf1_name],
             (completed_at - assigned_at) / timezone.timedelta(seconds=1),
         )
-        self.assertEqual(response.data["aht"][0][wf2_name], 0)
-        for idata in response.data["aht"][1:]:
+        self.assertEqual(response.data["aht"][-1][wf2_name], 0)
+        for idata in response.data["aht"][:-1]:
             self.assertEqual(idata[wf1_name], 0)
             self.assertEqual(idata[wf2_name], 0)
 
         self.assertEqual(
-            response.data["tat"][0][wf1_name],
+            response.data["tat"][-1][wf1_name],
             (completed_at - created_at) / timezone.timedelta(seconds=1),
         )
-        self.assertEqual(response.data["tat"][0][wf2_name], 0)
-        for idata in response.data["tat"][1:]:
+        self.assertEqual(response.data["tat"][-1][wf2_name], 0)
+        for idata in response.data["tat"][:-1]:
             self.assertEqual(idata[wf1_name], 0)
             self.assertEqual(idata[wf2_name], 0)
 
@@ -543,7 +543,7 @@ class TestWorkflowMetrics(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertNotIn(disabled_workflow_name, response.data["pending"][0])
-        self.assertEqual(response.data["pending"][0][workflow_name], 3)
+        self.assertEqual(response.data["pending"][-1][workflow_name], 3)
 
 
 class TestWorkermetrics(APITestCase):
@@ -627,7 +627,7 @@ class TestWorkermetrics(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["completed"]), 12 + 1)
         self.assertEqual(
-            response.data["completed"][0][worker.name], 1,
+            response.data["completed"][-1][worker.name], 1,
         )
 
         data = {
@@ -640,10 +640,10 @@ class TestWorkermetrics(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(
-            response.data["aht"][0][worker.name],
+            response.data["aht"][-1][worker.name],
             (completed_at - assigned_at) / timezone.timedelta(seconds=1),
         )
-        for idata in response.data["aht"][1:]:
+        for idata in response.data["aht"][:-1]:
             self.assertEqual(idata[worker.name], 0)
 
     def test_worker_id(self):

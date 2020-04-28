@@ -142,7 +142,7 @@ class OrganizationMetrics(APIView):
         if any([qtype in METRICS for qtype in qtypes]):
             organization = self.get_queryset().first()
             time_ranges = self.process_time_range(request.query_params.get("range"))
-            for start_time, end_time in time_ranges:
+            for start_time, end_time in reversed(time_ranges):
                 data_dict = {
                     "date": end_time,
                     "id": uuid4().hex,
@@ -190,7 +190,7 @@ class WorkflowMetrics(APIView):
             result = {}
             for qtype in qtypes:
                 data = []
-                for start_time, end_time in time_ranges:
+                for start_time, end_time in reversed(time_ranges):
                     data_dict = {
                         "date": end_time,
                         "id": uuid4().hex,
@@ -239,7 +239,7 @@ class WorkerMetrics(APIView):
             result = {}
             for qtype in qtypes:
                 data = []
-                for start_time, end_time in time_ranges:
+                for start_time, end_time in reversed(time_ranges):
                     data_dict = {
                         "date": end_time,
                         "id": uuid4().hex,
