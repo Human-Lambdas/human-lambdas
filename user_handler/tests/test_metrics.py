@@ -437,8 +437,8 @@ class TestWorkflowMetrics(APITestCase):
             "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 12 + 1)
-        for idata in response.data:
+        self.assertEqual(len(response.data["pending"]), 12 + 1)
+        for idata in response.data["pending"]:
             for wf_name in wf_names:
                 self.assertIn(wf_name, idata)
 
@@ -460,67 +460,53 @@ class TestWorkflowMetrics(APITestCase):
 
         data = {
             "range": "monthly",
-            "type": ["completed"],
+            "type": ["completed", "aht", "tat"],
         }
         response = self.client.get(
             "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 12 + 1)
+        self.assertEqual(len(response.data["completed"]), 12 + 1)
         self.assertEqual(
-            response.data[0][wf1_name], 1,
+            response.data["completed"][0][wf1_name], 1,
         )
-        self.assertEqual(response.data[0][wf2_name], 0)
-        for idata in response.data[1:]:
+        self.assertEqual(response.data["completed"][0][wf2_name], 0)
+        for idata in response.data["completed"][1:]:
             self.assertEqual(idata[wf1_name], 0)
             self.assertEqual(idata[wf2_name], 0)
 
-        data = {
-            "range": "monthly",
-            "type": "aht",
-        }
-        response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         self.assertEqual(
-            response.data[0][wf1_name],
+            response.data["aht"][0][wf1_name],
             (completed_at - assigned_at) / timezone.timedelta(seconds=1),
         )
-        self.assertEqual(response.data[0][wf2_name], 0)
-        for idata in response.data[1:]:
+        self.assertEqual(response.data["aht"][0][wf2_name], 0)
+        for idata in response.data["aht"][1:]:
             self.assertEqual(idata[wf1_name], 0)
             self.assertEqual(idata[wf2_name], 0)
 
-        data = {
-            "range": "monthly",
-            "type": "tat",
-        }
-        response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         self.assertEqual(
-            response.data[0][wf1_name],
+            response.data["tat"][0][wf1_name],
             (completed_at - created_at) / timezone.timedelta(seconds=1),
         )
-        self.assertEqual(response.data[0][wf2_name], 0)
-        for idata in response.data[1:]:
+        self.assertEqual(response.data["tat"][0][wf2_name], 0)
+        for idata in response.data["tat"][1:]:
             self.assertEqual(idata[wf1_name], 0)
             self.assertEqual(idata[wf2_name], 0)
 
     def test_workflow_id(self):
         wf1_name = Workflow.objects.get(pk=self.workflow_id).name
         wf2_name = Workflow.objects.get(pk=self.workflow_id2).name
-        data = {"range": "monthly", "type": "pending", "workflow_id": self.workflow_id}
+        data = {
+            "range": "monthly",
+            "type": ["pending"],
+            "workflow_id": self.workflow_id,
+        }
         response = self.client.get(
             "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 12 + 1)
-        for idata in response.data:
+        self.assertEqual(len(response.data["pending"]), 12 + 1)
+        for idata in response.data["pending"]:
             self.assertIn(wf1_name, idata)
             self.assertNotIn(wf2_name, idata)
 
@@ -529,15 +515,15 @@ class TestWorkflowMetrics(APITestCase):
         wf2_name = Workflow.objects.get(pk=self.workflow_id2).name
         data = {
             "range": "monthly",
-            "type": "pending",
+            "type": ["pending"],
             "workflow_id": [self.workflow_id, self.workflow_id2],
         }
         response = self.client.get(
             "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 12 + 1)
-        for idata in response.data:
+        self.assertEqual(len(response.data["pending"]), 12 + 1)
+        for idata in response.data["pending"]:
             self.assertIn(wf1_name, idata)
             self.assertIn(wf2_name, idata)
 
@@ -545,16 +531,19 @@ class TestWorkflowMetrics(APITestCase):
         workflow = Workflow.objects.get(pk=self.workflow_id2)
         workflow.disabled = True
         workflow.save()
+        disabled_workflow_name = workflow.name
+        workflow_name = Workflow.objects.get(pk=self.workflow_id).name
 
         data = {
             "range": "monthly",
             "type": ["pending"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[0]["pending"], 3)
+        self.assertNotIn(disabled_workflow_name, response.data["pending"][0])
+        self.assertEqual(response.data["pending"][0][workflow_name], 3)
 
 
 class TestWorkermetrics(APITestCase):
@@ -636,9 +625,9 @@ class TestWorkermetrics(APITestCase):
             "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 12 + 1)
+        self.assertEqual(len(response.data["completed"]), 12 + 1)
         self.assertEqual(
-            response.data[0][worker.name], 1,
+            response.data["completed"][0][worker.name], 1,
         )
 
         data = {
@@ -651,19 +640,29 @@ class TestWorkermetrics(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(
-            response.data[0][worker.name],
+            response.data["aht"][0][worker.name],
             (completed_at - assigned_at) / timezone.timedelta(seconds=1),
         )
-        for idata in response.data[1:]:
+        for idata in response.data["aht"][1:]:
             self.assertEqual(idata[worker.name], 0)
 
-    def test_workflow_id(self):
+    def test_worker_id(self):
         worker = User.objects.get(email="foo@bar.com")
-        data = {"range": "monthly", "type": "completed", "worker_id": worker.pk}
+        data = {"range": "monthly", "type": ["completed"], "worker_id": worker.pk}
         response = self.client.get(
             "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 12 + 1)
-        for idata in response.data:
+        self.assertEqual(len(response.data["completed"]), 12 + 1)
+        for idata in response.data["completed"]:
             self.assertIn(worker.name, idata)
+
+    def test_worker_multiple_types(self):
+        worker = User.objects.get(email="foo@bar.com")
+        data = {"range": "monthly", "type": ["completed", "aht"]}
+        response = self.client.get(
+            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["completed"]), 12 + 1)
+        self.assertEqual(len(response.data["aht"]), 12 + 1)

@@ -174,36 +174,41 @@ class WorkflowMetrics(APIView):
 
     def get(self, request, *args, **kwargs):
         self.validate_data(request.data)
-        data = []
-        qtype = request.query_params.get("type")
+        qtypes = request.query_params.getlist("type")
         workflow_ids = request.query_params.getlist("workflow_id")
-        if qtype in METRICS:
+        if any([qtype in METRICS for qtype in qtypes]):
             organization = self.get_queryset().first()
             if workflow_ids:
                 workflows = Workflow.objects.filter(
-                    organization=organization, pk__in=workflow_ids,
+                    organization=organization, pk__in=workflow_ids, disabled=False
                 ).all()
             else:
-                workflows = Workflow.objects.filter(organization=organization).all()
+                workflows = Workflow.objects.filter(
+                    organization=organization, disabled=False
+                ).all()
             time_ranges = self.process_time_range(request.query_params.get("range"))
-            for start_time, end_time in time_ranges:
-                data_dict = {
-                    "date": end_time,
-                    "id": uuid4().hex,
-                }
+            result = {}
+            for qtype in qtypes:
+                data = []
+                for start_time, end_time in time_ranges:
+                    data_dict = {
+                        "date": end_time,
+                        "id": uuid4().hex,
+                    }
 
-                for workflow in workflows:
-                    try:
-                        data_dict[workflow.name] = METRICS[qtype](
-                            start_time=start_time,
-                            end_time=end_time,
-                            organization=organization,
-                            workflow=workflow,
-                        )
-                    except KeyError:
-                        continue
-                data.append(data_dict)
-        return Response(data, status=200)
+                    for workflow in workflows:
+                        try:
+                            data_dict[workflow.name] = METRICS[qtype](
+                                start_time=start_time,
+                                end_time=end_time,
+                                organization=organization,
+                                workflow=workflow,
+                            )
+                        except KeyError:
+                            continue
+                    data.append(data_dict)
+                result[qtype] = data
+        return Response(result, status=200)
 
 
 class WorkerMetrics(APIView):
@@ -220,10 +225,9 @@ class WorkerMetrics(APIView):
 
     def get(self, request, *args, **kwargs):
         self.validate_data(request.data)
-        data = []
-        qtype = request.query_params.get("type")
+        qtypes = request.query_params.getlist("type")
         worker_id = request.query_params.getlist("worker_id")
-        if qtype in WORKER_METRICS:
+        if any([qtype in WORKER_METRICS for qtype in qtypes]):
             organization = self.get_queryset().first()
             if worker_id:
                 users = User.objects.filter(
@@ -232,21 +236,25 @@ class WorkerMetrics(APIView):
             else:
                 users = User.objects.filter(organization=organization).all()
             time_ranges = self.process_time_range(request.query_params.get("range"))
-            for start_time, end_time in time_ranges:
-                data_dict = {
-                    "date": end_time,
-                    "id": uuid4().hex,
-                }
+            result = {}
+            for qtype in qtypes:
+                data = []
+                for start_time, end_time in time_ranges:
+                    data_dict = {
+                        "date": end_time,
+                        "id": uuid4().hex,
+                    }
 
-                for user in users:
-                    try:
-                        data_dict[user.name] = WORKER_METRICS[qtype](
-                            start_time=start_time,
-                            end_time=end_time,
-                            organization=organization,
-                            worker=user,
-                        )
-                    except KeyError:
-                        continue
-                data.append(data_dict)
-        return Response(data, status=200)
+                    for user in users:
+                        try:
+                            data_dict[user.name] = WORKER_METRICS[qtype](
+                                start_time=start_time,
+                                end_time=end_time,
+                                organization=organization,
+                                worker=user,
+                            )
+                        except KeyError:
+                            continue
+                    data.append(data_dict)
+                result[qtype] = data
+        return Response(result, status=200)
