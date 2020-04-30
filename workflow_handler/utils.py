@@ -1,3 +1,5 @@
+import copy
+
 from .models import WorkflowHook
 
 
@@ -18,7 +20,13 @@ def sync_workflow_task(workflow, task):
             final_input["layout"] = workflow_input["layout"]
         inputs.append(final_input)
     task.inputs = inputs
-    if task.outputs != workflow.outputs:
+    outputs = copy.deepcopy(task.outputs)
+    [
+        output[output["type"]].pop("value")
+        for output in outputs
+        if "value" in output.get(output["type"], [])
+    ]
+    if outputs != workflow.outputs:
         task.outputs = workflow.outputs
 
 
