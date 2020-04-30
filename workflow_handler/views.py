@@ -426,7 +426,7 @@ class GetCompletedTaskView(ListAPIView):
         return Response(serializer.data)
 
 
-class GetCompletedTaskInternalView(ListAPIView):
+class GetCompletedTasksCSVView(ListAPIView):
     """
     Internal API View for getting all the Tasks
     """

@@ -117,20 +117,31 @@ class TestTaskCount(APITestCase):
                 ),
                 format="json",
             )
-            value = "foo2" if i % 2 == 0 else "bar2"
             output_list = [
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {
-                        "value": value,
+                        "value": "foo2" if i % 2 == 0 else "bar2",
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
+                {
+                    "id": "secondary_output",
+                    "name": "barbar",
+                    "type": "single-selection",
+                    "single-selection": {
+                        "value": "SO1" if i % 2 == 0 else "SO2",
+                        "options": [
+                            {"id": "foo2", "name": "SO1"},
+                            {"id": "bar2", "name": "SO2"},
+                        ],
+                    },
+                },
             ]
             task = response.data
             response_data = {"inputs": task["inputs"], "outputs": output_list}
@@ -143,7 +154,7 @@ class TestTaskCount(APITestCase):
             )
 
         response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/completed-internal".format(
+            "/v1/orgs/{}/workflows/{}/tasks/completed-tasks-csv".format(
                 self.org_id, self.workflow_id
             )
         )

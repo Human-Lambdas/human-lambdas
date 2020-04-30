@@ -4,7 +4,7 @@ import io
 
 from django.db.models import F
 
-from .models import Task
+from .models import Task, Workflow
 
 
 def validate_keys(title_row, workflow):
@@ -48,9 +48,10 @@ def process_csv(csv_file, workflow):
 def task_list_to_csv_string(task_list):
     completed_csv = io.StringIO()
     writer = csv.writer(completed_csv, quoting=csv.QUOTE_NONNUMERIC)
+    current_workflow = Workflow.objects.get(task__id=task_list[0].id)
     writer.writerow(
-        [task_input["id"] for task_input in task_list[0].inputs]
-        + [task_output["name"] for task_output in task_list[0].outputs]
+        [task_input["id"] for task_input in current_workflow.inputs]
+        + [task_output["id"] for task_output in current_workflow.outputs]
     )
     for task in task_list:
         print(task.__dict__)

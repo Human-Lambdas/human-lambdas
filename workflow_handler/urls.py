@@ -10,7 +10,7 @@ from .views import (
     NextTaskView,
     CreateTaskView,
     GetCompletedTaskView,
-    GetCompletedTaskInternalView,
+    GetCompletedTasksCSVView,
 )
 
 
@@ -27,9 +27,9 @@ urlpatterns = [
     ),
     path("/<int:workflow_id>/tasks/next", NextTaskView.as_view(), name="next-task"),
     path(
-        "/<int:workflow_id>/tasks/completed-internal",
-        GetCompletedTaskInternalView.as_view(),
-        name="completed-task-internal",
+        "/<int:workflow_id>/tasks/completed-tasks-csv",
+        GetCompletedTasksCSVView.as_view(),
+        name="completed-tasks-csv",
     ),
     # External API calls
     path(
