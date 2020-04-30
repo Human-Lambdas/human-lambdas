@@ -48,25 +48,19 @@ def process_csv(csv_file, workflow):
 def task_list_to_csv_string(task_list):
     completed_csv = io.StringIO()
     writer = csv.writer(completed_csv, quoting=csv.QUOTE_NONNUMERIC)
-    title_passed = False
+    writer.writerow(
+        [task_input["id"] for task_input in task_list[0].inputs]
+        + [task_output["name"] for task_output in task_list[0].outputs]
+    )
     for task in task_list:
         print(task.__dict__)
-        if title_passed is True:
-            # refactor to double list comprehension
-            row = [task_input["value"] for task_input in task.inputs]
-            for task_output in task.outputs:
-                row.append(task_output[task_output["type"]]["value"])
-            writer.writerow(row)
-        else:
-            row = [task_input["id"] for task_input in task.inputs]
-            for task_output in task.outputs:
-                row.append(task_output["name"])
-            writer.writerow(row)
-            row = [task_input["value"] for task_input in task.inputs]
-            for task_output in task.outputs:
-                row.append(task_output[task_output["type"]]["value"])
-            writer.writerow(row)
-            title_passed = True
+        writer.writerow(
+            [task_input["value"] for task_input in task.inputs]
+            + [
+                task_output[task_output["type"]]["value"]
+                for task_output in task.outputs
+            ]
+        )
     print(completed_csv.getvalue())
     string_to_return = repr(completed_csv.getvalue())
     return string_to_return
