@@ -196,6 +196,8 @@ class TestTasks(APITestCase):
             )
             self.assertEqual("completed", response.data["status"])
             self.assertEqual(expected_outputs, response.data["outputs"])
+            task = Task.objects.get(id=task.id)
+            self.assertIn("value", task.outputs[0]["single-selection"])
 
     def test_complete_multiple_selection_task(self):
         workflow = Workflow.objects.get(id=self.second_workflow_id)
