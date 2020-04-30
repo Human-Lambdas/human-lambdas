@@ -1,8 +1,8 @@
 import csv
 import copy
-import io
 
 from django.db.models import F
+from django.http import HttpResponse
 
 from .models import Task, Workflow
 
@@ -46,15 +46,19 @@ def process_csv(csv_file, workflow):
 
 
 def task_list_to_csv_string(task_list):
-    completed_csv = io.StringIO()
-    writer = csv.writer(completed_csv, quoting=csv.QUOTE_NONNUMERIC)
     current_workflow = Workflow.objects.get(task__id=task_list[0].id)
+    response = HttpResponse(content_type="text/csv")
+    response[
+        "Content-Disposition"
+    ] = 'attachment; filename="workflow_{0}_completed_tasks.csv"'.format(
+        current_workflow.id
+    )
+    writer = csv.writer(response)
     writer.writerow(
         [task_input["id"] for task_input in current_workflow.inputs]
         + [task_output["id"] for task_output in current_workflow.outputs]
     )
     for task in task_list:
-        print(task.__dict__)
         writer.writerow(
             [task_input["value"] for task_input in task.inputs]
             + [
@@ -62,6 +66,4 @@ def task_list_to_csv_string(task_list):
                 for task_output in task.outputs
             ]
         )
-    print(completed_csv.getvalue())
-    string_to_return = repr(completed_csv.getvalue())
-    return string_to_return
+    return response

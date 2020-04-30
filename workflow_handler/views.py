@@ -449,7 +449,4 @@ class GetCompletedTasksCSVView(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         tasks = get_list_or_404(self.get_queryset())
-        return Response(
-            {"status_code": 200, "completed_tasks": task_list_to_csv_string(tasks)},
-            status=200,
-        )
+        return task_list_to_csv_string(tasks)

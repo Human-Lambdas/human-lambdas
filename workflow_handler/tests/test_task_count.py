@@ -158,4 +158,14 @@ class TestTaskCount(APITestCase):
                 self.org_id, self.workflow_id
             )
         )
+        print(response)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_completed_task_internal_404(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/{}/tasks/completed-tasks-csv".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
