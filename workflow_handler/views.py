@@ -11,7 +11,7 @@ from user_handler.models import Organization
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from workflow_handler.csv_utils import process_csv, task_list_to_csv_string
+from workflow_handler.csv_utils import process_csv, task_list_to_csv_response
 from django.db import transaction
 from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
@@ -449,4 +449,4 @@ class GetCompletedTasksCSVView(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         tasks = get_list_or_404(self.get_queryset())
-        return task_list_to_csv_string(tasks)
+        return task_list_to_csv_response(tasks)

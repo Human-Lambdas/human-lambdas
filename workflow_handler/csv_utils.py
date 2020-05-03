@@ -4,7 +4,7 @@ import copy
 from django.db.models import F
 from django.http import HttpResponse
 
-from .models import Task, Workflow
+from .models import Task
 
 
 def validate_keys(title_row, workflow):
@@ -45,25 +45,40 @@ def process_csv(csv_file, workflow):
     workflow.save()
 
 
-def task_list_to_csv_string(task_list):
-    current_workflow = Workflow.objects.get(task__id=task_list[0].id)
+def task_list_to_csv_response(task_list):
+    workflow = task_list[0].workflow
     response = HttpResponse(content_type="text/csv")
     response[
         "Content-Disposition"
-    ] = 'attachment; filename="workflow_{0}_completed_tasks.csv"'.format(
-        current_workflow.id
-    )
+    ] = 'attachment; filename="workflow_{0}_completed_tasks.csv"'.format(workflow.id)
     writer = csv.writer(response)
-    writer.writerow(
-        [task_input["id"] for task_input in current_workflow.inputs]
-        + [task_output["id"] for task_output in current_workflow.outputs]
-    )
+    headers = [task_input["id"] for task_input in workflow.inputs] + [
+        task_output["id"] for task_output in workflow.outputs
+    ]
+    writer.writerow(headers)
     for task in task_list:
         writer.writerow(
-            [task_input["value"] for task_input in task.inputs]
+            [
+                next(
+                    (
+                        task_input["value"]
+                        for task_input in task.inputs
+                        if task_input["id"] == workflow_input["id"]
+                    ),
+                    None,
+                )
+                for workflow_input in workflow.inputs
+            ]
             + [
-                task_output[task_output["type"]]["value"]
-                for task_output in task.outputs
+                next(
+                    (
+                        task_output[task_output["type"]]["value"]
+                        for task_output in task.outputs
+                        if task_output["id"] == workflow_output["id"]
+                    ),
+                    None,
+                )
+                for workflow_output in workflow.outputs
             ]
         )
     return response
