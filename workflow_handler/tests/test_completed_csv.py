@@ -138,5 +138,45 @@ class TestTaskCount(APITestCase):
                 self.org_id, self.workflow_id
             )
         )
-        print(response)
+        needed_csv = repr(
+            """Alpha,Beta,Gamma,foo,secondary_output
+7,8,9,foo2,SO1
+4,5,6,bar2,SO2
+1,2,3,foo2,SO1""".strip()
+        )
+        received_csv = repr(
+            response.getvalue().decode("utf-8").rstrip().replace("\r", "")
+        )
+        self.assertEqual(needed_csv, received_csv)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        #         updated_workflow_data = {
+        #     "outputs": [
+        #         {
+        #             "id": "tertiary_output",
+        #             "name": "terttert",
+        #             "type": "single-selection",
+        #             "single-selection": {
+        #                 "value": "TO1" if i % 2 == 0 else "TO2",
+        #                 "options": [
+        #                     {"id": "fooalpha2", "name": "TO1"},
+        #                     {"id": "barbeta2", "name": "TO2"},
+        #                 ],
+        #             },
+        #         },
+        #     ],
+        # }
+
+        # response = self.client.patch(
+        #     "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id),
+        #     updated_workflow_data,
+        #     format="json",
+        # )
+        # print(response.data)
+        # self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        # print(Workflow.objects.get(pk=self.workflow_id))
+
+
+# You need to test with adding another output, checking that new ones are applied
+# and old ones are left empty. Also try it with removing an output and testing that
+#  the tasks with that output included have that output ignored.
