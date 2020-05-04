@@ -1,7 +1,8 @@
+cat <<EOF > Dockerrun.aws.json
 {
   "AWSEBDockerrunVersion": "1",
   "Image": {
-    "Name": "hlambdas/prod-api:latest",
+    "Name": "hlambdas/$DOCKER_REPO:latest",
     "Update": "true"
   },
   "Authentication": {
@@ -20,3 +21,4 @@
     }
   ]
 }
+EOF

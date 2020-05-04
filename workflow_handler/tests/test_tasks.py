@@ -188,6 +188,17 @@ class TestTasks(APITestCase):
             self.assertEqual(expected_outputs, response.data["outputs"])
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
 
+            # test retrieving the same task
+            response = self.client.get(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                    self.org_id, self.workflow_id, task.id
+                )
+            )
+            self.assertEqual("completed", response.data["status"])
+            self.assertEqual(expected_outputs, response.data["outputs"])
+            task = Task.objects.get(id=task.id)
+            self.assertIn("value", task.outputs[0]["single-selection"])
+
     def test_complete_multiple_selection_task(self):
         workflow = Workflow.objects.get(id=self.second_workflow_id)
         tasks = Task.objects.filter(workflow=workflow).all()
