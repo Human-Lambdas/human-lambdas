@@ -19,7 +19,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
 import analytics
 
-from .serializers import WorkflowSerializer, TaskSerializer
+from .serializers import WorkflowSerializer, TaskSerializer, CompletedTaskSerializer
 from .models import Workflow, Task
 from .utils import sync_workflow_task
 
@@ -238,14 +238,19 @@ class NextTaskView(APIView):
         queryset = self.get_queryset()
 
         # 1 get assigned to self
-        obj = (
-            queryset.filter(status="assigned").filter(assigned_to=request.user).first()
-        )
-        if obj:
-            sync_workflow_task(workflow, obj)
-            task = self.serializer_class(obj).data
-            task["status_code"] = 200
-            return Response(task, status=200)
+        with transaction.atomic():
+            obj = (
+                queryset.filter(status="assigned")
+                .filter(assigned_to=request.user)
+                .first()
+            )
+            if obj:
+                obj.assigned_at = timezone.now()
+                obj.save()
+                sync_workflow_task(workflow, obj)
+                task = self.serializer_class(obj).data
+                task["status_code"] = 200
+                return Response(task, status=200)
 
         # 2 get assigned to someone else and expired
         with transaction.atomic():
@@ -393,7 +398,7 @@ class GetCompletedTaskView(ListAPIView):
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = TaskSerializer
+    serializer_class = CompletedTaskSerializer
     pagination_class = TaskPagination
 
     def get_queryset(self):

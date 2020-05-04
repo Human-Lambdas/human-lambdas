@@ -34,8 +34,8 @@ class TestTaskList(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "inputs": [
-                {"id": "news", "name": "news", "type": "text"},
-                {"id": "type", "name": "type", "type": "text"},
+                {"id": "news", "name": "news", "type": "text", "layout": {}},
+                {"id": "type", "name": "type", "type": "text", "layout": {}},
             ],
             "outputs": [
                 {
@@ -87,6 +87,7 @@ class TestTaskList(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["tasks"]), 50, response.data)
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
+        self.assertFalse("layout" in response.data["tasks"][0]["inputs"][0])
 
     def test_non_existing_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
@@ -97,3 +98,4 @@ class TestTaskList(APITestCase):
         task = Task.objects.filter(status="completed").first()
         result = task.serialize_hook()
         self.assertEqual(result["id"], task.pk)
+        self.assertFalse("layout" in result["inputs"][0])
