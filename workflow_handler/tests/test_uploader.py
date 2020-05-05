@@ -69,6 +69,9 @@ class TestUpload(APITestCase):
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
+        task = Task.objects.filter(workflow__pk=workflow_id).first()
+        self.assertIn(task.source.name, self.file_path)
+
     def test_larger_upload(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
@@ -220,7 +223,7 @@ class TestCSV2Task(TestCase):
 
     def test_process_csv(self):
         # try:
-        process_csv(csv_file=self.test_csv_file, workflow=self.sample_workflow)
+        process_csv(csv_file=self.test_csv_file, workflow=self.sample_workflow, source=None)
         title_row = ["alpha", "beta", "gamma", "delta"]
         # Check each workflow key appears once in each task
         tasks = Task.objects.all()

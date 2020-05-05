@@ -8,7 +8,7 @@ FORMATTED_INPUT = ["id", "name", "value", "type"]
 
 
 class Workflow(models.Model):
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=128, unique=True)
     description = models.TextField(blank=True)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     inputs = JSONField()
@@ -17,6 +17,16 @@ class Workflow(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     disabled = models.BooleanField(default=False)
     n_tasks = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
+
+
+class Source(models.Model):
+    name = models.CharField(max_length=128)
+    workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -31,6 +41,7 @@ class Task(models.Model):
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
     inputs = JSONField()
     outputs = JSONField()
+    source = models.ForeignKey(Source, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)

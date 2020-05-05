@@ -7,8 +7,8 @@ from .models import Task
 
 
 def validate_keys(title_row, workflow):
-    for input in workflow.inputs:
-        value_count = title_row.count(input["id"])
+    for winput in workflow.inputs:
+        value_count = title_row.count(winput["id"])
         if value_count > 1:
             raise Exception("There are duplicate column names")
 
@@ -16,7 +16,7 @@ def validate_keys(title_row, workflow):
             raise Exception("The dataset is missing some columns")
 
 
-def process_csv(csv_file, workflow):
+def process_csv(csv_file, workflow, source):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
     validate_keys(title_row, workflow)
@@ -36,7 +36,7 @@ def process_csv(csv_file, workflow):
                     }
                 )
         task_obj = Task(
-            inputs=inputs, outputs=copy.deepcopy(workflow.outputs), workflow=workflow
+            inputs=inputs, outputs=copy.deepcopy(workflow.outputs), workflow=workflow, source=source
         )
         task_obj.save()
         task_counter += 1

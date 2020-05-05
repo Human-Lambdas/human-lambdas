@@ -20,7 +20,7 @@ from user_handler.permissions import IsOrgAdmin
 import analytics
 
 from .serializers import WorkflowSerializer, TaskSerializer, CompletedTaskSerializer
-from .models import Workflow, Task
+from .models import Workflow, Task, Source
 from .utils import sync_workflow_task
 
 
@@ -28,12 +28,12 @@ class CreateWorkflowView(CreateAPIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     serializer_class = WorkflowSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=201, headers=headers)
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=201, headers=headers)
 
 
 class ListWorkflowView(ListAPIView):
@@ -146,8 +146,10 @@ class FileUploadView(APIView):
                 "No workflow found for id %s not found", kwargs["workflow_id"]
             )
         content = decode_utf8(file_obj)  # .read()
+        source = Source(name=request.data["file"].name, workflow=workflow, created_by=request.user)
+        source.save()
         try:
-            process_csv(content, workflow=workflow)
+            process_csv(content, workflow=workflow, source=source)
         except Exception as exception:
             return Response(
                 {"status_code": 400, "errors": [{"message": str(exception)}]},
