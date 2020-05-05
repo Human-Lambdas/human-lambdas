@@ -73,6 +73,7 @@ class Task(models.Model):
             "completed_by": worker_name,
             "completed_by_email": worker_email,
             "workflow": self.workflow.name,
+            "workflow_id": self.workflow.name,
             "inputs": inputs,
             "outputs": self.outputs,
             "source": source_name,
