@@ -223,7 +223,9 @@ class TestCSV2Task(TestCase):
 
     def test_process_csv(self):
         # try:
-        process_csv(csv_file=self.test_csv_file, workflow=self.sample_workflow, source=None)
+        process_csv(
+            csv_file=self.test_csv_file, workflow=self.sample_workflow, source=None
+        )
         title_row = ["alpha", "beta", "gamma", "delta"]
         # Check each workflow key appears once in each task
         tasks = Task.objects.all()

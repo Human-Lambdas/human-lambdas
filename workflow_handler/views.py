@@ -28,13 +28,6 @@ class CreateWorkflowView(CreateAPIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     serializer_class = WorkflowSerializer
 
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)
-    #     return Response(serializer.data, status=201, headers=headers)
-
 
 class ListWorkflowView(ListAPIView):
     permission_classes = (IsAuthenticated,)
@@ -135,18 +128,24 @@ def decode_utf8(input_iterator):
 
 
 class FileUploadView(APIView):
-
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
     parser_classes = [MultiPartParser]
+
+    def get_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return workflows.filter(pk=self.kwargs["workflow_id"])
 
     def post(self, request, *args, **kwargs):
         file_obj = request.data["file"]
-        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
-        if not workflow:
-            raise KeyError(
-                "No workflow found for id %s not found", kwargs["workflow_id"]
-            )
-        content = decode_utf8(file_obj)  # .read()
-        source = Source(name=request.data["file"].name, workflow=workflow, created_by=request.user)
+        workflow = get_object_or_404(self.get_queryset())
+        content = decode_utf8(file_obj)
+        filename = request.data["file"].name
+        source = Source(name=filename, workflow=workflow, created_by=request.user)
         source.save()
         try:
             process_csv(content, workflow=workflow, source=source)
@@ -156,7 +155,11 @@ class FileUploadView(APIView):
                 status=400,
             )
         return Response(
-            {"status_code": 200, "message": "File was uploaded!"}, status=200
+            {
+                "status_code": 200,
+                "message": f"File {filename} was processed and task created",
+            },
+            status=200,
         )
 
 
@@ -393,12 +396,46 @@ class TaskPagination(LimitOffsetPagination):
         )
 
 
-class GetCompletedTaskView(ListAPIView):
+class GetExternalCompletedTaskView(ListAPIView):
     """
     External API View for getting all the Tasks
     """
 
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CompletedTaskSerializer
+    pagination_class = TaskPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow__in=workflows)
+            & Q(workflow=self.kwargs["workflow_id"])
+            & Q(status="completed")
+        )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = get_list_or_404(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.serializer_class(obj, many=True)
+        return Response(serializer.data)
+
+
+class GetCompletedTaskView(ListAPIView):
+    """
+    Internal API View for getting all the Tasks
+    """
+
     permission_classes = (IsAuthenticated,)
     serializer_class = CompletedTaskSerializer
     pagination_class = TaskPagination

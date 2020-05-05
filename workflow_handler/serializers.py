@@ -155,7 +155,9 @@ class TaskSerializer(serializers.ModelSerializer):
         inputs = validated_data["inputs"]
         outputs = validated_data["outputs"]
         workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
-        source = Source(name="API", created_by=self.context["request"].user, workflow=workflow)
+        source = Source(
+            name="API", created_by=self.context["request"].user, workflow=workflow
+        )
         source.save()
         task = Task(inputs=inputs, outputs=outputs, workflow=workflow, source=source)
         task.save()

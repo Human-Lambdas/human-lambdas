@@ -36,7 +36,10 @@ def process_csv(csv_file, workflow, source):
                     }
                 )
         task_obj = Task(
-            inputs=inputs, outputs=copy.deepcopy(workflow.outputs), workflow=workflow, source=source
+            inputs=inputs,
+            outputs=copy.deepcopy(workflow.outputs),
+            workflow=workflow,
+            source=source,
         )
         task_obj.save()
         task_counter += 1
