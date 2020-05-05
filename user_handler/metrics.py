@@ -83,7 +83,7 @@ WORKER_METRICS = {
 
 def process_monthly():
     end = timezone.now()
-    start = end.replace(day=1, hour=0, minute=0, second=0)
+    start = end.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     time_ranges = [(start, end)]
     for _ in range(MONTHS_BACK):
         end = start
@@ -95,7 +95,7 @@ def process_monthly():
 def process_weekly():
     end = timezone.now()
     start = (end - timezone.timedelta(days=end.isoweekday() - 1)).replace(
-        hour=0, minute=0, second=0
+        hour=0, minute=0, second=0, microsecond=0
     )
     time_ranges = [(start, end)]
     for _ in range(WEEKS_BACK):
@@ -107,7 +107,7 @@ def process_weekly():
 
 def process_daily():
     end = timezone.now()
-    start = end.replace(hour=1, minute=1, second=1)
+    start = end.replace(hour=0, minute=0, second=0, microsecond=0)
     time_ranges = [(start, end)]
     for _ in range(DAYS_BACK):
         end = start
@@ -144,7 +144,7 @@ class OrganizationMetrics(APIView):
             time_ranges = self.process_time_range(request.query_params.get("range"))
             for start_time, end_time in reversed(time_ranges):
                 data_dict = {
-                    "date": end_time,
+                    "date": end_time - timezone.timedelta(microseconds=1),
                     "id": uuid4().hex,
                 }
                 for qtype in qtypes:
