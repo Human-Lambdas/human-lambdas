@@ -208,15 +208,15 @@ class TestCSV2Task(TestCase):
         title_row = next(csv.reader(self.test_csv_file))
         try:
             validate_keys(title_row, self.sample_workflow)
-        except Exception:
-            self.fail("An error has occurred")
+        except Exception as e:
+            self.fail("An error has occurred" + e)
 
     def test_validate_keys_extra_columns(self):
         title_row = next(csv.reader(self.test_csv_file_extra_columns))
         try:
             validate_keys(title_row, self.sample_workflow)
-        except Exception:
-            self.fail("An error has occurred")
+        except Exception as e:
+            self.fail("An error has occurred" + e)
 
     def test_process_csv(self):
         # try:

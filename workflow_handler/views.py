@@ -426,7 +426,7 @@ class GetCompletedTaskView(ListAPIView):
         return Response(serializer.data)
 
 
-class GetCompletedTasksCSVView(ListAPIView):
+class GetCompletedTasksCSVView(APIView):
     """
     Internal API View for getting all the Tasks
     """
@@ -447,6 +447,6 @@ class GetCompletedTasksCSVView(ListAPIView):
             & Q(status="completed")
         )
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         tasks = get_list_or_404(self.get_queryset())
         return task_list_to_csv_response(tasks)

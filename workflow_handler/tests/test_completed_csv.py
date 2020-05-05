@@ -12,7 +12,7 @@ from . import DATA_PATH
 logger = logging.getLogger(__file__)
 
 
-class TestTaskCount(APITestCase):
+class TestCompletedTasksToCSV(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(DATA_PATH, "test.csv")
         self.total_rows = 3
