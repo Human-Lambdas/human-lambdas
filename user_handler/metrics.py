@@ -144,7 +144,9 @@ class OrganizationMetrics(APIView):
             time_ranges = self.process_time_range(request.query_params.get("range"))
             for start_time, end_time in reversed(time_ranges):
                 data_dict = {
-                    "date": end_time - timezone.timedelta(microseconds=1),
+                    "date": (end_time - timezone.timedelta(microseconds=1)).replace(
+                        tzinfo=None
+                    ),
                     "id": uuid4().hex,
                 }
                 for qtype in qtypes:
