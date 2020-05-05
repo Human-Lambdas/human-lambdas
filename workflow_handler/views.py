@@ -447,11 +447,7 @@ class GetCompletedTaskView(ListAPIView):
             Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
         )
-        return Task.objects.filter(
-            Q(workflow__in=workflows)
-            & Q(workflow=self.kwargs["workflow_id"])
-            & Q(status="completed")
-        )
+        return Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

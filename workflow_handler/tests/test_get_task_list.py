@@ -155,14 +155,14 @@ class TestInternalTaskList(APITestCase):
 
     def test_list_completed_task(self):
         response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/get-completed".format(
+            "/v1/orgs/{}/workflows/tasks/completed".format(
                 self.org_id, self.workflow_id
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["tasks"]), 100, response.data)
         response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/get-completed".format(
+            "/v1/orgs/{}/workflows/tasks/completed".format(
                 self.org_id, self.workflow_id
             ),
             format="json",
@@ -174,5 +174,5 @@ class TestInternalTaskList(APITestCase):
         self.assertFalse("layout" in response.data["tasks"][0]["inputs"][0])
 
     def test_non_existing_workflow(self):
-        response = self.client.get("/v1/orgs/10000/workflows/1000/get-completed")
+        response = self.client.get("/v1/orgs/10000/tasks/completed")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

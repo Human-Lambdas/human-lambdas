@@ -27,9 +27,9 @@ urlpatterns = [
     ),
     path("/<int:workflow_id>/tasks/next", NextTaskView.as_view(), name="next-task"),
     path(
-        "/<int:workflow_id>/tasks/get-completed",
+        "/tasks/completed",
         GetCompletedTaskView.as_view(),
-        name="completed-task",
+        name="internal-completed-task",
     ),
     # External API calls
     path(
