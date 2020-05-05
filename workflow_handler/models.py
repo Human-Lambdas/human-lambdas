@@ -56,15 +56,22 @@ class Task(models.Model):
             {f_inp: inp_item[f_inp] for f_inp in FORMATTED_INPUT}
             for inp_item in self.inputs
         ]
+        if self.assigned_to:
+            worker_name = self.assigned_to.name
+            worker_email = self.assigned_to.email
+        else:
+            worker_name, worker_email = None, None
         return {
             "id": self.pk,
             "status": self.status,
             "completed_at": self.completed_at,
             "created_at": self.created_at,
-            "assigned_to": str(self.assigned_to),
-            "workflow_id": self.workflow.pk,
+            "completed_by": worker_name,
+            "completed_by_email": worker_email,
+            "workflow": self.workflow.name,
             "inputs": inputs,
             "outputs": self.outputs,
+            "source": self.source.name,
         }
 
     def serialize_hook(self, *args, **kwargs):

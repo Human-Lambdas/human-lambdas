@@ -2,6 +2,7 @@ import os
 
 from rest_framework.test import APITestCase
 from rest_framework import status
+from django.utils import timezone
 
 from workflow_handler.models import Task
 from user_handler.models import Organization
@@ -85,6 +86,8 @@ class TestTaskList(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["tasks"]), 50, response.data)
+        for itask in response.data["tasks"]:
+            self.assertEqual(itask["status"], "completed", itask)
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
         self.assertFalse("layout" in response.data["tasks"][0]["inputs"][0])
 
@@ -149,8 +152,11 @@ class TestInternalTaskList(APITestCase):
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.completed_tasks = 150
+        t_delta = timezone.timedelta(0)
         for task in Task.objects.all()[: self.completed_tasks]:
             task.status = "completed"
+            task.completed_at = timezone.now() - t_delta
+            t_delta -= timezone.timedelta(minutes=10)
             task.save()
 
     def test_list_completed_task(self):
@@ -172,6 +178,10 @@ class TestInternalTaskList(APITestCase):
         self.assertEqual(len(response.data["tasks"]), 50, response.data)
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
         self.assertFalse("layout" in response.data["tasks"][0]["inputs"][0])
+        self.assertGreater(
+            response.data["tasks"][0]["completed_at"],
+            response.data["tasks"][1]["completed_at"],
+        )
 
     def test_non_existing_workflow(self):
         response = self.client.get("/v1/orgs/10000/tasks/completed")
