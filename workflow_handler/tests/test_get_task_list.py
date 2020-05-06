@@ -68,7 +68,6 @@ class TestTaskList(APITestCase):
             task.save()
 
     def test_list_completed_task(self):
-
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.get(
             "/v1/orgs/{}/workflows/{}/tasks/completed".format(
