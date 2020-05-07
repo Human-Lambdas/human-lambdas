@@ -62,9 +62,9 @@ class Task(models.Model):
         else:
             worker_name, worker_email = None, None
         if self.source:
-            source_name = self.source.name
+            source_name, source_id = self.source.name, self.source.pk
         else:
-            source_name = None
+            source_name, source_id = None, None
         return {
             "id": self.pk,
             "status": self.status,
@@ -77,6 +77,7 @@ class Task(models.Model):
             "inputs": inputs,
             "outputs": self.outputs,
             "source": source_name,
+            "source_id": source_id,
         }
 
     def serialize_hook(self, *args, **kwargs):
