@@ -4,7 +4,7 @@ import os
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from workflow_handler.models import Workflow, Task
+from workflow_handler.models import Workflow
 from user_handler.models import Organization
 
 from . import DATA_PATH
