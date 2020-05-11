@@ -477,11 +477,7 @@ class GetCompletedTasksCSVView(APIView):
             & Q(disabled=False)
             & Q(organization__pk=self.kwargs["org_id"])
         )
-        return Task.objects.filter(
-            Q(workflow__in=workflows)
-            & Q(workflow=self.kwargs["workflow_id"])
-            & Q(status="completed")
-        )
+        return Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
 
     def get(self, request, *args, **kwargs):
         tasks = get_list_or_404(self.get_queryset())

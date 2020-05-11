@@ -33,7 +33,7 @@ urlpatterns = [
         name="internal-completed-task",
     ),
     path(
-        "/<int:workflow_id>/tasks/completed-tasks-csv",
+        "/tasks/completed-tasks-csv",
         GetCompletedTasksCSVView.as_view(),
         name="completed-tasks-csv",
     ),

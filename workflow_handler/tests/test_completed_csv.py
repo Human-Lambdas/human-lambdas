@@ -134,7 +134,7 @@ class TestCompletedTasksToCSV(APITestCase):
             )
 
         response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/completed-tasks-csv".format(
+            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(
                 self.org_id, self.workflow_id
             )
         )
@@ -294,7 +294,7 @@ class TestCompletedTasksToCSV(APITestCase):
             format="json",
         )
         response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/completed-tasks-csv".format(
+            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(
                 self.org_id, self.workflow_id
             )
         )
@@ -408,7 +408,7 @@ class TestCompletedTasksToCSV(APITestCase):
             format="json",
         )
         response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/completed-tasks-csv".format(
+            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(
                 self.org_id, self.workflow_id
             )
         )
