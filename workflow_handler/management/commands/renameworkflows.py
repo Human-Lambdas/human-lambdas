@@ -12,7 +12,9 @@ class Command(BaseCommand):
             n_wf_names = Workflow.objects.filter(name=wf_name).count()
             if n_wf_names > 1:
                 workflow.name = f"{wf_name}-{n_wf_names}"
-            workflow.save()
-            self.stdout.write(
-                self.style.SUCCESS('Successfully renamed workflow "%s"' % workflow.id)
-            )
+                workflow.save()
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        'Successfully renamed workflow "%s"' % workflow.id
+                    )
+                )
