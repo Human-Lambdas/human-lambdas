@@ -411,6 +411,7 @@ class GetExternalCompletedTaskView(ListAPIView):
         organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
             Q(organization__in=organizations)
+            & Q(disabled=False)
             & Q(organization__pk=self.kwargs["org_id"])
         )
         return Task.objects.filter(
@@ -445,6 +446,7 @@ class GetCompletedTaskView(ListAPIView):
         organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
             Q(organization__in=organizations)
+            & Q(disabled=False)
             & Q(organization__pk=self.kwargs["org_id"])
         )
         return Task.objects.filter(
@@ -472,6 +474,7 @@ class GetCompletedTasksCSVView(APIView):
         organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
             Q(organization__in=organizations)
+            & Q(disabled=False)
             & Q(organization__pk=self.kwargs["org_id"])
         )
         return Task.objects.filter(
