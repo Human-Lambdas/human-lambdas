@@ -441,7 +441,7 @@ class GetCompletedTaskView(ListAPIView):
     serializer_class = CompletedTaskSerializer
     pagination_class = TaskPagination
 
-    def get_queryset(self):
+    def get_queryset(self, *args, **kwargs):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
@@ -449,14 +449,21 @@ class GetCompletedTaskView(ListAPIView):
             & Q(disabled=False)
             & Q(organization__pk=self.kwargs["org_id"])
         )
-        return Task.objects.filter(
-            Q(workflow__in=workflows) & Q(status="completed")
-        ).order_by("-completed_at")
+        return (
+            Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
+            .filter(*args, **kwargs)
+            .order_by("-completed_at")
+        )
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        obj = get_list_or_404(self.get_queryset())
-        page = self.paginate_queryset(queryset)
+        workflow_id = request.query_params.get("workflow_id")
+        if workflow_id:
+            queryset = self.get_queryset(workflow__pk=workflow_id)
+        else:
+            queryset = self.get_queryset()
+        filtered_queryset = self.filter_queryset(queryset)
+        obj = get_list_or_404(queryset)
+        page = self.paginate_queryset(filtered_queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
@@ -469,7 +476,7 @@ class GetCompletedTasksCSVView(APIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     serializer_class = TaskSerializer
 
-    def get_queryset(self):
+    def get_queryset(self, *args, **kwargs):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
@@ -477,8 +484,21 @@ class GetCompletedTasksCSVView(APIView):
             & Q(disabled=False)
             & Q(organization__pk=self.kwargs["org_id"])
         )
-        return Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
+        return (
+            Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
+            .filter(*args, **kwargs)
+            .order_by("-completed_at")
+        )
 
     def get(self, request, *args, **kwargs):
-        tasks = get_list_or_404(self.get_queryset())
+        workflow_id = request.query_params.get("workflow_id")
+        if not workflow_id:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "Need to set workflow_id"}],
+                },
+                status=400,
+            )
+        tasks = get_list_or_404(self.get_queryset(workflow__pk=workflow_id))
         return task_list_to_csv_response(tasks)
