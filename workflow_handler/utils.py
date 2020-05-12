@@ -31,3 +31,13 @@ def find_and_fire_hook(event_name, instance, **kwargs):
     hooks = WorkflowHook.objects.filter(**filters)
     for hook in hooks:
         hook.deliver_hook(instance)
+
+
+def process_external_completed_tasks(serialized_list):
+    for data in serialized_list:
+        data["inputs"] = {d_input["id"]: d_input["value"] for d_input in data["inputs"]}
+        data["outputs"] = {
+            d_output["id"]: d_output[d_output["type"]]["value"]
+            for d_output in data["outputs"]
+        }
+    return serialized_list

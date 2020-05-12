@@ -65,8 +65,15 @@ class TestTaskList(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.completed_tasks = 150
         for task in Task.objects.all()[: self.completed_tasks]:
-            task.status = "completed"
-            task.save()
+            response_data = {"inputs": task.inputs, "outputs": task.outputs}
+            response_data["outputs"][0]["single-selection"]["value"] = "bar1"
+            _ = self.client.patch(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                    self.org_id, self.workflow_id, task.pk
+                ),
+                data=response_data,
+                format="json",
+            )
 
     def test_list_completed_task(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
@@ -89,7 +96,9 @@ class TestTaskList(APITestCase):
         for itask in response.data["tasks"]:
             self.assertEqual(itask["status"], "completed", itask)
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
-        self.assertFalse("layout" in response.data["tasks"][0]["inputs"][0])
+        self.assertFalse("layout" in response.data["tasks"][0]["inputs"])
+        self.assertEqual(type(response.data["tasks"][0]["inputs"]), dict)
+        self.assertEqual(type(response.data["tasks"][0]["outputs"]), dict)
 
     def test_non_existing_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)

@@ -21,7 +21,7 @@ import analytics
 
 from .serializers import WorkflowSerializer, TaskSerializer, CompletedTaskSerializer
 from .models import Workflow, Task, Source
-from .utils import sync_workflow_task
+from .utils import sync_workflow_task, process_external_completed_tasks
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -426,10 +426,12 @@ class GetExternalCompletedTaskView(ListAPIView):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            return self.get_paginated_response(
+                process_external_completed_tasks(serializer.data)
+            )
 
         serializer = self.serializer_class(obj, many=True)
-        return Response(serializer.data)
+        return Response(process_external_completed_tasks(serializer.data))
 
 
 class GetCompletedTaskView(ListAPIView):
