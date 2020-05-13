@@ -427,7 +427,6 @@ class GetExternalCompletedTaskView(ListAPIView):
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
 
@@ -438,7 +437,7 @@ class GetCompletedTaskView(ListAPIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = CompletedTaskSerializer
+    serializer_class = TaskSerializer
     pagination_class = TaskPagination
 
     def get_queryset(self, *args, **kwargs):
