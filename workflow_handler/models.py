@@ -61,7 +61,7 @@ class Task(models.Model):
             source_name, source_id = self.source.name, self.source.pk
         else:
             source_name, source_id = None, None
-        serilized_data = {
+        return {
             "id": self.pk,
             "status": self.status,
             "completed_at": self.completed_at,
@@ -75,10 +75,13 @@ class Task(models.Model):
             "source": source_name,
             "source_id": source_id,
         }
+
+    def get_formatted_task_external(self):
+        serilized_data = self.get_formatted_task()
         return process_external_completed_tasks(serilized_data)
 
     def serialize_hook(self, *args, **kwargs):
-        return self.get_formatted_task()
+        return self.get_formatted_task_external()
 
 
 class WorkflowHook(AbstractHook):

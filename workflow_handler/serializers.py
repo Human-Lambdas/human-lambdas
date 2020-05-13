@@ -197,3 +197,8 @@ class TaskSerializer(serializers.ModelSerializer):
 class CompletedTaskSerializer(TaskSerializer):
     def to_representation(self, instance):
         return instance.get_formatted_task()
+
+
+class CompletedExternalTaskSerializer(TaskSerializer):
+    def to_representation(self, instance):
+        return instance.get_formatted_task_external()
