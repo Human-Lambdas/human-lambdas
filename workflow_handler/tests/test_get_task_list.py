@@ -112,7 +112,6 @@ class TestTaskList(APITestCase):
         self.assertEqual(type(result["inputs"]), dict)
 
 
-
 class TestInternalTaskList(APITestCase):
     def setUp(self):
         registration_data = {
@@ -192,6 +191,7 @@ class TestInternalTaskList(APITestCase):
             response.data["tasks"][0]["completed_at"],
             response.data["tasks"][1]["completed_at"],
         )
+        self.assertIn("completed_by_email", response.data["tasks"][0])
 
     def test_non_existing_workflow(self):
         response = self.client.get("/v1/orgs/10000/tasks/completed")
