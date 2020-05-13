@@ -1,9 +1,9 @@
 from rest_framework.test import APITestCase
 
-from workflow_handler.utils import process_output_value
+from workflow_handler.format_completed_tasks import process_output_value
 
 
-class TestUtils(APITestCase):
+class TestTaskFormat(APITestCase):
     def test_process_output_value(self):
         data = [
             ("foo", "foo"),

@@ -109,7 +109,7 @@ class TestTaskList(APITestCase):
         task = Task.objects.filter(status="completed").first()
         result = task.serialize_hook()
         self.assertEqual(result["id"], task.pk)
-        self.assertFalse("layout" in result["inputs"][0])
+        self.assertFalse("layout" in result["inputs"])
 
 
 class TestInternalTaskList(APITestCase):

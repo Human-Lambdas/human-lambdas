@@ -4,7 +4,7 @@ from user_handler.models import User, Organization
 from rest_hooks.signals import hook_event
 from rest_hooks.models import AbstractHook
 
-FORMATTED_INPUT = ["id", "name", "value", "type"]
+from .format_completed_tasks import process_external_completed_tasks
 
 
 class Workflow(models.Model):
@@ -52,10 +52,6 @@ class Task(models.Model):
         )
 
     def get_formatted_task(self):
-        inputs = [
-            {f_inp: inp_item[f_inp] for f_inp in FORMATTED_INPUT}
-            for inp_item in self.inputs
-        ]
         if self.assigned_to:
             worker_name = self.assigned_to.name
             worker_email = self.assigned_to.email
@@ -65,7 +61,7 @@ class Task(models.Model):
             source_name, source_id = self.source.name, self.source.pk
         else:
             source_name, source_id = None, None
-        return {
+        serilized_data = {
             "id": self.pk,
             "status": self.status,
             "completed_at": self.completed_at,
@@ -74,11 +70,12 @@ class Task(models.Model):
             "completed_by_email": worker_email,
             "workflow": self.workflow.name,
             "workflow_id": self.workflow.pk,
-            "inputs": inputs,
+            "inputs": self.inputs,
             "outputs": self.outputs,
             "source": source_name,
             "source_id": source_id,
         }
+        return process_external_completed_tasks(serilized_data)
 
     def serialize_hook(self, *args, **kwargs):
         return self.get_formatted_task()
