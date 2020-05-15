@@ -12,9 +12,7 @@ class Command(BaseCommand):
             if not org:
                 self.stdout.write(
                     self.style.SUCCESS(
-                        'No organization was found for user "%s" with the user id "%s"'
-                        % user.email,
-                        user.pk,
+                        'No organization was found for user "%s"' % user.email
                     )
                 )
             else:
