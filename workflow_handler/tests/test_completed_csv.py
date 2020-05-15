@@ -81,10 +81,13 @@ class TestCompletedTasksToCSV(APITestCase):
 
     def test_list_completed_task_internal_404(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        data = {
+            "workflow_id": self.workflow_id,
+        }
         response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/completed-tasks-csv".format(
-                self.org_id, self.workflow_id
-            )
+            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(self.org_id),
+            data=data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -125,18 +128,20 @@ class TestCompletedTasksToCSV(APITestCase):
             ]
             task = response.data
             response_data = {"inputs": task["inputs"], "outputs": output_list}
-            response = self.client.patch(
+            _ = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task["id"]
                 ),
                 data=response_data,
                 format="json",
             )
-
+        data = {
+            "workflow_id": self.workflow_id,
+        }
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(
-                self.org_id, self.workflow_id
-            )
+            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(self.org_id),
+            data=data,
+            format="json",
         )
         needed_csv = repr(
             """Alpha,Beta,Gamma,foo,secondary_output
@@ -293,10 +298,13 @@ class TestCompletedTasksToCSV(APITestCase):
             data=response_data,
             format="json",
         )
+        data = {
+            "workflow_id": self.workflow_id,
+        }
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(
-                self.org_id, self.workflow_id
-            )
+            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(self.org_id),
+            data=data,
+            format="json",
         )
         needed_csv = repr(
             """Alpha,Beta,Gamma,foo,secondary_output,tertiary_output
@@ -407,10 +415,13 @@ class TestCompletedTasksToCSV(APITestCase):
             data=response_data,
             format="json",
         )
+        data = {
+            "workflow_id": self.workflow_id,
+        }
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(
-                self.org_id, self.workflow_id
-            )
+            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(self.org_id),
+            data=data,
+            format="json",
         )
         needed_csv = repr(
             """Alpha,Beta,Gamma,foo
@@ -423,3 +434,9 @@ class TestCompletedTasksToCSV(APITestCase):
         )
         self.assertEqual(needed_csv, received_csv)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_no_workflow_id(self):
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(self.org_id)
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
