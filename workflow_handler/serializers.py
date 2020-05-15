@@ -6,7 +6,7 @@ from rest_framework import serializers, exceptions
 from user_handler.models import Organization
 from schema import SchemaError
 
-from .models import Workflow, Task, WorkflowHook
+from .models import Workflow, Task, WorkflowHook, Source
 from .schemas import (
     WORKFLOW_INPUT_SCHEMA,
     TASK_INPUT_SCHEMA,
@@ -155,7 +155,11 @@ class TaskSerializer(serializers.ModelSerializer):
         inputs = validated_data["inputs"]
         outputs = validated_data["outputs"]
         workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
-        task = Task(inputs=inputs, outputs=outputs, workflow=workflow)
+        source = Source(
+            name="API", created_by=self.context["request"].user, workflow=workflow
+        )
+        source.save()
+        task = Task(inputs=inputs, outputs=outputs, workflow=workflow, source=source)
         task.save()
         return task
 
@@ -193,3 +197,8 @@ class TaskSerializer(serializers.ModelSerializer):
 class CompletedTaskSerializer(TaskSerializer):
     def to_representation(self, instance):
         return instance.get_formatted_task()
+
+
+class CompletedExternalTaskSerializer(TaskSerializer):
+    def to_representation(self, instance):
+        return instance.get_formatted_task_external()

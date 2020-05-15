@@ -4,11 +4,11 @@ from user_handler.models import User, Organization
 from rest_hooks.signals import hook_event
 from rest_hooks.models import AbstractHook
 
-FORMATTED_INPUT = ["id", "name", "value", "type"]
+from .format_completed_tasks import process_external_completed_tasks
 
 
 class Workflow(models.Model):
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=128, unique=True)
     description = models.TextField(blank=True)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     inputs = JSONField()
@@ -17,6 +17,16 @@ class Workflow(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     disabled = models.BooleanField(default=False)
     n_tasks = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
+
+
+class Source(models.Model):
+    name = models.CharField(max_length=128)
+    workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -31,6 +41,7 @@ class Task(models.Model):
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
     inputs = JSONField()
     outputs = JSONField()
+    source = models.ForeignKey(Source, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
@@ -41,23 +52,36 @@ class Task(models.Model):
         )
 
     def get_formatted_task(self):
-        inputs = [
-            {f_inp: inp_item[f_inp] for f_inp in FORMATTED_INPUT}
-            for inp_item in self.inputs
-        ]
+        if self.assigned_to:
+            worker_name = self.assigned_to.name
+            worker_email = self.assigned_to.email
+        else:
+            worker_name, worker_email = None, None
+        if self.source:
+            source_name, source_id = self.source.name, self.source.pk
+        else:
+            source_name, source_id = None, None
         return {
             "id": self.pk,
             "status": self.status,
             "completed_at": self.completed_at,
             "created_at": self.created_at,
-            "assigned_to": str(self.assigned_to),
+            "completed_by": worker_name,
+            "completed_by_email": worker_email,
+            "workflow": self.workflow.name,
             "workflow_id": self.workflow.pk,
-            "inputs": inputs,
+            "inputs": self.inputs,
             "outputs": self.outputs,
+            "source": source_name,
+            "source_id": source_id,
         }
 
+    def get_formatted_task_external(self):
+        serilized_data = self.get_formatted_task()
+        return process_external_completed_tasks(serilized_data)
+
     def serialize_hook(self, *args, **kwargs):
-        return self.get_formatted_task()
+        return self.get_formatted_task_external()
 
 
 class WorkflowHook(AbstractHook):

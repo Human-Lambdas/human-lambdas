@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import Workflow, Task
-from workflow_handler.csv2task import validate_keys, process_csv
+from workflow_handler.csv_utils import validate_keys, process_csv
 
 
 logger = logging.getLogger(__file__)
@@ -68,6 +68,9 @@ class TestUpload(APITestCase):
                 data=data,
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        task = Task.objects.filter(workflow__pk=workflow_id).first()
+        self.assertIn(task.source.name, self.file_path)
 
     def test_larger_upload(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
@@ -179,10 +182,10 @@ class TestCSV2Task(TestCase):
             name="example",
             description="description",
             inputs=[
-                {"id": "alpha", "name": "alpha", "type": "text",},
-                {"id": "beta", "name": "beta", "type": "text",},
-                {"id": "gamma", "name": "gamma", "type": "text",},
-                {"id": "delta", "name": "delta", "type": "text",},
+                {"id": "alpha", "name": "alpha", "type": "text"},
+                {"id": "beta", "name": "beta", "type": "text"},
+                {"id": "gamma", "name": "gamma", "type": "text"},
+                {"id": "delta", "name": "delta", "type": "text"},
             ],
             outputs=[{"id": "binary", "name": "binary", "type": "binary"}],
             organization=org,
@@ -209,18 +212,20 @@ class TestCSV2Task(TestCase):
         try:
             validate_keys(title_row, self.sample_workflow)
         except Exception as e:
-            self.fail("An error has occurred")
+            self.fail("An error has occurred " + e)
 
     def test_validate_keys_extra_columns(self):
         title_row = next(csv.reader(self.test_csv_file_extra_columns))
         try:
             validate_keys(title_row, self.sample_workflow)
         except Exception as e:
-            self.fail("An error has occurred")
+            self.fail("An error has occurred " + e)
 
     def test_process_csv(self):
         # try:
-        process_csv(csv_file=self.test_csv_file, workflow=self.sample_workflow)
+        process_csv(
+            csv_file=self.test_csv_file, workflow=self.sample_workflow, source=None
+        )
         title_row = ["alpha", "beta", "gamma", "delta"]
         # Check each workflow key appears once in each task
         tasks = Task.objects.all()

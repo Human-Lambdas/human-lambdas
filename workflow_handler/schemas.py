@@ -6,7 +6,7 @@ WORKFLOW_INPUT_SCHEMA = Schema(
         {
             "id": And(str, len),
             "name": And(str, len),
-            "type": Or("text", "image"),
+            "type": Or("text", "image", "number", "date", "audio", "video"),
             Optional("layout"): dict,
         }
     ],
@@ -18,7 +18,7 @@ TASK_INPUT_SCHEMA = Schema(
         {
             "id": And(str, len),
             "name": And(str, len),
-            "type": Or("text", "image"),
+            "type": Or("text", "image", "number", "date", "audio", "video"),
             Optional("layout"): dict,
             "value": str,
         }
