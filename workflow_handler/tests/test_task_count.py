@@ -90,11 +90,7 @@ class TestTaskCount(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         n_tasks = self.total_rows
         task_data = {
-            "inputs": [
-                {"id": "Alpha", "value": "data1"},
-                {"id": "Beta", "value": "data2"},
-                {"id": "Gamma", "value": "data3"},
-            ]
+            "inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"},
         }
         for i in range(5):
             _ = self.client.post(

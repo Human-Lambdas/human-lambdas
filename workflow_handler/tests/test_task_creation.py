@@ -56,11 +56,7 @@ class TestTaskCreation(APITestCase):
 
     def test_create_task(self):
         task_data = {
-            "inputs": [
-                {"id": "Alpha", "value": "data1"},
-                {"id": "Beta", "value": "data2"},
-                {"id": "Gamma", "value": "data3"},
-            ]
+            "inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}
         }
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
@@ -75,7 +71,7 @@ class TestTaskCreation(APITestCase):
         self.assertIsNotNone(task)
 
     def test_empty_create_task(self):
-        task_data = {"inputs": []}
+        task_data = {"inputs": {}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/v1/orgs/{}/workflows/{}/tasks/create".format(
@@ -100,7 +96,7 @@ class TestTaskCreation(APITestCase):
         )
 
     def test_empty_value_create_task(self):
-        task_data = {"inputs": [{"id": "Alpha", "value": ""}]}
+        task_data = {"inputs": {"Alpha": "", "Beta": "", "Gamma": ""}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/v1/orgs/{}/workflows/{}/tasks/create".format(
@@ -111,8 +107,20 @@ class TestTaskCreation(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
+    def test_missing_inputs_create_task(self):
+        task_data = {"inputs": {"Alpha": ""}}
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/{}/tasks/create".format(
+                self.org_id, self.workflow_id
+            ),
+            task_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
     def test_create_task_non_existing_workflow(self):
-        task_data = {"inputs": [{"id": "Alpha", "value": ""}]}
+        task_data = {"inputs": {"Alpha": "", "Beta": "", "Gamma": ""}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/v1/orgs/{}/workflows/{}/tasks/create".format(self.org_id, 1000),

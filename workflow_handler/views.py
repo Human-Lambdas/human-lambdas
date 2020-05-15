@@ -1,3 +1,5 @@
+import copy
+
 from django.utils import timezone
 from django.conf import settings
 from rest_framework.generics import (
@@ -347,36 +349,35 @@ class CreateTaskView(CreateAPIView):
             return Response(
                 {"status_code": 400, "errors": [{"message": "No inputs"}]}, status=400,
             )
-        for task_input in request.data["inputs"]:
+        formatted_inputs = []
+        for w_input in workflow.inputs:
+            task_input = copy.deepcopy(w_input)
             try:
-                workflow_input = next(
-                    {"name": item["name"], "type": item["type"]}
-                    for item in workflow.inputs
-                    if item["id"] == task_input["id"]
-                )
-            except StopIteration:
+                task_input["value"] = request.data["inputs"][w_input["id"]]
+            except KeyError:
                 return Response(
                     {
                         "status_code": 400,
                         "errors": [
                             {
                                 "message": "Cannot find input with input id: {}".format(
-                                    task_input["id"]
+                                    w_input["id"],
                                 )
                             }
                         ],
                     },
                     status=400,
                 )
-            task_input.update(workflow_input)
-        workflow.n_tasks = F("n_tasks") + 1
-        workflow.save()
+            formatted_inputs.append(task_input)
+        request.data["inputs"] = formatted_inputs
         if not settings.DEBUG:
             analytics.track(
                 request.user.pk,
                 "Task Create Success",
                 {"workflow_id": workflow.id, "source": "API"},
             )
+        workflow.n_tasks = F("n_tasks") + 1
+        workflow.save()
         return self.create(request, *args, **kwargs)
 
 
