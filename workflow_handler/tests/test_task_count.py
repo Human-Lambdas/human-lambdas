@@ -103,3 +103,18 @@ class TestTaskCount(APITestCase):
             n_tasks += 1
             workflow = Workflow.objects.get(pk=self.workflow_id)
             self.assertEqual(workflow.n_tasks, n_tasks)
+
+    def test_unassigning_task(self):
+        n_tasks = self.total_rows - 1
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/{}/tasks/next".format(self.org_id, self.workflow_id)
+        )
+        workflow = Workflow.objects.get(pk=self.workflow_id)
+        self.assertEqual(workflow.n_tasks, n_tasks)
+        _ = self.client.get(
+            "/v1/orgs/{}/workflows/{}/tasks/{}/unassign".format(
+                self.org_id, self.workflow_id, response.data["id"]
+            )
+        )
+        workflow = Workflow.objects.get(pk=self.workflow_id)
+        self.assertEqual(workflow.n_tasks, n_tasks + 1)

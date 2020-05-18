@@ -55,9 +55,7 @@ class TestTaskCreation(APITestCase):
         self.workflow_id = response.data["id"]
 
     def test_create_task(self):
-        task_data = {
-            "inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}
-        }
+        task_data = {"inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/v1/orgs/{}/workflows/{}/tasks/create".format(
@@ -117,7 +115,9 @@ class TestTaskCreation(APITestCase):
             task_data,
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(
+            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
+        )
 
     def test_create_task_non_existing_workflow(self):
         task_data = {"inputs": {"Alpha": "", "Beta": "", "Gamma": ""}}

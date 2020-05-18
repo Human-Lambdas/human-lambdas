@@ -507,3 +507,47 @@ class GetCompletedTasksCSVView(APIView):
             )
         tasks = get_list_or_404(self.get_queryset(workflow__pk=workflow_id))
         return task_list_to_csv_response(tasks)
+
+
+class UnassignTaskView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow__in=workflows)
+            & Q(workflow=self.kwargs["workflow_id"])
+            & Q(pk=self.kwargs["task_id"])
+        )
+
+    def get(self, *args, **kwargs):
+        queryset = self.get_queryset()
+        task = get_object_or_404(queryset)
+        if task.status == "completed":
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": f"Task {task.pk} is already completed!"}],
+                },
+                status=400,
+            )
+        task.assigned_to = None
+        task.status = "pending"
+        task.assigned_at = None
+        task.save()
+        workflow = task.workflow
+        with transaction.atomic():
+            workflow.n_tasks = F("n_tasks") + 1
+            workflow.save()
+        return Response(
+            {
+                "status_code": 200,
+                "message": f"Task {task.pk} was unassigned successfully!",
+            },
+            status=200,
+        )
