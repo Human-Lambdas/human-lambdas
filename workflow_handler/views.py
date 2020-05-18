@@ -295,10 +295,10 @@ class NextTaskView(APIView):
             obj.assigned_at = timezone.now()
             obj.save()
             sync_workflow_task(workflow, obj)
-            workflow.n_tasks = F("n_tasks") - 1
-            workflow.save()
             task = self.serializer_class(obj).data
             task["status_code"] = 200
+            workflow.n_tasks = F("n_tasks") - 1
+            workflow.save()
             return Response(task, status=200)
 
 
@@ -370,15 +370,17 @@ class CreateTaskView(CreateAPIView):
                 )
             formatted_inputs.append(task_input)
         request.data["inputs"] = formatted_inputs
+        response = self.create(request, *args, **kwargs)
         if not settings.DEBUG:
             analytics.track(
                 request.user.pk,
                 "Task Create Success",
                 {"workflow_id": workflow.id, "source": "API"},
             )
-        workflow.n_tasks = F("n_tasks") + 1
-        workflow.save()
-        return self.create(request, *args, **kwargs)
+        with transaction.atomic():
+            workflow.n_tasks = F("n_tasks") + 1
+            workflow.save()
+        return response
 
 
 class TaskPagination(LimitOffsetPagination):
