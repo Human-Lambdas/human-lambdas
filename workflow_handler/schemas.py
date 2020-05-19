@@ -36,6 +36,7 @@ OUTPUT_SCHEMA = Schema(
             Optional(
                 Or("binary", "text", "single-selection", "multiple-selection")
             ): dict,
+            Optional("conditionalLogic"): dict,
         }
     ],
     ignore_extra_keys=True,
@@ -51,6 +52,7 @@ UPDATE_OUTPUT_SCHEMA = Schema(
                 "value": Or(bool, And(str, len), And(list, len)),
                 Optional("options"): list,
             },
+            Optional("conditionalLogic"): dict,
         }
     ],
     ignore_extra_keys=True,
