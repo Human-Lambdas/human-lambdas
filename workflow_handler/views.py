@@ -26,9 +26,24 @@ from .serializers import (
     TaskSerializer,
     CompletedTaskSerializer,
     CompletedExternalTaskSerializer,
+    SourceSerializer,
 )
 from .models import Workflow, Task, Source
 from .utils import sync_workflow_task
+
+
+def process_query_params(query_params):
+    filter_mapper = [
+        ("workflow__pk", "workflow_id"),
+        ("assigned_to__pk", "worker_id"),
+        ("source__pk", "source_id"),
+    ]
+    filters = {}
+    for filter_name, param_name in filter_mapper:
+        filter_value = query_params.get(param_name)
+        if filter_value:
+            filters[filter_name] = filter_value
+    return filters
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -463,11 +478,8 @@ class GetCompletedTaskView(ListAPIView):
         )
 
     def list(self, request, *args, **kwargs):
-        workflow_id = request.query_params.get("workflow_id")
-        if workflow_id:
-            queryset = self.get_queryset(workflow__pk=workflow_id)
-        else:
-            queryset = self.get_queryset()
+        filters = process_query_params(request.query_params)
+        queryset = self.get_queryset(**filters)
         filtered_queryset = self.filter_queryset(queryset)
         obj = get_list_or_404(queryset)
         page = self.paginate_queryset(filtered_queryset)
@@ -498,8 +510,7 @@ class GetCompletedTasksCSVView(APIView):
         )
 
     def get(self, request, *args, **kwargs):
-        workflow_id = request.query_params.get("workflow_id")
-        if not workflow_id:
+        if "workflow_id" not in request.query_params:
             return Response(
                 {
                     "status_code": 400,
@@ -507,7 +518,8 @@ class GetCompletedTasksCSVView(APIView):
                 },
                 status=400,
             )
-        tasks = get_list_or_404(self.get_queryset(workflow__pk=workflow_id))
+        filters = process_query_params(request.query_params)
+        tasks = get_list_or_404(self.get_queryset(**filters))
         return task_list_to_csv_response(tasks)
 
 
@@ -552,4 +564,21 @@ class UnassignTaskView(APIView):
                 "message": f"Task {task.pk} was unassigned successfully!",
             },
             status=200,
+        )
+
+
+class ListSourcesView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SourceSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(disabled=False)
+            & Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Source.objects.filter(
+            workflow__in=workflows, workflow=self.kwargs["workflow_id"]
         )
