@@ -342,7 +342,13 @@ class CreateTaskView(CreateAPIView):
             analytics.track(
                 request.user.pk,
                 "Task Create Attempt",
-                {"workflow_id": workflow.id, "source": "API"},
+                {
+                    "user_id": request.user.pk,
+                    "user_email": request.user.email,
+                    "org_id": request.user.current_organization_id,
+                    "workflow_id": workflow.id,
+                    "source": "API",
+                },
             )
         request.data["outputs"] = workflow.outputs
         if "inputs" not in request.data or not request.data["inputs"]:
@@ -375,7 +381,13 @@ class CreateTaskView(CreateAPIView):
             analytics.track(
                 request.user.pk,
                 "Task Create Success",
-                {"workflow_id": workflow.id, "source": "API"},
+                {
+                    "user_id": request.user.pk,
+                    "user_email": request.user.email,
+                    "org_id": request.user.current_organization_id,
+                    "workflow_id": workflow.id,
+                    "source": "API",
+                },
             )
         with transaction.atomic():
             workflow.n_tasks = F("n_tasks") + 1
