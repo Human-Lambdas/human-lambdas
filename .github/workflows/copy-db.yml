@@ -1,0 +1,27 @@
+name: Copy DB from production to staging
+env:
+  DB_NAME: "hlambda"
+  DB_USERNAME: "hlambda"
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  migrate-database:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install postgres
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client libpq-dev
+      - name: Drop staging database
+        run: PGPASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" dropdb -h "${{ env.STAGING_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }}
+
+      - name: Create staging database
+        run: PGPASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" createdb -h "${{ env.STAGING_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }}
+
+      - name: Copy database from production to staging
+        run: PGPASSWORD="${{ secrets.PRODUCTION_DB_PASSWORD }}" pg_dump -C -h "${{ env.PRODUCTION_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }} | PGPASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" psql -h "${{ env.STAGING_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }}
