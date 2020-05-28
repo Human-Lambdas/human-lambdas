@@ -4,7 +4,7 @@ env:
   DB_USERNAME: "hlambda"
 
 on:
-  push:
+  pull_request:
     branches:
     - master
 
