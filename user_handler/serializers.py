@@ -36,7 +36,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         name = validated_data["name"]
         password = validated_data["password"]
-        email = validated_data["email"]
+        email = validated_data["email"].lower()
         is_admin = validated_data["is_admin"]
         organization_name = validated_data["organization"]
         user_obj = User(name=name, email=email)
