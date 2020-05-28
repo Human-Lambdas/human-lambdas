@@ -39,7 +39,7 @@ class TestEmailCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["email"], self.user_email1)
 
-    def test_login(self):
+    def test_login1(self):
         response = self.client.post(
             "/v1/users/register",
             {
@@ -54,6 +54,29 @@ class TestEmailCase(APITestCase):
         response = self.client.post(
             "/v1/users/token",
             {"email": self.user_email1, "password": self.user_password},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response)
+        response = self.client.post(
+            "/v1/users/token",
+            {"email": self.user_email2.upper(), "password": self.user_password},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response)
+
+    def test_login2(self):
+        response = self.client.post(
+            "/v1/users/register",
+            {
+                "email": self.user_email1,
+                "password": self.user_password,
+                "name": self.user_name1,
+                "organization": self.organization_name,
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.client.post(
+            "/v1/users/token",
+            {"email": self.user_email2, "password": self.user_password},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
         response = self.client.post(
