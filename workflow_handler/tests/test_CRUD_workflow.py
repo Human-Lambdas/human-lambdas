@@ -339,3 +339,4 @@ class TestCRUDWorkflow(APITestCase):
         self.assertEqual(len(response.data), 1)
         workflow_data1["n_tasks"] = 0
         self.assertEqual(workflow_data1, result_1, response.data)
+        self.assertNotEqual(Workflow.objects.get(pk=workflow.pk).name, workflow.name)
