@@ -1,3 +1,5 @@
+import cchardet
+
 from .models import WorkflowHook
 
 
@@ -31,3 +33,12 @@ def find_and_fire_hook(event_name, instance, **kwargs):
     hooks = WorkflowHook.objects.filter(**filters)
     for hook in hooks:
         hook.deliver_hook(instance)
+
+
+def decode_csv(file_obj):
+    for line in file_obj:
+        yield unidecode(line)
+
+
+def unidecode(text):
+    return text.decode(cchardet.detect(text)["encoding"])

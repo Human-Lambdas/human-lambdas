@@ -28,7 +28,7 @@ from .serializers import (
     CompletedExternalTaskSerializer,
 )
 from .models import Workflow, Task, Source
-from .utils import sync_workflow_task
+from .utils import sync_workflow_task, decode_csv
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -129,9 +129,9 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         )
 
 
-def decode_utf8(input_iterator):
-    for line in input_iterator:
-        yield line.decode("utf-8")
+# def decode_utf8(input_iterator):
+#     for line in input_iterator:
+#         yield line.decode("utf-8")
 
 
 class FileUploadView(APIView):
@@ -150,7 +150,7 @@ class FileUploadView(APIView):
     def post(self, request, *args, **kwargs):
         file_obj = request.data["file"]
         workflow = get_object_or_404(self.get_queryset())
-        content = decode_utf8(file_obj)
+        content = decode_csv(file_obj)
         filename = request.data["file"].name
         source = Source(name=filename, workflow=workflow, created_by=request.user)
         source.save()
