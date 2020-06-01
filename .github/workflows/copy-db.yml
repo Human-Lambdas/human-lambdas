@@ -16,7 +16,7 @@ jobs:
       - name: Install postgres
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client libpq-dev
+          sudo apt-get install -y postgresql-client-11 libpq-dev
       - name: Drop staging database
         run: PGPASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" dropdb -h "${{ secrets.STAGING_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }}
 
