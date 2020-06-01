@@ -18,10 +18,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client libpq-dev
       - name: Drop staging database
-        run: PGPASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" dropdb -h "${{ env.STAGING_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }}
+        run: PGPASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" dropdb -h "${{ secrets.STAGING_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }}
 
       - name: Create staging database
-        run: PGPASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" createdb -h "${{ env.STAGING_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }}
+        run: PGPASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" createdb -h "${{ secrets.STAGING_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }}
 
       - name: Copy database from production to staging
-        run: PGPASSWORD="${{ secrets.PRODUCTION_DB_PASSWORD }}" pg_dump -C -h "${{ env.PRODUCTION_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }} | PGPASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" psql -h "${{ env.STAGING_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }}
+        run: PGPASSWORD="${{ secrets.PRODUCTION_DB_PASSWORD }}" pg_dump -C -h "${{ secrets.PRODUCTION_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }} | PGPASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" psql -h "${{ secrets.STAGING_DB_HOST }}" -U ${{ env.DB_USERNAME }} ${{ env.DB_NAME }}
