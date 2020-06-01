@@ -7,6 +7,7 @@ from .views import (
     FileUploadView,
     ListTaskView,
     RUDTaskView,
+    UnassignTaskView,
     NextTaskView,
     CreateTaskView,
     GetCompletedTaskView,
@@ -25,6 +26,11 @@ urlpatterns = [
         "/<int:workflow_id>/tasks/<int:task_id>",
         RUDTaskView.as_view(),
         name="update-task",
+    ),
+    path(
+        "/<int:workflow_id>/tasks/<int:task_id>/unassign",
+        UnassignTaskView.as_view(),
+        name="unassign-task",
     ),
     path("/<int:workflow_id>/tasks/next", NextTaskView.as_view(), name="next-task"),
     path(

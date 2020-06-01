@@ -20,7 +20,7 @@ TASK_INPUT_SCHEMA = Schema(
             "name": And(str, len),
             "type": Or("text", "image", "number", "date", "audio", "video"),
             Optional("layout"): dict,
-            "value": str,
+            "value": Or(str, int, float),
         }
     ],
     ignore_extra_keys=True,
@@ -36,6 +36,7 @@ OUTPUT_SCHEMA = Schema(
             Optional(
                 Or("binary", "text", "single-selection", "multiple-selection")
             ): dict,
+            Optional("logicJump"): dict,
         }
     ],
     ignore_extra_keys=True,
@@ -47,10 +48,11 @@ UPDATE_OUTPUT_SCHEMA = Schema(
             "id": And(str, len),
             "name": And(str, len),
             "type": Or("binary", "text", "single-selection", "multiple-selection"),
-            Or("binary", "text", "single-selection", "multiple-selection"): {
-                "value": Or(bool, And(str, len), And(list, len)),
+            Optional(Or("binary", "text", "single-selection", "multiple-selection")): {
+                Optional("value"): Or(bool, And(str, len), And(list, len)),
                 Optional("options"): list,
             },
+            Optional("logicJump"): dict,
         }
     ],
     ignore_extra_keys=True,

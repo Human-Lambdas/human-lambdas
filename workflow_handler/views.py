@@ -295,10 +295,10 @@ class NextTaskView(APIView):
             obj.assigned_at = timezone.now()
             obj.save()
             sync_workflow_task(workflow, obj)
-            workflow.n_tasks = F("n_tasks") - 1
-            workflow.save()
             task = self.serializer_class(obj).data
             task["status_code"] = 200
+            workflow.n_tasks = F("n_tasks") - 1
+            workflow.save()
             return Response(task, status=200)
 
 
@@ -342,7 +342,13 @@ class CreateTaskView(CreateAPIView):
             analytics.track(
                 request.user.pk,
                 "Task Create Attempt",
-                {"workflow_id": workflow.id, "source": "API"},
+                {
+                    "user_id": request.user.pk,
+                    "user_email": request.user.email,
+                    "org_id": request.user.current_organization_id,
+                    "workflow_id": workflow.id,
+                    "source": "API",
+                },
             )
         request.data["outputs"] = workflow.outputs
         if "inputs" not in request.data or not request.data["inputs"]:
@@ -370,15 +376,23 @@ class CreateTaskView(CreateAPIView):
                 )
             formatted_inputs.append(task_input)
         request.data["inputs"] = formatted_inputs
+        response = self.create(request, *args, **kwargs)
         if not settings.DEBUG:
             analytics.track(
                 request.user.pk,
                 "Task Create Success",
-                {"workflow_id": workflow.id, "source": "API"},
+                {
+                    "user_id": request.user.pk,
+                    "user_email": request.user.email,
+                    "org_id": request.user.current_organization_id,
+                    "workflow_id": workflow.id,
+                    "source": "API",
+                },
             )
-        workflow.n_tasks = F("n_tasks") + 1
-        workflow.save()
-        return self.create(request, *args, **kwargs)
+        with transaction.atomic():
+            workflow.n_tasks = F("n_tasks") + 1
+            workflow.save()
+        return response
 
 
 class TaskPagination(LimitOffsetPagination):
@@ -507,3 +521,47 @@ class GetCompletedTasksCSVView(APIView):
             )
         tasks = get_list_or_404(self.get_queryset(workflow__pk=workflow_id))
         return task_list_to_csv_response(tasks)
+
+
+class UnassignTaskView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow__in=workflows)
+            & Q(workflow=self.kwargs["workflow_id"])
+            & Q(pk=self.kwargs["task_id"])
+        )
+
+    def get(self, *args, **kwargs):
+        queryset = self.get_queryset()
+        task = get_object_or_404(queryset)
+        if task.status == "completed":
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": f"Task {task.pk} is already completed!"}],
+                },
+                status=400,
+            )
+        task.assigned_to = None
+        task.status = "pending"
+        task.assigned_at = None
+        task.save()
+        workflow = task.workflow
+        with transaction.atomic():
+            workflow.n_tasks = F("n_tasks") + 1
+            workflow.save()
+        return Response(
+            {
+                "status_code": 200,
+                "message": f"Task {task.pk} was unassigned successfully!",
+            },
+            status=200,
+        )

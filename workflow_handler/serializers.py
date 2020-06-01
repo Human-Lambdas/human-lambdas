@@ -187,7 +187,15 @@ class TaskSerializer(serializers.ModelSerializer):
     def validate_outputs(self, data):
         try:
             if self.partial:
-                return UPDATE_OUTPUT_SCHEMA.validate(data)
+                validated_data = UPDATE_OUTPUT_SCHEMA.validate(data)
+                if not any(
+                    [
+                        "value" in output_data.get(output_data["type"], {})
+                        for output_data in validated_data
+                    ]
+                ):
+                    raise SchemaError("No values set!")
+                return validated_data
             else:
                 return validate_output_structure(OUTPUT_SCHEMA.validate(data))
         except SchemaError as exception_text:

@@ -2,6 +2,22 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 
+class LowercaseEmailField(models.EmailField):
+    """
+    Override EmailField to convert emails to lowercase before saving.
+    """
+
+    def to_python(self, value):
+        """
+        Convert email to lowercase.
+        """
+        value = super(LowercaseEmailField, self).to_python(value)
+        # Value can be None so check that it's a string before lowercasing.
+        if isinstance(value, str):
+            return value.lower()
+        return value
+
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None):
         """
@@ -37,7 +53,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     name = models.CharField(max_length=128, null=True)
-    email = models.EmailField(unique=True)
+    email = LowercaseEmailField(unique=True)
     USERNAME_FIELD = "email"
     objects = UserManager()
     current_organization_id = models.IntegerField(null=True)
@@ -83,7 +99,7 @@ class Invitation(models.Model):
     def __hash__(self):
         return hash((self.email, self.organization))
 
-    email = models.EmailField()
+    email = LowercaseEmailField()
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     invited_by = models.ForeignKey(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=128)
@@ -96,7 +112,7 @@ class Invitation(models.Model):
 
 
 class ForgottenPassword(models.Model):
-    email = models.EmailField()
+    email = LowercaseEmailField()
     token = models.CharField(max_length=128)
     datetime = models.DateTimeField(auto_now=True)
     expires_at = models.DateTimeField()
