@@ -33,10 +33,22 @@ OUTPUT_SCHEMA = Schema(
             "id": And(str, len),
             "name": And(str, len),
             "type": Or(
-                "binary", "text", "number", "single-selection", "multiple-selection"
+                "binary",
+                "text",
+                "number",
+                "date",
+                "single-selection",
+                "multiple-selection",
             ),
             Optional(
-                Or("binary", "text", "number", "single-selection", "multiple-selection")
+                Or(
+                    "binary",
+                    "text",
+                    "number",
+                    "date",
+                    "single-selection",
+                    "multiple-selection",
+                )
             ): dict,
             Optional("logicJump"): dict,
         }
@@ -50,10 +62,22 @@ UPDATE_OUTPUT_SCHEMA = Schema(
             "id": And(str, len),
             "name": And(str, len),
             "type": Or(
-                "binary", "text", "number", "single-selection", "multiple-selection"
+                "binary",
+                "text",
+                "number",
+                "date",
+                "single-selection",
+                "multiple-selection",
             ),
             Optional(
-                Or("binary", "text", "number", "single-selection", "multiple-selection")
+                Or(
+                    "binary",
+                    "text",
+                    "number",
+                    "date",
+                    "single-selection",
+                    "multiple-selection",
+                )
             ): {
                 Optional("value"): Or(bool, And(str, len), And(list, len)),
                 Optional("options"): list,
