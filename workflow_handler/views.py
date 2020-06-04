@@ -583,7 +583,6 @@ class ListSourcesView(ListAPIView):
             & Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
         )
-        task_status = self.request.query_params.get("task_status")
         return Source.objects.filter(
             workflow__in=workflows, workflow=self.kwargs["workflow_id"]
         )
