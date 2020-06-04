@@ -135,13 +135,3 @@ class TestTaskAudit(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], self.workflow_id)
-
-
-    def test_get_completed_source_list(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/sources".format(self.org_id, self.workflow_id),
-            data={"task_status": "completed"},
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
