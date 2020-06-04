@@ -58,6 +58,13 @@ class TestTaskAudit(APITestCase):
             format="json",
         )
         self.workflow_id = response.data["id"]
+
+        workflow_data["name"] = "another workflow"
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
         task_data = {"inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
@@ -121,3 +128,10 @@ class TestTaskAudit(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["tasks"]), 1)
+
+    def test_workflow_list_filter(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id), data={"task_status": "completed"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], self.workflow_id)

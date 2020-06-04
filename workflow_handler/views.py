@@ -58,11 +58,15 @@ class ListWorkflowView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
-        return Workflow.objects.filter(
+        queryset = Workflow.objects.filter(
             Q(disabled=False)
             & Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
         )
+        task_status = self.request.query_params.get("task_status")
+        if task_status:
+            queryset = queryset.filter(task__status=task_status).distinct()
+        return queryset
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
