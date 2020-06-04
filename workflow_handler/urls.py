@@ -13,6 +13,7 @@ from .views import (
     GetCompletedTaskView,
     GetExternalCompletedTaskView,
     GetCompletedTasksCSVView,
+    ListSourcesView,
 )
 
 
@@ -43,6 +44,7 @@ urlpatterns = [
         GetCompletedTasksCSVView.as_view(),
         name="completed-tasks-csv",
     ),
+    path("/<int:workflow_id>/sources", ListSourcesView.as_view(), name="list-sources"),
     # External API calls
     path(
         "/<int:workflow_id>/tasks/create", CreateTaskView.as_view(), name="create-task"
