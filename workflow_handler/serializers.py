@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from django.conf import settings
 from django.utils import timezone
@@ -100,7 +101,10 @@ class WorkflowSerializer(serializers.ModelSerializer):
         instance.description = validated_data.get("description", instance.description)
         instance.inputs = validated_data.get("inputs", instance.inputs)
         instance.outputs = validated_data.get("outputs", instance.outputs)
-        instance.disabled = validated_data.get("disabled", instance.disabled)
+        disabled = validated_data.get("disabled")
+        if disabled:
+            instance.disabled = disabled
+            instance.name = f"{instance.name}-{uuid.uuid4()}"
         instance.save()
         webhook_data = validated_data.get("webhook")
         if webhook_data or self.context.get("remove_webhook"):
@@ -210,3 +214,9 @@ class CompletedTaskSerializer(TaskSerializer):
 class CompletedExternalTaskSerializer(TaskSerializer):
     def to_representation(self, instance):
         return instance.get_formatted_task_external()
+
+
+class SourceSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = Source
