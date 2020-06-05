@@ -79,7 +79,7 @@ UPDATE_OUTPUT_SCHEMA = Schema(
                     "multiple-selection",
                 )
             ): {
-                Optional("value"): Or(bool, And(str, len), And(list, len)),
+                Optional("value"): Or(bool, And(str, len), And(list, len), float, int),
                 Optional("options"): list,
             },
             Optional("logicJump"): dict,
