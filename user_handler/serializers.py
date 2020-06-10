@@ -83,7 +83,3 @@ class APITokenUserSerializer(serializers.Serializer):
         return attrs
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Organization
-        fields = ["name", "user", "id"]

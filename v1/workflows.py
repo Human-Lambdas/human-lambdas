@@ -9,10 +9,8 @@ from workflow_handler.views import (
     RUDTaskView,
     UnassignTaskView,
     NextTaskView,
-    GetCompletedTaskView,
-    GetCompletedTasksCSVView,
-    ListSourcesView,
 )
+from workflow_handler.audits import GetCompletedTasksCSVView, GetCompletedTaskView, ListSourcesView
 
 
 urlpatterns = [

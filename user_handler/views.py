@@ -20,7 +20,6 @@ from user_handler.permissions import IsOrgAdmin
 
 from .models import User, Organization, Invitation, ForgottenPassword
 from .serializers import UserSerializer, OrganizationSerializer, APITokenUserSerializer
-from .utils import SendGridClient, is_invalid_email, generate_unique_token
 
 logger = logging.getLogger(__file__)
 

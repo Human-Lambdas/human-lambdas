@@ -47,3 +47,6 @@ def custom_exception_handler(exc, context):
             "errors": process_errors(response.data),
         }
     return response
+
+def add_analytics():
+    pass
