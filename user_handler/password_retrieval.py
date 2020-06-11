@@ -1,16 +1,127 @@
+import logging
+
 from sendgrid.helpers.mail import Mail
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.template.loader import get_template
-from django.conf import settings
 from django.utils import timezone
+from django.conf import settings
 from user_handler.permissions import IsOrgAdmin
+from hl_rest_api.utils import is_invalid_email, generate_unique_token, SendGridClient
 
-from user_handler.models import User, Organization, Invitation
-from organization_handler.utils import SendGridClient, is_invalid_email, generate_unique_token
+from .models import User, Organization, Invitation, ForgottenPassword
+
+logger = logging.getLogger(__file__)
 
 
+class SendForgottenPasswordView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        if is_invalid_email(request.data["email"]):
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "This email is not valid"}],
+                },
+                status=400,
+            )
+
+        token = generate_unique_token(request.data["email"])
+        forgotten_password = ForgottenPassword(
+            email=request.data["email"],
+            token=token,
+            expires_at=timezone.now() + timezone.timedelta(15),
+        )
+
+        password_link = "{0}forgot/{1}".format(settings.FRONT_END_BASE_URL, token)
+
+        html_content = get_template("forgottenPassword.html").render(
+            {"password_link": password_link}
+        )
+
+        forgotten_password.save()
+
+        message = Mail(
+            from_email=("no-reply@humanlambdas.com", "Human Lambdas"),
+            to_emails=request.data["email"],
+            subject="Human Lambdas Password Reset",
+            html_content=html_content,
+        )
+        sg = SendGridClient()
+        sg.send(message)
+
+        return Response(
+            {"status_code": 200, "message": "We have sent an email to this address"},
+            status=200,
+        )
+
+
+class ForgottenPasswordView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, *args, **kwargs):
+        forgotten_password = ForgottenPassword.objects.filter(
+            token=self.kwargs["token"]
+        )
+        if forgotten_password.exists():
+            return Response({"status_code": 200}, status=200,)
+        else:
+            return Response(
+                {
+                    "status_code": 404,
+                    "errors": [
+                        {"message": "this forgotten password token is not valid"}
+                    ],
+                },
+                status=404,
+            )
+
+    def post(self, request, *args, **kwargs):
+        forgotten_password = ForgottenPassword.objects.filter(token=kwargs["token"])
+        if not forgotten_password.exists():
+            return Response(
+                {"status_code": 400, "errors": [{"message": "this token is invalid"}]},
+                status=400,
+            )
+        if "password" not in self.request.data:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "no password has been attached"}],
+                },
+                status=400,
+            )
+        if len(self.request.data["password"]) < 8:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "passwords must be at least 8 characters"}],
+                },
+                status=400,
+            )
+        if forgotten_password.first().expires_at < timezone.now():
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [{"message": "this token has expired!"}],
+                },
+                status=400,
+            )
+        user = User.objects.filter(email=forgotten_password.first().email)
+        if not user.exists():
+            return Response(
+                {"status_code": 400, "errors": [{"message": "an error occurred"}]},
+                status=400,
+            )
+        user_to_change = user.first()
+        user_to_change.set_password(self.request.data["password"])
+        user_to_change.save()
+        return Response(
+            {"status_code": 200, "message": "your password has been reset!"},
+            status=200,
+        )
 
 
 class SendInviteView(APIView):

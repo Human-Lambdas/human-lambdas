@@ -1,14 +1,11 @@
 import logging
 
-import analytics
-from django.conf import settings
+from hl_rest_api import analytics
 
 logger = logging.getLogger(__file__)
 
 
 def register_events(user_obj, organization_obj, existing_org):
-    if settings.DEBUG:
-        return
     analytics.identify(
         user_obj.pk,
         {

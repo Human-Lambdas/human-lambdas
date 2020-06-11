@@ -1,5 +1,4 @@
 from django.urls import path
-
 from workflow_handler.views import (
     CreateWorkflowView,
     RUDWorkflowView,
@@ -10,7 +9,11 @@ from workflow_handler.views import (
     UnassignTaskView,
     NextTaskView,
 )
-from workflow_handler.audits import GetCompletedTasksCSVView, GetCompletedTaskView, ListSourcesView
+from workflow_handler.audits import (
+    GetCompletedTasksCSVView,
+    GetCompletedTaskView,
+    ListSourcesView,
+)
 
 
 urlpatterns = [

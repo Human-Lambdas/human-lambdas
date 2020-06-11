@@ -58,9 +58,7 @@ class TestTaskCreation(APITestCase):
         task_data = {"inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
-            "/v1/orgs/{}/workflows/{}/tasks/create".format(
-                self.org_id, self.workflow_id
-            ),
+            "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
             task_data,
             format="json",
         )
@@ -72,9 +70,7 @@ class TestTaskCreation(APITestCase):
         task_data = {"inputs": {}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
-            "/v1/orgs/{}/workflows/{}/tasks/create".format(
-                self.org_id, self.workflow_id
-            ),
+            "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
             task_data,
             format="json",
         )
@@ -83,9 +79,7 @@ class TestTaskCreation(APITestCase):
         )
         task_data = {}
         response = self.client.post(
-            "/v1/orgs/{}/workflows/{}/tasks/create".format(
-                self.org_id, self.workflow_id
-            ),
+            "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
             task_data,
             format="json",
         )
@@ -97,9 +91,7 @@ class TestTaskCreation(APITestCase):
         task_data = {"inputs": {"Alpha": "", "Beta": "", "Gamma": ""}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
-            "/v1/orgs/{}/workflows/{}/tasks/create".format(
-                self.org_id, self.workflow_id
-            ),
+            "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
             task_data,
             format="json",
         )
@@ -109,9 +101,7 @@ class TestTaskCreation(APITestCase):
         task_data = {"inputs": {"Alpha": ""}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
-            "/v1/orgs/{}/workflows/{}/tasks/create".format(
-                self.org_id, self.workflow_id
-            ),
+            "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
             task_data,
             format="json",
         )
@@ -123,7 +113,7 @@ class TestTaskCreation(APITestCase):
         task_data = {"inputs": {"Alpha": "", "Beta": "", "Gamma": ""}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
-            "/v1/orgs/{}/workflows/{}/tasks/create".format(self.org_id, 1000),
+            "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, 1000),
             task_data,
             format="json",
         )

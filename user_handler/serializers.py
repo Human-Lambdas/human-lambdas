@@ -81,5 +81,3 @@ class APITokenUserSerializer(serializers.Serializer):
             raise serializers.ValidationError(msg, code="authorization")
         attrs["user"] = request.user
         return attrs
-
-
