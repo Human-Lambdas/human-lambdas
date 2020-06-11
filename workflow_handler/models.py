@@ -8,7 +8,7 @@ from .format_completed_tasks import process_external_completed_tasks
 
 
 class Workflow(models.Model):
-    name = models.CharField(max_length=128, unique=True)
+    name = models.CharField(max_length=128)
     description = models.TextField(blank=True)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     inputs = JSONField()

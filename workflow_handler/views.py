@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from user_handler.models import Organization
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
+from rest_framework import serializers
 from rest_framework.response import Response
 from workflow_handler.csv_utils import process_csv
 from django.db import transaction
@@ -24,6 +25,20 @@ from .utils import sync_workflow_task, decode_csv
 class CreateWorkflowView(CreateAPIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     serializer_class = WorkflowSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        return Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+
+    def perform_create(self, serializer):
+        queryset = self.get_queryset()
+        if self.request.data["name"] in queryset.values_list("name", flat=True):
+            raise serializers.ValidationError("Workflow with same name already exists")
+        serializer.save()
 
 
 class ListWorkflowView(ListAPIView):
