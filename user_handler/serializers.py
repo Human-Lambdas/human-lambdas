@@ -3,7 +3,7 @@ import logging
 from rest_framework import serializers
 
 from .models import User, Organization
-from .utils import register_events
+from hl_rest_api import analytics
 
 logger = logging.getLogger(__file__)
 
@@ -56,7 +56,7 @@ class UserSerializer(serializers.ModelSerializer):
         user_obj.current_organization_id = organization_obj.pk
         user_obj.save()
 
-        register_events(user_obj, organization_obj, existing_org)
+        analytics.register_events(user_obj, organization_obj, existing_org)
 
         return user_obj
 

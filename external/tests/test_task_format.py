@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase
 
-from workflow_handler.format_completed_tasks import process_output_value
+from external.format_completed_tasks import process_output_value
 
 
 class TestTaskFormat(APITestCase):

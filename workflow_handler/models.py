@@ -4,7 +4,7 @@ from user_handler.models import User, Organization
 from rest_hooks.signals import hook_event
 from rest_hooks.models import AbstractHook
 
-from .format_completed_tasks import process_external_completed_tasks
+from external.format_completed_tasks import process_external_completed_tasks
 
 
 class Workflow(models.Model):
