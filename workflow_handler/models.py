@@ -3,7 +3,6 @@ from django.contrib.postgres.fields import JSONField
 from user_handler.models import User, Organization
 from rest_hooks.signals import hook_event
 from rest_hooks.models import AbstractHook
-
 from external.format_completed_tasks import process_external_completed_tasks
 
 

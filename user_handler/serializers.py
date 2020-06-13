@@ -1,9 +1,10 @@
 import logging
 
 from rest_framework import serializers
+from hl_rest_api import analytics
 
 from .models import User, Organization
-from hl_rest_api import analytics
+
 
 logger = logging.getLogger(__file__)
 

@@ -20,17 +20,12 @@ def register_events(user_obj, organization_obj, existing_org):
         "user_email": user_obj.email,
     }
     identify(
-        user_obj.pk,
-        data,
+        user_obj.pk, data,
     )
     if not existing_org:
         track(
-            user_obj.pk,
-            "Org Created",
-            data,
+            user_obj.pk, "Org Created", data,
         )
     track(
-        user_obj.pk,
-        "User Created",
-        data,
+        user_obj.pk, "User Created", data,
     )
