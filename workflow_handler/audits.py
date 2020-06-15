@@ -42,7 +42,6 @@ class TaskPagination(LimitOffsetPagination):
     def get_paginated_response(self, data):
         return Response(
             {
-                "status_code": 200,
                 "next": self.get_next_link(),
                 "previous": self.get_previous_link(),
                 "count": self.count,
