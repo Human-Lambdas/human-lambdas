@@ -4,6 +4,9 @@ from rest_framework import serializers
 
 
 class CreateTaskSerializer(BaseTaskSerializer):
+    def to_representation(self, instance):
+        return instance.get_formatted_task_external()
+
     def validate_inputs(self, data):
         if not data:
             raise serializers.ValidationError("No data in inputs!")
