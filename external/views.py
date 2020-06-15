@@ -65,6 +65,8 @@ class CreateTaskView(CreateAPIView):
         formatted_inputs = []
         for w_input in workflow.inputs:
             task_input = copy.deepcopy(w_input)
+            if "layout" in task_input:
+                del task_input["layout"]
             try:
                 task_input["value"] = self.request.data["inputs"][w_input["id"]]
             except KeyError:
