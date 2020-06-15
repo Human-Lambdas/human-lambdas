@@ -75,8 +75,30 @@ class Task(models.Model):
             "source_id": source_id,
         }
 
+    def get_simple_formatted_task(self):
+        if self.assigned_to:
+            worker_email = self.assigned_to.email
+        else:
+            worker_email = None
+        if self.source:
+            source_name = self.source.name
+        else:
+            source_name = None
+        return {
+            "id": self.pk,
+            "status": self.status,
+            "completed_at": self.completed_at,
+            "created_at": self.created_at,
+            "completed_by": worker_email,
+            "workflow": self.workflow.name,
+            "workflow_id": self.workflow.pk,
+            "inputs": self.inputs,
+            "outputs": self.outputs,
+            "source": source_name,
+        }
+
     def get_formatted_task_external(self):
-        serilized_data = self.get_formatted_task()
+        serilized_data = self.get_simple_formatted_task()
         return process_external_completed_tasks(serilized_data)
 
     def serialize_hook(self, *args, **kwargs):

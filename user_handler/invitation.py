@@ -58,7 +58,7 @@ class SendInviteView(APIView):
 
             invite_link = settings.FRONT_END_BASE_URL
 
-            if not user:
+            if not User.objects.filter(email=email).exists():
                 invite_link += "invite/{0}".format(token)
             else:
                 invite_link += "invite/success/{0}".format(token)

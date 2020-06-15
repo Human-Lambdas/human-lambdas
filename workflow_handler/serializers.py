@@ -150,7 +150,6 @@ class BaseTaskSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
             "inputs",
-            # "outputs",
             "assigned_to",
             "completed_at",
         ]
