@@ -227,3 +227,47 @@ class TestCreateWorkflow(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+    def test_create_same_name_workflow(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
+        workflow_data = {
+            "name": "foowf",
+            "description": "great wf",
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {"options": ["foo1", "bar1"]},
+                }
+            ],
+        }
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertTrue(Workflow.objects.filter(name=workflow_data["name"]).exists())
+        workflow_data = {
+            "name": "foowf",
+            "description": "great wf",
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {"options": ["foo1", "bar1"]},
+                }
+            ],
+        }
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(1, Workflow.objects.filter(name=workflow_data["name"]).count())

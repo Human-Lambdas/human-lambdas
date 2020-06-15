@@ -1,4 +1,4 @@
-from ..utils import is_invalid_email, generate_unique_token
+from hl_rest_api.utils import is_invalid_email, generate_unique_token
 from rest_framework.test import APITestCase
 
 

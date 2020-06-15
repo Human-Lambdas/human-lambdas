@@ -7,8 +7,7 @@ from django.utils import timezone
 from django.db.models import Q, F, Avg
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
-
-from .models import Organization, User
+from user_handler.models import Organization, User
 
 MONTHS_BACK = 12
 WEEKS_BACK = 14

@@ -94,7 +94,7 @@ class TestTaskCount(APITestCase):
         }
         for i in range(5):
             _ = self.client.post(
-                "/v1/orgs/{}/workflows/{}/tasks/create".format(
+                "/orgs/{}/workflows/{}/tasks/create".format(
                     self.org_id, self.workflow_id
                 ),
                 task_data,

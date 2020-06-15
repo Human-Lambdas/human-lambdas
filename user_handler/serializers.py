@@ -1,9 +1,10 @@
 import logging
 
 from rest_framework import serializers
+from hl_rest_api import analytics
 
 from .models import User, Organization
-from .utils import register_events
+
 
 logger = logging.getLogger(__file__)
 
@@ -56,7 +57,7 @@ class UserSerializer(serializers.ModelSerializer):
         user_obj.current_organization_id = organization_obj.pk
         user_obj.save()
 
-        register_events(user_obj, organization_obj, existing_org)
+        analytics.register_events(user_obj, organization_obj, existing_org)
 
         return user_obj
 
@@ -81,9 +82,3 @@ class APITokenUserSerializer(serializers.Serializer):
             raise serializers.ValidationError(msg, code="authorization")
         attrs["user"] = request.user
         return attrs
-
-
-class OrganizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Organization
-        fields = ["name", "user", "id"]

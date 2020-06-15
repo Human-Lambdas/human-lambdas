@@ -1,6 +1,5 @@
 from django.urls import path
-
-from .views import (
+from workflow_handler.views import (
     CreateWorkflowView,
     RUDWorkflowView,
     ListWorkflowView,
@@ -9,10 +8,10 @@ from .views import (
     RUDTaskView,
     UnassignTaskView,
     NextTaskView,
-    CreateTaskView,
-    GetCompletedTaskView,
-    GetExternalCompletedTaskView,
+)
+from workflow_handler.audits import (
     GetCompletedTasksCSVView,
+    GetCompletedTaskView,
     ListSourcesView,
 )
 
@@ -45,13 +44,4 @@ urlpatterns = [
         name="completed-tasks-csv",
     ),
     path("/<int:workflow_id>/sources", ListSourcesView.as_view(), name="list-sources"),
-    # External API calls
-    path(
-        "/<int:workflow_id>/tasks/create", CreateTaskView.as_view(), name="create-task"
-    ),
-    path(
-        "/<int:workflow_id>/tasks/completed",
-        GetExternalCompletedTaskView.as_view(),
-        name="completed-task",
-    ),
 ]

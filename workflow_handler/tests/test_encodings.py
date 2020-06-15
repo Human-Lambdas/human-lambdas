@@ -15,10 +15,10 @@ class TestEncodings(APITestCase):
             with open(os.path.join(DATA_PATH, "encodings", efile), "rb") as f:
                 raw_text = f.read()
                 self.raw_text.append(raw_text)
-                self.expected.append(raw_text.decode(cchardet.detect(raw_text)["encoding"]))
+                self.expected.append(
+                    raw_text.decode(cchardet.detect(raw_text)["encoding"])
+                )
 
     def test_ecodings(self):
         for raw_text, expected in zip(self.raw_text, self.expected):
             self.assertEqual(unidecode(raw_text), expected)
-
-
