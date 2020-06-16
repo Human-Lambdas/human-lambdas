@@ -24,6 +24,21 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
     authentication_classes = (TokenAuthentication,)
     serializer_class = CompletedTaskSerializer
 
+    def get_queryset(self, *args, **kwargs):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(disabled=False)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        workflow = get_object_or_404(workflows, pk=self.kwargs["workflow_id"])
+        return (
+            Task.objects.filter(Q(workflow=workflow) & Q(status="completed"))
+            .filter(*args, **kwargs)
+            .order_by("-completed_at")
+        )
+
 
 class CreateTaskView(CreateAPIView):
     """

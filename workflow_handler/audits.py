@@ -78,13 +78,11 @@ class GetCompletedTaskView(ListAPIView):
         filters = process_query_params(request.query_params)
         queryset = self.get_queryset(**filters)
         filtered_queryset = self.filter_queryset(queryset)
-        obj = get_list_or_404(queryset)
         page = self.paginate_queryset(filtered_queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-
-        serializer = self.serializer_class(obj, many=True)
+        serializer = self.serializer_class(queryset.all(), many=True)
         return Response(serializer.data)
 
 
