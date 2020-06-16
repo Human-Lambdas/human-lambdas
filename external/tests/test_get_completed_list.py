@@ -99,7 +99,11 @@ class TestTaskList(APITestCase):
 
     def test_existing_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
-        response = self.client.get("/orgs/{}/workflows/{}/tasks/completed".format(self.org_id, self.workflow_id))
+        response = self.client.get(
+            "/orgs/{}/workflows/{}/tasks/completed".format(
+                self.org_id, self.workflow_id
+            )
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_non_existing_workflow(self):
