@@ -234,9 +234,10 @@ class TestCSV2Task(TestCase):
                 self.assertEqual(1, title_row.count(input_item["id"]))
 
 
-class TestUploadFail(APITestCase):
+class TestUploadExtremes(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "data_space.csv")
+        self.feedback_file_path = os.path.join(_CURRENT_DIR, "data", "feedback.csv")
         registration_data = {
             "email": "foo@bar.com",
             "password": "foowordbar",
@@ -252,7 +253,7 @@ class TestUploadFail(APITestCase):
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
 
-    def test_upload(self):
+    def test_upload_spaces(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "name": "uploader",
@@ -286,3 +287,41 @@ class TestUploadFail(APITestCase):
         self.assertEqual(
             response.status_code, status.HTTP_400_BAD_REQUEST, response.content
         )
+
+    def test_upload_with_emoji(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        workflow_data = {
+            "name": "feedback",
+            "description": "emoji wf",
+            "inputs": [
+                {"id": "submitter_picture", "name": "alpha", "type": "image"},
+                {"id": "submitter_full_name", "name": "beta", "type": "text"},
+                {"id": "submission_date", "name": "gamma", "type": "date"},
+                {"id": "subject", "name": "eta", "type": "text"},
+                {"id": "body", "name": "leta", "type": "text"},
+                {"id": "organization", "name": "my", "type": "text"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {"options": ["foo1", "bar1"]},
+                }
+            ],
+        }
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        workflow_id = Workflow.objects.get(name="feedback").id
+        with open(self.feedback_file_path, encoding="ISO-8859-1") as f:
+            data = {"file": f}
+            response = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(self.org_id, workflow_id),
+                data=data,
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        workflow = Workflow.objects.get(pk=workflow_id)
+        self.assertEqual(workflow.n_tasks, 6)

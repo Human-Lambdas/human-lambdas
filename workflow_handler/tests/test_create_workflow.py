@@ -269,5 +269,7 @@ class TestCreateWorkflow(APITestCase):
             workflow_data,
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(
+            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
+        )
         self.assertEqual(1, Workflow.objects.filter(name=workflow_data["name"]).count())

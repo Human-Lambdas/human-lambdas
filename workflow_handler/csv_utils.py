@@ -21,27 +21,22 @@ def process_csv(csv_file, workflow, source):
     title_row = next(dataset)
     validate_keys(title_row, workflow)
     task_counter = 0
-    for ic, row in enumerate(dataset):
-        if row == title_row:
-            continue
-        else:
-            inputs = []
-            for input in workflow.inputs:
-                inputs.append(
-                    {
-                        "id": input["id"],
-                        "name": input["name"],
-                        "type": input["type"],
-                        "value": row[title_row.index(input["id"])],
-                    }
-                )
-        task_obj = Task(
+    for row in dataset:
+        inputs = [
+            {
+                "id": w_input["id"],
+                "name": w_input["name"],
+                "type": w_input["type"],
+                "value": row[title_row.index(w_input["id"])],
+            }
+            for w_input in workflow.inputs
+        ]
+        Task(
             inputs=inputs,
             outputs=copy.deepcopy(workflow.outputs),
             workflow=workflow,
             source=source,
-        )
-        task_obj.save()
+        ).save()
         task_counter += 1
     workflow.n_tasks = F("n_tasks") + task_counter
     workflow.save()
