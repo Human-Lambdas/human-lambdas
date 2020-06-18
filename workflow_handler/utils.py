@@ -1,5 +1,3 @@
-import cchardet
-
 from .models import WorkflowHook
 
 
@@ -42,6 +40,6 @@ def decode_csv(file_obj):
 
 def unidecode(text):
     try:
-        return text.decode(cchardet.detect(text)["encoding"])
+        return text.decode("utf-8")
     except UnicodeDecodeError:
         return text.decode()
