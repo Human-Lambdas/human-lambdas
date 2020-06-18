@@ -7,7 +7,7 @@ from external.task_formats import process_external_completed_tasks
 
 
 class Workflow(models.Model):
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=140)
     description = models.TextField(blank=True)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     inputs = JSONField()

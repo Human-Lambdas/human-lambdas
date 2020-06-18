@@ -14,6 +14,7 @@ from workflow_handler.audits import (
     GetCompletedTaskView,
     ListSourcesView,
 )
+from external.views import GetExternalCompletedTaskView, CreateTaskView
 
 
 urlpatterns = [
@@ -44,4 +45,13 @@ urlpatterns = [
         name="completed-tasks-csv",
     ),
     path("/<int:workflow_id>/sources", ListSourcesView.as_view(), name="list-sources"),
+    # temporary external API endpoints
+    path(
+        "/<int:workflow_id>/tasks/completed",
+        GetExternalCompletedTaskView.as_view(),
+        name="external-completed-task",
+    ),
+    path(
+        "/<int:workflow_id>/tasks/create", CreateTaskView.as_view(), name="create-task",
+    ),
 ]
