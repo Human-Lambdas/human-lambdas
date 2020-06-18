@@ -316,7 +316,7 @@ class TestUploadExtremes(APITestCase):
             format="json",
         )
         workflow_id = Workflow.objects.get(name="feedback").id
-        with open(self.feedback_file_path, encoding="ISO-8859-1") as f:
+        with open(self.feedback_file_path) as f:
             data = {"file": f}
             response = self.client.post(
                 "/v1/orgs/{0}/workflows/{1}/upload".format(self.org_id, workflow_id),
