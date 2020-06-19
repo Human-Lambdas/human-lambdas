@@ -1,3 +1,5 @@
+import cchardet
+
 from .models import WorkflowHook
 
 
@@ -42,4 +44,4 @@ def unidecode(text):
     try:
         return text.decode("utf-8")
     except UnicodeDecodeError:
-        return text.decode()
+        return text.decode(cchardet.detect(text)["encoding"])
