@@ -1,13 +1,14 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-
-from .jwt_token import HLTokenObtainPairView
-from .views import (
+from user_handler.jwt_token import HLTokenObtainPairView
+from user_handler.views import (
     RegistrationView,
     HelloView,
-    InvitationView,
     RetrieveUpdateUserView,
     APIAuthToken,
+)
+from user_handler.invitation import InvitationView
+from user_handler.password_retrieval import (
     SendForgottenPasswordView,
     ForgottenPasswordView,
 )

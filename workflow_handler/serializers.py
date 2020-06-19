@@ -136,7 +136,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(exception_text)
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class BaseTaskSerializer(serializers.ModelSerializer):
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
             err_msg = "Unexpected event {}".format(event)
@@ -150,7 +150,6 @@ class TaskSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
             "inputs",
-            "outputs",
             "assigned_to",
             "completed_at",
         ]
@@ -188,6 +187,20 @@ class TaskSerializer(serializers.ModelSerializer):
         except SchemaError as exception_text:
             raise serializers.ValidationError(exception_text)
 
+
+class TaskSerializer(BaseTaskSerializer):
+    class Meta:
+        model = Task
+        fields = [
+            "id",
+            "status",
+            "created_at",
+            "inputs",
+            "outputs",
+            "assigned_to",
+            "completed_at",
+        ]
+
     def validate_outputs(self, data):
         try:
             if self.partial:
@@ -209,11 +222,6 @@ class TaskSerializer(serializers.ModelSerializer):
 class CompletedTaskSerializer(TaskSerializer):
     def to_representation(self, instance):
         return instance.get_formatted_task()
-
-
-class CompletedExternalTaskSerializer(TaskSerializer):
-    def to_representation(self, instance):
-        return instance.get_formatted_task_external()
 
 
 class SourceSerializer(serializers.ModelSerializer):

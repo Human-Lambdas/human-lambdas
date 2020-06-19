@@ -6,8 +6,9 @@ WORKFLOW_INPUT_SCHEMA = Schema(
         {
             "id": And(str, len),
             "name": And(str, len),
-            "type": Or("text", "image", "number", "date", "audio", "video"),
+            "type": Or("text", "image", "number", "date", "audio", "video", "list"),
             Optional("layout"): dict,
+            Optional("subtype"): And(str, len),
         }
     ],
     ignore_extra_keys=True,
@@ -18,9 +19,10 @@ TASK_INPUT_SCHEMA = Schema(
         {
             "id": And(str, len),
             "name": And(str, len),
-            "type": Or("text", "image", "number", "date", "audio", "video"),
+            "type": Or("text", "image", "number", "date", "audio", "video", "list"),
             Optional("layout"): dict,
-            "value": Or(str, int, float),
+            Optional("subtype"): And(str, len),
+            "value": Or(str, int, float, list),
         }
     ],
     ignore_extra_keys=True,

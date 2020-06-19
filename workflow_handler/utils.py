@@ -41,4 +41,7 @@ def decode_csv(file_obj):
 
 
 def unidecode(text):
-    return text.decode(cchardet.detect(text)["encoding"])
+    try:
+        return text.decode("utf-8")
+    except UnicodeDecodeError:
+        return text.decode(cchardet.detect(text)["encoding"])
