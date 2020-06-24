@@ -1,5 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from workflow_handler.models import Workflow
+
+
+class Notification(models.Model):
+    enabled = models.BooleanField(default=True)
+    last_notified = models.DateTimeField(null=True)
+
+
+class WorkflowNotification(models.Model):
+    workflow = models.OneToOneField(Workflow, on_delete=models.CASCADE)
+    enabled = models.BooleanField(default=False)
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
 
 
 class LowercaseEmailField(models.EmailField):
@@ -58,6 +70,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
     current_organization_id = models.IntegerField(null=True)
     is_superuser = models.BooleanField(default=False)
+    notifications = models.OneToOneField(Notification, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.email

@@ -3,7 +3,7 @@ import logging
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from user_handler.models import User, Organization
+from user_handler.models import User
 
 logger = logging.getLogger(__file__)
 

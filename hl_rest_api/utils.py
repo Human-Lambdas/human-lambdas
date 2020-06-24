@@ -7,6 +7,8 @@ from django.conf import settings
 from rest_framework.views import exception_handler
 from rest_framework.exceptions import ErrorDetail
 from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Personalization, Email
+
 
 logger = logging.getLogger(__file__)
 
