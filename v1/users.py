@@ -38,5 +38,5 @@ urlpatterns = [
     path("/<int:pk>", RetrieveUpdateUserView.as_view(), name="update-user"),
     path("/api-token", APIAuthToken.as_view(), name="api-token"),
 
-    path("/v1/users/notifications", NotificationView.as_view(), name="notifications")
+    path("/notifications", NotificationView.as_view(), name="notifications")
 ]

@@ -1,20 +1,33 @@
-from rest_framework.generics import  RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework import serializers
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+
 
 from .models import Notification
 
 
-
 class NotificationSerializer(serializers.ModelSerializer):
+    workflow_notifications = serializers.JSONField()
     class Meta:
         model = Notification
-        fields = ["__all__"]
+        fields = "__all__"
         extra_kwargs = {}
 
-    # def update(self, instance, validated_data):
-    #
-    #     return instance
+    def to_representation(self, instance):
+        return instance.format_output()
+
+    def update(self, instance, validated_data):
+        instance.enabled = validated_data.get("enabled", instance.enabled)
+        workflow_notifications = validated_data.get("workflow_notifications", [])
+        for workflow_notification in workflow_notifications:
+            wfnotification_obj = instance.workflownotification_set.filter(workflow__pk=workflow_notification["id"]).first()
+            if wfnotification_obj:
+                wfnotification_obj.enabled = workflow_notification["enabled"]
+                wfnotification_obj.save()
+        instance.save()
+        return instance
 
 
 class NotificationView(RetrieveUpdateAPIView):
@@ -23,39 +36,15 @@ class NotificationView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return user.notifications
+        return Notification.objects.filter(pk=user.notifications.pk)
 
-    # def get_object(self):
-    #     obj = get_object_or_404(self.get_queryset())
-    #     return obj
-    #
-    # def retrieve(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     serializer = self.get_serializer(instance)
-    #     return Response(data, status=200)
-    #
+    def get_object(self):
+        obj = get_object_or_404(self.get_queryset())
+        return obj
+
     # def update(self, request, *args, **kwargs):
     #     partial = kwargs.pop("partial", False)
     #     instance = self.get_object()
-    #     # change password work
-    #     if request.data.get("currentPassword") or request.data.get("password"):
-    #         if "currentPassword" not in request.data or "password" not in request.data:
-    #             error_message = (
-    #                 "Both the current password and the new password must be provided"
-    #             )
-    #             return Response(
-    #                 {"status_code": 400, "errors": [{"message": error_message}]},
-    #                 status=400,
-    #             )
-    #         if not instance.check_password(request.data["currentPassword"]):
-    #             error_message = (
-    #                 "The current password provided does not match the user password"
-    #             )
-    #             return Response(
-    #                 {"status_code": 400, "errors": [{"message": error_message}]},
-    #                 status=400,
-    #             )
-    #     # throw any errors otherwise let through
     #     serializer = self.get_serializer(instance, data=request.data, partial=partial)
     #     serializer.is_valid(raise_exception=True)
     #     self.perform_update(serializer)
