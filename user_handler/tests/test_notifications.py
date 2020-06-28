@@ -1,8 +1,8 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
-
 from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Workflow, WorkflowNotification
+from user_handler.notifications import send_notification
 
 
 class TestNotifications(APITestCase):
@@ -41,38 +41,37 @@ class TestNotifications(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        user = User.objects.get(pk=user_id)
-        notification = Notification()
-        notification.save()
-        user.notifications = notification
-        user.save()
         workflow = Workflow.objects.get(pk=response.data["id"])
         self.workflow_id = workflow.pk
-        WorkflowNotification(workflow=workflow, notification=user.notifications, enabled=True).save()
 
     def test_notification_retrieval(self):
-        response = self.client.get(
-            "/v1/users/notifications",
-        )
+        response = self.client.get("/v1/users/notifications",)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["workflow_notifications"]), 1)
         self.assertTrue(response.data["workflow_notifications"][0]["enabled"])
 
     def test_notification_update(self):
-        response = self.client.patch(
-            "/v1/users/notifications",
-            data={"enabled": False}
-        )
+        response = self.client.patch("/v1/users/notifications", data={"enabled": False})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(response.data["enabled"])
 
     def test_notification_update_workflow(self):
         response = self.client.patch(
             "/v1/users/notifications",
-            data={"workflow_notifications": [
-                {"id": self.workflow_id, "enabled": False}
-            ]},
-            format="json"
+            data={
+                "workflow_notifications": [{"id": self.workflow_id, "enabled": False}]
+            },
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(response.data["workflow_notifications"][0]["enabled"])
+
+    def test_send_notification(self):
+        workflow = Workflow.objects.get(pk=self.workflow_id)
+        wfnotifications = WorkflowNotification.objects.filter(workflow=workflow).all()
+        for wfn in wfnotifications:
+            self.assertIsNone(wfn.last_notified)
+        send_notification(workflow=workflow)
+        wfnotifications = WorkflowNotification.objects.filter(workflow=workflow).all()
+        for wfn in wfnotifications:
+            self.assertIsNotNone(wfn.last_notified)

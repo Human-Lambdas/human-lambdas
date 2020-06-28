@@ -7,18 +7,38 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user_handler', '0012_auto_20200624_1449'),
-        ('workflow_handler', '0018_auto_20200618_0949'),
+        ("user_handler", "0012_auto_20200624_1449"),
+        ("workflow_handler", "0018_auto_20200618_0949"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WorkflowNotification',
+            name="WorkflowNotification",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('enabled', models.BooleanField(default=True)),
-                ('notification', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user_handler.Notification')),
-                ('workflow', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='workflow_handler.Workflow')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("enabled", models.BooleanField(default=True)),
+                (
+                    "notification",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="user_handler.Notification",
+                    ),
+                ),
+                (
+                    "workflow",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="workflow_handler.Workflow",
+                    ),
+                ),
             ],
         ),
     ]

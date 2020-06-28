@@ -7,21 +7,33 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user_handler', '0011_auto_20200527_1448'),
+        ("user_handler", "0011_auto_20200527_1448"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('enabled', models.BooleanField(default=True)),
-                ('last_notified', models.DateTimeField(null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("enabled", models.BooleanField(default=True)),
+                ("last_notified", models.DateTimeField(null=True)),
             ],
         ),
         migrations.AddField(
-            model_name='user',
-            name='notifications',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, to='user_handler.Notification'),
+            model_name="user",
+            name="notifications",
+            field=models.OneToOneField(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="user_handler.Notification",
+            ),
         ),
     ]

@@ -22,7 +22,11 @@ class TestWebhook(APITestCase):
         notification = Notification()
         notification.save()
 
-        user = User(name=self.preset_user_name, email=self.preset_user_email, notifications=notification)
+        user = User(
+            name=self.preset_user_name,
+            email=self.preset_user_email,
+            notifications=notification,
+        )
         user.set_password(self.preset_user_password)
         user.save()
         organization = Organization(name=self.organization_name)

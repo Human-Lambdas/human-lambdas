@@ -35,14 +35,15 @@ class SendGrid(SGMail):
         self.default_from = ("noreply@humanlambdas.com", "Human Lambdas")
         self.client = SendGridAPIClient(self.api_key).client
 
-    def send_email(self, to_email, subject, template_id, template_data, from_email=None, *args, **kwargs):  # noqa
+    def send_email(
+        self, to_email, template_id, template_data, from_email=None, *args, **kwargs
+    ):  # noqa
         if settings.DEBUG:
             return "Debug mode does not send emails"
         if not any([from_email, self.default_from]):
             raise ValueError("Missing from email and no default.")
         self.template_id = template_id
         self.from_email = self.default_from
-        self.subject = subject
 
         personalization = Personalization()
 
@@ -65,8 +66,7 @@ class SendGrid(SGMail):
                 yield email
         elif type(emails[0]) is dict:
             for email in emails:
-                yield Email(email['email'])
+                yield Email(email["email"])
         else:
             for email in emails:
                 yield Email(email)
-

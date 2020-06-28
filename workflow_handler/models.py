@@ -113,3 +113,4 @@ class WorkflowNotification(models.Model):
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
     enabled = models.BooleanField(default=True)
     notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
+    last_notified = models.DateTimeField(null=True)

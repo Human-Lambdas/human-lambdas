@@ -14,16 +14,17 @@ class Command(BaseCommand):
                 notification.save()
                 for org in user.organization_set.all():
                     for workflow in org.workflow_set.all():
-                        WorkflowNotification(workflow=workflow, enabled=True, notification=notification)
+                        WorkflowNotification(
+                            workflow=workflow, enabled=True, notification=notification
+                        )
                 self.stdout.write(
                     self.style.SUCCESS(
-                        'Enabled all workflow notifications for user %s', user.pk
+                        "Enabled all workflow notifications for user %s", user.pk
                     )
                 )
             else:
                 self.stdout.write(
                     self.style.SUCCESS(
-                        'Notification alredy exists for user %s'
-                        % user.pk
+                        "Notification alredy exists for user %s" % user.pk
                     )
                 )

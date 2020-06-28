@@ -95,7 +95,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
             webhook_data["user"] = user
             WorkflowHook.objects.create(workflow=workflow, **webhook_data)
         for org_user in organization.user.all():
-            wfnotification = WorkflowNotification(workflow=workflow, notification=org_user.notifications, enabled=True)
+            wfnotification = WorkflowNotification(
+                workflow=workflow, notification=org_user.notifications, enabled=True
+            )
             wfnotification.save()
         return workflow
 

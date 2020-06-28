@@ -228,3 +228,8 @@ if LOCAL_IP and not DEBUG:
 TASK_EXPIRATION_MIN = 60  # Minutes
 
 SEGMENT_KEY = os.environ.get("SEGMENT_KEY")
+
+# Email template ids
+SEND_NOTIFICATION_TEMPLATE = os.environ.get("SEND_NOTIFICATION_TEMPLATE")
+
+THROTTLING_TIME_MIN = 5
