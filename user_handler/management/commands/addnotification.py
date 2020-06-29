@@ -12,6 +12,8 @@ class Command(BaseCommand):
             if not user.notifications:
                 notification = Notification()
                 notification.save()
+                user.notifications = notification
+                user.save()
                 for org in user.organization_set.all():
                     for workflow in org.workflow_set.all():
                         WorkflowNotification(
@@ -19,7 +21,7 @@ class Command(BaseCommand):
                         )
                 self.stdout.write(
                     self.style.SUCCESS(
-                        "Enabled all workflow notifications for user %s", user.pk
+                        "Enabled all workflow notifications for user %s" % user.pk
                     )
                 )
             else:
