@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from hl_rest_api import analytics
 from workflow_handler.models import Workflow, Task
 from workflow_handler.audits import GetCompletedTaskView
+from user_handler.notifications import send_notification
 
 from .serializers import CompletedTaskSerializer, CreateTaskSerializer
 
@@ -93,6 +94,7 @@ class CreateTaskView(CreateAPIView):
         with transaction.atomic():
             workflow.n_tasks = F("n_tasks") + 1
             workflow.save()
+        send_notification(workflow)
         analytics.track(
             self.request.user.pk,
             "Task Create Success",

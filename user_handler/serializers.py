@@ -3,7 +3,7 @@ import logging
 from rest_framework import serializers
 from hl_rest_api import analytics
 
-from .models import User, Organization
+from .models import User, Organization, Notification
 
 
 logger = logging.getLogger(__file__)
@@ -40,7 +40,9 @@ class UserSerializer(serializers.ModelSerializer):
         email = validated_data["email"].lower()
         is_admin = validated_data["is_admin"]
         organization_name = validated_data["organization"]
-        user_obj = User(name=name, email=email)
+        notification = Notification()
+        notification.save()
+        user_obj = User(name=name, email=email, notifications=notification)
         user_obj.set_password(password)
         user_obj.save()
         organization_obj = Organization.objects.filter(name=organization_name)

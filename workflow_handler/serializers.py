@@ -7,7 +7,7 @@ from rest_framework import serializers, exceptions
 from user_handler.models import Organization
 from schema import SchemaError
 
-from .models import Workflow, Task, WorkflowHook, Source
+from .models import Workflow, Task, WorkflowHook, Source, WorkflowNotification
 from .schemas import (
     WORKFLOW_INPUT_SCHEMA,
     TASK_INPUT_SCHEMA,
@@ -94,6 +94,11 @@ class WorkflowSerializer(serializers.ModelSerializer):
             webhook_data["event"] = "task.completed"
             webhook_data["user"] = user
             WorkflowHook.objects.create(workflow=workflow, **webhook_data)
+        for org_user in organization.user.all():
+            wfnotification = WorkflowNotification(
+                workflow=workflow, notification=org_user.notifications, enabled=True
+            )
+            wfnotification.save()
         return workflow
 
     def update(self, instance, validated_data):

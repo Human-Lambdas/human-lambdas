@@ -3,6 +3,7 @@ import copy
 
 from django.db.models import F
 from django.http import HttpResponse
+from user_handler.notifications import send_notification
 
 from .models import Task
 
@@ -38,6 +39,8 @@ def process_csv(csv_file, workflow, source):
             source=source,
         ).save()
         task_counter += 1
+        send_notification(workflow)
+
     workflow.n_tasks = F("n_tasks") + task_counter
     workflow.save()
 

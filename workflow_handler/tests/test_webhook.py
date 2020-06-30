@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import WorkflowHook, Workflow, Task
-from user_handler.models import User, Organization
+from user_handler.models import User, Organization, Notification
 
 
 logger = logging.getLogger(__file__)
@@ -19,8 +19,14 @@ class TestWebhook(APITestCase):
         self.preset_user_email = "foo@bar.com"
         self.organization_name = "fooinc"
         self.preset_user_password = "foowordbar"
+        notification = Notification()
+        notification.save()
 
-        user = User(name=self.preset_user_name, email=self.preset_user_email)
+        user = User(
+            name=self.preset_user_name,
+            email=self.preset_user_email,
+            notifications=notification,
+        )
         user.set_password(self.preset_user_password)
         user.save()
         organization = Organization(name=self.organization_name)

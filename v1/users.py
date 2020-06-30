@@ -12,6 +12,7 @@ from user_handler.password_retrieval import (
     SendForgottenPasswordView,
     ForgottenPasswordView,
 )
+from user_handler.notifications import NotificationView
 
 
 urlpatterns = [
@@ -36,4 +37,5 @@ urlpatterns = [
     ),
     path("/<int:pk>", RetrieveUpdateUserView.as_view(), name="update-user"),
     path("/api-token", APIAuthToken.as_view(), name="api-token"),
+    path("/notifications", NotificationView.as_view(), name="notifications"),
 ]
