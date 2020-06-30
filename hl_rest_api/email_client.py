@@ -1,6 +1,6 @@
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail as SGMail
-from sendgrid.helpers.mail import Email, Personalization
+from sendgrid.helpers.mail import Email, Personalization, GroupId, Asm
 from django.conf import settings
 
 
@@ -36,7 +36,14 @@ class SendGrid(SGMail):
         self.client = SendGridAPIClient(self.api_key).client
 
     def send_email(
-        self, to_email, template_id, template_data, from_email=None, *args, **kwargs
+        self,
+        to_email,
+        template_id,
+        template_data,
+        group_id,
+        from_email=None,
+        *args,
+        **kwargs
     ):  # noqa
         if settings.DEBUG:
             return "Debug mode does not send emails"
@@ -57,7 +64,7 @@ class SendGrid(SGMail):
 
         personalization.dynamic_template_data = template_data
         self.add_personalization(personalization)
-
+        self.asm = Asm(GroupId(group_id))
         return self.client.mail.send.post(request_body=self.get())
 
     def _extract_emails(self, emails):
