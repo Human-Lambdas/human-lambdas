@@ -70,7 +70,7 @@ def send_notification(workflow):
             to_email=user.email,
             template_id=settings.SEND_NOTIFICATION_TEMPLATE,
             template_data=template_data,
-            group_id=settings.NOTIFICATION_ASM_GROUPID,
+            group_id=int(settings.NOTIFICATION_ASM_GROUPID),
         )
         wf_notification.last_notified = timezone.now()
         wf_notification.save()
