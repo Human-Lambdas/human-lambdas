@@ -11,6 +11,8 @@ def sync_workflow_task(workflow, task):
             final_input["id"] = workflow_input["id"]
             final_input["name"] = workflow_input["name"]
             final_input["type"] = workflow_input["type"]
+            if "subtype" in workflow_input and workflow_input["type"] == "list":
+                final_input["subtype"] = workflow_input["subtype"]
             potential_input_value = [
                 el["value"] for el in task.inputs if el["id"] == workflow_input["id"]
             ]
