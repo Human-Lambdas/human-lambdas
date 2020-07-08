@@ -43,7 +43,6 @@ def process_csv(csv_file, workflow, source):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
     validate_keys(title_row, workflow)
-    task_counter = 0
     for row in dataset:
         inputs = [
             make_input_dict(w_input, row, title_row) for w_input in workflow.inputs
@@ -54,11 +53,9 @@ def process_csv(csv_file, workflow, source):
             workflow=workflow,
             source=source,
         ).save()
-        task_counter += 1
-        send_notification(workflow)
-
-    workflow.n_tasks = F("n_tasks") + task_counter
-    workflow.save()
+        workflow.n_tasks = F("n_tasks") + 1
+        workflow.save()
+    send_notification(workflow)
 
 
 def task_list_to_csv_response(task_list):
