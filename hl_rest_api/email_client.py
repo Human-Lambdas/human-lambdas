@@ -1,7 +1,18 @@
+import logging
+
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail as SGMail
 from sendgrid.helpers.mail import Email, Personalization, GroupId, Asm
 from django.conf import settings
+
+logger = logging.getLogger(__file__)
+
+
+def get_personalization(email, template_data):
+    personalization = Personalization()
+    personalization.add_to(email)
+    personalization.dynamic_template_data = template_data
+    return personalization
 
 
 class SendGrid(SGMail):
@@ -10,7 +21,9 @@ class SendGrid(SGMail):
     default_from = None
 
     def __init__(self, app=None, **opts):
-        self.init_app()
+        self.api_key = settings.SENDGRID_API_KEY
+        self.default_from = ("noreply@humanlambdas.com", "Human Lambdas")
+        self.client = SendGridAPIClient(self.api_key).client
         super(SGMail, self).__init__()
         self.from_email = None
         self.subject = None
@@ -30,11 +43,6 @@ class SendGrid(SGMail):
         self._tracking_settings = None
         self._reply_to = None
 
-    def init_app(self):
-        self.api_key = settings.SENDGRID_API_KEY
-        self.default_from = ("noreply@humanlambdas.com", "Human Lambdas")
-        self.client = SendGridAPIClient(self.api_key).client
-
     def send_email(
         self,
         to_email,
@@ -52,20 +60,20 @@ class SendGrid(SGMail):
         self.template_id = template_id
         self.from_email = self.default_from
 
-        personalization = Personalization()
-
         if type(to_email) is list:
             for email in self._extract_emails(to_email):
-                personalization.add_to(email)
+                self.add_personalization(get_personalization(email, template_data))
         elif type(to_email) is Email:
-            personalization.add_to(to_email)
+            self.add_personalization(get_personalization(to_email, template_data))
         elif type(to_email) is str:
-            personalization.add_to(Email(to_email))
+            self.add_personalization(
+                get_personalization(Email(to_email), template_data)
+            )
 
-        personalization.dynamic_template_data = template_data
-        self.add_personalization(personalization)
         self.asm = Asm(GroupId(group_id))
-        return self.client.mail.send.post(request_body=self.get())
+        request_body = self.get()
+        logger.info("Sending email with request body: %s", request_body)
+        return self.client.mail.send.post(request_body=request_body)
 
     def _extract_emails(self, emails):
         if type(emails[0]) is Email:
