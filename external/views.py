@@ -41,6 +41,13 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
         )
 
 
+def get_input_value(request_inputs, w_input):
+    input_value = request_inputs[w_input["id"]]
+    if w_input["type"] == "list" and w_input["subtype"] == "number":
+        input_value = [float(i) for i in input_value]
+    return input_value
+
+
 class CreateTaskView(CreateAPIView):
     """
     External API View for creating Tasks
@@ -84,7 +91,9 @@ class CreateTaskView(CreateAPIView):
             if "layout" in task_input:
                 del task_input["layout"]
             try:
-                task_input["value"] = self.request.data["inputs"][w_input["id"]]
+                task_input["value"] = get_input_value(
+                    self.request.data["inputs"], w_input
+                )
             except KeyError:
                 raise serializers.ValidationError(
                     "Cannot find input with input id: {}".format(w_input["id"])
