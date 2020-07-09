@@ -1,5 +1,7 @@
 on:
   workflow_dispatch:
+    ref:
+    - master
     inputs:
       logLevel:
         description: 'Log level'
