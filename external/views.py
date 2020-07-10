@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from hl_rest_api import analytics
 from workflow_handler.models import Workflow, Task
 from workflow_handler.audits import GetCompletedTaskView
+from user_handler.notifications import send_notification
 
 from .serializers import CompletedTaskSerializer, CreateTaskSerializer
 
@@ -38,6 +39,13 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
             .filter(*args, **kwargs)
             .order_by("-completed_at")
         )
+
+
+def get_input_value(request_inputs, w_input):
+    input_value = request_inputs[w_input["id"]]
+    if w_input["type"] == "list" and w_input["subtype"] == "number":
+        input_value = [float(i) for i in input_value]
+    return input_value
 
 
 class CreateTaskView(CreateAPIView):
@@ -83,7 +91,9 @@ class CreateTaskView(CreateAPIView):
             if "layout" in task_input:
                 del task_input["layout"]
             try:
-                task_input["value"] = self.request.data["inputs"][w_input["id"]]
+                task_input["value"] = get_input_value(
+                    self.request.data["inputs"], w_input
+                )
             except KeyError:
                 raise serializers.ValidationError(
                     "Cannot find input with input id: {}".format(w_input["id"])
@@ -93,6 +103,7 @@ class CreateTaskView(CreateAPIView):
         with transaction.atomic():
             workflow.n_tasks = F("n_tasks") + 1
             workflow.save()
+        send_notification(workflow)
         analytics.track(
             self.request.user.pk,
             "Task Create Success",

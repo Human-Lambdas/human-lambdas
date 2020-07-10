@@ -325,3 +325,61 @@ class TestUploadExtremes(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         workflow = Workflow.objects.get(pk=workflow_id)
         self.assertEqual(workflow.n_tasks, 6)
+
+
+class TestUploadList(APITestCase):
+    def setUp(self):
+        self.file_path = os.path.join(_CURRENT_DIR, "data", "list_data.csv")
+        registration_data = {
+            "email": "foo@bar.com",
+            "password": "foowordbar",
+            "organization": "fooInc",
+            "is_admin": True,
+            "name": "foo",
+        }
+        _ = self.client.post("/v1/users/register", registration_data)
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
+        response = self.client.post(
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
+        )
+        self.access_token = response.data["access"]
+        self.refresh = response.data["refresh"]
+
+    def test_upload_list(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        workflow_data = {
+            "name": "uploader",
+            "description": "great wf",
+            "inputs": [
+                {"id": "Alpha", "name": "alpha", "type": "list", "subtype": "number"},
+                {"id": "Beta", "name": "beta", "type": "number"},
+                {"id": "Gamma", "name": "gamma", "type": "number"},
+            ],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {"options": ["foo1", "bar1"]},
+                }
+            ],
+        }
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        workflow_id = Workflow.objects.get(name="uploader").id
+        with open(self.file_path) as f:
+            data = {"file": f}
+            response = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/upload".format(self.org_id, workflow_id),
+                data=data,
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        for task in Task.objects.filter(workflow__pk=workflow_id).all():
+            list_input = [tinput for tinput in task.inputs if tinput["id"] == "Alpha"][
+                0
+            ]
+            self.assertIsInstance(list_input["value"], list)

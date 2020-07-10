@@ -2,6 +2,23 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 
+class Notification(models.Model):
+    enabled = models.BooleanField(default=True)
+
+    def format_output(self):
+        return {
+            "enabled": self.enabled,
+            "workflow_notifications": [
+                {
+                    "workflow_id": wnotification.workflow.pk,
+                    "workflow_name": wnotification.workflow.name,
+                    "enabled": wnotification.enabled,
+                }
+                for wnotification in self.workflownotification_set.all()
+            ],
+        }
+
+
 class LowercaseEmailField(models.EmailField):
     """
     Override EmailField to convert emails to lowercase before saving.
@@ -58,6 +75,9 @@ class User(AbstractBaseUser):
     objects = UserManager()
     current_organization_id = models.IntegerField(null=True)
     is_superuser = models.BooleanField(default=False)
+    notifications = models.OneToOneField(
+        Notification, on_delete=models.CASCADE, null=True
+    )
 
     def __str__(self):
         return self.email

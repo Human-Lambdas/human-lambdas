@@ -6,7 +6,9 @@ from django.template.loader import get_template
 from django.conf import settings
 from django.utils import timezone
 from user_handler.permissions import IsOrgAdmin
-from user_handler.models import User, Organization, Invitation
+from user_handler.models import User, Organization, Invitation, Notification
+from django.shortcuts import get_object_or_404
+from workflow_handler.models import WorkflowNotification
 from hl_rest_api.utils import SendGridClient, is_invalid_email, generate_unique_token
 
 
@@ -141,44 +143,26 @@ class SendInviteView(APIView):
 class InvitationView(APIView):
     permission_classes = (AllowAny,)
 
+    def get_queryset(self):
+        return Invitation.objects.filter(token=self.kwargs["invite_token"])
+
     def get(self, request, *args, **kwargs):
-        invite = Invitation.objects.filter(token=self.kwargs["invite_token"])
-        if not invite.exists():
-            return Response(
-                {
-                    "status_code": 404,
-                    "errors": [
-                        {
-                            "message": "this invitation has either been revoked, or is invalid"
-                        }
-                    ],
-                },
-                status=404,
-            )
-        else:
-            invitation_email, invitation_org = (
-                invite.first().email,
-                invite.first().organization.name,
-            )
-            return Response(
-                {
-                    "status_code": 200,
-                    "invitation_email": invitation_email,
-                    "invitation_org": invitation_org,
-                },
-                status=200,
-            )
+        invite = get_object_or_404(self.get_queryset())
+        invitation_email, invitation_org = (
+            invite.email,
+            invite.organization.name,
+        )
+        return Response(
+            {
+                "status_code": 200,
+                "invitation_email": invitation_email,
+                "invitation_org": invitation_org,
+            },
+            status=200,
+        )
 
     def post(self, request, *args, **kwargs):
-        invite = Invitation.objects.filter(token=self.kwargs["invite_token"]).first()
-        if invite is None:
-            return Response(
-                {
-                    "status_code": 404,
-                    "errors": [{"message": "no invitation with this token exists"}],
-                },
-                status=404,
-            )
+        invite = get_object_or_404(self.get_queryset())
         if invite.expires_at < timezone.now():
             return Response(
                 {
@@ -187,55 +171,57 @@ class InvitationView(APIView):
                 },
                 status=400,
             )
+
+        invitation_org = invite.organization
+        if invitation_org.user.filter(email=invite.email).exists():
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [
+                        {"message": "this organization has already been joined"}
+                    ],
+                },
+                status=400,
+            )
+        user = User.objects.filter(email=invite.email).first()
+        if not user:
+            notification = Notification()
+            notification.save()
+            user = User(
+                email=invite.email,
+                name=request.data["name"],
+                current_organization_id=invitation_org.id,
+                notifications=notification,
+            )
+            user.set_password(request.data["password"])
+            user.save()
+            response_data = {
+                "data": {
+                    "status_code": 201,
+                    "message": "Your account has been created!",
+                    "email": invite.email,
+                },
+                "status": 201,
+            }
         else:
-            invitation_org = invite.organization
-            if Organization.objects.filter(
-                user__email=invite.email, name=str(invitation_org)
-            ).exists():
-                return Response(
-                    {
-                        "status_code": 400,
-                        "errors": [
-                            {"message": "this organization has already been joined"}
-                        ],
-                    },
-                    status=400,
-                )
-            if not User.objects.filter(email=invite.email).exists():
-                new_user = User(
-                    email=invite.email,
-                    name=request.data["name"],
-                    current_organization_id=invitation_org.id,
-                )
-                new_user.set_password(request.data["password"])
-                new_user.save()
-                invitation_org.add_admin(
-                    new_user
-                ) if invite.admin else invitation_org.user.add(new_user)
-                invites_to_delete = Invitation.objects.filter(
-                    organization__pk=invitation_org.id, email=invite.email
-                )
-                for invite_to_delete in invites_to_delete:
-                    invite_to_delete.delete()
-                return Response(
-                    {
-                        "status_code": 201,
-                        "message": "Your account has been created!",
-                        "email": invite.email,
-                    },
-                    status=201,
-                )
-            else:
-                user = User.objects.filter(email=invite.email).first()
-                invitation_org.add_admin(
-                    user
-                ) if invite.admin else invitation_org.user.add(user)
-                invites_to_delete = Invitation.objects.filter(
-                    organization__pk=invitation_org.id, email=invite.email
-                )
-                for invite_to_delete in invites_to_delete:
-                    invite_to_delete.delete()
-                return Response(
-                    {"status_code": 200, "message": "Success!", "email": invite.email},
-                    status=200,
-                )
+            response_data = {
+                "data": {
+                    "status_code": 200,
+                    "message": "Success!",
+                    "email": invite.email,
+                },
+                "status": 200,
+            }
+
+        for workflow in invitation_org.workflow_set.all():
+            WorkflowNotification(workflow=workflow, notification=notification).save()
+
+        if invite.admin:
+            invitation_org.add_admin(user)
+        else:
+            invitation_org.user.add(user)
+
+        Invitation.objects.filter(
+            organization__pk=invitation_org.id, email=invite.email
+        ).all().delete()
+        return Response(**response_data)

@@ -1,10 +1,21 @@
 import csv
 import copy
+from ast import literal_eval
 
 from django.db.models import F
 from django.http import HttpResponse
+from user_handler.notifications import send_notification
 
 from .models import Task
+
+
+def process_list(input_value):
+    return literal_eval(input_value)
+
+
+process_input = {
+    "list": process_list,
+}
 
 
 def validate_keys(title_row, workflow):
@@ -16,20 +27,25 @@ def validate_keys(title_row, workflow):
             raise Exception("The dataset is missing some columns")
 
 
+def make_input_dict(w_input, row, title_row):
+    input_value = row[title_row.index(w_input["id"])]
+    if w_input["type"] in process_input:
+        input_value = process_input[w_input["type"]](input_value)
+    return {
+        "id": w_input["id"],
+        "name": w_input["name"],
+        "type": w_input["type"],
+        "value": input_value,
+    }
+
+
 def process_csv(csv_file, workflow, source):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
     validate_keys(title_row, workflow)
-    task_counter = 0
     for row in dataset:
         inputs = [
-            {
-                "id": w_input["id"],
-                "name": w_input["name"],
-                "type": w_input["type"],
-                "value": row[title_row.index(w_input["id"])],
-            }
-            for w_input in workflow.inputs
+            make_input_dict(w_input, row, title_row) for w_input in workflow.inputs
         ]
         Task(
             inputs=inputs,
@@ -37,9 +53,9 @@ def process_csv(csv_file, workflow, source):
             workflow=workflow,
             source=source,
         ).save()
-        task_counter += 1
-    workflow.n_tasks = F("n_tasks") + task_counter
-    workflow.save()
+        workflow.n_tasks = F("n_tasks") + 1
+        workflow.save()
+    send_notification(workflow)
 
 
 def task_list_to_csv_response(task_list):

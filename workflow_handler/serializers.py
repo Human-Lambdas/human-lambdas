@@ -6,8 +6,9 @@ from django.utils import timezone
 from rest_framework import serializers, exceptions
 from user_handler.models import Organization
 from schema import SchemaError
+from django.db.models import Q
 
-from .models import Workflow, Task, WorkflowHook, Source
+from .models import Workflow, Task, WorkflowHook, Source, WorkflowNotification
 from .schemas import (
     WORKFLOW_INPUT_SCHEMA,
     TASK_INPUT_SCHEMA,
@@ -94,10 +95,23 @@ class WorkflowSerializer(serializers.ModelSerializer):
             webhook_data["event"] = "task.completed"
             webhook_data["user"] = user
             WorkflowHook.objects.create(workflow=workflow, **webhook_data)
+        for org_user in organization.user.all():
+            wfnotification = WorkflowNotification(
+                workflow=workflow, notification=org_user.notifications, enabled=True
+            )
+            wfnotification.save()
         return workflow
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get("name", instance.name)
+        workflow_name = validated_data.get("name")
+        if workflow_name:
+            if workflow_name in instance.organization.workflow_set.filter(
+                ~Q(pk=instance.pk)
+            ).values_list("name", flat=True):
+                raise serializers.ValidationError(
+                    "Workflow with same name already exists"
+                )
+            instance.name = workflow_name
         instance.description = validated_data.get("description", instance.description)
         instance.inputs = validated_data.get("inputs", instance.inputs)
         instance.outputs = validated_data.get("outputs", instance.outputs)

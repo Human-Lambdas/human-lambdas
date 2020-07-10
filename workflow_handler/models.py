@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField
-from user_handler.models import User, Organization
+from user_handler.models import User, Organization, Notification
 from rest_hooks.signals import hook_event
 from rest_hooks.models import AbstractHook
 from external.task_formats import process_external_completed_tasks
@@ -107,3 +107,10 @@ class Task(models.Model):
 
 class WorkflowHook(AbstractHook):
     workflow = models.OneToOneField(Workflow, on_delete=models.CASCADE,)
+
+
+class WorkflowNotification(models.Model):
+    workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
+    enabled = models.BooleanField(default=True)
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
+    last_notified = models.DateTimeField(null=True)

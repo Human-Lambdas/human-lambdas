@@ -67,7 +67,9 @@ class TestCreateWorkflow(APITestCase):
             workflow_data,
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(
+            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
+        )
         self.assertFalse(Workflow.objects.filter(name=workflow_data["name"]).exists())
 
     def test_input_validation_errors(self):
