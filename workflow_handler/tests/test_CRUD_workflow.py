@@ -204,6 +204,27 @@ class TestCRUDWorkflow(APITestCase):
         workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
+
+        workflow_data2 = {
+            "name": "foowf2",
+            "description": "great wf",
+            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
+            "outputs": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single-selection",
+                    "single-selection": {"options": ["foo1", "bar1"]},
+                }
+            ],
+        }
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data2,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
         updated_text = "not so great wf"
         updated_workflow_data = {
             "description": updated_text,
@@ -221,6 +242,17 @@ class TestCRUDWorkflow(APITestCase):
         self.assertEqual(updated_text, workflow.description)
         updated_workflow_data = {
             "name": workflow_data["name"],
+        }
+
+        response = self.client.patch(
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
+            updated_workflow_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_workflow_data = {
+            "name": workflow_data2["name"],
         }
 
         response = self.client.patch(

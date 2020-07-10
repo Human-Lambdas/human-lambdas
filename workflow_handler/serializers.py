@@ -6,6 +6,7 @@ from django.utils import timezone
 from rest_framework import serializers, exceptions
 from user_handler.models import Organization
 from schema import SchemaError
+from django.db.models import Q
 
 from .models import Workflow, Task, WorkflowHook, Source, WorkflowNotification
 from .schemas import (
@@ -104,9 +105,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         workflow_name = validated_data.get("name")
         if workflow_name:
-            if workflow_name in instance.organization.workflow_set.values_list(
-                "name", flat=True
-            ):
+            if workflow_name in instance.organization.workflow_set.filter(
+                ~Q(pk=instance.pk)
+            ).values_list("name", flat=True):
                 raise serializers.ValidationError(
                     "Workflow with same name already exists"
                 )
