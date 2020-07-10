@@ -102,7 +102,15 @@ class WorkflowSerializer(serializers.ModelSerializer):
         return workflow
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get("name", instance.name)
+        workflow_name = validated_data.get("name")
+        if workflow_name:
+            if workflow_name in instance.organization.workflow_set.values_list(
+                "name", flat=True
+            ):
+                raise serializers.ValidationError(
+                    "Workflow with same name already exists"
+                )
+            instance.name = workflow_name
         instance.description = validated_data.get("description", instance.description)
         instance.inputs = validated_data.get("inputs", instance.inputs)
         instance.outputs = validated_data.get("outputs", instance.outputs)

@@ -219,6 +219,16 @@ class TestCRUDWorkflow(APITestCase):
         workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
         workflow = workflow_obj.first()
         self.assertEqual(updated_text, workflow.description)
+        updated_workflow_data = {
+            "name": workflow_data["name"],
+        }
+
+        response = self.client.patch(
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
+            updated_workflow_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_list_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
