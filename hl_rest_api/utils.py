@@ -3,10 +3,8 @@ import re
 import ctypes
 
 from django.utils import timezone
-from django.conf import settings
 from rest_framework.views import exception_handler
 from rest_framework.exceptions import ErrorDetail
-from sendgrid import SendGridAPIClient
 
 
 logger = logging.getLogger(__file__)
@@ -74,22 +72,3 @@ def generate_unique_token(*args):
         to_hash += str(arg)
     token = ctypes.c_size_t(hash(to_hash)).value
     return token
-
-
-class MockSendGrid:
-    def send(self, message):
-        logger.debug("Following message was sent: %s", message)
-
-
-class SendGridClient(object):
-    instance = None
-
-    def __new__(cls):
-        if settings.DEBUG:
-            return MockSendGrid()
-        else:
-            if cls.instance is not None:
-                return cls.instance
-            else:
-                cls.instance = SendGridAPIClient(settings.SENDGRID_API_KEY)
-                return cls.instance
