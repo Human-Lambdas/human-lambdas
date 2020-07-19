@@ -59,10 +59,15 @@ class SendGrid(SGMail):
             raise ValueError("Missing from email and no default.")
         self.template_id = template_id
         self.from_email = self.default_from
-
         if type(to_email) is list:
-            for email in self._extract_emails(to_email):
-                self.add_personalization(get_personalization(email, template_data))
+            if isinstance(template_data, list):
+                for email, itemplate in zip(
+                    self._extract_emails(to_email), template_data
+                ):
+                    self.add_personalization(get_personalization(email, itemplate))
+            else:
+                for email in self._extract_emails(to_email):
+                    self.add_personalization(get_personalization(email, template_data))
         elif type(to_email) is Email:
             self.add_personalization(get_personalization(to_email, template_data))
         elif type(to_email) is str:

@@ -1,86 +1,81 @@
-from sendgrid.helpers.mail import Mail
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.template.loader import get_template
 from django.conf import settings
 from django.utils import timezone
 from user_handler.permissions import IsOrgAdmin
 from user_handler.models import User, Organization, Invitation, Notification
 from django.shortcuts import get_object_or_404
 from workflow_handler.models import WorkflowNotification
-from hl_rest_api.utils import SendGridClient, is_invalid_email, generate_unique_token
+from hl_rest_api.utils import is_invalid_email, generate_unique_token
+
+from .apps import UserHandlerConfig
 
 
 class SendInviteView(APIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
 
+    def get_queryset(self):
+        return Invitation.objects.filter(
+            organization__pk=self.kwargs["org_id"]
+        ).distinct()
+
     def get(self, request, *args, **kwargs):
-        invited_users = set(
-            Invitation.objects.filter(organization__pk=self.kwargs["org_id"])
-        )
-        invited_users_cleaned = []
-        for invited_user in invited_users:
-            invited_users_cleaned.append(
-                {
-                    "email": invited_user.email,
-                    "pending": True,
-                    "is_admin": invited_user.admin,
-                }
-            )
+        invited_users = [
+            {"email": invitation.email, "pending": True, "is_admin": invitation.admin}
+            for invitation in self.get_queryset()
+        ]
         return Response(
-            {"status_code": 200, "invited_users": invited_users_cleaned}, status=200
+            {"status_code": 200, "invited_users": invited_users}, status=200
         )
 
     def post(self, request, *args, **kwargs):
         email_set = set("".join(request.data["emails"].split()).split(","))
         invalid_email_list, already_added_email_list = [], []
-
+        organization = Organization.objects.get(pk=kwargs["org_id"])
+        template_data = []
+        emails = []
         for email in email_set:
             if is_invalid_email(email):
                 invalid_email_list.append(email)
                 continue
 
-            user = User.objects.filter(email=email).first()
-            organization = Organization.objects.get(pk=kwargs["org_id"])
-
-            if user in organization.user.all():
+            if Organization.objects.filter(user__email=email).exists():
                 already_added_email_list.append(email)
                 continue
 
             token = generate_unique_token(email, kwargs["org_id"])
-            invite = Invitation(
+            Invitation(
                 email=email,
                 organization=organization,
                 invited_by=request.user,
                 token=token,
-                expires_at=timezone.now() + timezone.timedelta(30),
-            )
-            invite.save()
-
-            invite_link = settings.FRONT_END_BASE_URL
+                expires_at=timezone.now()
+                + timezone.timedelta(days=settings.INVITATION_EXPIRATION_WINDOW_DAYS),
+            ).save()
 
             if not User.objects.filter(email=email).exists():
-                invite_link += "invite/{0}".format(token)
+                invite_link = "{0}invite/{1}".format(settings.FRONT_END_BASE_URL, token)
             else:
-                invite_link += "invite/success/{0}".format(token)
+                invite_link = "{0}invite/success/{1}".format(
+                    settings.FRONT_END_BASE_URL, token
+                )
 
-            render_info = {
-                "organization_name": organization.name,
-                "invite_sender": request.user.name,
-                "invite_link": invite_link,
-            }
-
-            html_content = get_template("invite.html").render(render_info)
-
-            message = Mail(
-                from_email=("no-reply@humanlambdas.com", "Human Lambdas"),
-                to_emails=email,
-                subject="Human Lambdas invitation",
-                html_content=html_content,
+            template_data.append(
+                {
+                    "org_name": organization.name,
+                    "inviter_name": request.user.name,
+                    "url": invite_link,
+                }
             )
-            sg = SendGridClient()
-            sg.send(message)
+            emails.append(email)
+
+        UserHandlerConfig.emailclient.send_email(
+            to_email=emails,
+            template_id=settings.INVITATION_TEMPLATE,
+            template_data=template_data,
+            group_id=int(settings.ACCOUNT_ASM_GROUPID),
+        )
 
         # sending responses
         if len(invalid_email_list) == 0 and len(already_added_email_list) == 0:
@@ -98,9 +93,7 @@ class SendInviteView(APIView):
         )
 
     def patch(self, request, *args, **kwargs):
-        invites = Invitation.objects.filter(
-            email=self.request.data["email"], organization__pk=self.kwargs["org_id"]
-        )
+        invites = self.get_queryset().filter(email=self.request.data["email"])
         if not invites.exists():
             return Response(
                 {
@@ -121,9 +114,7 @@ class SendInviteView(APIView):
         return Response({"status_code": 200, "message": response_text}, status=200)
 
     def delete(self, request, *args, **kwargs):
-        invites = Invitation.objects.filter(
-            email=self.request.data["email"], organization__pk=self.kwargs["org_id"]
-        )
+        invites = self.get_queryset().filter(email=self.request.data["email"])
         if not invites.exists():
             return Response(
                 {

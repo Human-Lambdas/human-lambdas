@@ -66,14 +66,15 @@ def send_notification(workflow):
         emails.append(user.email)
         wf_notification.last_notified = timezone.now()
         wf_notification.save()
-    template_data = {
-        "workflow_name": workflow.name,
-        "org_id": workflow.organization.pk,
-        "hl_url": settings.FRONT_END_BASE_URL,
-    }
-    UserHandlerConfig.emailclient.send_email(
-        to_email=emails,
-        template_id=settings.SEND_NOTIFICATION_TEMPLATE,
-        template_data=template_data,
-        group_id=int(settings.NOTIFICATION_ASM_GROUPID),
-    )
+    if emails:
+        template_data = {
+            "workflow_name": workflow.name,
+            "org_id": workflow.organization.pk,
+            "hl_url": settings.FRONT_END_BASE_URL,
+        }
+        UserHandlerConfig.emailclient.send_email(
+            to_email=emails,
+            template_id=settings.SEND_NOTIFICATION_TEMPLATE,
+            template_data=template_data,
+            group_id=int(settings.NOTIFICATION_ASM_GROUPID),
+        )

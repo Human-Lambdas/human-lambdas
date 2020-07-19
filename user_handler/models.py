@@ -44,7 +44,7 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError("Users must have an email address")
 
-        user = self.model(email=self.normalize_email(email),)
+        user = self.model(email=self.normalize_email(email), name=email)
 
         user.set_password(password)
         user.save(using=self._db)
@@ -64,7 +64,7 @@ class UserManager(BaseUserManager):
         else:
             org = Organization(name="superusers")
             org.save()
-        org.user.add(user)
+        org.add_admin(user)
         return user
 
 
