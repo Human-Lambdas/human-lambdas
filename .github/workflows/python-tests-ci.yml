@@ -59,3 +59,6 @@ jobs:
         APP_URL: https://app.humanlambdas.com/
         SEGMENT_KEY: ${{ secrets.SEGMENT_KEY }}
         NOTIFICATION_ASM_GROUPID: ${{ secrets.NOTIFICATION_ASM_GROUPID }}
+        INVITATION_TEMPLATE: "test"
+        ACCOUNT_ASM_GROUPID: 10101
+        FORGOTTEN_PASSWORD_TEMPLATE: "test"
