@@ -118,3 +118,13 @@ class TestTaskCount(APITestCase):
         )
         workflow = Workflow.objects.get(pk=self.workflow_id)
         self.assertEqual(workflow.n_tasks, n_tasks + 1)
+
+    def test_active_users(self):
+        n_tasks = self.total_rows - 1
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/{}/tasks/next".format(self.org_id, self.workflow_id)
+        )
+        workflow = Workflow.objects.get(pk=self.workflow_id)
+        self.assertEqual(workflow.n_tasks, n_tasks)
+        response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id))
+        self.assertEqual(response.data[0]["active_users"], ["foo"])

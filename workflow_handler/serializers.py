@@ -49,6 +49,9 @@ class HookSerializer(serializers.ModelSerializer):
 
 class WorkflowSerializer(serializers.ModelSerializer):
     webhook = HookSerializer(required=False)
+    active_users = serializers.SerializerMethodField(
+        "get_active_users", allow_null=True
+    )
 
     class Meta:
         model = Workflow
@@ -62,13 +65,22 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "n_tasks",
             "created_at",
             "webhook",
+            "active_users",
         ]
         extra_kwargs = {
             "disabled": {"write_only": True},
             "n_tasks": {"read_only": True},
             "id": {"read_only": True},
             "created_at": {"read_only": True},
+            "active_users": {"read_only": True},
         }
+
+    def get_active_users(self, instance):
+        return list(
+            instance.task_set.filter(assigned_to__isnull=False)
+            .distinct()
+            .values_list("assigned_to__name", flat=True)
+        )
 
     def create(self, validated_data):
         user = self.context["request"].user

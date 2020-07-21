@@ -96,6 +96,7 @@ class TestListWorkflow(APITestCase):
         result_1 = response.data[0]
         self.assertTrue(result_1.pop("id"))
         self.assertEqual(result_1.pop("name"), self.wf_name1)
+        self.assertEqual(result_1["active_users"], [])
 
     def test_list_workflow2(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token2)
