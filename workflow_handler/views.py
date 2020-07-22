@@ -4,7 +4,6 @@ from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
     ListAPIView,
-    RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 from user_handler.models import Organization
@@ -23,7 +22,7 @@ from .models import Workflow, Task, Source, WorkflowHook
 from .utils import sync_workflow_task, decode_csv
 
 
-class RUDWebhookView(RetrieveUpdateDestroyAPIView):
+class RUWebhookView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     serializer_class = HookSerializer
 

@@ -117,16 +117,6 @@ class TestWebhook(APITestCase):
             WorkflowHook.objects.get(workflow__pk=self.workflow_id).target, new_url
         )
 
-        response = self.client.delete(
-            "/v1/orgs/{0}/workflows/{1}/webhook".format(self.org_id, self.workflow_id),
-        )
-        self.assertEqual(
-            response.status_code, status.HTTP_204_NO_CONTENT, response.data
-        )
-        self.assertEqual(
-            WorkflowHook.objects.filter(workflow__pk=self.workflow_id).count(), 0
-        )
-
     def test_invalid_url(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         self.workflow_data = {
