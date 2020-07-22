@@ -4,6 +4,7 @@ from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
     ListAPIView,
+    RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 from user_handler.models import Organization
@@ -17,9 +18,23 @@ from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from user_handler.permissions import IsOrgAdmin
 
-from .serializers import WorkflowSerializer, TaskSerializer
-from .models import Workflow, Task, Source
+from .serializers import WorkflowSerializer, TaskSerializer, HookSerializer
+from .models import Workflow, Task, Source, WorkflowHook
 from .utils import sync_workflow_task, decode_csv
+
+
+class RUDWebhookView(RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    serializer_class = HookSerializer
+
+    def get_queryset(self):
+        return WorkflowHook.objects.filter(workflow__pk=self.kwargs["workflow_id"])
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = get_object_or_404(queryset)
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
 class CreateWorkflowView(CreateAPIView):

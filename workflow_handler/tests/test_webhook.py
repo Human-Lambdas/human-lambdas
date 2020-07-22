@@ -39,6 +39,7 @@ class TestWebhook(APITestCase):
         )
         self.admin_access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
+        self.hook_url = "http://some.url.com"
         self.workflow_data = {
             "name": "foowf",
             "description": "great wf",
@@ -51,7 +52,7 @@ class TestWebhook(APITestCase):
                     "single-selection": {"options": ["foo1", "bar1"]},
                 }
             ],
-            "webhook": {"target": "http://some.url.com"},
+            "webhook": {"target": self.hook_url},
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
@@ -93,6 +94,35 @@ class TestWebhook(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(
+            WorkflowHook.objects.filter(workflow__pk=self.workflow_id).count(), 0
+        )
+
+    def test_webhook_endpoint(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/webhook".format(self.org_id, self.workflow_id),
+        )
+        self.assertEqual(response.data["target"], self.hook_url)
+
+        new_url = "http://someother.url.com"
+        response = self.client.patch(
+            "/v1/orgs/{0}/workflows/{1}/webhook".format(self.org_id, self.workflow_id),
+            {"target": new_url},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data["target"], new_url)
+        self.assertEqual(
+            WorkflowHook.objects.get(workflow__pk=self.workflow_id).target, new_url
+        )
+
+        response = self.client.delete(
+            "/v1/orgs/{0}/workflows/{1}/webhook".format(self.org_id, self.workflow_id),
+        )
+        self.assertEqual(
+            response.status_code, status.HTTP_204_NO_CONTENT, response.data
+        )
         self.assertEqual(
             WorkflowHook.objects.filter(workflow__pk=self.workflow_id).count(), 0
         )
