@@ -6,6 +6,9 @@ from rest_hooks.models import AbstractHook
 from external.task_formats import process_external_completed_tasks
 
 
+STATUS_MAPPING = {"completed": "COMPLETED", "assigned": "IN PROGRESS", "pending": "NEW"}
+
+
 class Workflow(models.Model):
     name = models.CharField(max_length=140)
     description = models.TextField(blank=True)
@@ -49,6 +52,19 @@ class Task(models.Model):
         hook_event.send(
             sender=self.__class__, action="completed", instance=self, user=user
         )
+
+    def get_updated_status(self):
+        return {
+            "status": STATUS_MAPPING[self.status],
+            "completed_at": self.completed_at,
+            "created_at": self.created_at,
+            "assigned_at": self.assigned_at,
+            "assigned_to": self.assigned_to.pk if self.assigned_to else None,
+            "workflow": self.workflow.pk,
+            "inputs": self.inputs,
+            "outputs": self.outputs,
+            "source": self.source.pk if self.source else None,
+        }
 
     def get_formatted_task(self):
         if self.assigned_to:

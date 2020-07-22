@@ -17,7 +17,7 @@ from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from user_handler.permissions import IsOrgAdmin
 
-from .serializers import WorkflowSerializer, TaskSerializer
+from .serializers import WorkflowSerializer, TaskSerializer, PendingTaskSerializer
 from .models import Workflow, Task, Source
 from .utils import sync_workflow_task, decode_csv
 
@@ -192,6 +192,19 @@ class ListTaskView(ListAPIView):
     def list(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         obj = get_list_or_404(self.get_queryset(), workflow=workflow)
+        serializer = self.serializer_class(obj, many=True)
+        return Response(serializer.data)
+
+
+class ListNonCompleteTaskView(ListTaskView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PendingTaskSerializer
+
+    def list(self, request, *args, **kwargs):
+        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
+        obj = get_list_or_404(
+            self.get_queryset().filter(~Q(status="completed")), workflow=workflow
+        )
         serializer = self.serializer_class(obj, many=True)
         return Response(serializer.data)
 

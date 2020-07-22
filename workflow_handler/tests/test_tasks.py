@@ -379,3 +379,63 @@ class TestTasks(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(response.data["inputs"][0]["name"], "new_name")
+
+    def test_get_pending_tasks(self):
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
+                self.org_id, self.workflow_id,
+            )
+        )
+        self.assertEqual(len(response.data), 3)
+        for idata in response.data:
+            self.assertEqual(idata["status"], "NEW")
+
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        task_id = response.data["id"]
+        task_inputs = response.data["inputs"]
+
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
+                self.org_id, self.workflow_id,
+            )
+        )
+        self.assertEqual(len(response.data), 3)
+        self.assertEqual(
+            len([idata for idata in response.data if idata["status"] == "IN PROGRESS"]),
+            1,
+        )
+
+        output_list = [
+            {
+                "id": "foo",
+                "name": "foo",
+                "type": "single-selection",
+                "single-selection": {
+                    "value": "foo2",
+                    "options": [
+                        {"id": "foo2", "name": "foo2"},
+                        {"id": "bar2", "name": "bar2"},
+                    ],
+                },
+            }
+        ]
+        data = {"inputs": task_inputs, "outputs": output_list}
+        response = self.client.patch(
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                self.org_id, self.workflow_id, task_id
+            ),
+            data=data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
+                self.org_id, self.workflow_id,
+            )
+        )
+        self.assertEqual(len(response.data), 2)

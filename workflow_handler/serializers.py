@@ -250,6 +250,11 @@ class CompletedTaskSerializer(TaskSerializer):
         return instance.get_formatted_task()
 
 
+class PendingTaskSerializer(TaskSerializer):
+    def to_representation(self, instance):
+        return instance.get_updated_status()
+
+
 class SourceSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"

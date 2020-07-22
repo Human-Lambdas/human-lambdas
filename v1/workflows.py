@@ -8,6 +8,7 @@ from workflow_handler.views import (
     RUDTaskView,
     UnassignTaskView,
     NextTaskView,
+    ListNonCompleteTaskView,
 )
 from workflow_handler.audits import (
     GetCompletedTasksCSVView,
@@ -23,6 +24,11 @@ urlpatterns = [
     path("/<int:workflow_id>", RUDWorkflowView.as_view(), name="update-workflow"),
     path("/<int:workflow_id>/upload", FileUploadView.as_view(), name="upload"),
     path("/<int:workflow_id>/tasks", ListTaskView.as_view(), name="list-tasks"),
+    path(
+        "/<int:workflow_id>/tasks/pending",
+        ListNonCompleteTaskView.as_view(),
+        name="pending-tasks",
+    ),
     path(
         "/<int:workflow_id>/tasks/<int:task_id>",
         RUDTaskView.as_view(),
