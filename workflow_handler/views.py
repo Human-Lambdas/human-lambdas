@@ -5,6 +5,7 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
     ListAPIView,
 )
+from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from user_handler.models import Organization
 from rest_framework.parsers import MultiPartParser
@@ -22,7 +23,7 @@ from .models import Workflow, Task, Source, WorkflowHook
 from .utils import sync_workflow_task, decode_csv
 
 
-class RUWebhookView(RetrieveUpdateAPIView):
+class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     serializer_class = HookSerializer
 
@@ -31,9 +32,47 @@ class RUWebhookView(RetrieveUpdateAPIView):
 
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
-        obj = get_object_or_404(queryset)
-        self.check_object_permissions(self.request, obj)
-        return obj
+        return queryset.first()
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        if not instance and request.data["target"]:
+            response = self.create(request)
+        elif not instance and not request.data["target"]:
+            response = Response({"status_code": 204}, status=204)
+        elif not request.data["target"]:
+            response = self.destroy(request)
+        else:
+            self.check_object_permissions(self.request, instance)
+            serializer = self.get_serializer(
+                instance, data=request.data, partial=partial
+            )
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            if getattr(instance, "_prefetched_objects_cache", None):
+                # If 'prefetch_related' has been applied to a queryset, we need to
+                # forcibly invalidate the prefetch cache on the instance.
+                instance._prefetched_objects_cache = {}
+            response = Response(serializer.data)
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.check_object_permissions(self.request, instance)
+        self.perform_destroy(instance)
+        return Response(status=204)
+
+    def perform_destroy(self, instance):
+        instance.delete()
+
+    # def perform_update(self, serializer):
+    # if not queryset.exists():
+    #     workflow = Workflow.objects.get(pk=self.kwargs["workflow_id"])
+    #     webhook_data["event"] = "task.completed"
+    #     webhook_data["user"] = self.request.user
+    #     WorkflowHook.objects.create(workflow=workflow, **webhook_data)
+    # serializer.save()
 
 
 class CreateWorkflowView(CreateAPIView):
