@@ -60,7 +60,7 @@ class Task(models.Model):
             "completed_at": self.completed_at,
             "created_at": self.created_at,
             "assigned_at": self.assigned_at,
-            "assigned_to": self.assigned_to.pk if self.assigned_to else None,
+            "assigned_to": self.assigned_to.name if self.assigned_to else None,
             "workflow": self.workflow.pk,
             "inputs": self.inputs,
             "outputs": self.outputs,
