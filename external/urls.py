@@ -27,7 +27,7 @@ urlpatterns = [
         name="zapier-workflows"
     ),
     path(
-        "zapier/<int:workflow_id>/get-task-inputs",
+        "zapier/get-task-inputs",
         GetZapierTaskInputs.as_view(),
         name="zapier-task-inputs"
     ),
