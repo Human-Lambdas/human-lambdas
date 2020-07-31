@@ -386,12 +386,13 @@ class TestTasks(APITestCase):
                 self.org_id, self.workflow_id,
             )
         )
-        self.assertEqual(len(response.data), 3)
-        for idata in response.data:
+        self.assertEqual(response.data["count"], 3)
+        self.assertEqual(response.data["next"], None)
+        for idata in response.data["tasks"]:
             self.assertEqual(idata["status"], "NEW")
 
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+            "/v1/orgs/{0}/workflows/{1}/tasks/nexyet".format(
                 self.org_id, self.workflow_id
             )
         )
@@ -403,9 +404,9 @@ class TestTasks(APITestCase):
                 self.org_id, self.workflow_id,
             )
         )
-        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data["count"], 3)
         self.assertEqual(
-            len([idata for idata in response.data if idata["status"] == "IN PROGRESS"]),
+            len([idata for idata in response.data["tasks"] if idata["status"] == "IN PROGRESS"]),
             1,
         )
 
@@ -438,4 +439,4 @@ class TestTasks(APITestCase):
                 self.org_id, self.workflow_id,
             )
         )
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data["count"], 2)

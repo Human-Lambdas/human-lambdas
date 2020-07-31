@@ -19,7 +19,7 @@ from user_handler.permissions import IsOrgAdmin
 
 from .serializers import WorkflowSerializer, TaskSerializer, PendingTaskSerializer
 from .models import Workflow, Task, Source
-from .utils import sync_workflow_task, decode_csv
+from .utils import sync_workflow_task, decode_csv, TaskPagination
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -199,13 +199,38 @@ class ListTaskView(ListAPIView):
 class ListNonCompleteTaskView(ListTaskView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PendingTaskSerializer
+    pagination_class = TaskPagination
+
+    # def list(self, request, *args, **kwargs):
+    #     workflow = Workflow.objects.get(id=kwargs["workflow_id"])
+    #     obj = get_list_or_404(
+    #         self.get_queryset().filter(~Q(status="completed")), workflow=workflow
+    #     )
+    #     page = self.paginate_queryset(filtered_queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response(serializer.data)
+    #     serializer = self.serializer_class(obj, many=True)
+    #     return Response(serializer.data)
+
+    def get_queryset(self, *args, **kwargs):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflow = Workflow.objects.filter(
+            Q(organization__in=organizations) & Q(pk=self.kwargs["workflow_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow=workflow.first()) & ~Q(status="completed")
+        )
 
     def list(self, request, *args, **kwargs):
-        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
-        obj = get_list_or_404(
-            self.get_queryset().filter(~Q(status="completed")), workflow=workflow
-        )
-        serializer = self.serializer_class(obj, many=True)
+        queryset = self.get_queryset()
+        filtered_queryset = self.filter_queryset(queryset)
+        page = self.paginate_queryset(filtered_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.serializer_class(queryset.all(), many=True)
         return Response(serializer.data)
 
 

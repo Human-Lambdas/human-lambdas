@@ -55,6 +55,7 @@ class Task(models.Model):
 
     def get_updated_status(self):
         return {
+            "id": self.pk,
             "status": STATUS_MAPPING[self.status],
             "completed_at": self.completed_at,
             "created_at": self.created_at,
