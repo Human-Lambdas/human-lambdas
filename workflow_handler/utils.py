@@ -1,6 +1,6 @@
 import cchardet
 
-from .models import WorkflowHook
+from .models import WebHook
 
 
 def sync_workflow_task(workflow, task):
@@ -30,9 +30,9 @@ def sync_workflow_task(workflow, task):
 def find_and_fire_hook(event_name, instance, **kwargs):
     filters = {
         "event": event_name,
-        "workflow": instance.workflow,
+        "pk": instance.workflow.hook_id,
     }
-    hooks = WorkflowHook.objects.filter(**filters)
+    hooks = WebHook.objects.filter(**filters)
     for hook in hooks:
         hook.deliver_hook(instance)
 

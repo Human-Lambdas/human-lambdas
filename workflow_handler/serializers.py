@@ -7,8 +7,9 @@ from rest_framework import serializers, exceptions
 from user_handler.models import Organization
 from schema import SchemaError
 from django.db.models import Q
+from hl_rest_api.utils import is_valid_url
 
-from .models import Workflow, Task, WorkflowHook, Source, WorkflowNotification
+from .models import Workflow, Task, Source, WorkflowNotification, WebHook
 from .schemas import (
     WORKFLOW_INPUT_SCHEMA,
     TASK_INPUT_SCHEMA,
@@ -34,21 +35,21 @@ def validate_output_structure(validated_data_items):
     return validated_data_items
 
 
-class HookSerializer(serializers.ModelSerializer):
-    def validate_event(self, event):
-        if event not in settings.HOOK_EVENTS:
-            err_msg = "Unexpected event {}".format(event)
-            raise exceptions.ValidationError(detail=err_msg)
-        return event
-
-    class Meta:
-        model = WorkflowHook
-        fields = "__all__"
-        read_only_fields = ("user", "event", "workflow", "id")
+# class HookSerializer(serializers.ModelSerializer):
+#     def validate_event(self, event):
+#         if event not in settings.HOOK_EVENTS:
+#             err_msg = "Unexpected event {}".format(event)
+#             raise exceptions.ValidationError(detail=err_msg)
+#         return event
+#
+#     class Meta:
+#         model = Hook
+#         fields = "__all__"
+#         read_only_fields = ("user", "event", "workflow", "id")
 
 
 class WorkflowSerializer(serializers.ModelSerializer):
-    webhook = HookSerializer(required=False)
+    webhook = serializers.DictField(allow_null=True, required=False, write_only=True)
 
     class Meta:
         model = Workflow
@@ -61,6 +62,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "disabled",
             "n_tasks",
             "created_at",
+            "hook_id",
             "webhook",
         ]
         extra_kwargs = {
@@ -68,6 +70,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "n_tasks": {"read_only": True},
             "id": {"read_only": True},
             "created_at": {"read_only": True},
+            "webhook": {"write_only": True},
         }
 
     def create(self, validated_data):
@@ -94,7 +97,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
         if webhook_data:
             webhook_data["event"] = "task.completed"
             webhook_data["user"] = user
-            WorkflowHook.objects.create(workflow=workflow, **webhook_data)
+            hook = WebHook.objects.create(**webhook_data)
+            workflow.hook_id = hook.pk
+            workflow.save()
         for org_user in organization.user.all():
             wfnotification = WorkflowNotification(
                 workflow=workflow, notification=org_user.notifications, enabled=True
@@ -121,20 +126,23 @@ class WorkflowSerializer(serializers.ModelSerializer):
             instance.name = f"{instance.name}-{uuid.uuid4()}"
         instance.save()
         webhook_data = validated_data.get("webhook")
-        if webhook_data or self.context.get("remove_webhook"):
-            hook_instance = WorkflowHook.objects.filter(workflow=instance)
+        if webhook_data or (self.context.get("remove_webhook") and instance.hook_id):
+            hook_instance = WebHook.objects.filter(pk=instance.hook_id)
             if hook_instance.exists():
                 hook_instance = hook_instance.first()
                 if self.context.get("remove_webhook"):
                     hook_instance.delete()
+                    instance.hook_id = None
+                    instance.save()
                 else:
                     hook_instance.target = webhook_data["target"]
                     hook_instance.save()
             else:
-                webhook_data["workflow"] = instance
                 webhook_data["event"] = "task.completed"
                 webhook_data["user"] = self.context["request"].user
-                WorkflowHook.objects.create(**webhook_data)
+                hook = WebHook.objects.create(**webhook_data)
+                instance.hook_id = hook.pk
+                instance.save()
         return super(WorkflowSerializer, self).update(instance, validated_data)
 
     def validate_inputs(self, data):
@@ -148,6 +156,12 @@ class WorkflowSerializer(serializers.ModelSerializer):
             return validate_output_structure(OUTPUT_SCHEMA.validate(data))
         except SchemaError as exception_text:
             raise serializers.ValidationError(exception_text)
+
+    def validate_webhook(self, data):
+        if data["target"]:
+            if not is_valid_url(data["target"]):
+                raise serializers.ValidationError("Not a valid URL set for Webhooks")
+        return data
 
 
 class BaseTaskSerializer(serializers.ModelSerializer):

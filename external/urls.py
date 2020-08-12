@@ -1,6 +1,12 @@
 from django.urls import path
+
 from .views import CreateTaskView, GetExternalCompletedTaskView
-from .zapier import GetZapierTaskInputs, GetZapierWorkflows, ZapierAuthentication
+from .zapier import (
+    GetZapierTaskInputs,
+    GetZapierWorkflows,
+    ZapierAuthentication,
+    ZapierCreateTask,
+)
 
 
 urlpatterns = [
@@ -14,21 +20,21 @@ urlpatterns = [
         GetExternalCompletedTaskView.as_view(),
         name="completed-task",
     ),
-
     # Zapier Endpoints
     path(
         "zapier/authentication",
         ZapierAuthentication.as_view(),
-        name="zapier-authentication"
+        name="zapier-authentication",
     ),
-    path(
-        "zapier/get-workflows",
-        GetZapierWorkflows.as_view(),
-        name="zapier-workflows"
-    ),
+    path("zapier/get-workflows", GetZapierWorkflows.as_view(), name="zapier-workflows"),
     path(
         "zapier/get-task-inputs",
         GetZapierTaskInputs.as_view(),
-        name="zapier-task-inputs"
+        name="zapier-task-inputs",
+    ),
+    path(
+        "zapier/<int:workflow_id>/create-task",
+        ZapierCreateTask.as_view(),
+        name="zapier-create-task",
     ),
 ]

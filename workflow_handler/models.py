@@ -16,6 +16,7 @@ class Workflow(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     disabled = models.BooleanField(default=False)
     n_tasks = models.IntegerField(default=0)
+    hook_id = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -105,8 +106,8 @@ class Task(models.Model):
         return self.get_formatted_task_external()
 
 
-class WorkflowHook(AbstractHook):
-    workflow = models.OneToOneField(Workflow, on_delete=models.CASCADE,)
+class WebHook(AbstractHook):
+    pass
 
 
 class WorkflowNotification(models.Model):
