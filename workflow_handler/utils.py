@@ -1,4 +1,6 @@
 import cchardet
+from rest_framework.response import Response
+from rest_framework.pagination import LimitOffsetPagination
 
 from .models import WorkflowHook
 
@@ -47,3 +49,37 @@ def unidecode(text):
         return text.decode("utf-8")
     except UnicodeDecodeError:
         return text.decode(cchardet.detect(text)["encoding"])
+
+
+def process_query_params(query_params):
+    filter_mapper = [
+        ("workflow__pk", "workflow_id"),
+        ("assigned_to__pk", "worker_id"),
+        ("source__pk", "source_id"),
+    ]
+    filters = {}
+    for filter_name, param_name in filter_mapper:
+        filter_value = query_params.get(param_name)
+        if filter_value:
+            filters[filter_name] = filter_value
+    return filters
+
+
+class TaskPagination(LimitOffsetPagination):
+    """
+    Extended pagination class for Tasks
+    """
+
+    default_limit = 100
+    max_limit = 1000
+
+    def get_paginated_response(self, data):
+        return Response(
+            {
+                "next": self.get_next_link(),
+                "previous": self.get_previous_link(),
+                "count": self.count,
+                "tasks": data,
+            },
+            status=200,
+        )
