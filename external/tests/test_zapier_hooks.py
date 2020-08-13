@@ -83,7 +83,7 @@ class TestZapierHook(APITestCase):
 
         response = self.client.delete(
             "/zapier/hook",
-            {"hook_id": hook_id, "workflow_id": self.workflow_id,},
+            {"hook_id": hook_id},
             format="json",
         )
         self.assertEqual(
