@@ -113,8 +113,13 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     def retrieve(self, request, *args, **kwargs):
         obj = get_object_or_404(self.get_queryset())
         workflow = self.serializer_class(obj).data
-        if hasattr(obj, "hook_id") and obj.hook_id:
-            workflow["webhook"] = {"target": WebHook.objects.get(pk=obj.hook_id).target}
+        if (
+            hasattr(obj, "webhook_set")
+            and obj.webhook_set.filter(is_zapier=False).exists()
+        ):
+            workflow["webhook"] = {
+                "target": WebHook.objects.get(workflow=obj, is_zapier=False).target
+            }
         return Response(workflow)
 
     def update(self, request, *args, **kwargs):

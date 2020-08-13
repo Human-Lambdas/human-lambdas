@@ -35,19 +35,6 @@ def validate_output_structure(validated_data_items):
     return validated_data_items
 
 
-# class HookSerializer(serializers.ModelSerializer):
-#     def validate_event(self, event):
-#         if event not in settings.HOOK_EVENTS:
-#             err_msg = "Unexpected event {}".format(event)
-#             raise exceptions.ValidationError(detail=err_msg)
-#         return event
-#
-#     class Meta:
-#         model = Hook
-#         fields = "__all__"
-#         read_only_fields = ("user", "event", "workflow", "id")
-
-
 class WorkflowSerializer(serializers.ModelSerializer):
     webhook = serializers.DictField(allow_null=True, required=False, write_only=True)
 
@@ -62,7 +49,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "disabled",
             "n_tasks",
             "created_at",
-            "hook_id",
             "webhook",
         ]
         extra_kwargs = {
@@ -97,9 +83,8 @@ class WorkflowSerializer(serializers.ModelSerializer):
         if webhook_data:
             webhook_data["event"] = "task.completed"
             webhook_data["user"] = user
-            hook = WebHook.objects.create(**webhook_data)
-            workflow.hook_id = hook.pk
-            workflow.save()
+            webhook_data["workflow"] = workflow
+            WebHook.objects.create(**webhook_data)
         for org_user in organization.user.all():
             wfnotification = WorkflowNotification(
                 workflow=workflow, notification=org_user.notifications, enabled=True
@@ -126,23 +111,20 @@ class WorkflowSerializer(serializers.ModelSerializer):
             instance.name = f"{instance.name}-{uuid.uuid4()}"
         instance.save()
         webhook_data = validated_data.get("webhook")
-        if webhook_data or (self.context.get("remove_webhook") and instance.hook_id):
-            hook_instance = WebHook.objects.filter(pk=instance.hook_id)
+        if webhook_data or self.context.get("remove_webhook"):
+            hook_instance = WebHook.objects.filter(workflow=instance)
             if hook_instance.exists():
                 hook_instance = hook_instance.first()
                 if self.context.get("remove_webhook"):
                     hook_instance.delete()
-                    instance.hook_id = None
-                    instance.save()
                 else:
                     hook_instance.target = webhook_data["target"]
                     hook_instance.save()
             else:
                 webhook_data["event"] = "task.completed"
                 webhook_data["user"] = self.context["request"].user
-                hook = WebHook.objects.create(**webhook_data)
-                instance.hook_id = hook.pk
-                instance.save()
+                webhook_data["workflow"] = instance
+                WebHook.objects.create(**webhook_data)
         return super(WorkflowSerializer, self).update(instance, validated_data)
 
     def validate_inputs(self, data):

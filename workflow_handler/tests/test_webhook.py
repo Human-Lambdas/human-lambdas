@@ -60,7 +60,6 @@ class TestWebhook(APITestCase):
             format="json",
         )
         self.workflow_id = response.data["id"]
-        self.hook_id = response.data["hook_id"]
 
     def test_admin_webhook_creation(self):
         self.assertIsNotNone(WebHook.objects.get(user__email="foo@bar.com"))
@@ -74,7 +73,7 @@ class TestWebhook(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        hook = WebHook.objects.filter(pk=response.data["hook_id"]).first()
+        hook = WebHook.objects.filter(workflow__id=response.data["id"]).first()
         self.assertIsNotNone(hook)
         self.assertEqual(hook.target, new_url)
 
@@ -84,7 +83,7 @@ class TestWebhook(APITestCase):
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        hook = WebHook.objects.filter(pk=response.data["hook_id"]).first()
+        hook = WebHook.objects.filter(workflow__pk=self.workflow_id).first()
         self.assertIsNotNone(hook)
         self.assertEqual(hook.target, "http://some.url.com")
 
@@ -96,7 +95,9 @@ class TestWebhook(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(WebHook.objects.filter(pk=self.hook_id).count(), 0)
+        self.assertEqual(
+            WebHook.objects.filter(workflow__pk=self.workflow_id).count(), 0
+        )
 
     def test_invalid_url(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
@@ -130,7 +131,9 @@ class TestWebhook(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(WebHook.objects.filter(pk=self.hook_id).count(), 0)
+        self.assertEqual(
+            WebHook.objects.filter(workflow__id=self.workflow_id).count(), 0
+        )
         new_url = "http://someother.url.com"
         response = self.client.patch(
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id),
@@ -138,7 +141,7 @@ class TestWebhook(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        hook = WebHook.objects.filter(pk=response.data["hook_id"]).first()
+        hook = WebHook.objects.filter(workflow__pk=self.workflow_id).first()
         self.assertIsNotNone(hook)
         self.assertEqual(hook.target, new_url)
 
@@ -280,7 +283,7 @@ class TestWebhookTasks(APITestCase):
         workflow = Workflow.objects.get(pk=self.workflow_id)
         filters = {
             "event": "task.completed",
-            "pk": workflow.hook_id,
+            "workflow": workflow,
         }
         hooks = WebHook.objects.filter(**filters)
         self.assertEqual(len(hooks), 1)

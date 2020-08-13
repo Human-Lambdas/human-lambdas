@@ -1,11 +1,16 @@
 from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from user_handler.models import Organization
 from rest_framework.response import Response
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from workflow_handler.models import Workflow, Task
+from workflow_handler.models import Workflow, Task, WebHook
+from django.conf import settings
+from rest_framework import serializers, exceptions
+from rest_framework import status
+
 
 from .views import CreateTaskView
 
@@ -112,10 +117,47 @@ class ZapierCreateTask(CreateTaskView):
         return Task.objects.filter(workflows=workflow)
 
 
-class ZapierHook(APIView):
+class HookSerializer(serializers.ModelSerializer):
+    def validate_event(self, event):
+        if event not in settings.HOOK_EVENTS:
+            err_msg = "Unexpected event {}".format(event)
+            raise exceptions.ValidationError(detail=err_msg)
+        return event
+
+    class Meta:
+        model = WebHook
+        fields = "__all__"
+
+
+class ZapierHook(CreateAPIView):
     """
     API View for getting Task inputs for Zapier
     """
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+    serializer_class = HookSerializer
+
+    def create(self, request, *args, **kwargs):
+        # workflow = Workflow.objects.filter(pk=request.data["workflow_id"]).first()
+        data = {
+            "workflow": request.data["workflow_id"],
+            "user": request.user.pk,
+            "event": "task.completed",
+            "target": request.data["target"],
+        }
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def delete(self, request, *args, **kwargs):
+        instance = WebHook.objects.filter(pk=request.data["hook_id"]).first()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()

@@ -16,7 +16,6 @@ class Workflow(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     disabled = models.BooleanField(default=False)
     n_tasks = models.IntegerField(default=0)
-    hook_id = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -107,7 +106,8 @@ class Task(models.Model):
 
 
 class WebHook(AbstractHook):
-    pass
+    workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE, default=None)
+    is_zapier = models.BooleanField(default=False)
 
 
 class WorkflowNotification(models.Model):

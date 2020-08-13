@@ -6,6 +6,7 @@ from .zapier import (
     GetZapierWorkflows,
     ZapierAuthentication,
     ZapierCreateTask,
+    ZapierHook,
 )
 
 
@@ -37,4 +38,5 @@ urlpatterns = [
         ZapierCreateTask.as_view(),
         name="zapier-create-task",
     ),
+    path("zapier/hook", ZapierHook.as_view(), name="zapier-hook",),
 ]

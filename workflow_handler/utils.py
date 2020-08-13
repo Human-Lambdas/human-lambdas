@@ -30,7 +30,7 @@ def sync_workflow_task(workflow, task):
 def find_and_fire_hook(event_name, instance, **kwargs):
     filters = {
         "event": event_name,
-        "pk": instance.workflow.hook_id,
+        "workflow": instance.workflow,
     }
     hooks = WebHook.objects.filter(**filters)
     for hook in hooks:
