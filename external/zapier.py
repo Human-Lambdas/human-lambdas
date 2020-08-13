@@ -145,6 +145,7 @@ class ZapierHook(CreateAPIView):
             "user": request.user.pk,
             "event": "task.completed",
             "target": request.data["target"],
+            "is_zapier": True,
         }
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)

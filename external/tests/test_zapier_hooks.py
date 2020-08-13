@@ -66,6 +66,7 @@ class TestZapierHook(APITestCase):
         webhook = WebHook.objects.filter(pk=response.data["id"])
         self.assertTrue(webhook.exists())
         self.assertEqual(webhook.first().target, hook_url)
+        self.assertTrue(webhook.first().is_zapier)
 
     def test_unsubscribe_to_hook(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
