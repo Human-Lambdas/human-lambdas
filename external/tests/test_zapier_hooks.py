@@ -82,9 +82,7 @@ class TestZapierHook(APITestCase):
         self.assertTrue(webhook.exists())
 
         response = self.client.delete(
-            "/zapier/hook",
-            {"hook_id": hook_id},
-            format="json",
+            "/zapier/hook", {"hook_id": hook_id}, format="json",
         )
         self.assertEqual(
             response.status_code, status.HTTP_204_NO_CONTENT, response.data

@@ -162,3 +162,35 @@ class ZapierHook(CreateAPIView):
 
     def perform_destroy(self, instance):
         instance.delete()
+
+
+class GetZapierTaskSampleData(APIView):
+    """
+    API View for getting Task data for Zapier
+    """
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(pk=self.request.query_params["workflow_id"])
+        )
+        return workflows
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.query_params["workflow_id"]:
+            return Response({}, status=200)
+        obj = get_object_or_404(self.get_queryset())
+        perform_list = []
+        perform_list.append(
+            {
+                w_input["id"]: 42 if w_input["type"] == "number" else "text"
+                for w_input in obj.inputs
+            }
+        )
+        perform_list.append({w_output["id"]: "text" for w_output in obj.outputs})
+        return Response(perform_list, status=200)
