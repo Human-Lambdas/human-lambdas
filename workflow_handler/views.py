@@ -18,7 +18,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from user_handler.permissions import IsOrgAdmin
 
 from .serializers import WorkflowSerializer, TaskSerializer
-from .models import Workflow, Task, Source
+from .models import Workflow, Task, Source, WebHook
 from .utils import sync_workflow_task, decode_csv
 
 
@@ -113,8 +113,13 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     def retrieve(self, request, *args, **kwargs):
         obj = get_object_or_404(self.get_queryset())
         workflow = self.serializer_class(obj).data
-        if hasattr(obj, "workflowhook"):
-            workflow["webhook"] = {"target": obj.workflowhook.target}
+        if (
+            hasattr(obj, "webhook_set")
+            and obj.webhook_set.filter(is_zapier=False).exists()
+        ):
+            workflow["webhook"] = {
+                "target": WebHook.objects.get(workflow=obj, is_zapier=False).target
+            }
         return Response(workflow)
 
     def update(self, request, *args, **kwargs):
