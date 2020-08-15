@@ -185,12 +185,11 @@ class GetZapierTaskSampleData(APIView):
         if not self.request.query_params["workflow_id"]:
             return Response({}, status=200)
         obj = get_object_or_404(self.get_queryset())
-        perform_list = []
-        perform_list.append(
+
+        perform_list = [
             {
                 w_input["id"]: 42 if w_input["type"] == "number" else "text"
                 for w_input in obj.inputs
-            }
-        )
-        perform_list.append({w_output["id"]: "text" for w_output in obj.outputs})
+            }]
+        perform_list[0].update({w_output["id"]: "text" for w_output in obj.outputs})
         return Response(perform_list, status=200)
