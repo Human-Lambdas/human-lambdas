@@ -61,7 +61,7 @@ class GetZapierTaskInputs(APIView):
 
 class GetZapierWorkflows(APIView):
     """
-    API View for getting Task inputs for Zapier
+    API View for getting workflows for Zapier
     """
 
     authentication_classes = (TokenAuthentication,)
@@ -97,7 +97,7 @@ class GetZapierWorkflows(APIView):
 
 class ZapierAuthentication(APIView):
     """
-    API View for getting Task inputs for Zapier
+    API View for authentication for Zapier
     """
 
     authentication_classes = (TokenAuthentication,)
@@ -131,7 +131,7 @@ class HookSerializer(serializers.ModelSerializer):
 
 class ZapierHook(CreateAPIView):
     """
-    API View for getting Task inputs for Zapier
+    API View for hooks for Zapier
     """
 
     authentication_classes = (TokenAuthentication,)
