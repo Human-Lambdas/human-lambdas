@@ -70,7 +70,9 @@ class GetZapierWorkflows(APIView):
     def get_queryset(self):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
-        workflows = Workflow.objects.filter(Q(organization__in=organizations))
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations) & Q(disabled=False)
+        )
         return workflows
 
     def get(self, request, *args, **kwargs):
@@ -190,6 +192,7 @@ class GetZapierTaskSampleData(APIView):
             {
                 w_input["id"]: 42 if w_input["type"] == "number" else "text"
                 for w_input in obj.inputs
-            }]
+            }
+        ]
         perform_list[0].update({w_output["id"]: "text" for w_output in obj.outputs})
         return Response(perform_list, status=200)
