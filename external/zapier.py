@@ -26,6 +26,19 @@ ZAPIER_TYPE_MAPPER = {
 }
 
 
+SAMPLE_DATA = {
+    "text": "sample text",
+    "image": "link/to/image",
+    "number": 42,
+    "date": "1999/12/31",
+    "audio": "link/to/audio",
+    "video": "link/to/video",
+    "single-selction": "selection",
+    "multiple-selection": "[selection1, selection2]",
+    "binary": False,
+}
+
+
 class GetZapierTaskInputs(APIView):
     """
     API View for getting Task inputs for Zapier
@@ -70,7 +83,9 @@ class GetZapierWorkflows(APIView):
     def get_queryset(self):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
-        workflows = Workflow.objects.filter(Q(organization__in=organizations))
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations) & Q(disabled=False)
+        )
         return workflows
 
     def get(self, request, *args, **kwargs):
@@ -179,17 +194,43 @@ class GetZapierTaskSampleData(APIView):
             Q(organization__in=organizations)
             & Q(pk=self.request.query_params["workflow_id"])
         )
-        return workflows
+        return Task.objects.filter(workflow=workflows.first(), status="completed")
+
+    def get_workflow(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(pk=self.request.query_params["workflow_id"])
+        )
+        return workflows.first()
+
+    def get_dict_or_sample(self, queryset):
+        if queryset.exists():
+            task = queryset.first()
+            perform_dict = {t_input["id"]: t_input["value"] for t_input in task.inputs}
+            perform_dict.update(
+                {
+                    t_output["id"]: t_output[t_output["type"]]["value"]
+                    for t_output in task.outputs
+                }
+            )
+        else:
+            workflow = self.get_workflow()
+            perform_dict = {
+                w_input["id"]: SAMPLE_DATA[w_input["type"]]
+                for w_input in workflow.inputs
+            }
+            perform_dict.update(
+                {
+                    w_output["id"]: SAMPLE_DATA[w_output["type"]]
+                    for w_output in workflow.outputs
+                }
+            )
+        return perform_dict
 
     def get(self, request, *args, **kwargs):
         if not self.request.query_params["workflow_id"]:
             return Response({}, status=200)
-        obj = get_object_or_404(self.get_queryset())
-
-        perform_list = [
-            {
-                w_input["id"]: 42 if w_input["type"] == "number" else "text"
-                for w_input in obj.inputs
-            }]
-        perform_list[0].update({w_output["id"]: "text" for w_output in obj.outputs})
-        return Response(perform_list, status=200)
+        perform_dict = self.get_dict_or_sample(self.get_queryset())
+        return Response([perform_dict], status=200)
