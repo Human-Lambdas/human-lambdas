@@ -16,6 +16,7 @@ class Workflow(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     disabled = models.BooleanField(default=False)
     n_tasks = models.IntegerField(default=0)
+    data = JSONField(blank=True, default=[])
 
     def __str__(self):
         return self.name
@@ -41,6 +42,7 @@ class Task(models.Model):
     inputs = JSONField()
     outputs = JSONField()
     source = models.ForeignKey(Source, on_delete=models.CASCADE, null=True)
+    data = JSONField(blank=True, default=[])
 
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
