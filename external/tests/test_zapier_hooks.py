@@ -54,6 +54,12 @@ class TestZapierHook(APITestCase):
         )
         self.workflow_id = response.data["id"]
 
+    def test_zapier_authentication(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.get(
+            "/zapier/authentication")
+        self.assertTrue("organization" in response.data)
+
     def test_subscribe_to_hook(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         hook_url = "https://some.url.se"

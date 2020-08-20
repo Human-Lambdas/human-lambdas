@@ -119,7 +119,10 @@ class ZapierAuthentication(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
-        return Response(status=200)
+        resp = {
+            "organization": Organization.objects.filter(admin=request.user).first().name
+        }
+        return Response(resp, status=200)
 
 
 class ZapierCreateTask(CreateTaskView):
