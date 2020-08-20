@@ -104,7 +104,10 @@ class ZapierAuthentication(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
-        return Response(status=200)
+        resp = {
+            "orgnization": Organization.objects.filter(admin=request.user).first().name
+        }
+        return Response(resp, status=200)
 
 
 class ZapierCreateTask(CreateTaskView):
@@ -190,6 +193,7 @@ class GetZapierTaskSampleData(APIView):
             {
                 w_input["id"]: 42 if w_input["type"] == "number" else "text"
                 for w_input in obj.inputs
-            }]
+            }
+        ]
         perform_list[0].update({w_output["id"]: "text" for w_output in obj.outputs})
         return Response(perform_list, status=200)
