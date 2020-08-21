@@ -66,6 +66,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "created_at",
             "webhook",
             "active_users",
+            "data"
         ]
         extra_kwargs = {
             "disabled": {"write_only": True},
@@ -86,8 +87,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         wf_name = validated_data["name"]
         description = validated_data["description"]
-        inputs = validated_data["inputs"]
-        outputs = validated_data["outputs"]
+        # inputs = validated_data["inputs"]
+        # outputs = validated_data["outputs"]
+        data = validated_data["data"]
         organization_obj = Organization.objects.filter(user=user)
         if organization_obj.exists() and organization_obj.count() == 1:
             organization = organization_obj.first()
@@ -98,8 +100,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
             description=description,
             organization=organization,
             created_by=user,
-            inputs=inputs,
-            outputs=outputs,
+            # inputs=inputs,
+            # outputs=outputs,
+            data=data
         )
         workflow.save()
         webhook_data = validated_data.get("webhook")
@@ -149,17 +152,24 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 WorkflowHook.objects.create(**webhook_data)
         return super(WorkflowSerializer, self).update(instance, validated_data)
 
-    def validate_inputs(self, data):
-        try:
-            return WORKFLOW_INPUT_SCHEMA.validate(data)
-        except SchemaError as exception_text:
-            raise serializers.ValidationError(exception_text)
+    # def validate_inputs(self, data):
+    #     try:
+    #         return WORKFLOW_INPUT_SCHEMA.validate(data)
+    #     except SchemaError as exception_text:
+    #         raise serializers.ValidationError(exception_text)
+    #
+    # def validate_outputs(self, data):
+    #     try:
+    #         return validate_output_structure(OUTPUT_SCHEMA.validate(data))
+    #     except SchemaError as exception_text:
+    #         raise serializers.ValidationError(exception_text)
 
-    def validate_outputs(self, data):
+    def validate_data(self, data):
         try:
             return validate_output_structure(OUTPUT_SCHEMA.validate(data))
         except SchemaError as exception_text:
             raise serializers.ValidationError(exception_text)
+
 
 
 class BaseTaskSerializer(serializers.ModelSerializer):
