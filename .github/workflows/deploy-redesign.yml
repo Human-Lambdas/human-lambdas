@@ -1,4 +1,4 @@
-name: Deploy-Staging-AWS-ElasticBeanstalk-Redesign
+name: Deploy-AWS-ElasticBeanstalk-Redesign
 env:
   EB_APPLICATION_NAME       : "human-lambdas"
   EB_ENVIRONMENT_NAME       : "human-lambdas-api-redesign"
@@ -28,7 +28,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: teustan/staging-api
+          name: teustan/redesign-api
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           tags: "latest,${{ env.RELEASE_VERSION }}"

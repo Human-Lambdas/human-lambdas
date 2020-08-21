@@ -1,4 +1,4 @@
-name: Deploy-Staging-AWS-ElasticBeanstalk-Staging
+name: Deploy-AWS-ElasticBeanstalk-Staging
 env:
   EB_APPLICATION_NAME       : "human-lambdas"
   EB_ENVIRONMENT_NAME       : "human-lambdas-api-stg"
