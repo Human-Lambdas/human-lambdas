@@ -6,49 +6,15 @@ from rest_framework.response import Response
 from workflow_handler.csv_utils import task_list_to_csv_response
 from django.db.models import Q
 from django.shortcuts import get_list_or_404
-from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
 
+from .utils import TaskPagination, process_query_params
 from .serializers import (
     TaskSerializer,
     CompletedTaskSerializer,
     SourceSerializer,
 )
 from .models import Workflow, Task, Source
-
-
-def process_query_params(query_params):
-    filter_mapper = [
-        ("workflow__pk", "workflow_id"),
-        ("assigned_to__pk", "worker_id"),
-        ("source__pk", "source_id"),
-    ]
-    filters = {}
-    for filter_name, param_name in filter_mapper:
-        filter_value = query_params.get(param_name)
-        if filter_value:
-            filters[filter_name] = filter_value
-    return filters
-
-
-class TaskPagination(LimitOffsetPagination):
-    """
-    Extended pagination class for Tasks
-    """
-
-    default_limit = 100
-    max_limit = 1000
-
-    def get_paginated_response(self, data):
-        return Response(
-            {
-                "next": self.get_next_link(),
-                "previous": self.get_previous_link(),
-                "count": self.count,
-                "tasks": data,
-            },
-            status=200,
-        )
 
 
 class GetCompletedTaskView(ListAPIView):

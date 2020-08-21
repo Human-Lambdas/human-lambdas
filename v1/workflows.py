@@ -8,6 +8,8 @@ from workflow_handler.views import (
     RUDTaskView,
     UnassignTaskView,
     NextTaskView,
+    ListNonCompleteTaskView,
+    RUWebhookView,
 )
 from workflow_handler.audits import (
     GetCompletedTasksCSVView,
@@ -24,10 +26,16 @@ urlpatterns = [
     path("/<int:workflow_id>/upload", FileUploadView.as_view(), name="upload"),
     path("/<int:workflow_id>/tasks", ListTaskView.as_view(), name="list-tasks"),
     path(
+        "/<int:workflow_id>/tasks/pending",
+        ListNonCompleteTaskView.as_view(),
+        name="pending-tasks",
+    ),
+    path(
         "/<int:workflow_id>/tasks/<int:task_id>",
         RUDTaskView.as_view(),
         name="update-task",
     ),
+    path("/<int:workflow_id>/webhook", RUWebhookView.as_view(), name="webhook"),
     path(
         "/<int:workflow_id>/tasks/<int:task_id>/unassign",
         UnassignTaskView.as_view(),

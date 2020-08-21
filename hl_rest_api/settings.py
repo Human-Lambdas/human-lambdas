@@ -150,6 +150,7 @@ else:
     ALLOWED_HOSTS = [
         "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
         "human-lambdas-api-stg.eu-west-2.elasticbeanstalk.com",
+        "human-lambdas-api-redesign.eu-west-2.elasticbeanstalk.com",
         "api.humanlambdas.com",
         "api-stg.humanlambdas.com",
         "localhost",
