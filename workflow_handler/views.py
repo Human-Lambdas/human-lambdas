@@ -5,6 +5,7 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
     ListAPIView,
 )
+from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from user_handler.models import Organization
 from rest_framework.parsers import MultiPartParser
@@ -17,9 +18,66 @@ from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from user_handler.permissions import IsOrgAdmin
 
-from .serializers import WorkflowSerializer, TaskSerializer
-from .models import Workflow, Task, Source
-from .utils import sync_workflow_task, decode_csv
+from .serializers import (
+    WorkflowSerializer,
+    TaskSerializer,
+    HookSerializer,
+    PendingTaskSerializer,
+)
+from .models import Workflow, Task, Source, WorkflowHook
+from .utils import sync_workflow_task, decode_csv, TaskPagination
+
+
+class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    serializer_class = HookSerializer
+
+    def get_queryset(self):
+        return WorkflowHook.objects.filter(workflow__pk=self.kwargs["workflow_id"])
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        return queryset.first()
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        if not instance and request.data["target"]:
+            response = self.create(request)
+        elif not instance and not request.data["target"]:
+            response = Response({"status_code": 204}, status=204)
+        elif not request.data["target"]:
+            response = self.destroy(request)
+        else:
+            self.check_object_permissions(self.request, instance)
+            serializer = self.get_serializer(
+                instance, data=request.data, partial=partial
+            )
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            if getattr(instance, "_prefetched_objects_cache", None):
+                # If 'prefetch_related' has been applied to a queryset, we need to
+                # forcibly invalidate the prefetch cache on the instance.
+                instance._prefetched_objects_cache = {}
+            response = Response(serializer.data)
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.check_object_permissions(self.request, instance)
+        self.perform_destroy(instance)
+        return Response(status=204)
+
+    def perform_destroy(self, instance):
+        instance.delete()
+
+    # def perform_update(self, serializer):
+    # if not queryset.exists():
+    #     workflow = Workflow.objects.get(pk=self.kwargs["workflow_id"])
+    #     webhook_data["event"] = "task.completed"
+    #     webhook_data["user"] = self.request.user
+    #     WorkflowHook.objects.create(workflow=workflow, **webhook_data)
+    # serializer.save()
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -193,6 +251,44 @@ class ListTaskView(ListAPIView):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         obj = get_list_or_404(self.get_queryset(), workflow=workflow)
         serializer = self.serializer_class(obj, many=True)
+        return Response(serializer.data)
+
+
+class ListNonCompleteTaskView(ListTaskView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PendingTaskSerializer
+    pagination_class = TaskPagination
+
+    # def list(self, request, *args, **kwargs):
+    #     workflow = Workflow.objects.get(id=kwargs["workflow_id"])
+    #     obj = get_list_or_404(
+    #         self.get_queryset().filter(~Q(status="completed")), workflow=workflow
+    #     )
+    #     page = self.paginate_queryset(filtered_queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response(serializer.data)
+    #     serializer = self.serializer_class(obj, many=True)
+    #     return Response(serializer.data)
+
+    def get_queryset(self, *args, **kwargs):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflow = Workflow.objects.filter(
+            Q(organization__in=organizations) & Q(pk=self.kwargs["workflow_id"])
+        )
+        return Task.objects.filter(
+            Q(workflow=workflow.first()) & ~Q(status="completed")
+        )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        filtered_queryset = self.filter_queryset(queryset)
+        page = self.paginate_queryset(filtered_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.serializer_class(queryset.all(), many=True)
         return Response(serializer.data)
 
 

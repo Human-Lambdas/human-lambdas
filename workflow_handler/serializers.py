@@ -46,6 +46,16 @@ class HookSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("user", "event", "workflow", "id")
 
+    def create(self, validated_data):
+        validated_data["event"] = "task.completed"
+        validated_data["user"] = self.context["request"].user
+        validated_data["workflow"] = Workflow.objects.get(
+            pk=self.context["view"].kwargs["workflow_id"]
+        )
+        webhook = WorkflowHook(**validated_data)
+        webhook.save()
+        return webhook
+
 
 class WorkflowSerializer(serializers.ModelSerializer):
     webhook = HookSerializer(required=False)
@@ -248,6 +258,11 @@ class TaskSerializer(BaseTaskSerializer):
 class CompletedTaskSerializer(TaskSerializer):
     def to_representation(self, instance):
         return instance.get_formatted_task()
+
+
+class PendingTaskSerializer(TaskSerializer):
+    def to_representation(self, instance):
+        return instance.get_updated_status()
 
 
 class SourceSerializer(serializers.ModelSerializer):
