@@ -28,12 +28,10 @@ class TestTaskCreation(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
+            "data": [
                 {"id": "Alpha", "name": "alpha", "type": "text"},
                 {"id": "Beta", "name": "beta", "type": "text"},
                 {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
                 {
                     "id": "foo",
                     "name": "foo",
@@ -44,7 +42,7 @@ class TestTaskCreation(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -55,7 +53,7 @@ class TestTaskCreation(APITestCase):
         self.workflow_id = response.data["id"]
 
     def test_create_task(self):
-        task_data = {"inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}}
+        task_data = {"data": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
@@ -67,7 +65,7 @@ class TestTaskCreation(APITestCase):
         self.assertIsNotNone(task)
 
     def test_empty_create_task(self):
-        task_data = {"inputs": {}}
+        task_data = {"data": {}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
@@ -88,7 +86,7 @@ class TestTaskCreation(APITestCase):
         )
 
     def test_empty_value_create_task(self):
-        task_data = {"inputs": {"Alpha": "", "Beta": "", "Gamma": ""}}
+        task_data = {"data": {"Alpha": "", "Beta": "", "Gamma": ""}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
@@ -97,20 +95,8 @@ class TestTaskCreation(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
-    def test_missing_inputs_create_task(self):
-        task_data = {"inputs": {"Alpha": ""}}
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
-        response = self.client.post(
-            "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
-            task_data,
-            format="json",
-        )
-        self.assertEqual(
-            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
-        )
-
     def test_create_task_non_existing_workflow(self):
-        task_data = {"inputs": {"Alpha": "", "Beta": "", "Gamma": ""}}
+        task_data = {"data": {"Alpha": "", "Beta": "", "Gamma": ""}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, 1000),
@@ -150,10 +136,13 @@ class TestListTaskCreation(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "list", "subtype": "number"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "list",
+                    "list": {"subtype": "number"},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -164,7 +153,7 @@ class TestListTaskCreation(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -175,7 +164,7 @@ class TestListTaskCreation(APITestCase):
         self.workflow_id = response.data["id"]
 
     def test_create_list_task(self):
-        task_data = {"inputs": {"Alpha": [1, 2, 3]}}
+        task_data = {"data": {"Alpha": [1, 2, 3]}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
@@ -187,7 +176,7 @@ class TestListTaskCreation(APITestCase):
         self.assertIsNotNone(task)
 
     def test_create_list_task2(self):
-        task_data = {"inputs": {"Alpha": ["1", "2", "3"]}}
+        task_data = {"data": {"Alpha": ["1", "2", "3"]}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),

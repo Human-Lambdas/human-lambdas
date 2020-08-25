@@ -1,4 +1,5 @@
 import os
+import copy
 
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -31,17 +32,27 @@ class TestTaskList(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "news", "name": "news", "type": "text", "layout": {}},
-                {"id": "type", "name": "type", "type": "text", "layout": {}},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "news",
+                    "name": "news",
+                    "type": "text",
+                    "layout": {},
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "type",
+                    "name": "type",
+                    "type": "text",
+                    "layout": {},
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -62,8 +73,12 @@ class TestTaskList(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.completed_tasks = 150
         for task in Task.objects.all()[: self.completed_tasks]:
-            response_data = {"inputs": task.inputs, "outputs": task.outputs}
-            response_data["outputs"][0]["single-selection"]["value"] = "bar1"
+            data = copy.deepcopy(task.data)
+            for idata in data:
+                if idata["id"] == "foo":
+                    idata["single-selection"]["value"] = "bar1"
+            response_data = {"data": data}
+
             _ = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.pk
@@ -94,8 +109,8 @@ class TestTaskList(APITestCase):
             self.assertEqual(itask["status"], "completed", itask)
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
         self.assertFalse("layout" in response.data["tasks"][0]["inputs"])
-        self.assertEqual(type(response.data["tasks"][0]["inputs"]), dict)
-        self.assertEqual(type(response.data["tasks"][0]["outputs"]), dict)
+        self.assertEqual(type(response.data["tasks"][0]["data"]), dict)
+        # self.assertEqual(type(response.data["tasks"][0]["outputs"]), dict)
 
     def test_existing_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
@@ -115,4 +130,4 @@ class TestTaskList(APITestCase):
         task = Task.objects.filter(status="completed").first()
         result = task.serialize_hook()
         self.assertEqual(result["id"], task.pk)
-        self.assertEqual(type(result["inputs"]), dict)
+        self.assertEqual(type(result["data"]), dict)

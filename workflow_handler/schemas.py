@@ -58,6 +58,7 @@ OUTPUT_SCHEMA = Schema(
     ignore_extra_keys=True,
 )
 
+
 UPDATE_OUTPUT_SCHEMA = Schema(
     [
         {
@@ -85,6 +86,51 @@ UPDATE_OUTPUT_SCHEMA = Schema(
                 Optional("options"): list,
             },
             Optional("logicJump"): dict,
+        }
+    ],
+    ignore_extra_keys=True,
+)
+
+
+DATA_SCHEMA = Schema(
+    [
+        {
+            "id": And(str, len),
+            "name": And(str, len),
+            "type": Or(
+                "binary",
+                "text",
+                "number",
+                "date",
+                "image",
+                "audio",
+                "video",
+                "list",
+                "single-selection",
+                "multiple-selection",
+            ),
+            Optional("layout"): dict,
+            Optional(
+                Or(
+                    "binary",
+                    "text",
+                    "number",
+                    "date",
+                    "image",
+                    "audio",
+                    "video",
+                    "list",
+                    "single-selection",
+                    "multiple-selection",
+                ),
+            ): {
+                Optional("placeholder"): Or(str, float, int, bool, list),
+                Optional("read-only"): bool,
+                Optional("subtype"): And(str, len),
+                Optional("value"): Or(bool, And(str, len), And(list, len), float, int),
+                Optional("options"): list,
+            },
+            Optional("logic-jump"): dict,
         }
     ],
     ignore_extra_keys=True,

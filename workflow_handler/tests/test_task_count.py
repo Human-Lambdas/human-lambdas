@@ -36,12 +36,25 @@ class TestTaskCount(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -52,7 +65,7 @@ class TestTaskCount(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -90,7 +103,7 @@ class TestTaskCount(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         n_tasks = self.total_rows
         task_data = {
-            "inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"},
+            "data": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"},
         }
         for i in range(5):
             _ = self.client.post(

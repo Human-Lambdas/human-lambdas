@@ -43,14 +43,14 @@ class TestWebhook(APITestCase):
         self.workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
             "webhook": {"target": self.hook_url},
         }
@@ -198,12 +198,10 @@ class TestWebhookTasks(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
+            "data": [
                 {"id": "Alpha", "name": "alpha", "type": "text"},
                 {"id": "Beta", "name": "beta", "type": "text"},
                 {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
                 {
                     "id": "foo",
                     "name": "foo",
@@ -214,7 +212,7 @@ class TestWebhookTasks(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
             "webhook": {"target": "https://en9sk43hft479.x.pipedream.net"},
         }
@@ -337,14 +335,14 @@ class TestWebhookEndpoint(APITestCase):
         self.workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(

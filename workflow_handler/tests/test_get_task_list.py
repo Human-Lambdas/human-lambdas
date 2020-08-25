@@ -30,17 +30,27 @@ class TestInternalTaskList(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "news", "name": "news", "type": "text", "layout": {}},
-                {"id": "type", "name": "type", "type": "text", "layout": {}},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "news",
+                    "name": "news",
+                    "type": "text",
+                    "layout": {},
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "type",
+                    "name": "type",
+                    "type": "text",
+                    "layout": {},
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -85,7 +95,7 @@ class TestInternalTaskList(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["tasks"]), 50, response.data)
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
-        self.assertFalse("layout" in response.data["tasks"][0]["inputs"][0])
+        self.assertFalse("layout" in response.data["tasks"][0]["data"][0])
         self.assertGreater(
             response.data["tasks"][0]["completed_at"],
             response.data["tasks"][1]["completed_at"],

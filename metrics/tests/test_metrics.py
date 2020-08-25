@@ -31,12 +31,10 @@ class TestMetrics(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
@@ -121,12 +119,10 @@ class TestComplexMetrics(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
@@ -217,12 +213,10 @@ class TestQueryMetrics(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
@@ -255,12 +249,10 @@ class TestQueryMetrics(APITestCase):
         workflow_data = {
             "name": "uploader2",
             "description": "greater wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
@@ -351,12 +343,10 @@ class TestWorkflowMetrics(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
@@ -389,12 +379,10 @@ class TestWorkflowMetrics(APITestCase):
         workflow_data = {
             "name": "uploader2",
             "description": "greater wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
@@ -569,12 +557,10 @@ class TestWorkermetrics(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
                 {
                     "id": "foo",
                     "name": "foo",

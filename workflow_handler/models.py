@@ -13,12 +13,13 @@ class Workflow(models.Model):
     name = models.CharField(max_length=140)
     description = models.TextField(blank=True)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    inputs = JSONField()
-    outputs = JSONField()
+    inputs = JSONField(default=list)
+    outputs = JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     disabled = models.BooleanField(default=False)
     n_tasks = models.IntegerField(default=0)
+    data = JSONField(blank=True, default=list)
 
     def __str__(self):
         return self.name
@@ -41,9 +42,10 @@ class Task(models.Model):
     assigned_at = models.DateTimeField(null=True)
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
-    inputs = JSONField()
-    outputs = JSONField()
+    inputs = JSONField(default=list)
+    outputs = JSONField(default=list)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, null=True)
+    data = JSONField(blank=True, default=list)
 
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
@@ -64,6 +66,7 @@ class Task(models.Model):
             "workflow": self.workflow.pk,
             "inputs": self.inputs,
             "outputs": self.outputs,
+            "data": self.data,
             "source": self.source.pk if self.source else None,
         }
 
@@ -88,6 +91,7 @@ class Task(models.Model):
             "workflow_id": self.workflow.pk,
             "inputs": self.inputs,
             "outputs": self.outputs,
+            "data": self.data,
             "source": source_name,
             "source_id": source_id,
         }
@@ -111,6 +115,7 @@ class Task(models.Model):
             "workflow_id": self.workflow.pk,
             "inputs": self.inputs,
             "outputs": self.outputs,
+            "data": self.data,
             "source": source_name,
         }
 

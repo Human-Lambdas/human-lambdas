@@ -27,16 +27,16 @@ def validate_keys(title_row, workflow):
             raise Exception("The dataset is missing some columns")
 
 
-def make_input_dict(w_input, row, title_row):
-    input_value = row[title_row.index(w_input["id"])]
-    if w_input["type"] in process_input:
-        input_value = process_input[w_input["type"]](input_value)
-    return {
-        "id": w_input["id"],
-        "name": w_input["name"],
-        "type": w_input["type"],
-        "value": input_value,
-    }
+def extract_value(w_data, row, title_row):
+    data_item = copy.deepcopy(w_data)
+    if "layout" in data_item:
+        del data_item["layout"]
+    if data_item["id"] in title_row:
+        input_value = row[title_row.index(data_item["id"])]
+        if data_item["type"] in process_input:
+            input_value = process_input[data_item["type"]](input_value)
+        data_item[data_item["type"]]["value"] = input_value
+    return data_item
 
 
 def process_csv(csv_file, workflow, source):
@@ -44,15 +44,8 @@ def process_csv(csv_file, workflow, source):
     title_row = next(dataset)
     validate_keys(title_row, workflow)
     for row in dataset:
-        inputs = [
-            make_input_dict(w_input, row, title_row) for w_input in workflow.inputs
-        ]
-        Task(
-            inputs=inputs,
-            outputs=copy.deepcopy(workflow.outputs),
-            workflow=workflow,
-            source=source,
-        ).save()
+        data = [extract_value(w_input, row, title_row) for w_input in workflow.data]
+        Task(data=data, workflow=workflow, source=source,).save()
         workflow.n_tasks = F("n_tasks") + 1
         workflow.save()
     send_notification(workflow)
@@ -65,33 +58,20 @@ def task_list_to_csv_response(task_list):
         "Content-Disposition"
     ] = 'attachment; filename="workflow_{0}_completed_tasks.csv"'.format(workflow.id)
     writer = csv.writer(response)
-    headers = [task_input["id"] for task_input in workflow.inputs] + [
-        task_output["id"] for task_output in workflow.outputs
-    ]
+    headers = [task_data["id"] for task_data in workflow.data]
     writer.writerow(headers)
     for task in task_list:
         writer.writerow(
             [
                 next(
                     (
-                        task_input["value"]
-                        for task_input in task.inputs
-                        if task_input["id"] == workflow_input["id"]
+                        task_data[task_data["type"]]["value"]
+                        for task_data in task.data
+                        if task_data["id"] == workflow_data["id"]
                     ),
                     None,
                 )
-                for workflow_input in workflow.inputs
-            ]
-            + [
-                next(
-                    (
-                        task_output[task_output["type"]]["value"]
-                        for task_output in task.outputs
-                        if task_output["id"] == workflow_output["id"]
-                    ),
-                    None,
-                )
-                for workflow_output in workflow.outputs
+                for workflow_data in workflow.data
             ]
         )
     return response
