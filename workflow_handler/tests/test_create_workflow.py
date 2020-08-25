@@ -28,14 +28,14 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -52,14 +52,14 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -79,8 +79,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{}],
-            "outputs": [{}],
+            "data": [{}],
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
@@ -95,8 +94,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo"}],
-            "outputs": [],
+            "data": [{"id": "foo"}],
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
@@ -111,8 +109,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": 1, "name": "foo", "type": "text"}],
-            "outputs": [],
+            "data": [{"id": 1, "name": "foo", "type": "text"}],
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
@@ -127,8 +124,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "game"}],
-            "outputs": [],
+            "data": [{"id": "foo", "name": "foo", "type": "game"}],
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
@@ -141,19 +137,16 @@ class TestCreateWorkflow(APITestCase):
         )
 
     def test_output_validation_errors(self):
-        headers = {"Authorization": "Bearer {}".format(self.access_token)}
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [{}],
+            "data": [{"id": "foo", "name": "foo", "type": "text"}, {"id": 1}],
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
-            headers=headers,
             format="json",
         )
         self.assertEqual(
@@ -163,13 +156,14 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [{"id": "foo"}],
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
+                {"id": "foo2", "name": "foo", "type": "notype"},
+            ],
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
-            headers=headers,
             format="json",
         )
         self.assertEqual(
@@ -179,13 +173,14 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [{"id": 1}],
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
+                {"id": "foo2", "name": "foo", "type": "random"},
+            ],
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
-            headers=headers,
             format="json",
         )
         self.assertEqual(
@@ -195,13 +190,14 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [{"id": "foo", "name": "foo", "type": "notype"}],
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
+                {"id": "foo2", "name": "foo", "type": "single-class"},
+            ],
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
-            headers=headers,
             format="json",
         )
         self.assertEqual(
@@ -211,45 +207,14 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [{"id": "foo", "name": "foo", "type": "random"}],
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
+                {"id": "foo2", "name": "foo", "type": "binary", "binary": {}},
+            ],
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
-            headers=headers,
-            format="json",
-        )
-        self.assertEqual(
-            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
-        )
-
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [{"id": "foo", "name": "foo", "type": "single-class"}],
-        }
-        response = self.client.post(
-            "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
-            headers=headers,
-            format="json",
-        )
-        self.assertEqual(
-            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
-        )
-
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [{"id": "foo", "name": "foo", "type": "binary", "binary": {}}],
-        }
-        response = self.client.post(
-            "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
-            headers=headers,
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
@@ -260,14 +225,14 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -280,14 +245,14 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(

@@ -40,14 +40,14 @@ class TestListWorkflow(APITestCase):
         workflow_data1 = {
             "name": self.wf_name1,
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -61,14 +61,14 @@ class TestListWorkflow(APITestCase):
         workflow_data1 = {
             "name": self.wf_name2,
             "description": "superb wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(

@@ -1,4 +1,5 @@
 import os
+import copy
 
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -33,12 +34,25 @@ class TestTaskAudit(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -49,7 +63,7 @@ class TestTaskAudit(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -65,7 +79,7 @@ class TestTaskAudit(APITestCase):
             workflow_data,
             format="json",
         )
-        task_data = {"inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}}
+        task_data = {"data": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
@@ -84,8 +98,15 @@ class TestTaskAudit(APITestCase):
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         for task in Task.objects.all():
-            response_data = {"inputs": task.inputs, "outputs": task.outputs}
-            response_data["outputs"][0]["single-selection"]["value"] = "bar2"
+            # response_data = {"inputs": task.inputs, "outputs": task.outputs}
+            # response_data["outputs"][0]["single-selection"]["value"] = "bar2"
+
+            data = copy.deepcopy(task.data)
+            for idata in data:
+                if idata["id"] == "foo":
+                    idata["single-selection"]["value"] = "bar2"
+            response_data = {"data": data}
+
             _ = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.pk
@@ -163,12 +184,25 @@ class TestEmptyTaskAudit(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -179,7 +213,7 @@ class TestEmptyTaskAudit(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -195,7 +229,7 @@ class TestEmptyTaskAudit(APITestCase):
             workflow_data,
             format="json",
         )
-        task_data = {"inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}}
+        task_data = {"data": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"}}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
             "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),

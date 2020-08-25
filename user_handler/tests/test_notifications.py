@@ -25,8 +25,7 @@ class TestNotifications(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [{"id": "foo", "name": "foo", "type": "text"},
                 {
                     "id": "foo",
                     "name": "foo",

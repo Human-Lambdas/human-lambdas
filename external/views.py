@@ -41,9 +41,9 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
         )
 
 
-def get_input_value(request_inputs, w_input):
-    input_value = request_inputs[w_input["id"]]
-    if w_input["type"] == "list" and w_input["subtype"] == "number":
+def get_data_value(request_data, w_data):
+    input_value = request_data[w_data["id"]]
+    if w_data["type"] == "list" and w_data[w_data["type"]]["subtype"] == "number":
         input_value = [float(i) for i in input_value]
     return input_value
 
@@ -68,6 +68,13 @@ class CreateTaskView(CreateAPIView):
             Q(workflow__in=workflows) & Q(workflow__id=self.kwargs["workflow_id"])
         )
 
+    def post(self, request, *args, **kwargs):
+        if "data" not in self.request.data or not self.request.data["data"]:
+            return Response(
+                {"status_code": 400, "errors": [{"message": "No data"}]}, status=400,
+            )
+        return self.create(request, *args, **kwargs)
+
     def perform_create(self, serializer):
         workflow = get_object_or_404(Workflow, pk=self.kwargs["workflow_id"])
         analytics.track(
@@ -81,25 +88,24 @@ class CreateTaskView(CreateAPIView):
                 "source": "API",
             },
         )
-        if "inputs" not in self.request.data or not self.request.data["inputs"]:
-            return Response(
-                {"status_code": 400, "errors": [{"message": "No inputs"}]}, status=400,
-            )
-        formatted_inputs = []
-        for w_input in workflow.inputs:
-            task_input = copy.deepcopy(w_input)
-            if "layout" in task_input:
-                del task_input["layout"]
+        formatted_data = []
+        for w_data in workflow.data:
+            task_data = copy.deepcopy(w_data)
+            if "layout" in task_data:
+                del task_data["layout"]
             try:
-                task_input["value"] = get_input_value(
-                    self.request.data["inputs"], w_input
-                )
+                if task_data["type"] not in task_data:
+                    task_data[task_data["type"]] = {}
+                if w_data["id"] in self.request.data["data"]:
+                    task_data[task_data["type"]]["value"] = get_data_value(
+                        self.request.data["data"], task_data
+                    )
             except KeyError:
                 raise serializers.ValidationError(
-                    "Cannot find input with input id: {}".format(w_input["id"])
+                    "Cannot find data with data id: {}".format(w_data["id"])
                 )
-            formatted_inputs.append(task_input)
-        serializer.save(outputs=workflow.outputs, inputs=formatted_inputs)
+            formatted_data.append(task_data)
+        serializer.save(data=formatted_data)
         with transaction.atomic():
             workflow.n_tasks = F("n_tasks") + 1
             workflow.save()

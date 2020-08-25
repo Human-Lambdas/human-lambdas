@@ -39,14 +39,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -63,14 +68,20 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "workerwf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text", "layout": {}}],
-            "outputs": [
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "layout": {},
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -86,14 +97,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -115,14 +131,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -145,14 +166,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -185,14 +211,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -208,14 +239,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data2 = {
             "name": "foowf2",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -267,14 +303,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data1 = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -286,14 +327,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data2 = {
             "name": "foowf2",
             "description": "greater wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -325,14 +371,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data1 = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -344,14 +395,14 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data2 = {
             "name": "foowf2",
             "description": "greater wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
+                {"id": "foo", "name": "foo", "type": "text"},
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         response = self.client.post(

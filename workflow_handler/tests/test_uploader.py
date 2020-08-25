@@ -41,18 +41,16 @@ class TestUpload(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
+            "data": [
                 {"id": "Alpha", "name": "alpha", "type": "text"},
                 {"id": "Beta", "name": "beta", "type": "text"},
                 {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         _ = self.client.post(
@@ -77,17 +75,15 @@ class TestUpload(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
+            "data": [
                 {"id": "news", "name": "news", "type": "text"},
                 {"id": "type", "name": "type", "type": "text"},
-            ],
-            "outputs": [
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         _ = self.client.post(
@@ -109,18 +105,16 @@ class TestUpload(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
+            "data": [
                 {"id": "Alpha", "name": "alpha", "type": "text"},
                 {"id": "Beta", "name": "beta", "type": "text"},
                 {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         _ = self.client.post(
@@ -258,18 +252,16 @@ class TestUploadExtremes(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
+            "data": [
                 {"id": "car", "name": "alpha", "type": "text"},
                 {"id": "img_1", "name": "beta", "type": "text"},
                 {"id": "img_2", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         _ = self.client.post(
@@ -293,21 +285,19 @@ class TestUploadExtremes(APITestCase):
         workflow_data = {
             "name": "feedback",
             "description": "emoji wf",
-            "inputs": [
+            "data": [
                 {"id": "submitter_picture", "name": "alpha", "type": "image"},
                 {"id": "submitter_full_name", "name": "beta", "type": "text"},
                 {"id": "submission_date", "name": "gamma", "type": "date"},
                 {"id": "subject", "name": "eta", "type": "text"},
                 {"id": "body", "name": "leta", "type": "text"},
                 {"id": "organization", "name": "my", "type": "text"},
-            ],
-            "outputs": [
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         _ = self.client.post(
@@ -350,18 +340,16 @@ class TestUploadList(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
+            "data": [
                 {"id": "Alpha", "name": "alpha", "type": "list", "subtype": "number"},
                 {"id": "Beta", "name": "beta", "type": "number"},
                 {"id": "Gamma", "name": "gamma", "type": "number"},
-            ],
-            "outputs": [
                 {
                     "id": "foo",
                     "name": "foo",
                     "type": "single-selection",
                     "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                },
             ],
         }
         _ = self.client.post(

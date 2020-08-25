@@ -7,18 +7,22 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0020_workflownotification_last_notified'),
+        ("workflow_handler", "0020_workflownotification_last_notified"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='task',
-            name='data',
-            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=[]),
+            model_name="task",
+            name="data",
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                blank=True, default=[]
+            ),
         ),
         migrations.AddField(
-            model_name='workflow',
-            name='data',
-            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=[]),
+            model_name="workflow",
+            name="data",
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                blank=True, default=[]
+            ),
         ),
     ]

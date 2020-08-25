@@ -259,18 +259,6 @@ class ListNonCompleteTaskView(ListTaskView):
     serializer_class = PendingTaskSerializer
     pagination_class = TaskPagination
 
-    # def list(self, request, *args, **kwargs):
-    #     workflow = Workflow.objects.get(id=kwargs["workflow_id"])
-    #     obj = get_list_or_404(
-    #         self.get_queryset().filter(~Q(status="completed")), workflow=workflow
-    #     )
-    #     page = self.paginate_queryset(filtered_queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True)
-    #         return self.get_paginated_response(serializer.data)
-    #     serializer = self.serializer_class(obj, many=True)
-    #     return Response(serializer.data)
-
     def get_queryset(self, *args, **kwargs):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
