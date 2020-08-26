@@ -1,7 +1,12 @@
 import copy
+from schema import SchemaError
+
+from .schemas import WORKFLOW_INPUT_SCHEMA, OUTPUT_SCHEMA
 
 
 def input2data(input_data, is_task=True):
+    if not is_task:
+        WORKFLOW_INPUT_SCHEMA.validate(input_data)
     data = copy.deepcopy(input_data)
     data[input_data["type"]] = {
         "read-only": True,
@@ -17,6 +22,8 @@ def input2data(input_data, is_task=True):
 
 
 def output2data(output_data, is_task=False):
+    if not is_task:
+        OUTPUT_SCHEMA.validate(output_data)
     data = copy.deepcopy(output_data)
     if output_data["type"] not in output_data:
         data[output_data["type"]] = {}
@@ -30,7 +37,10 @@ def output2data(output_data, is_task=False):
 def get_workflow_data(workflow):
     workflow_data = []
     for w_inputs in workflow.inputs:
-        workflow_data.append(input2data(w_inputs, is_task=False))
+        data_item = input2data(w_inputs, is_task=False)
+        if not data_item:
+            continue
+        workflow_data.append()
     for w_outputs in workflow.outputs:
         workflow_data.append(output2data(w_outputs, is_task=False))
     return workflow_data
@@ -46,8 +56,11 @@ def get_task_data(task):
 
 
 def migrate_data(workflow):
-    workflow.data = get_workflow_data(workflow)
-    workflow.save()
+    try:
+        workflow.data = get_workflow_data(workflow)
+        workflow.save()
+    except SchemaError:
+        return
     for task in workflow.task_set.all():
         task.data = get_task_data(task)
         task.save()
