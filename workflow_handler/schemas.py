@@ -95,7 +95,7 @@ UPDATE_OUTPUT_SCHEMA = Schema(
 DATA_SCHEMA = Schema(
     [
         {
-            "id": And(str, len),
+            "id": Or(And(str, len), And(int,len)),
             "name": And(str, len),
             "type": Or(
                 "binary",
@@ -127,7 +127,7 @@ DATA_SCHEMA = Schema(
                 Optional("placeholder"): Or(str, float, int, bool, list),
                 Optional("read-only"): bool,
                 Optional("subtype"): And(str, len),
-                Optional("value"): Or(bool, And(str, len), And(list, len), float, int),
+                Optional("value"): Or(bool, And(str, len), And(list, len), float, int, None),
                 Optional("options"): list,
             },
             Optional("logic-jump"): dict,
