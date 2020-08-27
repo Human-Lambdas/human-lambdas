@@ -91,7 +91,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context["request"].user
         wf_name = validated_data["name"]
-        description = validated_data["description"]
+        description = validated_data.get("description", "")
         # inputs = validated_data["inputs"]
         # outputs = validated_data["outputs"]
         data = validated_data["data"]

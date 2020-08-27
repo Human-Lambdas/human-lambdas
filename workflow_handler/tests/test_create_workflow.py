@@ -27,7 +27,7 @@ class TestCreateWorkflow(APITestCase):
 
         workflow_data = {
             "name": "foowf",
-            "description": "great wf",
+            # "description": "great wf",
             "data": [
                 {"id": "foo", "name": "foo", "type": "text"},
                 {
