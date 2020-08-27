@@ -120,13 +120,6 @@ class TestTaskCreation(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
 
-from rest_framework.test import APITestCase
-from rest_framework import status
-
-from workflow_handler.models import Task
-from user_handler.models import Organization
-
-
 class TestListTaskCreation(APITestCase):
     def setUp(self):
         registration_data = {

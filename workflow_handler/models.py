@@ -105,8 +105,9 @@ class Task(models.Model):
         return self.get_formatted_task_external()
 
 
-class WorkflowHook(AbstractHook):
-    workflow = models.OneToOneField(Workflow, on_delete=models.CASCADE,)
+class WebHook(AbstractHook):
+    workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE, default=None)
+    is_zapier = models.BooleanField(default=False)
 
 
 class WorkflowNotification(models.Model):
