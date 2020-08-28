@@ -4,7 +4,7 @@ from external.task_formats import process_output_value
 
 
 class TestTaskFormat(APITestCase):
-    def test_process_output_value(self):
+    def test_process_data_value(self):
         data = [
             ("foo", "foo"),
             (["foo", "bar"], ["foo", "bar"]),

@@ -110,7 +110,6 @@ class TestTaskList(APITestCase):
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
         self.assertFalse("layout" in response.data["tasks"][0]["inputs"])
         self.assertEqual(type(response.data["tasks"][0]["data"]), dict)
-        # self.assertEqual(type(response.data["tasks"][0]["outputs"]), dict)
 
     def test_existing_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)

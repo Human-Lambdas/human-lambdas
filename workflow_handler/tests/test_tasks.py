@@ -165,54 +165,32 @@ class TestTasks(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("pending", response.data["status"])
             self.assertTrue(len(response.data["data"]))
-
-    def test_retrieve_task_output(self):
-        workflow = Workflow.objects.get(id=self.workflow_id)
-        tasks = Task.objects.filter(workflow=workflow).all()
-        for task in tasks:
-            response = self.client.get(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
-                    self.org_id, self.workflow_id, task.id
-                )
-            )
-            self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-            self.assertEqual("pending", response.data["status"])
-            self.assertEqual(workflow.outputs, response.data["outputs"])
+            for itask in response.data["data"]:
+                if itask[itask["type"]].get("read-only"):
+                    self.assertTrue("value" in itask[itask["type"]])
 
     def test_complete_single_selection_task(self):
         workflow = Workflow.objects.get(id=self.workflow_id)
         tasks = Task.objects.filter(workflow=workflow).all()
         output_values = ["foo1", "bar1"]
-        expected_outputs = workflow.outputs
         for output_value, task in zip(output_values, tasks):
-            exp_output = next(item for item in expected_outputs if item["id"] == "foo")
-            exp_output[exp_output["type"]]["value"] = output_value
-            output_list = [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
-                        "value": output_value,
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
-                }
-            ]
-            data = {"inputs": task.inputs, "outputs": output_list}
+            data = copy.deepcopy(task.data)
+            for idata in data:
+                if idata["id"] == "foo":
+                    idata["single-selection"]["value"] = output_value
+            data_payload = {"data": data}
+
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.id
                 ),
-                data=data,
+                data=data_payload,
                 format="json",
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("completed", response.data["status"])
-            self.assertEqual(expected_outputs, response.data["outputs"])
+            self.assertEqual(data, response.data["data"])
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
 
             # test retrieving the same task
@@ -222,9 +200,7 @@ class TestTasks(APITestCase):
                 )
             )
             self.assertEqual("completed", response.data["status"])
-            self.assertEqual(expected_outputs, response.data["outputs"])
-            task = Task.objects.get(id=task.id)
-            self.assertIn("value", task.outputs[0]["single-selection"])
+            self.assertEqual(data, response.data["data"])
 
     def test_complete_multiple_selection_task(self):
         workflow = Workflow.objects.get(id=self.second_workflow_id)
@@ -232,8 +208,6 @@ class TestTasks(APITestCase):
         output_values = [["foo1"], ["foo1", "bar1"]]
         expected_data = workflow.data
         for output_value, task in zip(output_values, tasks):
-            exp_data = next(item for item in expected_data if item["id"] == "bar")
-            exp_data[exp_data["type"]]["value"] = output_value
             data = copy.deepcopy(task.data)
             for idata in data:
                 if idata["id"] == "bar":
@@ -249,22 +223,22 @@ class TestTasks(APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("completed", response.data["status"])
-            self.assertEqual(expected_data, response.data["data"])
+            self.assertEqual(data, response.data["data"])
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
 
-    def test_update_task(self):
-        task = Task.objects.first()
-        data = {"status": "testing"}
-        response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
-                self.org_id, self.workflow_id, task.id
-            ),
-            data=data,
-            format="json",
-        )
-        self.assertEqual(
-            response.status_code, status.HTTP_400_BAD_REQUEST, response.content
-        )
+    # def test_update_task(self):
+    #     task = Task.objects.first()
+    #     data = {"status": "testing"}
+    #     response = self.client.patch(
+    #         "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+    #             self.org_id, self.workflow_id, task.id
+    #         ),
+    #         data=data,
+    #         format="json",
+    #     )
+    #     self.assertEqual(
+    #         response.status_code, status.HTTP_400_BAD_REQUEST, response.content
+    #     )
 
     def test_next_task(self):
         response = self.client.get(
@@ -373,9 +347,9 @@ class TestTasks(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual(response.data["data"][0]["name"], "new_name")
 
-    def test_next_task_change_outputs(self):
+    def test_next_task_change_data(self):
         workflow = Workflow.objects.get(id=self.workflow_id)
-        workflow.outputs[0]["name"] = "new_name"
+        workflow.data[0]["name"] = "new_name"
         workflow.save()
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
@@ -383,19 +357,7 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual(response.data["outputs"][0]["name"], "new_name")
-
-    def test_next_task_change_inputs(self):
-        workflow = Workflow.objects.get(id=self.workflow_id)
-        workflow.inputs[0]["name"] = "new_name"
-        workflow.save()
-        response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
-                self.org_id, self.workflow_id
-            )
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual(response.data["inputs"][0]["name"], "new_name")
+        self.assertEqual(response.data["data"][0]["name"], "new_name")
 
     def test_get_pending_tasks(self):
         response = self.client.get(
@@ -414,7 +376,7 @@ class TestTasks(APITestCase):
             )
         )
         task_id = response.data["id"]
-        task_inputs = response.data["inputs"]
+        task_data = response.data["data"]
 
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
@@ -432,22 +394,10 @@ class TestTasks(APITestCase):
             ),
             1,
         )
-
-        output_list = [
-            {
-                "id": "foo",
-                "name": "foo",
-                "type": "single-selection",
-                "single-selection": {
-                    "value": "foo2",
-                    "options": [
-                        {"id": "foo2", "name": "foo2"},
-                        {"id": "bar2", "name": "bar2"},
-                    ],
-                },
-            }
-        ]
-        data = {"inputs": task_inputs, "outputs": output_list}
+        for t_data in task_data:
+            if t_data["id"] == "foo":
+                t_data[t_data["type"]]["value"] = "foo2"
+        data = {"data": task_data}
         response = self.client.patch(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                 self.org_id, self.workflow_id, task_id

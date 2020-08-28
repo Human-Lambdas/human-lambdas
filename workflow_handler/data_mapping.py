@@ -1,4 +1,5 @@
 import copy
+
 from schema import SchemaError
 
 from .schemas import WORKFLOW_INPUT_SCHEMA, OUTPUT_SCHEMA

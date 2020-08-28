@@ -199,9 +199,24 @@ class TestWebhookTasks(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -234,12 +249,25 @@ class TestWebhookTasks(APITestCase):
         workflow_data = {
             "name": "uploader2",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -250,7 +278,7 @@ class TestWebhookTasks(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
             "webhook": {"target": "https://en9sk43hft479.x.pipedream.net"},
         }
@@ -264,36 +292,23 @@ class TestWebhookTasks(APITestCase):
         workflow = Workflow.objects.get(id=self.workflow_id)
         tasks = Task.objects.filter(workflow=workflow).all()
         output_values = ["foo1", "bar1"]
-        expected_outputs = workflow.outputs
         for output_value, task in zip(output_values, tasks):
-            exp_output = next(item for item in expected_outputs if item["id"] == "foo")
-            exp_output[exp_output["type"]]["value"] = output_value
-            output_list = [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
-                        "value": output_value,
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
-                }
-            ]
-            data = {"inputs": task.inputs, "outputs": output_list}
+            data = task.data
+            for idata in data:
+                if idata["id"] == "foo":
+                    idata[idata["type"]]["value"] = output_value
+            data_payload = {"data": data}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.id
                 ),
-                data=data,
+                data=data_payload,
                 format="json",
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("completed", response.data["status"])
-            self.assertEqual(expected_outputs, response.data["outputs"])
+            self.assertEqual(data, response.data["data"])
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
 
     def test_find_and_fire(self):

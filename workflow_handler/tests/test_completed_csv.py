@@ -129,7 +129,6 @@ class TestCompletedTasksToCSV(APITestCase):
                     else:
                         idata["single-selection"]["value"] = "SO2"
             response_data = {"data": update_data}
-            # response_data = {"inputs": task["inputs"], "outputs": output_list}
             _ = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task["id"]
@@ -202,43 +201,6 @@ class TestCompletedTasksToCSV(APITestCase):
                 },
             }
         )
-        # updated_workflow_data = {
-        #     "data": [
-        #         {
-        #             "id": "foo",
-        #             "name": "foo",
-        #             "type": "single-selection",
-        #             "single-selection": {
-        #                 "options": [
-        #                     {"id": "foo2", "name": "foo2"},
-        #                     {"id": "bar2", "name": "bar2"},
-        #                 ],
-        #             },
-        #         },
-        #         {
-        #             "id": "secondary_output",
-        #             "name": "barbar",
-        #             "type": "single-selection",
-        #             "single-selection": {
-        #                 "options": [
-        #                     {"id": "foo2", "name": "SO1"},
-        #                     {"id": "bar2", "name": "SO2"},
-        #                 ],
-        #             },
-        #         },
-        #         {
-        #             "id": "tertiary_output",
-        #             "name": "terttert",
-        #             "type": "single-selection",
-        #             "single-selection": {
-        #                 "options": [
-        #                     {"id": "fooalpha2", "name": "TO1"},
-        #                     {"id": "barbeta2", "name": "TO2"},
-        #                 ],
-        #             },
-        #         },
-        #     ],
-        # }
 
         response = self.client.patch(
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id),
@@ -316,35 +278,6 @@ class TestCompletedTasksToCSV(APITestCase):
                     else:
                         idata["single-selection"]["value"] = "SO2"
             response_data = {"data": update_data}
-
-            # output_list = [
-            #     {
-            #         "id": "foo",
-            #         "name": "foo",
-            #         "type": "single-selection",
-            #         "single-selection": {
-            #             "value": "foo2" if i % 2 == 0 else "bar2",
-            #             "options": [
-            #                 {"id": "foo2", "name": "foo2"},
-            #                 {"id": "bar2", "name": "bar2"},
-            #             ],
-            #         },
-            #     },
-            #     {
-            #         "id": "secondary_output",
-            #         "name": "barbar",
-            #         "type": "single-selection",
-            #         "single-selection": {
-            #             "value": "SO1" if i % 2 == 0 else "SO2",
-            #             "options": [
-            #                 {"id": "foo2", "name": "SO1"},
-            #                 {"id": "bar2", "name": "SO2"},
-            #             ],
-            #         },
-            #     },
-            # ]
-            # task = response.data
-            # response_data = {"inputs": task["inputs"], "outputs": output_list}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task["id"]
@@ -358,22 +291,6 @@ class TestCompletedTasksToCSV(APITestCase):
             for idata in self.workflow_data["data"]
             if idata["id"] != "secondary_output"
         ]
-
-        # updated_workflow_data = {
-        #     "outputs": [
-        #         {
-        #             "id": "foo",
-        #             "name": "foo",
-        #             "type": "single-selection",
-        #             "single-selection": {
-        #                 "options": [
-        #                     {"id": "foo2", "name": "foo2"},
-        #                     {"id": "bar2", "name": "bar2"},
-        #                 ],
-        #             },
-        #         },
-        #     ],
-        # }
 
         response = self.client.patch(
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id),
@@ -396,22 +313,6 @@ class TestCompletedTasksToCSV(APITestCase):
             if idata["id"] == "foo":
                 idata["single-selection"]["value"] = "bar2"
         response_data = {"data": update_data}
-        # output_list = [
-        #     {
-        #         "id": "foo",
-        #         "name": "foo",
-        #         "type": "single-selection",
-        #         "single-selection": {
-        #             "value": "bar2",
-        #             "options": [
-        #                 {"id": "foo2", "name": "foo2"},
-        #                 {"id": "bar2", "name": "bar2"},
-        #             ],
-        #         },
-        #     },
-        # ]
-        # task = response.data
-        # response_data = {"inputs": task["inputs"], "outputs": output_list}
         response = self.client.patch(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                 self.org_id, self.workflow_id, task["id"]

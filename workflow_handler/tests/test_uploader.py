@@ -42,9 +42,24 @@ class TestUpload(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -76,8 +91,18 @@ class TestUpload(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "news", "name": "news", "type": "text"},
-                {"id": "type", "name": "type", "type": "text"},
+                {
+                    "id": "news",
+                    "name": "news",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "type",
+                    "name": "type",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -106,9 +131,24 @@ class TestUpload(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -132,12 +172,13 @@ class TestUpload(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         tasks = Task.objects.all()
         for task in tasks:
-            self.assertEqual(3, len(task.inputs))
-            for input_item in task.inputs:
-                self.assertTrue(input_item.pop("value"))
-                self.assertTrue(
-                    any(wf_input == input_item for wf_input in workflow_data["inputs"])
-                )
+            self.assertEqual(4, len(task.data))
+            for data_item in task.data:
+                if data_item[data_item["type"]].get("read-only"):
+                    self.assertTrue(data_item[data_item["type"]].pop("value"))
+                    self.assertTrue(
+                        any(wf_data == data_item for wf_data in workflow_data["data"])
+                    )
 
 
 class TestCSV2Task(TestCase):
@@ -286,12 +327,42 @@ class TestUploadExtremes(APITestCase):
             "name": "feedback",
             "description": "emoji wf",
             "data": [
-                {"id": "submitter_picture", "name": "alpha", "type": "image"},
-                {"id": "submitter_full_name", "name": "beta", "type": "text"},
-                {"id": "submission_date", "name": "gamma", "type": "date"},
-                {"id": "subject", "name": "eta", "type": "text"},
-                {"id": "body", "name": "leta", "type": "text"},
-                {"id": "organization", "name": "my", "type": "text"},
+                {
+                    "id": "submitter_picture",
+                    "name": "alpha",
+                    "type": "image",
+                    "image": {"read-only": True},
+                },
+                {
+                    "id": "submitter_full_name",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "submission_date",
+                    "name": "gamma",
+                    "type": "date",
+                    "date": {"read-only": True},
+                },
+                {
+                    "id": "subject",
+                    "name": "eta",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "body",
+                    "name": "leta",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
+                {
+                    "id": "organization",
+                    "name": "my",
+                    "type": "text",
+                    "text": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -341,9 +412,25 @@ class TestUploadList(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "list", "subtype": "number"},
-                {"id": "Beta", "name": "beta", "type": "number"},
-                {"id": "Gamma", "name": "gamma", "type": "number"},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "list",
+                    "list": {"read-only": True},
+                    "subtype": "number",
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "number",
+                    "number": {"read-only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "number",
+                    "number": {"read-only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -367,7 +454,5 @@ class TestUploadList(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         for task in Task.objects.filter(workflow__pk=workflow_id).all():
-            list_input = [tinput for tinput in task.inputs if tinput["id"] == "Alpha"][
-                0
-            ]
-            self.assertIsInstance(list_input["value"], list)
+            list_input = [tinput for tinput in task.data if tinput["id"] == "Alpha"][0]
+            self.assertIsInstance(list_input["list"]["value"], list)

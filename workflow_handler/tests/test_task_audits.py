@@ -98,9 +98,6 @@ class TestTaskAudit(APITestCase):
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         for task in Task.objects.all():
-            # response_data = {"inputs": task.inputs, "outputs": task.outputs}
-            # response_data["outputs"][0]["single-selection"]["value"] = "bar2"
-
             data = copy.deepcopy(task.data)
             for idata in data:
                 if idata["id"] == "foo":

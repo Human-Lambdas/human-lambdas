@@ -6,14 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0023_auto_20200826_0839'),
+        ("workflow_handler", "0023_auto_20200826_0839"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='workflow',
-            name='description',
-            field=models.TextField(blank=True, default=''),
+            model_name="workflow",
+            name="description",
+            field=models.TextField(blank=True, default=""),
             preserve_default=False,
         ),
     ]
