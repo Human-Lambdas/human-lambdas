@@ -92,8 +92,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         wf_name = validated_data["name"]
         description = validated_data.get("description", "")
-        # inputs = validated_data["inputs"]
-        # outputs = validated_data["outputs"]
         data = validated_data["data"]
         organization_obj = Organization.objects.filter(user=user)
         if organization_obj.exists() and organization_obj.count() == 1:
@@ -105,8 +103,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
             description=description,
             organization=organization,
             created_by=user,
-            # inputs=inputs,
-            # outputs=outputs,
             data=data,
         )
         workflow.save()
@@ -198,19 +194,21 @@ class TaskSerializer(serializers.ModelSerializer):
         return task
 
     def update(self, instance, validated_data):
-        # inputs = validated_data.get("inputs")
-        # outputs = validated_data.get("outputs")
-        instance.data = validated_data.get("data", instance.data)
-        # if not outputs:
-        #     raise serializers.ValidationError("You can only update outputs of tasks")
         user = self.context["request"].user
-        instance.status = "completed"
-        instance.completed_at = timezone.now()
-        instance.assigned_to = user
-        # instance.inputs = inputs
-        # instance.outputs = outputs
+        assignee = validated_data.get("assigned_to")
+        if assignee:
+            instance.assigned_to = assignee
+        elif instance.assigned_to:
+            instance.assigned_to = None
+        if instance.assigned_to == user:
+            instance.data = validated_data.get("data", instance.data)
+        if validated_data["submit_task"]:
+            instance.status = "completed"
+            instance.completed_at = timezone.now()
+            instance.save()
+            instance.task_completed(user)
+            return instance
         instance.save()
-        instance.task_completed(user)
         return instance
 
     def validate_data(self, data):

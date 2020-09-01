@@ -68,6 +68,7 @@ def task_list_to_csv_response(task_list):
                         task_data[task_data["type"]]["value"]
                         for task_data in task.data
                         if task_data["id"] == workflow_data["id"]
+                        and "value" in task_data[task_data["type"]]
                     ),
                     None,
                 )

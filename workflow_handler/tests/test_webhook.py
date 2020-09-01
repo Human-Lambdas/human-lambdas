@@ -182,11 +182,12 @@ class TestWebhookTasks(APITestCase):
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register", registration_data)
+        response = self.client.post("/v1/users/register", registration_data)
+        self.user_id = response.data["id"]
 
         registration_data["email"] = "foojr@bar.com"
         _ = self.client.post("/v1/users/register", registration_data)
-        registration_data["email"] = "foo@bar.com"
+        # registration_data["email"] = "foo@bar.com"
 
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
@@ -297,7 +298,7 @@ class TestWebhookTasks(APITestCase):
             for idata in data:
                 if idata["id"] == "foo":
                     idata[idata["type"]]["value"] = output_value
-            data_payload = {"data": data}
+            data_payload = {"data": data, "assigned_to": self.user_id}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.id

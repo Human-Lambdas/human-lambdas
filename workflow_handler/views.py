@@ -71,14 +71,6 @@ class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
     def perform_destroy(self, instance):
         instance.delete()
 
-    # def perform_update(self, serializer):
-    # if not queryset.exists():
-    #     workflow = Workflow.objects.get(pk=self.kwargs["workflow_id"])
-    #     webhook_data["event"] = "task.completed"
-    #     webhook_data["user"] = self.request.user
-    #     WorkflowHook.objects.create(workflow=workflow, **webhook_data)
-    # serializer.save()
-
 
 class CreateWorkflowView(CreateAPIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
@@ -320,7 +312,12 @@ class RUDTaskView(RetrieveUpdateAPIView):
         return Response(task, status=200)
 
     def perform_update(self, serializer, *args, **kwargs):
-        serializer.save(owner=self.request.user)
+        serializer.save(owner=self.request.user, submit_task=True)
+
+
+class SaveTaskView(RUDTaskView):
+    def perform_update(self, serializer, *args, **kwargs):
+        serializer.save(owner=self.request.user, submit_task=False)
 
 
 class NextTaskView(APIView):

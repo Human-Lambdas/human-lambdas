@@ -32,11 +32,13 @@ class TestTasks(APITestCase):
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register", registration_data)
+        response = self.client.post("/v1/users/register", registration_data)
+        self.user_id = response.data["id"]
 
         registration_data["email"] = "foojr@bar.com"
         _ = self.client.post("/v1/users/register", registration_data)
-        registration_data["email"] = "foo@bar.com"
+
+        # registration_data["email"] = "foo@bar.com"
 
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
@@ -178,7 +180,7 @@ class TestTasks(APITestCase):
             for idata in data:
                 if idata["id"] == "foo":
                     idata["single-selection"]["value"] = output_value
-            data_payload = {"data": data}
+            data_payload = {"data": data, "assigned_to": self.user_id}
 
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
@@ -206,13 +208,12 @@ class TestTasks(APITestCase):
         workflow = Workflow.objects.get(id=self.second_workflow_id)
         tasks = Task.objects.filter(workflow=workflow).all()
         output_values = [["foo1"], ["foo1", "bar1"]]
-        expected_data = workflow.data
         for output_value, task in zip(output_values, tasks):
             data = copy.deepcopy(task.data)
             for idata in data:
                 if idata["id"] == "bar":
                     idata["multiple-selection"]["value"] = output_value
-            data_reponse = {"data": data}
+            data_reponse = {"data": data, "assigned_to": self.user_id}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.second_workflow_id, task.id
@@ -225,20 +226,6 @@ class TestTasks(APITestCase):
             self.assertEqual("completed", response.data["status"])
             self.assertEqual(data, response.data["data"])
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
-
-    # def test_update_task(self):
-    #     task = Task.objects.first()
-    #     data = {"status": "testing"}
-    #     response = self.client.patch(
-    #         "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
-    #             self.org_id, self.workflow_id, task.id
-    #         ),
-    #         data=data,
-    #         format="json",
-    #     )
-    #     self.assertEqual(
-    #         response.status_code, status.HTTP_400_BAD_REQUEST, response.content
-    #     )
 
     def test_next_task(self):
         response = self.client.get(
