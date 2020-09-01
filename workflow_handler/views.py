@@ -18,13 +18,14 @@ from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from user_handler.permissions import IsOrgAdmin
 
+# <<<<<<< HEAD
 from .serializers import (
     WorkflowSerializer,
     TaskSerializer,
     HookSerializer,
     PendingTaskSerializer,
 )
-from .models import Workflow, Task, Source, WorkflowHook
+from .models import Workflow, Task, Source, WebHook  # , WorkflowHook
 from .utils import sync_workflow_task, decode_csv, TaskPagination
 
 
@@ -33,7 +34,7 @@ class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
     serializer_class = HookSerializer
 
     def get_queryset(self):
-        return WorkflowHook.objects.filter(workflow__pk=self.kwargs["workflow_id"])
+        return WebHook.objects.filter(workflow__pk=self.kwargs["workflow_id"])
 
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
@@ -163,8 +164,13 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     def retrieve(self, request, *args, **kwargs):
         obj = get_object_or_404(self.get_queryset())
         workflow = self.serializer_class(obj).data
-        if hasattr(obj, "workflowhook"):
-            workflow["webhook"] = {"target": obj.workflowhook.target}
+        if (
+            hasattr(obj, "webhook_set")
+            and obj.webhook_set.filter(is_zapier=False).exists()
+        ):
+            workflow["webhook"] = {
+                "target": WebHook.objects.get(workflow=obj, is_zapier=False).target
+            }
         return Response(workflow)
 
     def update(self, request, *args, **kwargs):

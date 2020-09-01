@@ -45,8 +45,8 @@ class TestListWorkflow(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -66,8 +66,8 @@ class TestListWorkflow(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }

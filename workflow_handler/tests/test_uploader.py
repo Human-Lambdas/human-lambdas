@@ -46,25 +46,25 @@ class TestUpload(APITestCase):
                     "id": "Alpha",
                     "name": "alpha",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Beta",
                     "name": "beta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Gamma",
                     "name": "gamma",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -95,19 +95,19 @@ class TestUpload(APITestCase):
                     "id": "news",
                     "name": "news",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "type",
                     "name": "type",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -135,25 +135,25 @@ class TestUpload(APITestCase):
                     "id": "Alpha",
                     "name": "alpha",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Beta",
                     "name": "beta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Gamma",
                     "name": "gamma",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -174,7 +174,7 @@ class TestUpload(APITestCase):
         for task in tasks:
             self.assertEqual(4, len(task.data))
             for data_item in task.data:
-                if data_item[data_item["type"]].get("read-only"):
+                if data_item[data_item["type"]].get("read_only"):
                     self.assertTrue(data_item[data_item["type"]].pop("value"))
                     self.assertTrue(
                         any(wf_data == data_item for wf_data in workflow_data["data"])
@@ -300,8 +300,8 @@ class TestUploadExtremes(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -331,43 +331,43 @@ class TestUploadExtremes(APITestCase):
                     "id": "submitter_picture",
                     "name": "alpha",
                     "type": "image",
-                    "image": {"read-only": True},
+                    "image": {"read_only": True},
                 },
                 {
                     "id": "submitter_full_name",
                     "name": "beta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "submission_date",
                     "name": "gamma",
                     "type": "date",
-                    "date": {"read-only": True},
+                    "date": {"read_only": True},
                 },
                 {
                     "id": "subject",
                     "name": "eta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "body",
                     "name": "leta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "organization",
                     "name": "my",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -416,26 +416,26 @@ class TestUploadList(APITestCase):
                     "id": "Alpha",
                     "name": "alpha",
                     "type": "list",
-                    "list": {"read-only": True},
+                    "list": {"read_only": True},
                     "subtype": "number",
                 },
                 {
                     "id": "Beta",
                     "name": "beta",
                     "type": "number",
-                    "number": {"read-only": True},
+                    "number": {"read_only": True},
                 },
                 {
                     "id": "Gamma",
                     "name": "gamma",
                     "type": "number",
-                    "number": {"read-only": True},
+                    "number": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }

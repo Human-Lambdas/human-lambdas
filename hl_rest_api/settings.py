@@ -37,7 +37,7 @@ DEBUG = False if os.getenv("DEBUG") == "False" else True
 HOOK_EVENTS = {
     "task.completed": "workflow_handler.Task.completed",
 }
-HOOK_CUSTOM_MODEL = "workflow_handler.WorkflowHook"
+HOOK_CUSTOM_MODEL = "workflow_handler.WebHook"
 HOOK_FINDER = "workflow_handler.utils.find_and_fire_hook"
 
 # Application definition
@@ -159,7 +159,7 @@ else:
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
+    # or allow read_only access for unauthenticated users.
     "DEFAULT_PERMISSION_CLASSES": [DEFAULT_PERMISSION],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",

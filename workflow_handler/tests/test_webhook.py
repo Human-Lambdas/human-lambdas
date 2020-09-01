@@ -4,7 +4,8 @@ import os
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from workflow_handler.models import WorkflowHook, Workflow, Task
+from workflow_handler.models import WebHook
+from workflow_handler.models import Workflow, Task
 from user_handler.models import User, Organization, Notification
 
 
@@ -48,8 +49,8 @@ class TestWebhook(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
             "webhook": {"target": self.hook_url},
@@ -62,7 +63,7 @@ class TestWebhook(APITestCase):
         self.workflow_id = response.data["id"]
 
     def test_admin_webhook_creation(self):
-        self.assertIsNotNone(WorkflowHook.objects.get(user__email="foo@bar.com"))
+        self.assertIsNotNone(WebHook.objects.get(user__email="foo@bar.com"))
 
     def test_webhook_update(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
@@ -73,10 +74,9 @@ class TestWebhook(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data["webhook"]["target"], new_url)
-        self.assertEqual(
-            WorkflowHook.objects.get(workflow__pk=self.workflow_id).target, new_url
-        )
+        hook = WebHook.objects.filter(workflow__id=response.data["id"]).first()
+        self.assertIsNotNone(hook)
+        self.assertEqual(hook.target, new_url)
 
     def test_webhook_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
@@ -84,7 +84,9 @@ class TestWebhook(APITestCase):
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data["webhook"]["target"], "http://some.url.com")
+        hook = WebHook.objects.filter(workflow__pk=self.workflow_id).first()
+        self.assertIsNotNone(hook)
+        self.assertEqual(hook.target, "http://some.url.com")
 
     def test_webhook_delete(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
@@ -95,7 +97,7 @@ class TestWebhook(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(
-            WorkflowHook.objects.filter(workflow__pk=self.workflow_id).count(), 0
+            WebHook.objects.filter(workflow__pk=self.workflow_id).count(), 0
         )
 
     def test_webhook_endpoint(self):
@@ -114,7 +116,7 @@ class TestWebhook(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["target"], new_url)
         self.assertEqual(
-            WorkflowHook.objects.get(workflow__pk=self.workflow_id).target, new_url
+            WebHook.objects.get(workflow__pk=self.workflow_id).target, new_url
         )
 
     def test_invalid_url(self):
@@ -127,8 +129,8 @@ class TestWebhook(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 }
             ],
             "webhook": {"target": "not valid"},
@@ -150,7 +152,7 @@ class TestWebhook(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(
-            WorkflowHook.objects.filter(workflow__pk=self.workflow_id).count(), 0
+            WebHook.objects.filter(workflow__id=self.workflow_id).count(), 0
         )
         new_url = "http://someother.url.com"
         response = self.client.patch(
@@ -159,10 +161,9 @@ class TestWebhook(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data["webhook"]["target"], new_url)
-        self.assertEqual(
-            WorkflowHook.objects.get(workflow__pk=self.workflow_id).target, new_url
-        )
+        hook = WebHook.objects.filter(workflow__pk=self.workflow_id).first()
+        self.assertIsNotNone(hook)
+        self.assertEqual(hook.target, new_url)
 
 
 class TestWebhookTasks(APITestCase):
@@ -204,25 +205,25 @@ class TestWebhookTasks(APITestCase):
                     "id": "Alpha",
                     "name": "alpha",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Beta",
                     "name": "beta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Gamma",
                     "name": "gamma",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -255,25 +256,25 @@ class TestWebhookTasks(APITestCase):
                     "id": "Alpha",
                     "name": "alpha",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Beta",
                     "name": "beta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Gamma",
                     "name": "gamma",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -318,7 +319,7 @@ class TestWebhookTasks(APITestCase):
             "event": "task.completed",
             "workflow": workflow,
         }
-        hooks = WorkflowHook.objects.filter(**filters)
+        hooks = WebHook.objects.filter(**filters)
         self.assertEqual(len(hooks), 1)
 
 
@@ -356,8 +357,8 @@ class TestWebhookEndpoint(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -384,7 +385,7 @@ class TestWebhookEndpoint(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(response.data["target"], new_url)
         self.assertEqual(
-            WorkflowHook.objects.get(workflow__pk=self.workflow_id).target, new_url
+            WebHook.objects.get(workflow__pk=self.workflow_id).target, new_url
         )
 
         response = self.client.patch(
@@ -395,6 +396,4 @@ class TestWebhookEndpoint(APITestCase):
         self.assertEqual(
             response.status_code, status.HTTP_204_NO_CONTENT, response.data
         )
-        self.assertFalse(
-            WorkflowHook.objects.filter(workflow__pk=self.workflow_id).exists()
-        )
+        self.assertFalse(WebHook.objects.filter(workflow__pk=self.workflow_id).exists())

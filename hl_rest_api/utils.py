@@ -72,3 +72,13 @@ def generate_unique_token(*args):
         to_hash += str(arg)
     token = ctypes.c_size_t(hash(to_hash)).value
     return token
+
+
+def is_valid_url(text):
+    if re.match(
+        r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]"
+        r"{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)",
+        text,
+    ):
+        return True
+    return False

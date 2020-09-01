@@ -4,7 +4,7 @@ import cchardet
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 
-from .models import WorkflowHook
+from .models import WebHook
 
 
 def sync_workflow_task(workflow, task):
@@ -29,7 +29,7 @@ def find_and_fire_hook(event_name, instance, **kwargs):
         "event": event_name,
         "workflow": instance.workflow,
     }
-    hooks = WorkflowHook.objects.filter(**filters)
+    hooks = WebHook.objects.filter(**filters)
     for hook in hooks:
         hook.deliver_hook(instance)
 

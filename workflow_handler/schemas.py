@@ -39,8 +39,8 @@ OUTPUT_SCHEMA = Schema(
                 "text",
                 "number",
                 "date",
-                "single-selection",
-                "multiple-selection",
+                "single_selection",
+                "multiple_selection",
             ),
             Optional(
                 Or(
@@ -48,8 +48,8 @@ OUTPUT_SCHEMA = Schema(
                     "text",
                     "number",
                     "date",
-                    "single-selection",
-                    "multiple-selection",
+                    "single_selection",
+                    "multiple_selection",
                 )
             ): dict,
             Optional("logicJump"): dict,
@@ -69,8 +69,8 @@ UPDATE_OUTPUT_SCHEMA = Schema(
                 "text",
                 "number",
                 "date",
-                "single-selection",
-                "multiple-selection",
+                "single_selection",
+                "multiple_selection",
             ),
             Optional(
                 Or(
@@ -78,8 +78,8 @@ UPDATE_OUTPUT_SCHEMA = Schema(
                     "text",
                     "number",
                     "date",
-                    "single-selection",
-                    "multiple-selection",
+                    "single_selection",
+                    "multiple_selection",
                 )
             ): {
                 Optional("value"): Or(bool, And(str, len), And(list, len), float, int),
@@ -95,7 +95,7 @@ UPDATE_OUTPUT_SCHEMA = Schema(
 DATA_SCHEMA = Schema(
     [
         {
-            "id": Or(And(str, len), And(int, len)),
+            "id": Or(And(str, len), int),
             "name": And(str, len),
             "type": Or(
                 "binary",
@@ -106,8 +106,8 @@ DATA_SCHEMA = Schema(
                 "audio",
                 "video",
                 "list",
-                "single-selection",
-                "multiple-selection",
+                "single_selection",
+                "multiple_selection",
             ),
             Optional("layout"): dict,
             Optional(
@@ -120,19 +120,19 @@ DATA_SCHEMA = Schema(
                     "audio",
                     "video",
                     "list",
-                    "single-selection",
-                    "multiple-selection",
+                    "single_selection",
+                    "multiple_selection",
                 ),
             ): {
                 Optional("placeholder"): Or(str, float, int, bool, list),
-                Optional("read-only"): bool,
+                Optional("read_only"): bool,
                 Optional("subtype"): And(str, len),
                 Optional("value"): Or(
                     bool, And(str, len), And(list, len), float, int, None
                 ),
                 Optional("options"): list,
             },
-            Optional("logic-jump"): dict,
+            Optional("logic_jump"): dict,
         }
     ],
     ignore_extra_keys=True,

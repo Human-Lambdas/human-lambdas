@@ -33,8 +33,8 @@ class TestCreateWorkflow(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -57,8 +57,8 @@ class TestCreateWorkflow(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -95,21 +95,6 @@ class TestCreateWorkflow(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "data": [{"id": "foo"}],
-        }
-        response = self.client.post(
-            "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
-            headers=headers,
-            format="json",
-        )
-        self.assertEqual(
-            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
-        )
-
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [{"id": 1, "name": "foo", "type": "text"}],
         }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
@@ -230,8 +215,8 @@ class TestCreateWorkflow(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -250,8 +235,8 @@ class TestCreateWorkflow(APITestCase):
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }

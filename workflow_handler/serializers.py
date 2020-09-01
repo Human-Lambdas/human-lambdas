@@ -7,16 +7,18 @@ from rest_framework import serializers, exceptions
 from user_handler.models import Organization
 from schema import SchemaError
 from django.db.models import Q
+from hl_rest_api.utils import is_valid_url
 
-from .models import Workflow, Task, WorkflowHook, Source, WorkflowNotification
 from .schemas import DATA_SCHEMA
+from .models import Workflow, Task, Source, WorkflowNotification, WebHook
+
 
 logger = logging.getLogger(__file__)
 
 
 def validate_output_structure(validated_data_items):
     for validated_data in validated_data_items:
-        if validated_data["type"] in ["single-selection", "multiple-selection"]:
+        if validated_data["type"] in ["single_selection", "multiple_selection"]:
             type_data = validated_data.get(validated_data["type"])
             if type_data is None:
                 raise serializers.ValidationError(
@@ -37,7 +39,7 @@ class HookSerializer(serializers.ModelSerializer):
         return event
 
     class Meta:
-        model = WorkflowHook
+        model = WebHook
         fields = "__all__"
         read_only_fields = ("user", "event", "workflow", "id")
 
@@ -47,13 +49,13 @@ class HookSerializer(serializers.ModelSerializer):
         validated_data["workflow"] = Workflow.objects.get(
             pk=self.context["view"].kwargs["workflow_id"]
         )
-        webhook = WorkflowHook(**validated_data)
+        webhook = WebHook(**validated_data)
         webhook.save()
         return webhook
 
 
 class WorkflowSerializer(serializers.ModelSerializer):
-    webhook = HookSerializer(required=False)
+    webhook = HookSerializer(required=False, allow_null=True, write_only=True)
     active_users = serializers.SerializerMethodField(
         "get_active_users", allow_null=True
     )
@@ -64,8 +66,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
-            # "inputs",
-            # "outputs",
             "disabled",
             "n_tasks",
             "created_at",
@@ -79,6 +79,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "id": {"read_only": True},
             "created_at": {"read_only": True},
             "active_users": {"read_only": True},
+            "webhook": {"write_only": True},
         }
 
     def get_active_users(self, instance):
@@ -110,7 +111,8 @@ class WorkflowSerializer(serializers.ModelSerializer):
         if webhook_data:
             webhook_data["event"] = "task.completed"
             webhook_data["user"] = user
-            WorkflowHook.objects.create(workflow=workflow, **webhook_data)
+            webhook_data["workflow"] = workflow
+            WebHook.objects.create(**webhook_data)
         for org_user in organization.user.all():
             wfnotification = WorkflowNotification(
                 workflow=workflow, notification=org_user.notifications, enabled=True
@@ -129,8 +131,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 )
             instance.name = workflow_name
         instance.description = validated_data.get("description", instance.description)
-        # instance.inputs = validated_data.get("inputs", instance.inputs)
-        # instance.outputs = validated_data.get("outputs", instance.outputs)
         instance.data = validated_data.get("data", instance.data)
         disabled = validated_data.get("disabled")
         if disabled:
@@ -139,7 +139,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
         instance.save()
         webhook_data = validated_data.get("webhook")
         if webhook_data or self.context.get("remove_webhook"):
-            hook_instance = WorkflowHook.objects.filter(workflow=instance)
+            hook_instance = WebHook.objects.filter(workflow=instance)
             if hook_instance.exists():
                 hook_instance = hook_instance.first()
                 if self.context.get("remove_webhook"):
@@ -148,10 +148,10 @@ class WorkflowSerializer(serializers.ModelSerializer):
                     hook_instance.target = webhook_data["target"]
                     hook_instance.save()
             else:
-                webhook_data["workflow"] = instance
                 webhook_data["event"] = "task.completed"
                 webhook_data["user"] = self.context["request"].user
-                WorkflowHook.objects.create(**webhook_data)
+                webhook_data["workflow"] = instance
+                WebHook.objects.create(**webhook_data)
         return super(WorkflowSerializer, self).update(instance, validated_data)
 
     def validate_data(self, data):
@@ -159,6 +159,12 @@ class WorkflowSerializer(serializers.ModelSerializer):
             return validate_output_structure(DATA_SCHEMA.validate(data))
         except SchemaError as exception_text:
             raise serializers.ValidationError(exception_text)
+
+    def validate_webhook(self, data):
+        if data["target"]:
+            if not is_valid_url(data["target"]):
+                raise serializers.ValidationError("Not a valid URL set for Webhooks")
+        return data
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -174,15 +180,12 @@ class TaskSerializer(serializers.ModelSerializer):
             "id",
             "status",
             "created_at",
-            # "inputs",
             "assigned_to",
             "completed_at",
             "data",
         ]
 
     def create(self, validated_data):
-        # inputs = validated_data["inputs"]
-        # outputs = validated_data["outputs"]
         data = validated_data["data"]
         workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
         source = Source(

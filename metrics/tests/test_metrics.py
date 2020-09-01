@@ -32,14 +32,14 @@ class TestMetrics(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -120,14 +120,14 @@ class TestComplexMetrics(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -214,14 +214,14 @@ class TestQueryMetrics(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -250,14 +250,14 @@ class TestQueryMetrics(APITestCase):
             "name": "uploader2",
             "description": "greater wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -344,14 +344,14 @@ class TestWorkflowMetrics(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -380,14 +380,14 @@ class TestWorkflowMetrics(APITestCase):
             "name": "uploader2",
             "description": "greater wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -558,14 +558,14 @@ class TestWorkermetrics(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read-only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read-only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read-only": True}},
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},

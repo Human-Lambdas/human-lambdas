@@ -24,6 +24,9 @@ class SendGrid(SGMail):
         self.api_key = settings.SENDGRID_API_KEY
         self.default_from = ("noreply@humanlambdas.com", "Human Lambdas")
         self.client = SendGridAPIClient(self.api_key).client
+        self.reset_data()
+
+    def reset_data(self):
         super(SGMail, self).__init__()
         self.from_email = None
         self.subject = None
@@ -78,7 +81,9 @@ class SendGrid(SGMail):
         self.asm = Asm(GroupId(group_id))
         request_body = self.get()
         logger.info("Sending email with request body: %s", request_body)
-        return self.client.mail.send.post(request_body=request_body)
+        sent = self.client.mail.send.post(request_body=request_body)
+        self.reset_data()
+        return sent
 
     def _extract_emails(self, emails):
         if type(emails[0]) is Email:

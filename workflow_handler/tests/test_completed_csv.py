@@ -41,25 +41,25 @@ class TestCompletedTasksToCSV(APITestCase):
                     "id": "Alpha",
                     "name": "alpha",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Beta",
                     "name": "beta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Gamma",
                     "name": "gamma",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -69,8 +69,8 @@ class TestCompletedTasksToCSV(APITestCase):
                 {
                     "id": "secondary_output",
                     "name": "barbar",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "SO1"},
                             {"id": "bar2", "name": "SO2"},
@@ -122,14 +122,14 @@ class TestCompletedTasksToCSV(APITestCase):
             for idata in update_data:
                 if idata["id"] == "foo":
                     if i % 2 == 0:
-                        idata["single-selection"]["value"] = "foo2"
+                        idata["single_selection"]["value"] = "foo2"
                     else:
-                        idata["single-selection"]["value"] = "bar2"
+                        idata["single_selection"]["value"] = "bar2"
                 elif idata["id"] == "secondary_output":
                     if i % 2 == 0:
-                        idata["single-selection"]["value"] = "SO1"
+                        idata["single_selection"]["value"] = "SO1"
                     else:
-                        idata["single-selection"]["value"] = "SO2"
+                        idata["single_selection"]["value"] = "SO2"
             response_data = {"data": update_data, "assigned_to": self.user_id}
             _ = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
@@ -173,14 +173,14 @@ class TestCompletedTasksToCSV(APITestCase):
             for idata in update_data:
                 if idata["id"] == "foo":
                     if i % 2 == 0:
-                        idata["single-selection"]["value"] = "foo2"
+                        idata["single_selection"]["value"] = "foo2"
                     else:
-                        idata["single-selection"]["value"] = "bar2"
+                        idata["single_selection"]["value"] = "bar2"
                 elif idata["id"] == "secondary_output":
                     if i % 2 == 0:
-                        idata["single-selection"]["value"] = "SO1"
+                        idata["single_selection"]["value"] = "SO1"
                     else:
-                        idata["single-selection"]["value"] = "SO2"
+                        idata["single_selection"]["value"] = "SO2"
             response_data = {"data": update_data, "assigned_to": self.user_id}
 
             response = self.client.patch(
@@ -194,8 +194,8 @@ class TestCompletedTasksToCSV(APITestCase):
             {
                 "id": "tertiary_output",
                 "name": "terttert",
-                "type": "single-selection",
-                "single-selection": {
+                "type": "single_selection",
+                "single_selection": {
                     "options": [
                         {"id": "fooalpha2", "name": "TO1"},
                         {"id": "barbeta2", "name": "TO2"},
@@ -222,11 +222,11 @@ class TestCompletedTasksToCSV(APITestCase):
         update_data = copy.deepcopy(task["data"])
         for idata in update_data:
             if idata["id"] == "foo":
-                idata["single-selection"]["value"] = "bar2"
+                idata["single_selection"]["value"] = "bar2"
             elif idata["id"] == "secondary_output":
-                idata["single-selection"]["value"] = "SO2"
+                idata["single_selection"]["value"] = "SO2"
             elif idata["id"] == "tertiary_output":
-                idata["single-selection"]["value"] = "TO2"
+                idata["single_selection"]["value"] = "TO2"
         response_data = {"data": update_data, "assigned_to": self.user_id}
 
         response = self.client.patch(
@@ -271,14 +271,14 @@ class TestCompletedTasksToCSV(APITestCase):
             for idata in update_data:
                 if idata["id"] == "foo":
                     if i % 2 == 0:
-                        idata["single-selection"]["value"] = "foo2"
+                        idata["single_selection"]["value"] = "foo2"
                     else:
-                        idata["single-selection"]["value"] = "bar2"
+                        idata["single_selection"]["value"] = "bar2"
                 elif idata["id"] == "secondary_output":
                     if i % 2 == 0:
-                        idata["single-selection"]["value"] = "SO1"
+                        idata["single_selection"]["value"] = "SO1"
                     else:
-                        idata["single-selection"]["value"] = "SO2"
+                        idata["single_selection"]["value"] = "SO2"
             response_data = {"data": update_data, "assigned_to": self.user_id}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
@@ -313,7 +313,7 @@ class TestCompletedTasksToCSV(APITestCase):
 
         for idata in update_data:
             if idata["id"] == "foo":
-                idata["single-selection"]["value"] = "bar2"
+                idata["single_selection"]["value"] = "bar2"
         response_data = {"data": update_data, "assigned_to": self.user_id}
         response = self.client.patch(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(

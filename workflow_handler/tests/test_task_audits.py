@@ -39,25 +39,25 @@ class TestTaskAudit(APITestCase):
                     "id": "Alpha",
                     "name": "alpha",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Beta",
                     "name": "beta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Gamma",
                     "name": "gamma",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -101,7 +101,7 @@ class TestTaskAudit(APITestCase):
             data = copy.deepcopy(task.data)
             for idata in data:
                 if idata["id"] == "foo":
-                    idata["single-selection"]["value"] = "bar2"
+                    idata["single_selection"]["value"] = "bar2"
             response_data = {"data": data}
 
             _ = self.client.patch(
@@ -186,25 +186,25 @@ class TestEmptyTaskAudit(APITestCase):
                     "id": "Alpha",
                     "name": "alpha",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Beta",
                     "name": "beta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Gamma",
                     "name": "gamma",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},

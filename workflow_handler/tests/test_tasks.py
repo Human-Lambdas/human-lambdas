@@ -55,25 +55,25 @@ class TestTasks(APITestCase):
                     "id": "Alpha",
                     "name": "alpha",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Beta",
                     "name": "beta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Gamma",
                     "name": "gamma",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -95,25 +95,25 @@ class TestTasks(APITestCase):
                     "id": "Alpha",
                     "name": "alpha",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Beta",
                     "name": "beta",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "Gamma",
                     "name": "gamma",
                     "type": "text",
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "bar",
                     "name": "bar",
-                    "type": "multiple-selection",
-                    "multiple-selection": {
+                    "type": "multiple_selection",
+                    "multiple_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -168,7 +168,7 @@ class TestTasks(APITestCase):
             self.assertEqual("pending", response.data["status"])
             self.assertTrue(len(response.data["data"]))
             for itask in response.data["data"]:
-                if itask[itask["type"]].get("read-only"):
+                if itask[itask["type"]].get("read_only"):
                     self.assertTrue("value" in itask[itask["type"]])
 
     def test_complete_single_selection_task(self):
@@ -179,7 +179,7 @@ class TestTasks(APITestCase):
             data = copy.deepcopy(task.data)
             for idata in data:
                 if idata["id"] == "foo":
-                    idata["single-selection"]["value"] = output_value
+                    idata["single_selection"]["value"] = output_value
             data_payload = {"data": data, "assigned_to": self.user_id}
 
             response = self.client.patch(
@@ -212,7 +212,7 @@ class TestTasks(APITestCase):
             data = copy.deepcopy(task.data)
             for idata in data:
                 if idata["id"] == "bar":
-                    idata["multiple-selection"]["value"] = output_value
+                    idata["multiple_selection"]["value"] = output_value
             data_reponse = {"data": data, "assigned_to": self.user_id}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(

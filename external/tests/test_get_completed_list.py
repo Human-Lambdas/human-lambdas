@@ -38,20 +38,20 @@ class TestTaskList(APITestCase):
                     "name": "news",
                     "type": "text",
                     "layout": {},
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "type",
                     "name": "type",
                     "type": "text",
                     "layout": {},
-                    "text": {"read-only": True},
+                    "text": {"read_only": True},
                 },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
                 },
             ],
         }
@@ -76,7 +76,7 @@ class TestTaskList(APITestCase):
             data = copy.deepcopy(task.data)
             for idata in data:
                 if idata["id"] == "foo":
-                    idata["single-selection"]["value"] = "bar1"
+                    idata["single_selection"]["value"] = "bar1"
             response_data = {"data": data}
 
             _ = self.client.patch(
