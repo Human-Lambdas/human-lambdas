@@ -94,46 +94,47 @@ UPDATE_OUTPUT_SCHEMA = Schema(
 
 DATA_SCHEMA = Schema(
     [
-        {
-            "id": Or(And(str, len), And(int, len)),
-            "name": And(str, len),
-            "type": Or(
-                "binary",
-                "text",
-                "number",
-                "date",
-                "image",
-                "audio",
-                "video",
-                "list",
-                "single-selection",
-                "multiple-selection",
-            ),
-            Optional("layout"): dict,
-            Optional(
-                Or(
-                    "binary",
-                    "text",
-                    "number",
-                    "date",
-                    "image",
-                    "audio",
-                    "video",
-                    "list",
-                    "single-selection",
-                    "multiple-selection",
-                ),
-            ): {
-                Optional("placeholder"): Or(str, float, int, bool, list),
-                Optional("read-only"): bool,
-                Optional("subtype"): And(str, len),
-                Optional("value"): Or(
-                    bool, And(str, len), And(list, len), float, int, None
-                ),
-                Optional("options"): list,
-            },
-            Optional("logic-jump"): dict,
-        }
+        dict
+#         {
+#             "id": Or(And(str, len), And(int, len)),
+#             "name": And(str, len),
+#             "type": Or(
+#                 "binary",
+#                 "text",
+#                 "number",
+#                 "date",
+#                 "image",
+#                 "audio",
+#                 "video",
+#                 "list",
+#                 "single-selection",
+#                 "multiple-selection",
+#             ),
+#             Optional("layout"): dict,
+#             Optional(
+#                 Or(
+#                     "binary",
+#                     "text",
+#                     "number",
+#                     "date",
+#                     "image",
+#                     "audio",
+#                     "video",
+#                     "list",
+#                     "single-selection",
+#                     "multiple-selection",
+#                 ),
+#             ): {
+#                 Optional("placeholder"): Or(str, float, int, bool, list),
+#                 Optional("read-only"): bool,
+#                 Optional("subtype"): And(str, len),
+#                 Optional("value"): Or(
+#                     bool, And(str, len), And(list, len), float, int, None
+#                 ),
+#                 Optional("options"): list,
+#             },
+#             Optional("logic-jump"): dict,
+#         }
     ],
     ignore_extra_keys=True,
 )
