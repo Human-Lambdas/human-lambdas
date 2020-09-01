@@ -14,18 +14,17 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from workflow_handler.csv_utils import process_csv
 from django.db import transaction
-from django.db.models import Q, F
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
 from user_handler.permissions import IsOrgAdmin
 
-# <<<<<<< HEAD
 from .serializers import (
     WorkflowSerializer,
     TaskSerializer,
     HookSerializer,
     PendingTaskSerializer,
 )
-from .models import Workflow, Task, Source, WebHook  # , WorkflowHook
+from .models import Workflow, Task, Source, WebHook, User  # , WorkflowHook
 from .utils import sync_workflow_task, decode_csv, TaskPagination
 
 
@@ -393,12 +392,12 @@ class NextTaskView(APIView):
             sync_workflow_task(workflow, obj)
             task = self.serializer_class(obj).data
             task["status_code"] = 200
-            workflow.n_tasks = F("n_tasks") - 1
-            workflow.save()
+            # workflow.n_tasks = F("n_tasks") - 1
+            # workflow.save()
             return Response(task, status=200)
 
 
-class UnassignTaskView(APIView):
+class AssignTaskView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
@@ -414,7 +413,12 @@ class UnassignTaskView(APIView):
             & Q(pk=self.kwargs["task_id"])
         )
 
-    def get(self, *args, **kwargs):
+    def get_userset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        return User.objects.filter(Q(organization__in=organizations))
+
+    def post(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         task = get_object_or_404(queryset)
         if task.status == "completed":
@@ -425,18 +429,30 @@ class UnassignTaskView(APIView):
                 },
                 status=400,
             )
-        task.assigned_to = None
-        task.status = "pending"
-        task.assigned_at = None
-        task.save()
-        workflow = task.workflow
-        with transaction.atomic():
-            workflow.n_tasks = F("n_tasks") + 1
-            workflow.save()
-        return Response(
-            {
-                "status_code": 200,
-                "message": f"Task {task.pk} was unassigned successfully!",
-            },
-            status=200,
-        )
+        assigned_to = request.data["assigned_to"]
+        if not assigned_to:
+            task.assigned_to = None
+            task.status = "pending"
+            task.assigned_at = None
+            task.save()
+            return Response(
+                {
+                    "status_code": 200,
+                    "message": f"Task {task.pk} was unassigned successfully!",
+                },
+                status=200,
+            )
+        else:
+            users = self.get_userset()
+            user = get_object_or_404(users, pk=assigned_to)
+            task.assigned_to = user
+            task.status = "assigned"
+            task.assigned_at = timezone.now()
+            task.save()
+            return Response(
+                {
+                    "status_code": 200,
+                    "message": f"Task {task.pk} was assigned successfully to {user.name}!",
+                },
+                status=200,
+            )

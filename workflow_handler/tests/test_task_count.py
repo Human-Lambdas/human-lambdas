@@ -4,7 +4,7 @@ import os
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from workflow_handler.models import Workflow
+from workflow_handler.models import Workflow, Task
 from user_handler.models import Organization
 
 from . import DATA_PATH
@@ -89,12 +89,24 @@ class TestTaskCount(APITestCase):
         self.assertEqual(workflow.n_tasks, self.total_rows)
 
     def test_assigning_task(self):
-        n_tasks = self.total_rows - 1
+        n_tasks = self.total_rows
         for i in range(self.total_rows):
-            _ = self.client.get(
+            n_tasks -= 1
+            response = self.client.get(
                 "/v1/orgs/{}/workflows/{}/tasks/next".format(
                     self.org_id, self.workflow_id
                 )
+            )
+            for idata in response.data["data"]:
+                if idata["id"] == "foo":
+                    idata[idata["type"]]["value"] = "bajs"
+            data = {"data": response.data["data"]}
+            _ = self.client.patch(
+                "/v1/orgs/{}/workflows/{}/tasks/{}".format(
+                    self.org_id, self.workflow_id, response.data["id"]
+                ),
+                data=data,
+                format="json",
             )
             workflow = Workflow.objects.get(pk=self.workflow_id)
             self.assertEqual(workflow.n_tasks, n_tasks)
@@ -118,25 +130,41 @@ class TestTaskCount(APITestCase):
             self.assertEqual(workflow.n_tasks, n_tasks)
 
     def test_unassigning_task(self):
-        n_tasks = self.total_rows - 1
+        n_tasks = self.total_rows
         response = self.client.get(
             "/v1/orgs/{}/workflows/{}/tasks/next".format(self.org_id, self.workflow_id)
         )
         workflow = Workflow.objects.get(pk=self.workflow_id)
         self.assertEqual(workflow.n_tasks, n_tasks)
-        _ = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/{}/unassign".format(
-                self.org_id, self.workflow_id, response.data["id"]
-            )
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/{}/tasks/{}/assign".format(
+                self.org_id, self.workflow_id, response.data["id"],
+            ),
+            data={"assigned_to": None},
+            format="json",
         )
         workflow = Workflow.objects.get(pk=self.workflow_id)
-        self.assertEqual(workflow.n_tasks, n_tasks + 1)
+        self.assertEqual(workflow.n_tasks, n_tasks)
+        task = Task.objects.get(pk=response.data["id"])
+        self.assertEqual(task.status, "pending")
+        self.assertEqual(task.assigned_at, None)
 
     def test_active_users(self):
-        n_tasks = self.total_rows - 1
+        n_tasks = self.total_rows
         response = self.client.get(
             "/v1/orgs/{}/workflows/{}/tasks/next".format(self.org_id, self.workflow_id)
         )
+        # for idata in response.data["data"]:
+        #     if idata["id"] == "foo":
+        #         idata[idata["type"]]["value"] = "bajs"
+        # data = {"data": response.data["data"]}
+        # _ = self.client.patch(
+        #     "/v1/orgs/{}/workflows/{}/tasks/{}".format(
+        #         self.org_id, self.workflow_id, response.data["id"]
+        #     ),
+        #     data=data,
+        #     format="json",
+        # )
         workflow = Workflow.objects.get(pk=self.workflow_id)
         self.assertEqual(workflow.n_tasks, n_tasks)
         response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id))

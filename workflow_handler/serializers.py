@@ -6,8 +6,9 @@ from django.utils import timezone
 from rest_framework import serializers, exceptions
 from user_handler.models import Organization
 from schema import SchemaError
-from django.db.models import Q
 from hl_rest_api.utils import is_valid_url
+from django.db import transaction
+from django.db.models import Q, F
 
 from .schemas import DATA_SCHEMA
 from .models import Workflow, Task, Source, WorkflowNotification, WebHook
@@ -210,6 +211,10 @@ class TaskSerializer(serializers.ModelSerializer):
             instance.completed_at = timezone.now()
             instance.save()
             instance.task_completed(user)
+            workflow = instance.workflow
+            with transaction.atomic():
+                workflow.n_tasks = F("n_tasks") - 1
+                workflow.save()
             return instance
         instance.save()
         return instance
