@@ -101,11 +101,20 @@ class TestTasksSave(APITestCase):
         tasks = Task.objects.filter(workflow=workflow).all()
         output_values = ["foo1", "bar1"]
         for output_value, task in zip(output_values, tasks):
+
+            _ = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/assign".format(
+                    self.org_id, self.workflow_id, task.id
+                ),
+                data={"assigned_to": self.user_id},
+                format="json",
+            )
+
             data = copy.deepcopy(task.data)
             for idata in data:
                 if idata["id"] == "foo":
                     idata["single_selection"]["value"] = output_value
-            data_payload = {"data": data, "assigned_to": self.user_id}
+            data_payload = {"data": data}
 
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}/save".format(
@@ -116,9 +125,9 @@ class TestTasksSave(APITestCase):
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-            self.assertEqual("pending", response.data["status"])
+            self.assertEqual("assigned", response.data["status"])
             self.assertEqual(data, response.data["data"])
-            self.assertEqual("pending", Task.objects.get(id=task.id).status)
+            self.assertEqual("assigned", Task.objects.get(id=task.id).status)
             self.assertIsNone(Task.objects.get(id=task.id).completed_at)
 
             # test retrieving the same task
@@ -127,5 +136,5 @@ class TestTasksSave(APITestCase):
                     self.org_id, self.workflow_id, task.id
                 )
             )
-            self.assertEqual("pending", response.data["status"])
+            self.assertEqual("assigned", response.data["status"])
             self.assertEqual(data, response.data["data"])

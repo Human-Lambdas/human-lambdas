@@ -199,11 +199,6 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         user = self.context["request"].user
-        assignee = validated_data.get("assigned_to")
-        if assignee:
-            instance.assigned_to = assignee
-        elif instance.assigned_to:
-            instance.assigned_to = None
         if instance.assigned_to == user:
             instance.data = validated_data.get("data", instance.data)
         if validated_data["submit_task"]:

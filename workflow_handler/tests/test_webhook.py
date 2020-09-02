@@ -296,6 +296,15 @@ class TestWebhookTasks(APITestCase):
         output_values = ["foo1", "bar1"]
         for output_value, task in zip(output_values, tasks):
             data = task.data
+
+            _ = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/assign".format(
+                    self.org_id, self.workflow_id, task.id
+                ),
+                data={"assigned_to": self.user_id},
+                format="json",
+            )
+
             for idata in data:
                 if idata["id"] == "foo":
                     idata[idata["type"]]["value"] = output_value

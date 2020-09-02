@@ -177,6 +177,15 @@ class TestTasks(APITestCase):
         output_values = ["foo1", "bar1"]
         for output_value, task in zip(output_values, tasks):
             data = copy.deepcopy(task.data)
+
+            _ = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/assign".format(
+                    self.org_id, self.workflow_id, task.id
+                ),
+                data={"assigned_to": self.user_id},
+                format="json",
+            )
+
             for idata in data:
                 if idata["id"] == "foo":
                     idata["single_selection"]["value"] = output_value
@@ -210,10 +219,19 @@ class TestTasks(APITestCase):
         output_values = [["foo1"], ["foo1", "bar1"]]
         for output_value, task in zip(output_values, tasks):
             data = copy.deepcopy(task.data)
+
+            _ = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/assign".format(
+                    self.org_id, self.second_workflow_id, task.id
+                ),
+                data={"assigned_to": self.user_id},
+                format="json",
+            )
+
             for idata in data:
                 if idata["id"] == "bar":
                     idata["multiple_selection"]["value"] = output_value
-            data_reponse = {"data": data, "assigned_to": self.user_id}
+            data_reponse = {"data": data}  # , "assigned_to": self.user_id}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.second_workflow_id, task.id

@@ -24,7 +24,7 @@ from .serializers import (
     HookSerializer,
     PendingTaskSerializer,
 )
-from .models import Workflow, Task, Source, WebHook, User  # , WorkflowHook
+from .models import Workflow, Task, Source, WebHook, User
 from .utils import sync_workflow_task, decode_csv, TaskPagination
 
 
@@ -392,8 +392,6 @@ class NextTaskView(APIView):
             sync_workflow_task(workflow, obj)
             task = self.serializer_class(obj).data
             task["status_code"] = 200
-            # workflow.n_tasks = F("n_tasks") - 1
-            # workflow.save()
             return Response(task, status=200)
 
 
@@ -452,7 +450,8 @@ class AssignTaskView(APIView):
             return Response(
                 {
                     "status_code": 200,
-                    "message": f"Task {task.pk} was assigned successfully to {user.name}!",
+                    "message": f"Task {task.pk} was assigned successfully"
+                    f" to {user.name}!",
                 },
                 status=200,
             )
