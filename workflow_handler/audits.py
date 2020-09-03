@@ -1,4 +1,6 @@
-from rest_framework.generics import ListAPIView
+from urllib.parse import urlencode
+
+from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from user_handler.models import Organization
 from rest_framework.views import APIView
@@ -8,6 +10,8 @@ from django.db.models import Q
 from django.shortcuts import get_list_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
+from next_prev import next_in_order, prev_in_order
+from django.conf import settings
 
 from .serializers import (
     TaskSerializer,
@@ -15,6 +19,12 @@ from .serializers import (
     SourceSerializer,
 )
 from .models import Workflow, Task, Source
+
+
+def make_task_filter_url(org_id, workflow_id, task_id, filters):
+    url = f"{settings.API_URL}/v1/orgs/{org_id}/workflows/{workflow_id}/tasks/{task_id}/audit?{urlencode(filters)}"
+    return f"{settings.API_URL}"
+
 
 
 def process_query_params(query_params):
@@ -132,4 +142,38 @@ class ListSourcesView(ListAPIView):
         )
         return Source.objects.filter(
             workflow__in=workflows, workflow=self.kwargs["workflow_id"]
+        )
+
+
+class AuditsGetTask(GenericAPIView):
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(disabled=False)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        filters = process_query_params(self.request.query_params)
+        return (
+            Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
+            .filter(**filters)
+            .order_by("-completed_at")
+        )
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        queryset = self.get_queryset()
+        next_task = next_in_order(instance, qs=queryset)
+        previous_task = prev_in_order(instance, qs=queryset)
+        return Response(
+            {
+                "result": serializer.data,
+                "next": make_task_filter_url(kwargs["org_id"], kwargs["workflow_id"], next_task.pk, request.query_params),
+                "previous": make_task_filter_url(kwargs["org_id"], kwargs["workflow_id"], previous_task.pk, request.query_params),
+            }
         )
