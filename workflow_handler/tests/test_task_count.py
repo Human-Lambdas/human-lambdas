@@ -154,17 +154,7 @@ class TestTaskCount(APITestCase):
         response = self.client.get(
             "/v1/orgs/{}/workflows/{}/tasks/next".format(self.org_id, self.workflow_id)
         )
-        # for idata in response.data["data"]:
-        #     if idata["id"] == "foo":
-        #         idata[idata["type"]]["value"] = "bajs"
-        # data = {"data": response.data["data"]}
-        # _ = self.client.patch(
-        #     "/v1/orgs/{}/workflows/{}/tasks/{}".format(
-        #         self.org_id, self.workflow_id, response.data["id"]
-        #     ),
-        #     data=data,
-        #     format="json",
-        # )
+
         workflow = Workflow.objects.get(pk=self.workflow_id)
         self.assertEqual(workflow.n_tasks, n_tasks)
         response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id))

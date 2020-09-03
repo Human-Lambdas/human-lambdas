@@ -1,3 +1,5 @@
+import copy
+
 from django.utils import timezone
 from django.conf import settings
 from rest_framework.generics import (
@@ -455,3 +457,46 @@ class AssignTaskView(APIView):
                 },
                 status=200,
             )
+
+
+class CreateTaskFormView(CreateAPIView):
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        workflows = self.workflow_queryset()
+        return Task.objects.filter(
+            Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
+        )
+
+    def workflow_queryset(self):
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        workflows = Workflow.objects.filter(
+            Q(organization__in=organizations)
+            & Q(organization__pk=self.kwargs["org_id"])
+        )
+        return workflows
+
+    def get(self, request, *args, **kwargs):
+        workflow = get_object_or_404(
+            self.workflow_queryset(), pk=self.kwargs["workflow_id"]
+        )
+        result = []
+        for idata in workflow.data:
+            if idata[idata["type"]].get("read_only"):
+                read_only_data = copy.deepcopy(idata)
+                if "layout" in read_only_data:
+                    del read_only_data["layout"]
+                result.append(read_only_data)
+        return Response({"status_code": 200, "data": result}, status=200)
+
+    def post(self, request, *args, **kwargs):
+        workflow = get_object_or_404(
+            self.workflow_queryset(), pk=self.kwargs["workflow_id"]
+        )
+        ids = [i["id"] for i in request.data["data"]]
+        for idata in workflow.data:
+            if idata["id"] not in ids:
+                request.data["data"].append(idata)
+        return self.create(request, *args, **kwargs)

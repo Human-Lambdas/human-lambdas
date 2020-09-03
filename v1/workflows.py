@@ -11,6 +11,7 @@ from workflow_handler.views import (
     ListNonCompleteTaskView,
     RUWebhookView,
     SaveTaskView,
+    CreateTaskFormView,
 )
 from workflow_handler.audits import (
     GetCompletedTasksCSVView,
@@ -67,5 +68,10 @@ urlpatterns = [
     ),
     path(
         "/<int:workflow_id>/tasks/create", CreateTaskView.as_view(), name="create-task",
+    ),
+    path(
+        "/<int:workflow_id>/tasks/form",
+        CreateTaskFormView.as_view(),
+        name="create-task-form",
     ),
 ]
