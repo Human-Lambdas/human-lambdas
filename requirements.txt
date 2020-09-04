@@ -11,3 +11,4 @@ git+https://github.com/zapier/django-rest-hooks.git@d21a070b9a099b5e9c755b2afa6b
 sendgrid==6.4.6
 analytics-python==1.2.9
 cchardet==0.3.5
+django-next-prev
