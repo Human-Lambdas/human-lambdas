@@ -2,7 +2,7 @@ import os
 
 from rest_framework.test import APITestCase
 from rest_framework import status
-from workflow_handler.models import Task
+from workflow_handler.models import Task, Source
 from user_handler.models import Organization
 
 
@@ -137,6 +137,25 @@ class TestTaskAudit(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], self.workflow_id)
+
+    def test_get_audit_task(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        task = Task.objects.filter(
+            workflow__pk=self.workflow_id, source__name="test.csv"
+        ).first()
+        source_id = Source.objects.get(name="test.csv").pk
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/tasks/{}/audit".format(self.org_id, task.id),
+            data={"workflow_id": self.workflow_id, "source_id": source_id},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data["result"]["id"], task.id)
+        self.assertEqual(response.data["next"], None)
+        self.assertEqual(
+            response.data["previous"],
+            "http://localhost:8000/v1/orgs/125/workflows/tasks/13449/audit?workflow_id=80&source_id=41",
+        )
 
 
 class TestEmptyTaskAudit(APITestCase):

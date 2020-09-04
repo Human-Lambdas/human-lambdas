@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from workflow_handler.csv_utils import task_list_to_csv_response
 from django.db.models import Q
-from django.shortcuts import get_list_or_404
+from django.shortcuts import get_list_or_404, get_object_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
 from next_prev import next_in_order, prev_in_order
@@ -21,10 +21,14 @@ from .serializers import (
 from .models import Workflow, Task, Source
 
 
-def make_task_filter_url(org_id, workflow_id, task_id, filters):
-    url = f"{settings.API_URL}/v1/orgs/{org_id}/workflows/{workflow_id}/tasks/{task_id}/audit?{urlencode(filters)}"
-    return f"{settings.API_URL}"
-
+def make_task_filter_url(org_id, task_id, filters):
+    if task_id < 0:
+        return None
+    url = (
+        f"{settings.API_URL}/v1/orgs/{org_id}/workflows/tasks/"
+        f"{task_id}/audit?{urlencode(filters)}"
+    )
+    return url
 
 
 def process_query_params(query_params):
@@ -165,15 +169,22 @@ class AuditsGetTask(GenericAPIView):
         )
 
     def get(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        queryset = self.get_queryset()
-        next_task = next_in_order(instance, qs=queryset)
-        previous_task = prev_in_order(instance, qs=queryset)
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = get_object_or_404(queryset, pk=kwargs["task_id"])
+        self.check_object_permissions(self.request, obj)
+        serializer = self.get_serializer(obj)
+        next_task = next_in_order(obj, qs=queryset)
+        previous_task = prev_in_order(obj, qs=queryset)
+        next_task_id = next_task.pk if next_task else -1
+        prev_task_id = previous_task.pk if previous_task else -1
         return Response(
             {
                 "result": serializer.data,
-                "next": make_task_filter_url(kwargs["org_id"], kwargs["workflow_id"], next_task.pk, request.query_params),
-                "previous": make_task_filter_url(kwargs["org_id"], kwargs["workflow_id"], previous_task.pk, request.query_params),
+                "next": make_task_filter_url(
+                    kwargs["org_id"], next_task_id, request.query_params
+                ),
+                "previous": make_task_filter_url(
+                    kwargs["org_id"], prev_task_id, request.query_params
+                ),
             }
         )
