@@ -11,7 +11,6 @@ from django.shortcuts import get_list_or_404, get_object_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from user_handler.permissions import IsOrgAdmin
 from next_prev import next_in_order, prev_in_order
-from django.conf import settings
 
 from .serializers import (
     TaskSerializer,
@@ -24,10 +23,7 @@ from .models import Workflow, Task, Source
 def make_task_filter_url(org_id, task_id, filters):
     if task_id < 0:
         return None
-    url = (
-        f"{settings.API_URL}/v1/orgs/{org_id}/workflows/tasks/"
-        f"{task_id}/audit?{urlencode(filters)}"
-    )
+    url = f"/orgs/{org_id}/workflows/tasks/{task_id}/audit?{urlencode(filters)}"
     return url
 
 

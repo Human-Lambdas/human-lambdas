@@ -154,7 +154,7 @@ class TestTaskAudit(APITestCase):
         self.assertEqual(response.data["next"], None)
         self.assertEqual(
             response.data["previous"],
-            "http://localhost:8000/v1/orgs/125/workflows/tasks/13449/audit?workflow_id=80&source_id=41",
+            "/orgs/125/workflows/tasks/13449/audit?workflow_id=80&source_id=41",
         )
 
 
