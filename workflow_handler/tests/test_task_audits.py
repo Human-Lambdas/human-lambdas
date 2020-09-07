@@ -151,12 +151,22 @@ class TestTaskAudit(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["result"]["id"], task.id)
-        self.assertEqual(response.data["next"], None)
-        self.assertEqual(
-            response.data["previous"],
-            "/orgs/125/workflows/tasks/13449/audit?workflow_id=80&source_id=41",
+        prev_task = Task.objects.filter(source__pk=source_id, workflow__pk=self.workflow_id, completed_at__lte=task.completed_at).order_by("-completed_at").first()
+        next_task = Task.objects.filter(source__pk=source_id, workflow__pk=self.workflow_id,
+                                        completed_at__gte=task.completed_at).order_by("-completed_at").first()
+        if next_task:
+            self.assertEqual(response.data["next"], f"/orgs/125/workflows/tasks/{next_task.pk}/audit?workflow_id=80&source_id=41")
+        else:
+            self.assertEqual(response.data["next"],None)
+        if prev_task:
+            self.assertEqual(response.data["next"],
+                             f"/orgs/125/workflows/tasks/{prev_task.pk}/audit?workflow_id=80&source_id=41")
+        else:
+            self.assertEqual(response.data["prev"], None)
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/tasks/{}/audit?workflow_id={}&source_id=".format(self.org_id, task.id, self.workflow_id)
         )
-
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
 class TestEmptyTaskAudit(APITestCase):
     def setUp(self):
