@@ -484,11 +484,11 @@ class CreateTaskFormView(CreateAPIView):
         )
         result = []
         for idata in workflow.data:
-            if idata[idata["type"]].get("read_only"):
-                read_only_data = copy.deepcopy(idata)
-                if "layout" in read_only_data:
-                    del read_only_data["layout"]
-                result.append(read_only_data)
+            if not idata[idata["type"]].get("write_only"):
+                read_data = copy.deepcopy(idata)
+                if "layout" in read_data:
+                    del read_data["layout"]
+                result.append(read_data)
         return Response({"status_code": 200, "data": result}, status=200)
 
     def post(self, request, *args, **kwargs):
