@@ -274,7 +274,7 @@ class TestTasks(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(response.data["id"], task_id)
 
-        # get next task by client 2 should be different because task_id assigned_at has not expired
+        # get next task by client 2 should be different
         self.setUserClient("foojr@bar.com")
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
@@ -283,31 +283,6 @@ class TestTasks(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertNotEqual(response.data["id"], task_id)
-
-        # unassign from client 2
-        task = Task.objects.get(pk=response.data["id"])
-        task.status = "pending"
-        task.save()
-
-        task = Task.objects.get(pk=task_id)
-        task.assigned_at = timezone.now() - timezone.timedelta(hours=24)
-        task.save()
-
-        # get next task by client 2 should be task_id because assigned_at has expired
-        response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
-                self.org_id, self.workflow_id
-            )
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual(response.data["id"], task_id)
-
-        task = Task.objects.get(pk=task_id)
-        user = User.objects.get(email="foo@bar.com")
-        self.assertEqual(task.status, "assigned")
-        self.assertNotEqual(task.assigned_to, user)
-        self.assertIsNotNone(task.assigned_at)
-        self.setUserClient("foo@bar.com")
 
     def test_next_task_different_workflow(self):
         response = self.client.get(

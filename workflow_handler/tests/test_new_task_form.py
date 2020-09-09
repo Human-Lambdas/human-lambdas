@@ -64,12 +64,10 @@ class TestTaskForm(APITestCase):
         response = self.client.get(
             "/v1/orgs/{}/workflows/{}/tasks/form".format(self.org_id, self.workflow_id)
         )
-        read_only_data = [
-            i for i in self.workflow_data["data"] if i[i["type"]].get("read_only")
-        ]
-        for idata in read_only_data:
-            del idata["layout"]
-        self.assertEqual(response.data["data"], read_only_data)
+        for idata in self.workflow_data["data"]:
+            if "layout" in idata:
+                del idata["layout"]
+        self.assertEqual(response.data["data"], self.workflow_data["data"])
 
     def test_create_task_form(self):
         read_only_data = [
