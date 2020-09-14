@@ -25,6 +25,7 @@ from .utils import sync_workflow_task, decode_csv
 
 logger = logging.getLogger(__name__)
 
+
 class CreateWorkflowView(CreateAPIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     serializer_class = WorkflowSerializer
