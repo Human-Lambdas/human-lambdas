@@ -142,9 +142,11 @@ class TestTaskAudit(APITestCase):
 
     def test_get_audit_task(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        task = Task.objects.filter(
-            workflow__pk=self.workflow_id, source__name="test.csv"
-        ).order_by("-completed_at").first()
+        task = (
+            Task.objects.filter(workflow__pk=self.workflow_id, source__name="test.csv")
+            .order_by("-completed_at")
+            .first()
+        )
         source_id = Source.objects.get(name="test.csv").pk
         response = self.client.get(
             "/v1/orgs/{}/workflows/tasks/{}/audit".format(self.org_id, task.id),
@@ -153,22 +155,42 @@ class TestTaskAudit(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["result"]["id"], task.id)
-        next_task = Task.objects.filter(source__pk=source_id, workflow__pk=self.workflow_id,
-                                        completed_at__lt=task.completed_at).order_by("-completed_at").first()
-        prev_task = Task.objects.filter(source__pk=source_id, workflow__pk=self.workflow_id,
-                                        completed_at__gt=task.completed_at).order_by("-completed_at").first()
+        next_task = (
+            Task.objects.filter(
+                source__pk=source_id,
+                workflow__pk=self.workflow_id,
+                completed_at__lt=task.completed_at,
+            )
+            .order_by("-completed_at")
+            .first()
+        )
+        prev_task = (
+            Task.objects.filter(
+                source__pk=source_id,
+                workflow__pk=self.workflow_id,
+                completed_at__gt=task.completed_at,
+            )
+            .order_by("-completed_at")
+            .first()
+        )
         if next_task:
-            self.assertEqual(response.data["next"],
-                             f"/orgs/{self.org_id}/workflows/tasks/{next_task.pk}/audit?workflow_id={self.workflow_id}&source_id={source_id}")
+            self.assertEqual(
+                response.data["next"],
+                f"/orgs/{self.org_id}/workflows/tasks/{next_task.pk}/audit?workflow_id={self.workflow_id}&source_id={source_id}",
+            )
         else:
-            self.assertEqual(response.data["next"],None)
+            self.assertEqual(response.data["next"], None)
         if prev_task:
-            self.assertEqual(response.data["previous"],
-                             f"/orgs/{self.org_id}/workflows/tasks/{prev_task.pk}/audit?workflow_id={self.workflow_id}&source_id={source_id}")
+            self.assertEqual(
+                response.data["previous"],
+                f"/orgs/{self.org_id}/workflows/tasks/{prev_task.pk}/audit?workflow_id={self.workflow_id}&source_id={source_id}",
+            )
         else:
             self.assertEqual(response.data["previous"], None)
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/{}/audit?workflow_id={}&source_id=".format(self.org_id, task.id, self.workflow_id)
+            "/v1/orgs/{}/workflows/tasks/{}/audit?workflow_id={}&source_id=".format(
+                self.org_id, task.id, self.workflow_id
+            )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 

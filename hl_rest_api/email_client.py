@@ -56,8 +56,8 @@ class SendGrid(SGMail):
         *args,
         **kwargs
     ):  # noqa
-        if settings.DEBUG:
-            return "Debug mode does not send emails"
+        if settings.DEBUG or not to_email:
+            return "Will not send any email"
         if not any([from_email, self.default_from]):
             raise ValueError("Missing from email and no default.")
         self.template_id = template_id
