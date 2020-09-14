@@ -169,6 +169,8 @@ class WorkflowSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    workflow = serializers.SerializerMethodField()
+
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
             err_msg = "Unexpected event {}".format(event)
@@ -184,6 +186,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "assigned_to",
             "completed_at",
             "data",
+            "workflow",
         ]
 
     def create(self, validated_data):
@@ -219,6 +222,9 @@ class TaskSerializer(serializers.ModelSerializer):
             return DATA_SCHEMA.validate(data)
         except SchemaError as exception_text:
             raise serializers.ValidationError(exception_text)
+
+    def get_workflow(self, obj):
+        return obj.workflow.name
 
 
 class CompletedTaskSerializer(TaskSerializer):
