@@ -483,7 +483,7 @@ class CreateTaskFormView(CreateAPIView):
         )
         result = []
         for idata in workflow.data:
-            if not idata[idata["type"]].get("write_only"):
+            if idata[idata["type"]].get("read_only"):
                 read_data = copy.deepcopy(idata)
                 if "layout" in read_data:
                     del read_data["layout"]
