@@ -1,3 +1,5 @@
+import logging
+
 from django.utils import timezone
 from django.conf import settings
 from rest_framework.generics import (
@@ -20,6 +22,8 @@ from user_handler.permissions import IsOrgAdmin
 from .serializers import WorkflowSerializer, TaskSerializer
 from .models import Workflow, Task, Source, WebHook
 from .utils import sync_workflow_task, decode_csv
+
+logger = logging.getLogger(__name__)
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -308,6 +312,7 @@ class NextTaskView(APIView):
             task["status_code"] = 200
             workflow.n_tasks = F("n_tasks") - 1
             workflow.save()
+            logger.info(f"Getting new task with task id {obj.pk}")
             return Response(task, status=200)
 
 
