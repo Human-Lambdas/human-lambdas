@@ -56,8 +56,7 @@ class TestZapierHook(APITestCase):
 
     def test_zapier_authentication(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
-        response = self.client.get(
-            "/zapier/authentication")
+        response = self.client.get("/zapier/authentication")
         self.assertTrue("organization" in response.data)
 
     def test_subscribe_to_hook(self):

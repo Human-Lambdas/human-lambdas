@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
 from datetime import timedelta
 
 import requests
@@ -182,73 +183,69 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "user_handler.serializers.UserCreateSerializer",
 }
 
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+TESTING = "test" in sys.argv
+if TESTING:
+    LOGGING = {}
+else:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
+            },
+            "simple": {"format": "%(levelname)s %(asctime)s %(message)s"},
         },
-        'simple': {
-            'format': '%(levelname)s %(asctime)s %(message)s'
+        "handlers": {
+            "console": {
+                "level": "INFO",
+                "class": "logging.StreamHandler",
+                "formatter": "simple",
+            },
+            "logstash": {
+                "level": "INFO",
+                "class": "logstash.TCPLogstashHandler",
+                "host": os.getenv("LOGS_IP", "localhost"),
+                "port": 5000,  # Default value: 5000
+                "version": 1,
+                "message_type": "django_logstash",  # 'type' field in logstash message.
+                "fqdn": False,  # Fully qualified domain name. Default value: false.
+                # 'tags': ['django.request'],  # list of tags. Default: None.
+            },
         },
-    },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        },
-        'logstash': {
-            'level': 'INFO',
-            'class': 'logstash.TCPLogstashHandler',
-            'host': os.getenv('LOGS_IP', 'localhost'),
-            'port': 5000,  # Default value: 5000
-            'version': 1,
-            'message_type': 'django_logstash',  # 'type' field in logstash message. Default value: 'logstash'.
-            'fqdn': False,  # Fully qualified domain name. Default value: false.
-            # 'tags': ['django.request'],  # list of tags. Default: None.
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'django.server': {
-            'handlers': ['logstash'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'workflow_handler': {
-            'handlers': ['logstash', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'user_handler': {
-            'handlers': ['logstash', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'organization_handler': {
-            'handlers': ['logstash', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'metrics': {
-            'handlers': ['logstash', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'external': {
-            'handlers': ['logstash', 'console'],
-            'level': 'INFO',
-            'propagate': True,
+        "loggers": {
+            "django": {
+                "handlers": ["logstash", "console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "workflow_handler": {
+                "handlers": ["logstash", "console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "user_handler": {
+                "handlers": ["logstash", "console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "organization_handler": {
+                "handlers": ["logstash", "console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "metrics": {
+                "handlers": ["logstash", "console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "external": {
+                "handlers": ["logstash", "console"],
+                "level": "INFO",
+                "propagate": True,
+            },
         },
     }
-}
 
 SIMPLE_JWT = {
     # https://github.com/davesque/django-rest-framework-simplejwt
