@@ -30,10 +30,4 @@ class FlushTasksView(APIView):
         workflow = Workflow.objects.get(pk=self.kwargs["workflow_id"])
         workflow.n_tasks = 0
         workflow.save()
-        return Response(
-            {
-                "status_code": 200,
-                "message": f"Workflow {workflow.id} successfully flushed",
-            },
-            status=200,
-        )
+        return Response(status=200)
