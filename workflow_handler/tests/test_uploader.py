@@ -294,9 +294,24 @@ class TestUploadExtremes(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "car", "name": "alpha", "type": "text"},
-                {"id": "img_1", "name": "beta", "type": "text"},
-                {"id": "img_2", "name": "gamma", "type": "text"},
+                {
+                    "id": "car",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "img_1",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "img_2",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -317,9 +332,7 @@ class TestUploadExtremes(APITestCase):
                 "/v1/orgs/{0}/workflows/{1}/upload".format(self.org_id, workflow_id),
                 data=data,
             )
-        self.assertEqual(
-            response.status_code, status.HTTP_400_BAD_REQUEST, response.content
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_upload_with_emoji(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)

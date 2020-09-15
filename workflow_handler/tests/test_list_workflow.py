@@ -41,7 +41,12 @@ class TestListWorkflow(APITestCase):
             "name": self.wf_name1,
             "description": "great wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -62,7 +67,12 @@ class TestListWorkflow(APITestCase):
             "name": self.wf_name2,
             "description": "superb wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",

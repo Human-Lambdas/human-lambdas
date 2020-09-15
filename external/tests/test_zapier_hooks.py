@@ -29,9 +29,24 @@ class TestZapierHook(APITestCase):
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text":{"read_only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text":{"read_only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text":{"read_only": True}},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -42,7 +57,7 @@ class TestZapierHook(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -54,8 +69,7 @@ class TestZapierHook(APITestCase):
 
     def test_zapier_authentication(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
-        response = self.client.get(
-            "/zapier/authentication")
+        response = self.client.get("/zapier/authentication")
         self.assertTrue("organization" in response.data)
 
     def test_subscribe_to_hook(self):

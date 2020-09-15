@@ -45,7 +45,12 @@ class TestWebhook(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -362,7 +367,12 @@ class TestWebhookEndpoint(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",

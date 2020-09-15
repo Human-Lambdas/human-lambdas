@@ -91,46 +91,37 @@ UPDATE_OUTPUT_SCHEMA = Schema(
     ignore_extra_keys=True,
 )
 
-
+_DATA_TYPES = Or(
+    "binary",
+    "text",
+    "number",
+    "date",
+    "image",
+    "audio",
+    "video",
+    "list",
+    "single_selection",
+    "multiple_selection",
+    "form_sequence",
+)
 DATA_SCHEMA = Schema(
     [
         {
             "id": Or(And(str, len), int),
             "name": And(str, len),
-            "type": Or(
-                "binary",
-                "text",
-                "number",
-                "date",
-                "image",
-                "audio",
-                "video",
-                "list",
-                "single_selection",
-                "multiple_selection",
-            ),
+            "type": _DATA_TYPES,
             Optional("layout"): dict,
-            Optional(
-                Or(
-                    "binary",
-                    "text",
-                    "number",
-                    "date",
-                    "image",
-                    "audio",
-                    "video",
-                    "list",
-                    "single_selection",
-                    "multiple_selection",
-                ),
-            ): {
+            _DATA_TYPES: {
                 Optional("placeholder"): Or(str, float, int, bool, list),
                 Optional("read_only"): bool,
+                Optional("is_required"): bool,
                 Optional("subtype"): And(str, len),
                 Optional("value"): Or(
                     bool, And(str, len), And(list, len), float, int, None
                 ),
                 Optional("options"): list,
+                Optional("data"): list,
+                Optional("history"): list,
             },
             Optional("logic_jump"): dict,
         }

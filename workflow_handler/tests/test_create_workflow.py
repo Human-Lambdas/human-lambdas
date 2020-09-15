@@ -29,7 +29,12 @@ class TestCreateWorkflow(APITestCase):
             "name": "foowf",
             # "description": "great wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -127,23 +132,14 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "data": [{"id": "foo", "name": "foo", "type": "text"}, {"id": 1}],
-        }
-        response = self.client.post(
-            "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
-            format="json",
-        )
-        self.assertEqual(
-            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
-        )
-
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
-                {"id": "foo2", "name": "foo", "type": "notype"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {"id": 1},
             ],
         }
         response = self.client.post(
@@ -159,8 +155,18 @@ class TestCreateWorkflow(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
-                {"id": "foo2", "name": "foo", "type": "random"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo2",
+                    "name": "foo",
+                    "type": "notype",
+                    "notype": {"read_only": True},
+                },
             ],
         }
         response = self.client.post(
@@ -176,7 +182,39 @@ class TestCreateWorkflow(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo2",
+                    "name": "foo",
+                    "type": "random",
+                    "random": {"read_only": True},
+                },
+            ],
+        }
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        self.assertEqual(
+            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
+        )
+
+        workflow_data = {
+            "name": "foowf",
+            "description": "great wf",
+            "data": [
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {"id": "foo2", "name": "foo", "type": "single-class"},
             ],
         }
@@ -193,7 +231,12 @@ class TestCreateWorkflow(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {"id": "foo2", "name": "foo", "type": "binary", "binary": {}},
             ],
         }
@@ -211,7 +254,12 @@ class TestCreateWorkflow(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -231,7 +279,12 @@ class TestCreateWorkflow(APITestCase):
             "name": "foowf",
             "description": "great wf",
             "data": [
-                {"id": "foo", "name": "foo", "type": "text"},
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
