@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework.authtoken",
     "rest_hooks",
+    "drf_yasg",
 ]
 
 APPEND_SLASH = False
@@ -162,6 +163,7 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "EXCEPTION_HANDLER": "hl_rest_api.utils.custom_exception_handler",
+    # "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
 }
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -298,3 +300,15 @@ INVITATION_EXPIRATION_WINDOW_DAYS = 30
 INVITATION_TEMPLATE = os.environ.get("INVITATION_TEMPLATE")
 ACCOUNT_ASM_GROUPID = os.environ.get("ACCOUNT_ASM_GROUPID")
 FORGOTTEN_PASSWORD_TEMPLATE = os.environ.get("FORGOTTEN_PASSWORD_TEMPLATE")
+
+
+# Swagger
+# SWAGGER_SETTINGS = {
+#     'SECURITY_DEFINITIONS': {
+#         'JWT': {
+#                 "type": "apiKey",
+#                 "name": "Authorization",
+#                 "in": "header"
+#         }
+#     },
+# }
