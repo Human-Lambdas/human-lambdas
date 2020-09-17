@@ -25,7 +25,8 @@ class NotificationSerializer(serializers.ModelSerializer):
         workflow_notifications = validated_data.get("workflow_notifications", [])
         for workflow_notification in workflow_notifications:
             wfnotification_obj = instance.workflownotification_set.filter(
-                workflow__pk=workflow_notification["workflow_id"]
+                workflow__pk=workflow_notification["workflow_id"],
+                workflow__disabled=False,
             ).first()
             if wfnotification_obj:
                 wfnotification_obj.enabled = workflow_notification["enabled"]

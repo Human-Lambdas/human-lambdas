@@ -59,7 +59,9 @@ class TestNotifications(APITestCase):
         response = self.client.patch(
             "/v1/users/notifications",
             data={
-                "workflow_notifications": [{"workflow_id": self.workflow_id, "enabled": False}]
+                "workflow_notifications": [
+                    {"workflow_id": self.workflow_id, "enabled": False}
+                ]
             },
             format="json",
         )
