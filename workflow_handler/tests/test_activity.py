@@ -1,5 +1,6 @@
 import logging
 import os
+import copy
 
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -147,10 +148,58 @@ class TestTasksActivity(APITestCase):
         self.assertFalse(TaskActivity.objects.filter(pk=activity_id).exists())
 
     def test_complete_task_acticity(self):
-        pass
+        task = Task.objects.first()
+        data = copy.deepcopy(task.data)
+        for idata in data:
+            if idata["id"] == "foo":
+                idata["single_selection"]["value"] = "bar2"
+        response_data = {"data": data}
+        _ = self.client.post(
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}/assign".format(
+                self.org_id, self.workflow_id, task.id
+            ),
+            data={"assigned_to": self.user_id},
+            format="json",
+        )
+        _ = self.client.patch(
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                self.org_id, self.workflow_id, task.pk
+            ),
+            data=response_data,
+            format="json",
+        )
+        self.assertTrue(TaskActivity.objects.filter(task=task, action="completed").exists())
 
     def test_save_task_activity(self):
-        pass
+        task = Task.objects.first()
+        data = copy.deepcopy(task.data)
+        for idata in data:
+            if idata["id"] == "foo":
+                idata["single_selection"]["value"] = "bar2"
+        response_data = {"data": data}
+        _ = self.client.post(
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}/assign".format(
+                self.org_id, self.workflow_id, task.id
+            ),
+            data={"assigned_to": self.user_id},
+            format="json",
+        )
+        _ = self.client.patch(
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}/save".format(
+                self.org_id, self.workflow_id, task.pk
+            ),
+            data=response_data,
+            format="json",
+        )
+        self.assertTrue(TaskActivity.objects.filter(task=task, action="saved").exists())
 
     def test_assign_task_activity(self):
-        pass
+        task = Task.objects.first()
+        _ = self.client.post(
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}/assign".format(
+                self.org_id, self.workflow_id, task.id
+            ),
+            data={"assigned_to": self.user_id},
+            format="json",
+        )
+        self.assertTrue(TaskActivity.objects.filter(task=task, action="assigned").exists())
