@@ -6,7 +6,7 @@ from django.db.models import F
 from django.http import HttpResponse
 from user_handler.notifications import send_notification
 
-from .models import Task
+from .models import Task, TaskActivity
 
 
 def process_list(input_value):
@@ -39,13 +39,21 @@ def extract_value(w_data, row, title_row):
     return data_item
 
 
-def process_csv(csv_file, workflow, source):
+def process_csv(csv_file, workflow, source, user, filename):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
     validate_keys(title_row, workflow)
     for row in dataset:
         data = [extract_value(w_input, row, title_row) for w_input in workflow.data]
-        Task(data=data, workflow=workflow, source=source,).save()
+        task = Task(data=data, workflow=workflow, source=source)
+        task.save()
+        TaskActivity(
+            task=task,
+            source="csv",
+            filename=filename,
+            created_by=user,
+            action="created",
+        ).save()
         workflow.n_tasks = F("n_tasks") + 1
         workflow.save()
     send_notification(workflow)

@@ -257,9 +257,14 @@ class TestCSV2Task(TestCase):
             self.fail("An error has occurred " + e)
 
     def test_process_csv(self):
+        user = User.objects.get(email="foo@bar.com")
         # try:
         process_csv(
-            csv_file=self.test_csv_file, workflow=self.sample_workflow, source=None
+            csv_file=self.test_csv_file,
+            workflow=self.sample_workflow,
+            source=None,
+            filename="test.csv",
+            user=user,
         )
         title_row = ["alpha", "beta", "gamma", "delta"]
         # Check each workflow key appears once in each task
