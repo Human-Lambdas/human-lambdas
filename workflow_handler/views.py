@@ -25,7 +25,7 @@ from .serializers import (
     HookSerializer,
     PendingTaskSerializer,
 )
-from .models import Workflow, Task, Source, WebHook, User
+from .models import Workflow, Task, Source, WebHook, User, TaskActivity
 from .utils import sync_workflow_task, decode_csv, TaskPagination
 
 
@@ -220,7 +220,13 @@ class FileUploadView(APIView):
         source = Source(name=filename, workflow=workflow, created_by=request.user)
         source.save()
         try:
-            process_csv(content, workflow=workflow, source=source)
+            process_csv(
+                content,
+                workflow=workflow,
+                source=source,
+                user=request.user,
+                filename=filename,
+            )
         except Exception as exception:
             return Response(
                 {"status_code": 400, "errors": [{"message": str(exception)}]},
@@ -369,6 +375,12 @@ class NextTaskView(APIView):
             obj.assigned_to = request.user
             obj.assigned_at = timezone.now()
             obj.save()
+            TaskActivity(
+                task=obj,
+                created_by=request.user,
+                action="assigned",
+                assignee=request.user,
+            ).save()
             sync_workflow_task(workflow, obj)
             task = self.serializer_class(obj).data
             task["status_code"] = 200
@@ -413,6 +425,9 @@ class AssignTaskView(APIView):
             task.status = "pending"
             task.assigned_at = None
             task.save()
+            TaskActivity(
+                task=task, created_by=request.user, action="assigned", assignee=None
+            ).save()
             return Response(
                 {
                     "status_code": 200,
@@ -427,6 +442,9 @@ class AssignTaskView(APIView):
             task.status = "assigned"
             task.assigned_at = timezone.now()
             task.save()
+            TaskActivity(
+                task=task, created_by=request.user, action="assigned", assignee=user
+            ).save()
             return Response(
                 {
                     "status_code": 200,

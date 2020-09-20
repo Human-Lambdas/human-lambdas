@@ -137,3 +137,35 @@ class WorkflowNotification(models.Model):
     enabled = models.BooleanField(default=True)
     notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
     last_notified = models.DateTimeField(null=True)
+
+
+ACTIVITY_ACTIONS = [
+    ("created", "created"),
+    ("assigned", "assigned"),
+    ("completed", "completed"),
+    ("saved", "saved"),
+    ("comment", "comment"),
+]
+
+
+ACTIVITY_SOURCES = [
+    ("api", "api"),
+    ("zapier", "zapier"),
+    ("csv", "csv"),
+    ("manual", "manual"),
+]
+
+
+class TaskActivity(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="creator"
+    )
+    action = models.CharField(max_length=128, choices=ACTIVITY_ACTIONS)
+    source = models.CharField(max_length=64, choices=ACTIVITY_SOURCES, null=True)
+    filename = models.CharField(max_length=128, null=True)
+    assignee = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, related_name="assignee"
+    )
+    comment = models.TextField(null=True)

@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.models import Q, F
 
 from .schemas import DATA_SCHEMA
-from .models import Workflow, Task, Source, WorkflowNotification, WebHook
+from .models import Workflow, Task, Source, WorkflowNotification, WebHook, TaskActivity
 
 
 logger = logging.getLogger(__file__)
@@ -198,6 +198,12 @@ class TaskSerializer(serializers.ModelSerializer):
         source.save()
         task = Task(data=data, workflow=workflow, source=source)
         task.save()
+        TaskActivity(
+            task=task,
+            source="api",
+            created_by=self.context["request"].user,
+            action="created",
+        ).save()
         return task
 
     def update(self, instance, validated_data):
@@ -209,12 +215,14 @@ class TaskSerializer(serializers.ModelSerializer):
             instance.completed_at = timezone.now()
             instance.save()
             instance.task_completed(user)
+            TaskActivity(task=instance, action="completed", created_by=user).save()
             workflow = instance.workflow
             with transaction.atomic():
                 workflow.n_tasks = F("n_tasks") - 1
                 workflow.save()
-            return instance
-        instance.save()
+        else:
+            instance.save()
+            TaskActivity(task=instance, action="saved", created_by=user).save()
         return instance
 
     def validate_data(self, data):

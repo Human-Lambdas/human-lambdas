@@ -18,6 +18,7 @@ from workflow_handler.audits import (
     GetCompletedTaskView,
     ListSourcesView,
 )
+from workflow_handler.task_activity import ActivityView, RDActivityView
 from external.views import GetExternalCompletedTaskView, CreateTaskView
 
 
@@ -47,6 +48,16 @@ urlpatterns = [
         "/<int:workflow_id>/tasks/<int:task_id>/assign",
         AssignTaskView.as_view(),
         name="unassign-task",
+    ),
+    path(
+        "/<int:workflow_id>/tasks/<int:task_id>/activity",
+        ActivityView.as_view(),
+        name="task-activity",
+    ),
+    path(
+        "/<int:workflow_id>/tasks/<int:task_id>/activity/<int:pk>",
+        RDActivityView.as_view(),
+        name="task-activity-rd",
     ),
     path("/<int:workflow_id>/tasks/next", NextTaskView.as_view(), name="next-task"),
     path(
