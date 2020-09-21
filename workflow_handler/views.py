@@ -318,11 +318,16 @@ class RUDTaskView(RetrieveUpdateAPIView):
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
         return obj
 
-    def retrieve(self, *args, **kwargs):
+    def retrieve(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=self.kwargs["workflow_id"])
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
         sync_workflow_task(workflow, obj)
+        if obj.status == "pending":
+            obj.assigned_to = request.user
+            obj.status = "assigned"
+            obj.assigned_at = timezone.now()
+            obj.save()
         task = self.serializer_class(obj).data
         task["status_code"] = 200
         return Response(task, status=200)

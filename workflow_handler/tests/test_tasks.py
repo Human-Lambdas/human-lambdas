@@ -165,7 +165,7 @@ class TestTasks(APITestCase):
                 )
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-            self.assertEqual("pending", response.data["status"])
+            self.assertEqual("assigned", response.data["status"])
             self.assertTrue(len(response.data["data"]))
             for itask in response.data["data"]:
                 if itask[itask["type"]].get("read_only"):
