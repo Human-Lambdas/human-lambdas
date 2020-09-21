@@ -8,9 +8,20 @@ from .models import TaskActivity, Task, Organization, Workflow
 
 
 class ActivitySerializer(serializers.ModelSerializer):
+    assignee_name = serializers.SerializerMethodField(read_only=True)
+    created_by_name = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         fields = "__all__"
         model = TaskActivity
+
+    def get_assignee_name(self, obj):
+        if obj.assignee:
+            return obj.assignee.name
+        return None
+
+    def get_created_by_name(self, obj):
+        return obj.created_by.name
 
 
 class ActivityView(ListCreateAPIView):

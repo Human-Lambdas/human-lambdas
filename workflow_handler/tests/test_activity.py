@@ -207,3 +207,10 @@ class TestTasksActivity(APITestCase):
         self.assertTrue(
             TaskActivity.objects.filter(task=task, action="assigned").exists()
         )
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}/activity".format(
+                self.org_id, self.workflow_id, task.pk,
+            ),
+        )
+        self.assertEqual(response.data[0]["assignee_name"], "foo")
+        self.assertEqual(response.data[0]["created_by_name"], "foo")
