@@ -1,4 +1,5 @@
 import copy
+import logging
 
 from django.utils import timezone
 from rest_framework.generics import (
@@ -71,6 +72,8 @@ class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
 
     def perform_destroy(self, instance):
         instance.delete()
+
+logger = logging.getLogger(__name__)
 
 
 class CreateWorkflowView(CreateAPIView):
@@ -384,6 +387,7 @@ class NextTaskView(APIView):
             sync_workflow_task(workflow, obj)
             task = self.serializer_class(obj).data
             task["status_code"] = 200
+            logger.info(f"Getting new task with task id {obj.pk}")
             return Response(task, status=200)
 
 

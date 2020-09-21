@@ -9,6 +9,7 @@ from .zapier import (
     ZapierHook,
     GetZapierTaskSampleData,
 )
+from .flush import FlushTasksView
 
 
 urlpatterns = [
@@ -21,6 +22,11 @@ urlpatterns = [
         "orgs/<int:org_id>/workflows/<int:workflow_id>/tasks/completed",
         GetExternalCompletedTaskView.as_view(),
         name="completed-task",
+    ),
+    path(
+        "orgs/<int:org_id>/workflows/<int:workflow_id>/flush",
+        FlushTasksView.as_view(),
+        name="flush-task",
     ),
     # Zapier Endpoints
     path(
