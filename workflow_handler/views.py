@@ -258,7 +258,7 @@ class ListTaskView(ListAPIView):
         )
         return Task.objects.filter(
             Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
-        )
+        ).order_by("-created_at")
 
     def list(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
