@@ -73,6 +73,7 @@ class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
     def perform_destroy(self, instance):
         instance.delete()
 
+
 logger = logging.getLogger(__name__)
 
 

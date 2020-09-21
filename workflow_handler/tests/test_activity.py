@@ -168,7 +168,9 @@ class TestTasksActivity(APITestCase):
             data=response_data,
             format="json",
         )
-        self.assertTrue(TaskActivity.objects.filter(task=task, action="completed").exists())
+        self.assertTrue(
+            TaskActivity.objects.filter(task=task, action="completed").exists()
+        )
 
     def test_save_task_activity(self):
         task = Task.objects.first()
@@ -202,4 +204,6 @@ class TestTasksActivity(APITestCase):
             data={"assigned_to": self.user_id},
             format="json",
         )
-        self.assertTrue(TaskActivity.objects.filter(task=task, action="assigned").exists())
+        self.assertTrue(
+            TaskActivity.objects.filter(task=task, action="assigned").exists()
+        )
