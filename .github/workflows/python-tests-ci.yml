@@ -62,3 +62,4 @@ jobs:
         INVITATION_TEMPLATE: "test"
         ACCOUNT_ASM_GROUPID: 10101
         FORGOTTEN_PASSWORD_TEMPLATE: "test"
+        API_URL: "http://localhost:8000"
