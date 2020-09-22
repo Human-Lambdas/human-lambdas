@@ -1,5 +1,6 @@
 import logging
 import os
+import copy
 
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -91,12 +92,13 @@ class TestTaskCount(APITestCase):
     def test_assigning_task(self):
         n_tasks = self.total_rows
         for i in range(self.total_rows):
-            n_tasks -= 1
             response = self.client.get(
                 "/v1/orgs/{}/workflows/{}/tasks/next".format(
                     self.org_id, self.workflow_id
                 )
             )
+            workflow = Workflow.objects.get(pk=self.workflow_id)
+            self.assertEqual(workflow.n_tasks, n_tasks)
             for idata in response.data["data"]:
                 if idata["id"] == "foo":
                     idata[idata["type"]]["value"] = "bajs"
@@ -108,6 +110,7 @@ class TestTaskCount(APITestCase):
                 data=data,
                 format="json",
             )
+            n_tasks -= 1
             workflow = Workflow.objects.get(pk=self.workflow_id)
             self.assertEqual(workflow.n_tasks, n_tasks)
 
@@ -118,7 +121,7 @@ class TestTaskCount(APITestCase):
             "data": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"},
         }
         for i in range(5):
-            _ = self.client.post(
+            response = self.client.post(
                 "/orgs/{}/workflows/{}/tasks/create".format(
                     self.org_id, self.workflow_id
                 ),
@@ -128,6 +131,29 @@ class TestTaskCount(APITestCase):
             n_tasks += 1
             workflow = Workflow.objects.get(pk=self.workflow_id)
             self.assertEqual(workflow.n_tasks, n_tasks)
+
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/{}/tasks/{}".format(self.org_id, self.workflow_id, response.data["id"])
+        )
+
+        workflow = Workflow.objects.get(pk=self.workflow_id)
+        self.assertEqual(workflow.n_tasks, n_tasks)
+        data = copy.deepcopy(response.data["data"])
+        for idata in data:
+            if idata["id"] == "foo":
+                idata["single_selection"]["value"] = "bar2"
+        response_data = {"data": data}
+        _ = self.client.patch(
+            "/v1/orgs/{}/workflows/{}/tasks/{}".format(
+                self.org_id, self.workflow_id, response.data["id"]
+            ),
+            data=response_data,
+            format="json",
+        )
+        n_tasks -= 1
+        workflow = Workflow.objects.get(pk=self.workflow_id)
+        self.assertEqual(workflow.n_tasks, n_tasks)
 
     def test_unassigning_task(self):
         n_tasks = self.total_rows
