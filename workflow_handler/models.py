@@ -6,7 +6,7 @@ from rest_hooks.models import AbstractHook
 from external.task_formats import process_external_completed_tasks
 
 
-STATUS_MAPPING = {"completed": "COMPLETED", "assigned": "IN PROGRESS", "pending": "NEW"}
+STATUS_MAPPING = {"assigned": "in_progress", "pending": "new"}
 
 
 class Workflow(models.Model):
@@ -36,7 +36,7 @@ class Source(models.Model):
 
 
 class Task(models.Model):
-    status = models.CharField(max_length=128, default="pending")
+    status = models.CharField(max_length=128, default="new")
     completed_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     assigned_at = models.DateTimeField(null=True)
@@ -50,6 +50,9 @@ class Task(models.Model):
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
 
+    def get_status(self):
+        return STATUS_MAPPING.get(self.status, self.status)
+
     def task_completed(self, user):
         hook_event.send(
             sender=self.__class__, action="completed", instance=self, user=user
@@ -58,7 +61,7 @@ class Task(models.Model):
     def get_updated_status(self):
         return {
             "id": self.pk,
-            "status": STATUS_MAPPING[self.status],
+            "status": self.get_status(),
             "completed_at": self.completed_at,
             "created_at": self.created_at,
             "assigned_at": self.assigned_at,
@@ -82,7 +85,7 @@ class Task(models.Model):
             source_name, source_id = None, None
         return {
             "id": self.pk,
-            "status": self.status,
+            "status": self.get_status(),
             "completed_at": self.completed_at,
             "created_at": self.created_at,
             "completed_by": worker_name,
@@ -107,7 +110,7 @@ class Task(models.Model):
             source_name = None
         return {
             "id": self.pk,
-            "status": self.status,
+            "status": self.get_status(),
             "completed_at": self.completed_at,
             "created_at": self.created_at,
             "completed_by": worker_email,

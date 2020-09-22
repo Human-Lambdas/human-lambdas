@@ -165,7 +165,7 @@ class TestTasks(APITestCase):
                 )
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-            self.assertEqual("assigned", response.data["status"])
+            self.assertEqual("in_progress", response.data["status"])
             self.assertTrue(len(response.data["data"]))
             for itask in response.data["data"]:
                 if itask[itask["type"]].get("read_only"):
@@ -252,9 +252,9 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual("assigned", response.data["status"], response.content)
+        self.assertEqual("in_progress", response.data["status"], response.content)
         task = Task.objects.get(id=response.data["id"])
-        self.assertEqual(task.status, "assigned")
+        self.assertEqual(task.status, "in_progress")
 
     def test_next_task_repeatedly(self):
         response = self.client.get(
@@ -263,7 +263,7 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual("assigned", response.data["status"], response.content)
+        self.assertEqual("in_progress", response.data["status"], response.content)
 
         task_id = response.data["id"]
         response = self.client.get(
@@ -348,7 +348,7 @@ class TestTasks(APITestCase):
         self.assertEqual(response.data["count"], 3)
         self.assertEqual(response.data["next"], None)
         for idata in response.data["tasks"]:
-            self.assertEqual(idata["status"], "NEW")
+            self.assertEqual(idata["status"], "new")
 
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
@@ -369,7 +369,7 @@ class TestTasks(APITestCase):
                 [
                     idata
                     for idata in response.data["tasks"]
-                    if idata["status"] == "IN PROGRESS"
+                    if idata["status"] == "in_progress"
                 ]
             ),
             1,

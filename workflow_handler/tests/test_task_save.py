@@ -125,9 +125,9 @@ class TestTasksSave(APITestCase):
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-            self.assertEqual("assigned", response.data["status"])
+            self.assertEqual("in_progress", response.data["status"])
             self.assertEqual(data, response.data["data"])
-            self.assertEqual("assigned", Task.objects.get(id=task.id).status)
+            self.assertEqual("in_progress", Task.objects.get(id=task.id).status)
             self.assertIsNone(Task.objects.get(id=task.id).completed_at)
 
             # test retrieving the same task
@@ -136,5 +136,5 @@ class TestTasksSave(APITestCase):
                     self.org_id, self.workflow_id, task.id
                 )
             )
-            self.assertEqual("assigned", response.data["status"])
+            self.assertEqual("in_progress", response.data["status"])
             self.assertEqual(data, response.data["data"])

@@ -212,5 +212,5 @@ class TestTasksActivity(APITestCase):
                 self.org_id, self.workflow_id, task.pk,
             ),
         )
-        self.assertEqual(response.data[0]["assignee_name"], "foo")
+        self.assertEqual(response.data[1]["assignee_name"], "foo")
         self.assertEqual(response.data[0]["created_by_name"], "foo")

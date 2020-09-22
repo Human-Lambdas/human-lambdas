@@ -323,16 +323,16 @@ class RUDTaskView(RetrieveUpdateAPIView):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
         sync_workflow_task(workflow, obj)
-        if obj.status == "pending":
+        if obj.status in ["new", "pending"]:
             assigned_tasks = queryset.filter(assigned_to=request.user)
             if assigned_tasks.exists():
                 for assigned_task in assigned_tasks:
                     assigned_task.assigned_to = None
-                    assigned_task.status = "pending"
+                    assigned_task.status = "new"
                     assigned_task.assigned_at = None
                     assigned_task.save()
             obj.assigned_to = request.user
-            obj.status = "assigned"
+            obj.status = "in_progress"
             obj.assigned_at = timezone.now()
             obj.save()
         task = self.serializer_class(obj).data
@@ -370,7 +370,7 @@ class NextTaskView(APIView):
         # 1 get assigned to self
         with transaction.atomic():
             obj = (
-                queryset.filter(status="assigned")
+                queryset.filter(Q(status="assigned") | Q(status="in_progress"))
                 .filter(assigned_to=request.user)
                 .first()
             )
@@ -384,10 +384,14 @@ class NextTaskView(APIView):
 
         # 2 get first pending
         with transaction.atomic():
-            obj = queryset.select_for_update().filter(status="pending").first()
+            obj = (
+                queryset.select_for_update()
+                .filter(Q(status="pending") | Q(status="new"))
+                .first()
+            )
             if not obj:
                 return Response({"status_code": 204}, status=204)
-            obj.status = "assigned"
+            obj.status = "in_progress"
             obj.assigned_to = request.user
             obj.assigned_at = timezone.now()
             obj.save()
@@ -439,7 +443,7 @@ class AssignTaskView(APIView):
         assigned_to = request.data["assigned_to"]
         if not assigned_to:
             task.assigned_to = None
-            task.status = "pending"
+            task.status = "open"
             task.assigned_at = None
             task.save()
             TaskActivity(
@@ -456,7 +460,7 @@ class AssignTaskView(APIView):
             users = self.get_userset()
             user = get_object_or_404(users, pk=assigned_to)
             task.assigned_to = user
-            task.status = "assigned"
+            task.status = "in_progress"
             task.assigned_at = timezone.now()
             task.save()
             TaskActivity(

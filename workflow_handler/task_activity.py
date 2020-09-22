@@ -40,7 +40,7 @@ class ActivityView(ListCreateAPIView):
             & Q(workflow=self.kwargs["workflow_id"])
             & Q(pk=self.kwargs["task_id"])
         ).first()
-        return TaskActivity.objects.filter(task=task).order_by("-created_at")
+        return TaskActivity.objects.filter(task=task).order_by("created_at")
 
     def post(self, request, *args, **kwargs):
         request.data["created_by"] = self.request.user.pk

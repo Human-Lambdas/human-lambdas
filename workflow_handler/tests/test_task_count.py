@@ -146,7 +146,7 @@ class TestTaskCount(APITestCase):
         workflow = Workflow.objects.get(pk=self.workflow_id)
         self.assertEqual(workflow.n_tasks, n_tasks)
         task = Task.objects.get(pk=response.data["id"])
-        self.assertEqual(task.status, "pending")
+        self.assertEqual(task.status, "open")
         self.assertEqual(task.assigned_at, None)
 
     def test_active_users(self):
