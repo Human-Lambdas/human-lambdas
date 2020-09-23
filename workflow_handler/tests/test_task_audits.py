@@ -20,7 +20,8 @@ class TestTaskAudit(APITestCase):
             "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register", registration_data)
+        response = self.client.post("/v1/users/register", registration_data)
+        self.user_id = response.data["id"]
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
@@ -98,6 +99,13 @@ class TestTaskAudit(APITestCase):
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         for task in Task.objects.all():
+            _ = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/assign".format(
+                    self.org_id, self.workflow_id, task.id
+                ),
+                data={"assigned_to": self.user_id},
+                format="json",
+            )
             data = copy.deepcopy(task.data)
             for idata in data:
                 if idata["id"] == "foo":

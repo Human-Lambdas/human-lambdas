@@ -213,19 +213,21 @@ class TaskSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         if instance.assigned_to == user:
             instance.data = validated_data.get("data", instance.data)
-        if validated_data["submit_task"]:
-            instance.status = "completed"
-            instance.completed_at = timezone.now()
-            instance.save()
-            instance.task_completed(user)
-            TaskActivity(task=instance, action="completed", created_by=user).save()
-            workflow = instance.workflow
-            with transaction.atomic():
-                workflow.n_tasks = F("n_tasks") - 1
-                workflow.save()
+            if validated_data["submit_task"]:
+                instance.status = "completed"
+                instance.completed_at = timezone.now()
+                instance.save()
+                instance.task_completed(user)
+                TaskActivity(task=instance, action="completed", created_by=user).save()
+                workflow = instance.workflow
+                with transaction.atomic():
+                    workflow.n_tasks = F("n_tasks") - 1
+                    workflow.save()
+            else:
+                instance.save()
+                TaskActivity(task=instance, action="saved", created_by=user).save()
         else:
-            instance.save()
-            TaskActivity(task=instance, action="saved", created_by=user).save()
+            raise serializers.ValidationError("User not assigned to task")
         return instance
 
     def validate_data(self, data):
