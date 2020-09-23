@@ -6,8 +6,7 @@ from rest_framework.authentication import TokenAuthentication
 from user_handler.models import Organization
 from rest_framework.response import Response
 from rest_framework import serializers
-from django.db import transaction
-from django.db.models import Q, F
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from hl_rest_api import analytics
 from workflow_handler.models import Workflow, Task
@@ -106,9 +105,6 @@ class CreateTaskView(CreateAPIView):
                 )
             formatted_data.append(task_data)
         serializer.save(data=formatted_data)
-        with transaction.atomic():
-            workflow.n_tasks = F("n_tasks") + 1
-            workflow.save()
         send_notification(workflow)
         analytics.track(
             self.request.user.pk,

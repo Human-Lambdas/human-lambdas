@@ -204,6 +204,9 @@ class TaskSerializer(serializers.ModelSerializer):
             created_by=self.context["request"].user,
             action="created",
         ).save()
+        with transaction.atomic():
+            workflow.n_tasks = F("n_tasks") + 1
+            workflow.save()
         return task
 
     def update(self, instance, validated_data):
