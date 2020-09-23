@@ -134,7 +134,9 @@ class TestTaskCount(APITestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/{}".format(self.org_id, self.workflow_id, response.data["id"])
+            "/v1/orgs/{}/workflows/{}/tasks/{}".format(
+                self.org_id, self.workflow_id, response.data["id"]
+            )
         )
 
         workflow = Workflow.objects.get(pk=self.workflow_id)
