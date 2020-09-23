@@ -324,7 +324,9 @@ class RUDTaskView(RetrieveUpdateAPIView):
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
         sync_workflow_task(workflow, obj)
         if obj.status in ["new", "pending"]:
-            assigned_tasks = queryset.filter(assigned_to=request.user)
+            assigned_tasks = queryset.filter(
+                Q(assigned_to=request.user) & ~Q(status="completed")
+            )
             if assigned_tasks.exists():
                 for assigned_task in assigned_tasks:
                     assigned_task.assigned_to = None
