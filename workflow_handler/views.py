@@ -455,6 +455,7 @@ class AssignTaskView(APIView):
                 {
                     "status_code": 200,
                     "message": f"Task {task.pk} was unassigned successfully!",
+                    "assigned_to": None,
                 },
                 status=200,
             )
@@ -473,6 +474,7 @@ class AssignTaskView(APIView):
                     "status_code": 200,
                     "message": f"Task {task.pk} was assigned successfully"
                     f" to {user.name}!",
+                    "assigned_to": task.pk,
                 },
                 status=200,
             )
