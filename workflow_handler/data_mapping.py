@@ -101,6 +101,9 @@ def get_task_data(task):
 
 
 def underscore_conversion(data):
+    if data["type"] not in data:
+        data[data["type"]] = {}
+    data[data["type"]] = {k.replace("-", "_"): v for k, v in data[data["type"]].items()}
     data["type"] = data["type"].replace("-", "_")
     udata = {k.replace("-", "_"): v for k, v in data.items()}
     return udata
