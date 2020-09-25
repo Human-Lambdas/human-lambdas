@@ -14,7 +14,9 @@ class Notification(models.Model):
                     "workflow_name": wnotification.workflow.name,
                     "enabled": wnotification.enabled,
                 }
-                for wnotification in self.workflownotification_set.all()
+                for wnotification in self.workflownotification_set.filter(
+                    workflow__disabled=False
+                ).all()
             ],
         }
 
