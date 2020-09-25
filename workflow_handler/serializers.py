@@ -137,6 +137,11 @@ class WorkflowSerializer(serializers.ModelSerializer):
         if disabled:
             instance.disabled = disabled
             instance.name = f"{instance.name}-{uuid.uuid4()}"
+            for wnotification in WorkflowNotification.objects.filter(
+                workflow=instance
+            ).all():
+                wnotification.enabled = False
+                wnotification.save()
         instance.save()
         webhook_data = validated_data.get("webhook")
         if webhook_data or self.context.get("remove_webhook"):
