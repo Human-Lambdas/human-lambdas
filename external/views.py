@@ -74,7 +74,7 @@ class CreateTaskView(CreateAPIView):
             )
         return self.create(request, *args, **kwargs)
 
-    def perform_create(self, serializer):
+    def preprocess_data(self):
         workflow = get_object_or_404(Workflow, pk=self.kwargs["workflow_id"])
         analytics.track(
             self.request.user.pk,
@@ -104,7 +104,9 @@ class CreateTaskView(CreateAPIView):
                     "Cannot find data with data id: {}".format(w_data["id"])
                 )
             formatted_data.append(task_data)
-        serializer.save(data=formatted_data)
+        return formatted_data, workflow
+
+    def create_success(self, workflow):
         send_notification(workflow)
         analytics.track(
             self.request.user.pk,
@@ -117,3 +119,8 @@ class CreateTaskView(CreateAPIView):
                 "source": "API",
             },
         )
+
+    def perform_create(self, serializer):
+        formatted_data, workflow = self.preprocess_data()
+        serializer.save(data=formatted_data, source_name="api")
+        self.create_success(workflow)

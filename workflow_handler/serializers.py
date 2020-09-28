@@ -195,17 +195,22 @@ class TaskSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        source_name = validated_data.get("source_name")
+        if not source_name:
+            raise serializers.ValidationError("No source name given!")
         data = validated_data["data"]
         workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
         source = Source(
-            name="API", created_by=self.context["request"].user, workflow=workflow
+            name=source_name.upper(),
+            created_by=self.context["request"].user,
+            workflow=workflow,
         )
         source.save()
         task = Task(data=data, workflow=workflow, source=source)
         task.save()
         TaskActivity(
             task=task,
-            source="api",
+            source=source_name,
             created_by=self.context["request"].user,
             action="created",
         ).save()

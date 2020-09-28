@@ -521,3 +521,6 @@ class CreateTaskFormView(CreateAPIView):
             if idata["id"] not in ids:
                 request.data["data"].append(idata)
         return self.create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(source_name="manual")
