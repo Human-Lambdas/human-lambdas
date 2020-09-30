@@ -280,7 +280,7 @@ class ListNonCompleteTaskView(ListTaskView):
         )
         return Task.objects.filter(
             Q(workflow=workflow.first()) & ~Q(status="completed")
-        )
+        ).order_by("-created_at")
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -324,15 +324,6 @@ class RUDTaskView(RetrieveUpdateAPIView):
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
         sync_workflow_task(workflow, obj)
         if obj.status in ["new", "pending"]:
-            assigned_tasks = queryset.filter(
-                Q(assigned_to=request.user) & ~Q(status="completed")
-            )
-            if assigned_tasks.exists():
-                for assigned_task in assigned_tasks:
-                    assigned_task.assigned_to = None
-                    assigned_task.status = "new"
-                    assigned_task.assigned_at = None
-                    assigned_task.save()
             obj.assigned_to = request.user
             obj.status = "in_progress"
             obj.assigned_at = timezone.now()

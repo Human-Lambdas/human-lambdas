@@ -23,7 +23,7 @@ from .models import Workflow, Task, Source
 def make_task_filter_url(org_id, task_id, filters):
     if task_id < 0:
         return None
-    url = f"/orgs/{org_id}/workflows/tasks/{task_id}/audit?{urlencode(filters)}"
+    url = f"/workflows/tasks/{task_id}/audit?{urlencode(filters)}"
     return url
 
 

@@ -175,6 +175,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     workflow = serializers.SerializerMethodField()
+    workflow_id = serializers.SerializerMethodField()
 
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
@@ -192,6 +193,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "completed_at",
             "data",
             "workflow",
+            "workflow_id",
         ]
 
     def create(self, validated_data):
@@ -201,7 +203,7 @@ class TaskSerializer(serializers.ModelSerializer):
         data = validated_data["data"]
         workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
         source = Source(
-            name=source_name.upper(),
+            name=source_name,
             created_by=self.context["request"].user,
             workflow=workflow,
         )
@@ -248,6 +250,9 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def get_workflow(self, obj):
         return obj.workflow.name
+
+    def get_workflow_id(self, obj):
+        return obj.workflow.pk
 
 
 class CompletedTaskSerializer(TaskSerializer):
