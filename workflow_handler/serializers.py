@@ -192,6 +192,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "completed_at",
             "data",
             "workflow",
+            "workflow_id"
         ]
 
     def create(self, validated_data):
