@@ -280,7 +280,7 @@ class ListNonCompleteTaskView(ListTaskView):
         )
         return Task.objects.filter(
             Q(workflow=workflow.first()) & ~Q(status="completed")
-        )
+        ).order_by("-created_at")
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
