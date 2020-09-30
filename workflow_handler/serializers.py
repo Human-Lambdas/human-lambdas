@@ -201,7 +201,7 @@ class TaskSerializer(serializers.ModelSerializer):
         data = validated_data["data"]
         workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
         source = Source(
-            name=source_name.upper(),
+            name=source_name,
             created_by=self.context["request"].user,
             workflow=workflow,
         )

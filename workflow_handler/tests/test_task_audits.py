@@ -135,7 +135,7 @@ class TestTaskAudit(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for idata in response.data:
-            self.assertIn(idata["name"], ["API", "test.csv"])
+            self.assertIn(idata["name"], ["api", "test.csv"])
 
     def test_source_filter(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
@@ -143,7 +143,7 @@ class TestTaskAudit(APITestCase):
             "/v1/orgs/{}/workflows/{}/sources".format(self.org_id, self.workflow_id)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        API_id = [idata for idata in response.data if idata["name"] == "API"][0]["id"]
+        API_id = [idata for idata in response.data if idata["name"] == "api"][0]["id"]
         response = self.client.get(
             "/v1/orgs/{}/workflows/tasks/completed".format(self.org_id),
             data={"source_id": API_id},
