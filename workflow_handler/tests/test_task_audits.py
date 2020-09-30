@@ -199,14 +199,14 @@ class TestTaskAudit(APITestCase):
         if next_task:
             self.assertEqual(
                 response.data["next"],
-                f"/orgs/{self.org_id}/workflows/tasks/{next_task.pk}/audit?workflow_id={self.workflow_id}&source_id={source_id}",
+                f"/workflows/tasks/{next_task.pk}/audit?workflow_id={self.workflow_id}&source_id={source_id}",
             )
         else:
             self.assertEqual(response.data["next"], None)
         if prev_task:
             self.assertEqual(
                 response.data["previous"],
-                f"/orgs/{self.org_id}/workflows/tasks/{prev_task.pk}/audit?workflow_id={self.workflow_id}&source_id={source_id}",
+                f"/workflows/tasks/{prev_task.pk}/audit?workflow_id={self.workflow_id}&source_id={source_id}",
             )
         else:
             self.assertEqual(response.data["previous"], None)
