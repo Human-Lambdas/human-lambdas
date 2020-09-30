@@ -80,6 +80,7 @@ class User(AbstractBaseUser):
     notifications = models.OneToOneField(
         Notification, on_delete=models.CASCADE, null=True
     )
+    is_verified = models.BooleanField(default=True)
 
     def __str__(self):
         return self.email
@@ -131,6 +132,17 @@ class Invitation(models.Model):
 
     def __str__(self):
         return "{0}_invite_to_{1}".format(self.email, self.organization)
+
+
+class EmailVerification(models.Model):
+    def __hash__(self):
+        return hash((self.email, self.organization))
+
+    email = LowercaseEmailField()
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    token = models.CharField(max_length=128)
+    datetime = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField()
 
 
 class ForgottenPassword(models.Model):
