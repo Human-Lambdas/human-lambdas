@@ -40,7 +40,7 @@ class SendInviteView(APIView):
                 invalid_email_list.append(email)
                 continue
 
-            if Organization.objects.filter(user__email=email).exists():
+            if organization.user.filter(email=email).exists():
                 already_added_email_list.append(email)
                 continue
 
