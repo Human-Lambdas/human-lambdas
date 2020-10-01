@@ -1,5 +1,5 @@
 from rest_framework.generics import (
-    RetrieveAPIView,
+    RetrieveUpdateAPIView,
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
 )
@@ -132,7 +132,7 @@ class ListOrgUsersView(ListAPIView):
         return Response(result)
 
 
-class GetOrganizationView(RetrieveAPIView):
+class GetOrganizationView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
