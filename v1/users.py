@@ -13,11 +13,9 @@ from user_handler.password_retrieval import (
     ForgottenPasswordView,
 )
 from user_handler.notifications import NotificationView
-from user_handler.registration import RegistrationView2
 
 urlpatterns = [
     path("/register", RegistrationView.as_view(), name="user-registration"),
-    path("/register2", RegistrationView2.as_view(), name="user-registration2"),
 
     path("/token", HLTokenObtainPairView.as_view(), name="token-obtain-pair"),
     path("/token/refresh", TokenRefreshView.as_view(), name="token-refresh"),
