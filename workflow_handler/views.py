@@ -323,7 +323,7 @@ class RUDTaskView(RetrieveUpdateAPIView):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
         sync_workflow_task(workflow, obj)
-        if obj.status in ["new", "pending"]:
+        if obj.status in ["new", "pending", "open"]:
             obj.assigned_to = request.user
             obj.status = "in_progress"
             obj.assigned_at = timezone.now()
