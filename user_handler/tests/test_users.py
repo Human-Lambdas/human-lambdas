@@ -106,6 +106,13 @@ class TestAPIRegistration(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertFalse("password" in response.data)
 
+    def test_registration_without_organization(self):
+        response = self.client.post(
+            "/v1/users/register",
+            {"email": "foo@bar.com", "password": "foowordbar", "name": "foo",},
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_registration_short_password(self):
         response = self.client.post(
             "/v1/users/register",

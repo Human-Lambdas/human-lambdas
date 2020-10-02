@@ -12,7 +12,11 @@ logger = logging.getLogger(__file__)
 # Serializers define the API representation.
 class UserSerializer(serializers.ModelSerializer):
     organization = serializers.CharField(
-        max_length=128, allow_blank=True, write_only=True
+        max_length=128,
+        allow_blank=True,
+        write_only=True,
+        allow_null=True,
+        required=False,
     )
     password = serializers.CharField(min_length=8, write_only=True)
 
