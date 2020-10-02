@@ -16,7 +16,6 @@ from user_handler.notifications import NotificationView
 
 urlpatterns = [
     path("/register", RegistrationView.as_view(), name="user-registration"),
-
     path("/token", HLTokenObtainPairView.as_view(), name="token-obtain-pair"),
     path("/token/refresh", TokenRefreshView.as_view(), name="token-refresh"),
     path("/hello", HelloView.as_view(), name="hello"),

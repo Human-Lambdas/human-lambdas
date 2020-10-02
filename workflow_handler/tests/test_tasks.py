@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import Workflow, Task
-from user_handler.models import Organization, User
+from user_handler.models import Organization, User, Notification
 
 
 logger = logging.getLogger(__file__)
@@ -33,13 +33,23 @@ class TestTasks(APITestCase):
         }
         response = self.client.post("/v1/users/register", registration_data)
         self.user_id = response.data["id"]
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
 
-        registration_data["email"] = "foojr@bar.com"
-        _ = self.client.post("/v1/users/register", registration_data)
+        # create user and add in same org
+        org = Organization.objects.get(pk=self.org_id)
+        notification = Notification()
+        notification.save()
+        user = User(name="foo", email="foojr@bar.com", notifications=notification)
+        user.set_password("foowordbar")
+        user.save()
+        org.add_admin(user)
+
+        # registration_data["email"] =
+        # _ = self.client.post("/v1/users/register", registration_data)
 
         # registration_data["email"] = "foo@bar.com"
 
-        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
+        # self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )

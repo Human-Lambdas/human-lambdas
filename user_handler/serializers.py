@@ -45,8 +45,8 @@ class UserSerializer(serializers.ModelSerializer):
         if not organization_name:
             organization_name = f"{name}'s organization"
         org = Organization(name=organization_name)
-        org.add_admin(user_obj)
         org.save()
+        org.add_admin(user_obj)
         user_obj.current_organization_id = org.pk
         user_obj.save()
         analytics.register_events(user_obj, org, None)
