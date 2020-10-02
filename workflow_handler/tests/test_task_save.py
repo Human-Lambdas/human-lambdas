@@ -28,7 +28,6 @@ class TestTasksSave(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         response = self.client.post("/v1/users/register", registration_data)

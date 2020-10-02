@@ -2,7 +2,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import Workflow
-from user_handler.models import Organization
+from user_handler.models import Organization, User, Notification
 
 
 class TestCRUDWorkflow(APITestCase):
@@ -11,7 +11,6 @@ class TestCRUDWorkflow(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -20,14 +19,15 @@ class TestCRUDWorkflow(APITestCase):
         )
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         self.access_token = response.data["access"]
-        registration_data = {
-            "email": "worker@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "is_admin": False,
-            "name": "worker",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        # perhaps need an internal endpoint to make user as a worker of an org
+        org = Organization.objects.get(pk=self.org_id)
+        notification = Notification()
+        notification.save()
+        user = User(name="worker", email="worker@bar.com", notifications=notification)
+        user.set_password("foowordbar")
+        user.save()
+        org.user.add(user)
         response = self.client.post(
             "/v1/users/token", {"email": "worker@bar.com", "password": "foowordbar"}
         )

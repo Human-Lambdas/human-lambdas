@@ -100,7 +100,6 @@ class TestAPIRegistration(APITestCase):
                 "email": "foo@bar.com",
                 "password": "foowordbar",
                 "name": "foo",
-                "is_admin": True,
                 "organization": "barinc",
             },
         )
@@ -114,7 +113,6 @@ class TestAPIRegistration(APITestCase):
                 "email": "foo@bar.com",
                 "password": "fooword",
                 "name": "foo",
-                "is_admin": True,
                 "organization": "barinc",
             },
         )
@@ -129,7 +127,6 @@ class TestAPIUserCRUD(APITestCase):
                 "email": "foo@bar.com",
                 "password": "foowordbar",
                 "name": "foo",
-                "is_admin": True,
                 "organization": "barinc",
             },
         )

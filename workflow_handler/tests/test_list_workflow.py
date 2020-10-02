@@ -11,7 +11,6 @@ class TestListWorkflow(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -25,7 +24,6 @@ class TestListWorkflow(APITestCase):
             "email": "bar@bar.com",
             "password": "foowordbar",
             "organization": "barInc",
-            "is_admin": True,
             "name": "bar",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -124,7 +122,6 @@ class TestListNoWorkflow(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
