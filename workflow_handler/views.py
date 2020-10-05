@@ -280,7 +280,7 @@ class ListNonCompleteTaskView(ListTaskView):
         )
         return Task.objects.filter(
             Q(workflow=workflow.first()) & ~Q(status="completed")
-        ).order_by("-created_at")
+        ).order_by("created_at")
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -334,6 +334,17 @@ class RUDTaskView(RetrieveUpdateAPIView):
 
     def perform_update(self, serializer, *args, **kwargs):
         serializer.save(owner=self.request.user, submit_task=True)
+
+
+class RefreshTaskView(RUDTaskView):
+    def retrieve(self, request, *args, **kwargs):
+        workflow = Workflow.objects.get(id=self.kwargs["workflow_id"])
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, id=self.kwargs["task_id"], workflow=workflow)
+        sync_workflow_task(workflow, obj)
+        task = self.serializer_class(obj).data
+        task["status_code"] = 200
+        return Response(task, status=200)
 
 
 class SaveTaskView(RUDTaskView):

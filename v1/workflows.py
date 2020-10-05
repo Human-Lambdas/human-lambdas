@@ -12,6 +12,7 @@ from workflow_handler.views import (
     RUWebhookView,
     SaveTaskView,
     CreateTaskFormView,
+    RefreshTaskView,
 )
 from workflow_handler.audits import (
     GetCompletedTasksCSVView,
@@ -38,6 +39,11 @@ urlpatterns = [
         "/<int:workflow_id>/tasks/<int:task_id>",
         RUDTaskView.as_view(),
         name="update-task",
+    ),
+    path(
+        "/<int:workflow_id>/tasks/<int:task_id>/refresh",
+        RefreshTaskView.as_view(),
+        name="get-refresh-task",
     ),
     path(
         "/<int:workflow_id>/tasks/<int:task_id>/save",
