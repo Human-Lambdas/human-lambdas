@@ -176,6 +176,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     workflow = serializers.SerializerMethodField()
     workflow_id = serializers.SerializerMethodField()
+    n_comments = serializers.SerializerMethodField()
 
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
@@ -194,6 +195,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "data",
             "workflow",
             "workflow_id",
+            "n_comments",
         ]
 
     def create(self, validated_data):
@@ -253,6 +255,9 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def get_workflow_id(self, obj):
         return obj.workflow.pk
+
+    def get_n_comments(self, obj):
+        return obj.taskactivity_set.filter(action="comment").count()
 
 
 class CompletedTaskSerializer(TaskSerializer):

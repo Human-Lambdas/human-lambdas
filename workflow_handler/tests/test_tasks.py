@@ -402,3 +402,4 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(response.data["count"], 2)
+        self.assertEqual(response.data["tasks"][0]["n_comments"], 0)

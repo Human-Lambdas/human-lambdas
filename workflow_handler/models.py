@@ -71,6 +71,7 @@ class Task(models.Model):
             "outputs": self.outputs,
             "data": self.data,
             "source": self.source.pk if self.source else None,
+            "n_comments": self.taskactivity_set.filter(action="comment").count(),
         }
 
     def get_formatted_task(self):
@@ -97,6 +98,7 @@ class Task(models.Model):
             "data": self.data,
             "source": source_name,
             "source_id": source_id,
+            "n_comments": self.taskactivity_set.filter(action="comment").count(),
         }
 
     def get_simple_formatted_task(self):
