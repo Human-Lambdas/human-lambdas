@@ -19,7 +19,7 @@ class IsOrgAdmin(BasePermission):
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 
 
-class IsAuthenticatedOrReadOnlyAdmin(BasePermission):
+class IsAdminOrReadOnly(BasePermission):
     """
     The request is authenticated as a user, or is a read-only request.
     """

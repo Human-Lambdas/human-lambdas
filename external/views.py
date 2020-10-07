@@ -12,6 +12,7 @@ from hl_rest_api import analytics
 from workflow_handler.models import Workflow, Task
 from workflow_handler.audits import GetCompletedTaskView
 from user_handler.notifications import send_notification
+from user_handler.permissions import IsOrgAdmin
 
 from .serializers import CompletedTaskSerializer, CreateTaskSerializer
 
@@ -21,6 +22,7 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
     External API View for getting all the Tasks
     """
 
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
     authentication_classes = (TokenAuthentication,)
     serializer_class = CompletedTaskSerializer
 
@@ -53,7 +55,7 @@ class CreateTaskView(CreateAPIView):
     """
 
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
     serializer_class = CreateTaskSerializer
 
     def get_queryset(self):

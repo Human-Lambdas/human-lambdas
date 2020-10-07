@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, get_list_or_404
 from user_handler.models import User, Organization
 from user_handler.serializers import UserSerializer
-from user_handler.permissions import IsAuthenticatedOrReadOnlyAdmin
+from user_handler.permissions import IsAdminOrReadOnly
 
 from .serializers import OrganizationSerializer
 
@@ -134,7 +134,7 @@ class ListOrgUsersView(ListAPIView):
 
 
 class GetOrganizationView(RetrieveUpdateAPIView):
-    permission_classes = (IsAuthenticated, IsAuthenticatedOrReadOnlyAdmin)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
 

@@ -18,7 +18,7 @@ from workflow_handler.csv_utils import process_csv
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, get_list_or_404
-from user_handler.permissions import IsOrgAdmin
+from user_handler.permissions import IsOrgAdmin, IsAdminOrReadOnly
 
 from .serializers import (
     WorkflowSerializer,
@@ -124,7 +124,7 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     Retrieve and Update for now, will add delete here later
     """
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     serializer_class = WorkflowSerializer
 
     def get_serializer(self, *args, **kwargs):

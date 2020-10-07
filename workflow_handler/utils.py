@@ -20,6 +20,16 @@ def sync_workflow_task(workflow, task):
                     final_data[final_data["type"]]["value"] = t_data[t_data["type"]][
                         "value"
                     ]
+                elif (
+                    "data" in t_data[t_data["type"]]
+                    and t_data["id"] == workflow_data["id"]
+                ):
+                    final_data[final_data["type"]]["data"] = t_data[t_data["type"]][
+                        "data"
+                    ]
+                    final_data[final_data["type"]]["history"] = t_data[t_data["type"]][
+                        "history"
+                    ]
             updated_data.append(final_data)
         task.data = updated_data
 
