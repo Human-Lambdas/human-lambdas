@@ -1,4 +1,4 @@
-name: Deploy-Staging-AWS-ElasticBeanstalk-Staging
+name: Deploy-AWS-ElasticBeanstalk-Staging
 env:
   EB_APPLICATION_NAME       : "human-lambdas"
   EB_ENVIRONMENT_NAME       : "human-lambdas-api-stg"
@@ -21,6 +21,7 @@ jobs:
         run: ./create-dockerrun.sh
         env:
           DOCKER_REPO: "staging-api"
+          DOCKER_GROUP: "hlambdas"
       - name: Get release version
         id: get_version
         run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_SHA})

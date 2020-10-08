@@ -25,7 +25,6 @@ class TestUpload(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -41,18 +40,31 @@ class TestUpload(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         _ = self.client.post(
@@ -77,17 +89,25 @@ class TestUpload(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "news", "name": "news", "type": "text"},
-                {"id": "type", "name": "type", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "news",
+                    "name": "news",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "type",
+                    "name": "type",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         _ = self.client.post(
@@ -109,18 +129,31 @@ class TestUpload(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         _ = self.client.post(
@@ -138,12 +171,13 @@ class TestUpload(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         tasks = Task.objects.all()
         for task in tasks:
-            self.assertEqual(3, len(task.inputs))
-            for input_item in task.inputs:
-                self.assertTrue(input_item.pop("value"))
-                self.assertTrue(
-                    any(wf_input == input_item for wf_input in workflow_data["inputs"])
-                )
+            self.assertEqual(4, len(task.data))
+            for data_item in task.data:
+                if data_item[data_item["type"]].get("read_only"):
+                    self.assertTrue(data_item[data_item["type"]].pop("value"))
+                    self.assertTrue(
+                        any(wf_data == data_item for wf_data in workflow_data["data"])
+                    )
 
 
 class TestCSV2Task(TestCase):
@@ -222,9 +256,14 @@ class TestCSV2Task(TestCase):
             self.fail("An error has occurred " + e)
 
     def test_process_csv(self):
+        user = User.objects.get(email="foo@bar.com")
         # try:
         process_csv(
-            csv_file=self.test_csv_file, workflow=self.sample_workflow, source=None
+            csv_file=self.test_csv_file,
+            workflow=self.sample_workflow,
+            source=None,
+            filename="test.csv",
+            user=user,
         )
         title_row = ["alpha", "beta", "gamma", "delta"]
         # Check each workflow key appears once in each task
@@ -242,7 +281,6 @@ class TestUploadExtremes(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -258,18 +296,31 @@ class TestUploadExtremes(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "car", "name": "alpha", "type": "text"},
-                {"id": "img_1", "name": "beta", "type": "text"},
-                {"id": "img_2", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "car",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "img_1",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "img_2",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         _ = self.client.post(
@@ -284,30 +335,56 @@ class TestUploadExtremes(APITestCase):
                 "/v1/orgs/{0}/workflows/{1}/upload".format(self.org_id, workflow_id),
                 data=data,
             )
-        self.assertEqual(
-            response.status_code, status.HTTP_400_BAD_REQUEST, response.content
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_upload_with_emoji(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "name": "feedback",
             "description": "emoji wf",
-            "inputs": [
-                {"id": "submitter_picture", "name": "alpha", "type": "image"},
-                {"id": "submitter_full_name", "name": "beta", "type": "text"},
-                {"id": "submission_date", "name": "gamma", "type": "date"},
-                {"id": "subject", "name": "eta", "type": "text"},
-                {"id": "body", "name": "leta", "type": "text"},
-                {"id": "organization", "name": "my", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "submitter_picture",
+                    "name": "alpha",
+                    "type": "image",
+                    "image": {"read_only": True},
+                },
+                {
+                    "id": "submitter_full_name",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "submission_date",
+                    "name": "gamma",
+                    "type": "date",
+                    "date": {"read_only": True},
+                },
+                {
+                    "id": "subject",
+                    "name": "eta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "body",
+                    "name": "leta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "organization",
+                    "name": "my",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         _ = self.client.post(
@@ -334,7 +411,6 @@ class TestUploadList(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -350,18 +426,32 @@ class TestUploadList(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "list", "subtype": "number"},
-                {"id": "Beta", "name": "beta", "type": "number"},
-                {"id": "Gamma", "name": "gamma", "type": "number"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "list",
+                    "list": {"read_only": True},
+                    "subtype": "number",
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "number",
+                    "number": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "number",
+                    "number": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         _ = self.client.post(
@@ -379,7 +469,5 @@ class TestUploadList(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         for task in Task.objects.filter(workflow__pk=workflow_id).all():
-            list_input = [tinput for tinput in task.inputs if tinput["id"] == "Alpha"][
-                0
-            ]
-            self.assertIsInstance(list_input["value"], list)
+            list_input = [tinput for tinput in task.data if tinput["id"] == "Alpha"][0]
+            self.assertIsInstance(list_input["list"]["value"], list)

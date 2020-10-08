@@ -16,7 +16,6 @@ class TestMetrics(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -31,17 +30,15 @@ class TestMetrics(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -106,7 +103,6 @@ class TestComplexMetrics(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -121,17 +117,15 @@ class TestComplexMetrics(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -202,7 +196,6 @@ class TestQueryMetrics(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -217,17 +210,15 @@ class TestQueryMetrics(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -255,17 +246,15 @@ class TestQueryMetrics(APITestCase):
         workflow_data = {
             "name": "uploader2",
             "description": "greater wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -336,7 +325,6 @@ class TestWorkflowMetrics(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -351,17 +339,15 @@ class TestWorkflowMetrics(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -389,17 +375,15 @@ class TestWorkflowMetrics(APITestCase):
         workflow_data = {
             "name": "uploader2",
             "description": "greater wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
@@ -554,7 +538,6 @@ class TestWorkermetrics(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -569,17 +552,15 @@ class TestWorkermetrics(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
+                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
+                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},

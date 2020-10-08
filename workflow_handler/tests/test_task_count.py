@@ -1,10 +1,11 @@
 import logging
 import os
+import copy
 
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from workflow_handler.models import Workflow
+from workflow_handler.models import Workflow, Task
 from user_handler.models import Organization
 
 from . import DATA_PATH
@@ -21,7 +22,6 @@ class TestTaskCount(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -36,23 +36,36 @@ class TestTaskCount(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -76,13 +89,27 @@ class TestTaskCount(APITestCase):
         self.assertEqual(workflow.n_tasks, self.total_rows)
 
     def test_assigning_task(self):
-        n_tasks = self.total_rows - 1
+        n_tasks = self.total_rows
         for i in range(self.total_rows):
-            _ = self.client.get(
+            response = self.client.get(
                 "/v1/orgs/{}/workflows/{}/tasks/next".format(
                     self.org_id, self.workflow_id
                 )
             )
+            workflow = Workflow.objects.get(pk=self.workflow_id)
+            self.assertEqual(workflow.n_tasks, n_tasks)
+            for idata in response.data["data"]:
+                if idata["id"] == "foo":
+                    idata[idata["type"]]["value"] = "bajs"
+            data = {"data": response.data["data"]}
+            _ = self.client.patch(
+                "/v1/orgs/{}/workflows/{}/tasks/{}".format(
+                    self.org_id, self.workflow_id, response.data["id"]
+                ),
+                data=data,
+                format="json",
+            )
+            n_tasks -= 1
             workflow = Workflow.objects.get(pk=self.workflow_id)
             self.assertEqual(workflow.n_tasks, n_tasks)
 
@@ -90,10 +117,10 @@ class TestTaskCount(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         n_tasks = self.total_rows
         task_data = {
-            "inputs": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"},
+            "data": {"Alpha": "data1", "Beta": "data2", "Gamma": "data3"},
         }
         for i in range(5):
-            _ = self.client.post(
+            response = self.client.post(
                 "/orgs/{}/workflows/{}/tasks/create".format(
                     self.org_id, self.workflow_id
                 ),
@@ -104,17 +131,58 @@ class TestTaskCount(APITestCase):
             workflow = Workflow.objects.get(pk=self.workflow_id)
             self.assertEqual(workflow.n_tasks, n_tasks)
 
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/{}/tasks/{}".format(
+                self.org_id, self.workflow_id, response.data["id"]
+            )
+        )
+
+        workflow = Workflow.objects.get(pk=self.workflow_id)
+        self.assertEqual(workflow.n_tasks, n_tasks)
+        data = copy.deepcopy(response.data["data"])
+        for idata in data:
+            if idata["id"] == "foo":
+                idata["single_selection"]["value"] = "bar2"
+        response_data = {"data": data}
+        _ = self.client.patch(
+            "/v1/orgs/{}/workflows/{}/tasks/{}".format(
+                self.org_id, self.workflow_id, response.data["id"]
+            ),
+            data=response_data,
+            format="json",
+        )
+        n_tasks -= 1
+        workflow = Workflow.objects.get(pk=self.workflow_id)
+        self.assertEqual(workflow.n_tasks, n_tasks)
+
     def test_unassigning_task(self):
-        n_tasks = self.total_rows - 1
+        n_tasks = self.total_rows
         response = self.client.get(
             "/v1/orgs/{}/workflows/{}/tasks/next".format(self.org_id, self.workflow_id)
         )
         workflow = Workflow.objects.get(pk=self.workflow_id)
         self.assertEqual(workflow.n_tasks, n_tasks)
-        _ = self.client.get(
-            "/v1/orgs/{}/workflows/{}/tasks/{}/unassign".format(
-                self.org_id, self.workflow_id, response.data["id"]
-            )
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/{}/tasks/{}/assign".format(
+                self.org_id, self.workflow_id, response.data["id"],
+            ),
+            data={"assigned_to": None},
+            format="json",
         )
         workflow = Workflow.objects.get(pk=self.workflow_id)
-        self.assertEqual(workflow.n_tasks, n_tasks + 1)
+        self.assertEqual(workflow.n_tasks, n_tasks)
+        task = Task.objects.get(pk=response.data["id"])
+        self.assertEqual(task.status, "open")
+        self.assertEqual(task.assigned_at, None)
+
+    def test_active_users(self):
+        n_tasks = self.total_rows
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/{}/tasks/next".format(self.org_id, self.workflow_id)
+        )
+
+        workflow = Workflow.objects.get(pk=self.workflow_id)
+        self.assertEqual(workflow.n_tasks, n_tasks)
+        response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id))
+        self.assertEqual(response.data[0]["active_users"], ["foo"])

@@ -2,7 +2,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import Workflow
-from user_handler.models import Organization
+from user_handler.models import Organization, User, Notification
 
 
 class TestCRUDWorkflow(APITestCase):
@@ -11,7 +11,6 @@ class TestCRUDWorkflow(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -20,14 +19,15 @@ class TestCRUDWorkflow(APITestCase):
         )
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         self.access_token = response.data["access"]
-        registration_data = {
-            "email": "worker@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "is_admin": False,
-            "name": "worker",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        # perhaps need an internal endpoint to make user as a worker of an org
+        org = Organization.objects.get(pk=self.org_id)
+        notification = Notification()
+        notification.save()
+        user = User(name="worker", email="worker@bar.com", notifications=notification)
+        user.set_password("foowordbar")
+        user.save()
+        org.user.add(user)
         response = self.client.post(
             "/v1/users/token", {"email": "worker@bar.com", "password": "foowordbar"}
         )
@@ -39,14 +39,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -63,14 +68,20 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "workerwf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text", "layout": {}}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "layout": {},
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -86,14 +97,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -115,14 +131,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -145,14 +166,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -185,14 +211,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -208,14 +239,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data2 = {
             "name": "foowf2",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -267,14 +303,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data1 = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -286,14 +327,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data2 = {
             "name": "foowf2",
             "description": "greater wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -312,6 +358,7 @@ class TestCRUDWorkflow(APITestCase):
         self.assertTrue(result_1.pop("created_at"))
         self.assertTrue(result_2.pop("created_at"))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        [idata.pop("active_users") for idata in response.data]
         try:
             self.assertEqual(workflow_data2, response.data[0], response.data)
             self.assertEqual(workflow_data1, response.data[1], response.data)
@@ -324,14 +371,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data1 = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -343,14 +395,19 @@ class TestCRUDWorkflow(APITestCase):
         workflow_data2 = {
             "name": "foowf2",
             "description": "greater wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -380,5 +437,6 @@ class TestCRUDWorkflow(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
         workflow_data1["n_tasks"] = 0
+        result_1.pop("active_users")
         self.assertEqual(workflow_data1, result_1, response.data)
         self.assertNotEqual(Workflow.objects.get(pk=workflow.pk).name, workflow.name)

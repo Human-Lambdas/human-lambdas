@@ -6,8 +6,13 @@ from workflow_handler.views import (
     FileUploadView,
     ListTaskView,
     RUDTaskView,
-    UnassignTaskView,
+    AssignTaskView,
     NextTaskView,
+    ListNonCompleteTaskView,
+    RUWebhookView,
+    SaveTaskView,
+    CreateTaskFormView,
+    RefreshTaskView,
 )
 from workflow_handler.audits import (
     GetCompletedTasksCSVView,
@@ -15,6 +20,7 @@ from workflow_handler.audits import (
     ListSourcesView,
     AuditsGetTask,
 )
+from workflow_handler.task_activity import ActivityView, RDActivityView
 from external.views import GetExternalCompletedTaskView, CreateTaskView
 
 
@@ -25,14 +31,40 @@ urlpatterns = [
     path("/<int:workflow_id>/upload", FileUploadView.as_view(), name="upload"),
     path("/<int:workflow_id>/tasks", ListTaskView.as_view(), name="list-tasks"),
     path(
+        "/<int:workflow_id>/tasks/pending",
+        ListNonCompleteTaskView.as_view(),
+        name="pending-tasks",
+    ),
+    path(
         "/<int:workflow_id>/tasks/<int:task_id>",
         RUDTaskView.as_view(),
         name="update-task",
     ),
     path(
-        "/<int:workflow_id>/tasks/<int:task_id>/unassign",
-        UnassignTaskView.as_view(),
+        "/<int:workflow_id>/tasks/<int:task_id>/refresh",
+        RefreshTaskView.as_view(),
+        name="get-refresh-task",
+    ),
+    path(
+        "/<int:workflow_id>/tasks/<int:task_id>/save",
+        SaveTaskView.as_view(),
+        name="save-task",
+    ),
+    path("/<int:workflow_id>/webhook", RUWebhookView.as_view(), name="webhook"),
+    path(
+        "/<int:workflow_id>/tasks/<int:task_id>/assign",
+        AssignTaskView.as_view(),
         name="unassign-task",
+    ),
+    path(
+        "/<int:workflow_id>/tasks/<int:task_id>/activity",
+        ActivityView.as_view(),
+        name="task-activity",
+    ),
+    path(
+        "/<int:workflow_id>/tasks/<int:task_id>/activity/<int:pk>",
+        RDActivityView.as_view(),
+        name="task-activity-rd",
     ),
     path("/<int:workflow_id>/tasks/next", NextTaskView.as_view(), name="next-task"),
     path(
@@ -55,5 +87,10 @@ urlpatterns = [
     ),
     path(
         "/<int:workflow_id>/tasks/create", CreateTaskView.as_view(), name="create-task",
+    ),
+    path(
+        "/<int:workflow_id>/tasks/form",
+        CreateTaskFormView.as_view(),
+        name="create-task-form",
     ),
 ]
