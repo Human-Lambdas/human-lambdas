@@ -1,7 +1,7 @@
 django==2.2.13
 psycopg2==2.8.6
 djangorestframework==3.11.1
-djangorestframework-simplejwt==4.3.0
+djangorestframework-simplejwt==4.4.0
 django-cors-headers==3.4.0
 drf-chunked-upload==0.4.2
 sentry_sdk==0.17.8
