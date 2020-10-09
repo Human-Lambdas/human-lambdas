@@ -5,8 +5,8 @@ def process_output_value(output):
             ioutput["value"] if isinstance(ioutput, dict) else ioutput
             for ioutput in output_value
         ]
-    if not output_value:
-        data = output.get("data", [])
+    if not output_value and "data" in output:
+        data = output.get("data")
         output_value = {idata["id"]: idata[idata["type"]]["value"] for idata in data}
     return output_value
 
