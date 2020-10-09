@@ -115,7 +115,7 @@ class TestTaskList(APITestCase):
         for itask in response.data["tasks"]:
             self.assertEqual(itask["status"], "completed", itask)
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
-        self.assertFalse("layout" in response.data["tasks"][0]["inputs"])
+        self.assertFalse("layout" in response.data["tasks"][0]["data"])
         self.assertEqual(type(response.data["tasks"][0]["data"]), dict)
 
     def test_existing_workflow(self):

@@ -101,6 +101,8 @@ class CreateTaskView(CreateAPIView):
                     task_data[task_data["type"]]["value"] = get_data_value(
                         self.request.data["data"], task_data
                     )
+                else:
+                    task_data[task_data["type"]]["value"] = None
             except KeyError:
                 raise serializers.ValidationError(
                     "Cannot find data with data id: {}".format(w_data["id"])
