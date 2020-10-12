@@ -328,6 +328,12 @@ class RUDTaskView(RetrieveUpdateAPIView):
             obj.status = "in_progress"
             obj.assigned_at = timezone.now()
             obj.save()
+            TaskActivity(
+                task=obj,
+                created_by=request.user,
+                action="assigned",
+                assignee=request.user,
+            ).save()
         task = self.serializer_class(obj).data
         task["status_code"] = 200
         return Response(task, status=200)
