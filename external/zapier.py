@@ -34,7 +34,7 @@ SAMPLE_DATA = {
     "audio": "link/to/audio",
     "video": "link/to/video",
     "single-selction": "selection",
-    "multiple-selection": "[selection1, selection2]",
+    "multiple_selection": "[selection1, selection2]",
     "binary": False,
 }
 
@@ -61,11 +61,11 @@ class GetZapierTaskInputs(APIView):
             return Response({}, status=200)
         obj = get_object_or_404(self.get_queryset())
         children = []
-        for w_input in obj.inputs:
+        for w_input in obj.data:
             children.append({"key": w_input["id"]})
         result = {
-            "key": "inputs",
-            "label": "Inputs",
+            "key": "data",
+            "label": "Data",
             "children": children,
             "required": True,
         }
@@ -134,6 +134,11 @@ class ZapierCreateTask(CreateTaskView):
         )
         return Task.objects.filter(workflows=workflow)
 
+    def perform_create(self, serializer):
+        formatted_data, workflow = self.preprocess_data()
+        serializer.save(data=formatted_data, source_name="zapier")
+        self.create_success(workflow)
+
 
 class HookSerializer(serializers.ModelSerializer):
     def validate_event(self, event):
@@ -157,7 +162,6 @@ class ZapierHook(CreateAPIView):
     serializer_class = HookSerializer
 
     def create(self, request, *args, **kwargs):
-        # workflow = Workflow.objects.filter(pk=request.data["workflow_id"]).first()
         data = {
             "workflow": request.data["workflow_id"],
             "user": request.user.pk,
@@ -211,25 +215,15 @@ class GetZapierTaskSampleData(APIView):
     def get_dict_or_sample(self, queryset):
         if queryset.exists():
             task = queryset.first()
-            perform_dict = {t_input["id"]: t_input["value"] for t_input in task.inputs}
-            perform_dict.update(
-                {
-                    t_output["id"]: t_output[t_output["type"]]["value"]
-                    for t_output in task.outputs
-                }
-            )
+            perform_dict = {
+                t_data["id"]: t_data[t_data["type"]]["value"] for t_data in task.data
+            }
+            # )
         else:
             workflow = self.get_workflow()
             perform_dict = {
-                w_input["id"]: SAMPLE_DATA[w_input["type"]]
-                for w_input in workflow.inputs
+                w_data["id"]: SAMPLE_DATA[w_data["type"]] for w_data in workflow.data
             }
-            perform_dict.update(
-                {
-                    w_output["id"]: SAMPLE_DATA[w_output["type"]]
-                    for w_output in workflow.outputs
-                }
-            )
         return perform_dict
 
     def get(self, request, *args, **kwargs):

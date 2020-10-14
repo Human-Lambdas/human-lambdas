@@ -11,7 +11,6 @@ class TestNotifications(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         response = self.client.post("/v1/users/register", registration_data)
@@ -25,14 +24,19 @@ class TestNotifications(APITestCase):
         workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -59,7 +63,9 @@ class TestNotifications(APITestCase):
         response = self.client.patch(
             "/v1/users/notifications",
             data={
-                "workflow_notifications": [{"id": self.workflow_id, "enabled": False}]
+                "workflow_notifications": [
+                    {"workflow_id": self.workflow_id, "enabled": False}
+                ]
             },
             format="json",
         )

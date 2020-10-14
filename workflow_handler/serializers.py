@@ -6,23 +6,20 @@ from django.utils import timezone
 from rest_framework import serializers, exceptions
 from user_handler.models import Organization
 from schema import SchemaError
-from django.db.models import Q
 from hl_rest_api.utils import is_valid_url
+from django.db import transaction
+from django.db.models import Q, F
 
-from .models import Workflow, Task, Source, WorkflowNotification, WebHook
-from .schemas import (
-    WORKFLOW_INPUT_SCHEMA,
-    TASK_INPUT_SCHEMA,
-    OUTPUT_SCHEMA,
-    UPDATE_OUTPUT_SCHEMA,
-)
+from .schemas import DATA_SCHEMA
+from .models import Workflow, Task, Source, WorkflowNotification, WebHook, TaskActivity
+
 
 logger = logging.getLogger(__file__)
 
 
 def validate_output_structure(validated_data_items):
     for validated_data in validated_data_items:
-        if validated_data["type"] in ["single-selection", "multiple-selection"]:
+        if validated_data["type"] in ["single_selection", "multiple_selection"]:
             type_data = validated_data.get(validated_data["type"])
             if type_data is None:
                 raise serializers.ValidationError(
@@ -35,8 +32,34 @@ def validate_output_structure(validated_data_items):
     return validated_data_items
 
 
+class HookSerializer(serializers.ModelSerializer):
+    def validate_event(self, event):
+        if event not in settings.HOOK_EVENTS:
+            err_msg = "Unexpected event {}".format(event)
+            raise exceptions.ValidationError(detail=err_msg)
+        return event
+
+    class Meta:
+        model = WebHook
+        fields = "__all__"
+        read_only_fields = ("user", "event", "workflow", "id")
+
+    def create(self, validated_data):
+        validated_data["event"] = "task.completed"
+        validated_data["user"] = self.context["request"].user
+        validated_data["workflow"] = Workflow.objects.get(
+            pk=self.context["view"].kwargs["workflow_id"]
+        )
+        webhook = WebHook(**validated_data)
+        webhook.save()
+        return webhook
+
+
 class WorkflowSerializer(serializers.ModelSerializer):
-    webhook = serializers.DictField(allow_null=True, required=False, write_only=True)
+    webhook = HookSerializer(required=False, allow_null=True, write_only=True)
+    active_users = serializers.SerializerMethodField(
+        "get_active_users", allow_null=True
+    )
 
     class Meta:
         model = Workflow
@@ -44,27 +67,36 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
-            "inputs",
-            "outputs",
             "disabled",
             "n_tasks",
             "created_at",
             "webhook",
+            "active_users",
+            "data",
         ]
         extra_kwargs = {
             "disabled": {"write_only": True},
             "n_tasks": {"read_only": True},
             "id": {"read_only": True},
             "created_at": {"read_only": True},
+            "active_users": {"read_only": True},
             "webhook": {"write_only": True},
         }
+
+    def get_active_users(self, instance):
+        return list(
+            instance.task_set.filter(
+                Q(assigned_to__isnull=False), ~Q(status="completed")
+            )
+            .distinct()
+            .values_list("assigned_to__name", flat=True)
+        )
 
     def create(self, validated_data):
         user = self.context["request"].user
         wf_name = validated_data["name"]
-        description = validated_data["description"]
-        inputs = validated_data["inputs"]
-        outputs = validated_data["outputs"]
+        description = validated_data.get("description", "")
+        data = validated_data["data"]
         organization_obj = Organization.objects.filter(user=user)
         if organization_obj.exists() and organization_obj.count() == 1:
             organization = organization_obj.first()
@@ -75,8 +107,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             description=description,
             organization=organization,
             created_by=user,
-            inputs=inputs,
-            outputs=outputs,
+            data=data,
         )
         workflow.save()
         webhook_data = validated_data.get("webhook")
@@ -103,12 +134,16 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 )
             instance.name = workflow_name
         instance.description = validated_data.get("description", instance.description)
-        instance.inputs = validated_data.get("inputs", instance.inputs)
-        instance.outputs = validated_data.get("outputs", instance.outputs)
+        instance.data = validated_data.get("data", instance.data)
         disabled = validated_data.get("disabled")
         if disabled:
             instance.disabled = disabled
             instance.name = f"{instance.name}-{uuid.uuid4()}"
+            for wnotification in WorkflowNotification.objects.filter(
+                workflow=instance
+            ).all():
+                wnotification.enabled = False
+                wnotification.save()
         instance.save()
         webhook_data = validated_data.get("webhook")
         if webhook_data or self.context.get("remove_webhook"):
@@ -127,15 +162,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 WebHook.objects.create(**webhook_data)
         return super(WorkflowSerializer, self).update(instance, validated_data)
 
-    def validate_inputs(self, data):
+    def validate_data(self, data):
         try:
-            return WORKFLOW_INPUT_SCHEMA.validate(data)
-        except SchemaError as exception_text:
-            raise serializers.ValidationError(exception_text)
-
-    def validate_outputs(self, data):
-        try:
-            return validate_output_structure(OUTPUT_SCHEMA.validate(data))
+            return validate_output_structure(DATA_SCHEMA.validate(data))
         except SchemaError as exception_text:
             raise serializers.ValidationError(exception_text)
 
@@ -146,7 +175,11 @@ class WorkflowSerializer(serializers.ModelSerializer):
         return data
 
 
-class BaseTaskSerializer(serializers.ModelSerializer):
+class TaskSerializer(serializers.ModelSerializer):
+    workflow = serializers.SerializerMethodField()
+    workflow_id = serializers.SerializerMethodField()
+    n_comments = serializers.SerializerMethodField()
+
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
             err_msg = "Unexpected event {}".format(event)
@@ -159,79 +192,84 @@ class BaseTaskSerializer(serializers.ModelSerializer):
             "id",
             "status",
             "created_at",
-            "inputs",
             "assigned_to",
             "completed_at",
+            "data",
+            "workflow",
+            "workflow_id",
+            "n_comments",
         ]
 
     def create(self, validated_data):
-        inputs = validated_data["inputs"]
-        outputs = validated_data["outputs"]
+        source_name = validated_data.get("source_name")
+        if not source_name:
+            raise serializers.ValidationError("No source name given!")
+        data = validated_data["data"]
         workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
         source = Source(
-            name="API", created_by=self.context["request"].user, workflow=workflow
+            name=source_name,
+            created_by=self.context["request"].user,
+            workflow=workflow,
         )
         source.save()
-        task = Task(inputs=inputs, outputs=outputs, workflow=workflow, source=source)
+        task = Task(data=data, workflow=workflow, source=source)
         task.save()
+        TaskActivity(
+            task=task,
+            source=source_name,
+            created_by=self.context["request"].user,
+            action="created",
+        ).save()
+        with transaction.atomic():
+            workflow.n_tasks = F("n_tasks") + 1
+            workflow.save()
         return task
 
     def update(self, instance, validated_data):
-        inputs = validated_data.get("inputs")
-        outputs = validated_data.get("outputs")
-        if not outputs:
-            raise serializers.ValidationError("You can only update outputs of tasks")
         user = self.context["request"].user
-        instance.status = "completed"
-        instance.completed_at = timezone.now()
-        instance.assigned_to = user
-        instance.inputs = inputs
-        instance.outputs = outputs
-        instance.save()
-        instance.task_completed(user)
+        if instance.assigned_to == user:
+            instance.data = validated_data.get("data", instance.data)
+            if validated_data["submit_task"]:
+                instance.status = "completed"
+                instance.completed_at = timezone.now()
+                instance.save()
+                instance.task_completed(user)
+                TaskActivity(task=instance, action="completed", created_by=user).save()
+                workflow = instance.workflow
+                with transaction.atomic():
+                    workflow.n_tasks = F("n_tasks") - 1
+                    workflow.save()
+            else:
+                instance.save()
+                TaskActivity(task=instance, action="saved", created_by=user).save()
+        else:
+            raise serializers.ValidationError("User not assigned to task")
         return instance
 
-    def validate_inputs(self, data):
+    def validate_data(self, data):
         try:
-            return TASK_INPUT_SCHEMA.validate(data)
+            return DATA_SCHEMA.validate(data)
         except SchemaError as exception_text:
             raise serializers.ValidationError(exception_text)
 
+    def get_workflow(self, obj):
+        return obj.workflow.name
 
-class TaskSerializer(BaseTaskSerializer):
-    class Meta:
-        model = Task
-        fields = [
-            "id",
-            "status",
-            "created_at",
-            "inputs",
-            "outputs",
-            "assigned_to",
-            "completed_at",
-        ]
+    def get_workflow_id(self, obj):
+        return obj.workflow.pk
 
-    def validate_outputs(self, data):
-        try:
-            if self.partial:
-                validated_data = UPDATE_OUTPUT_SCHEMA.validate(data)
-                if not any(
-                    [
-                        "value" in output_data.get(output_data["type"], {})
-                        for output_data in validated_data
-                    ]
-                ):
-                    raise SchemaError("No values set!")
-                return validated_data
-            else:
-                return validate_output_structure(OUTPUT_SCHEMA.validate(data))
-        except SchemaError as exception_text:
-            raise serializers.ValidationError(exception_text)
+    def get_n_comments(self, obj):
+        return obj.taskactivity_set.filter(action="comment").count()
 
 
 class CompletedTaskSerializer(TaskSerializer):
     def to_representation(self, instance):
         return instance.get_formatted_task()
+
+
+class PendingTaskSerializer(TaskSerializer):
+    def to_representation(self, instance):
+        return instance.get_updated_status()
 
 
 class SourceSerializer(serializers.ModelSerializer):

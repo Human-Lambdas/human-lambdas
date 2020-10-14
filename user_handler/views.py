@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.models import Token
 
-
+from .permissions import IsOrgAdmin
 from .models import User, Organization
 from .serializers import UserSerializer, APITokenUserSerializer
 
@@ -96,7 +96,7 @@ class RetrieveUpdateUserView(RetrieveUpdateAPIView):
 
 
 class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOrgAdmin)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
