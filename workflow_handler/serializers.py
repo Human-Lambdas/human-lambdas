@@ -85,7 +85,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
 
     def get_active_users(self, instance):
         return list(
-            instance.task_set.filter(assigned_to__isnull=False)
+            instance.task_set.filter(
+                Q(assigned_to__isnull=False), ~Q(status="completed")
+            )
             .distinct()
             .values_list("assigned_to__name", flat=True)
         )
