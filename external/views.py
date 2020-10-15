@@ -14,7 +14,7 @@ from workflow_handler.audits import GetCompletedTaskView
 from user_handler.notifications import send_notification
 from user_handler.permissions import IsOrgAdmin
 
-from .serializers import CompletedTaskSerializer, CreateTaskSerializer
+from .serializers import ExternalCompletedTaskSerializer, CreateTaskSerializer
 
 
 class GetExternalCompletedTaskView(GetCompletedTaskView):
@@ -24,7 +24,7 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
 
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     authentication_classes = (TokenAuthentication,)
-    serializer_class = CompletedTaskSerializer
+    serializer_class = ExternalCompletedTaskSerializer
 
     def get_queryset(self, *args, **kwargs):
         user = self.request.user

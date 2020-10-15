@@ -140,7 +140,7 @@ class ZapierCreateTask(CreateTaskView):
         self.create_success(workflow)
 
 
-class HookSerializer(serializers.ModelSerializer):
+class ZapierHookSerializer(serializers.ModelSerializer):
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
             err_msg = "Unexpected event {}".format(event)
@@ -159,7 +159,7 @@ class ZapierHook(CreateAPIView):
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = HookSerializer
+    serializer_class = ZapierHookSerializer
 
     def create(self, request, *args, **kwargs):
         data = {
