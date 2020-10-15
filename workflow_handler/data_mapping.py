@@ -65,6 +65,16 @@ def input2data(input_data, is_task=True):
 
 def output2data(output_data, is_task=False):
     data = copy.deepcopy(output_data)
+    data["layout"] = {
+        "h": 12,
+        "i": data["name"],
+        "w": 12,
+        "x": 12,
+        "y": 12,
+        "maxW": 2048,
+        "minH": 1,
+        "minW": 2,
+    }
     if output_data["type"] not in output_data:
         data[output_data["type"]] = {}
     data[output_data["type"]]["read_only"] = False
@@ -110,6 +120,17 @@ def underscore_conversion(data):
 def data_underscore(data):
     new_data = []
     for idata in data:
+        if "layout" not in idata:
+            idata["layout"] = {
+                "h": 12,
+                "i": idata["name"],
+                "w": 12,
+                "x": 12,
+                "y": 12,
+                "maxW": 2048,
+                "minH": 1,
+                "minW": 2,
+            }
         new_data.append(underscore_conversion(idata))
     return new_data
 
