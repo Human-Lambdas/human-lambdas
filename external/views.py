@@ -63,7 +63,7 @@ class CreateTaskView(CreateAPIView):
         organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
             Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
+            & Q(organization__pk=self.kwargs["org_id"] & Q(disabled=False))
         )
         return Task.objects.filter(
             Q(workflow__in=workflows) & Q(workflow__id=self.kwargs["workflow_id"])

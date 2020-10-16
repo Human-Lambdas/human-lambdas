@@ -213,6 +213,7 @@ class FileUploadView(APIView):
         workflows = Workflow.objects.filter(
             Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
+            & Q(disabled=False)
         )
         return workflows.filter(pk=self.kwargs["workflow_id"])
 
