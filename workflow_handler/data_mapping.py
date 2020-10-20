@@ -89,8 +89,8 @@ def new_row():
 
 def is_collision(grid, block):
     x, y, w, h = (
-        block["layout"]["x"],
-        block["layout"]["y"],
+        round(block["layout"]["x"]),
+        round(block["layout"]["y"]),
         ceil(block["layout"]["w"]),
         ceil(block["layout"]["h"]),
     )
@@ -128,8 +128,8 @@ def fix_collision(grid, workflow_data, i):
 
 def fill_grid(grid, block):
     x, y, w, h = (
-        block["layout"]["x"],
-        block["layout"]["y"],
+        round(block["layout"]["x"]),
+        round(block["layout"]["y"]),
         ceil(block["layout"]["w"]),
         ceil(block["layout"]["h"]),
     )
