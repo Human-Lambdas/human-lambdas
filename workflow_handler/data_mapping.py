@@ -1,4 +1,5 @@
 import copy
+import math
 
 from schema import SchemaError, Schema, And, Or, Optional
 
@@ -88,10 +89,10 @@ def new_row():
 
 def is_collision(grid, block):
     x, y, w, h = (
-        block["layout"]["x"],
-        block["layout"]["y"],
-        block["layout"]["w"],
-        block["layout"]["h"],
+        math.ceil(block["layout"]["x"]),
+        math.ceil(block["layout"]["y"]),
+        math.ceil(block["layout"]["w"]),
+        math.ceil(block["layout"]["h"]),
     )
     if x + w > len(grid[0]):
         return True
@@ -127,10 +128,10 @@ def fix_collision(grid, workflow_data, i):
 
 def fill_grid(grid, block):
     x, y, w, h = (
-        block["layout"]["x"],
-        block["layout"]["y"],
-        block["layout"]["w"],
-        block["layout"]["h"],
+        math.ceil(block["layout"]["x"]),
+        math.ceil(block["layout"]["y"]),
+        math.ceil(block["layout"]["w"]),
+        math.ceil(block["layout"]["h"]),
     )
     for i in range(h):
         for j in range(w):
@@ -143,8 +144,6 @@ def fix_collisions(workflow_data):
         if is_collision(grid, workflow_data[i]):
             fix_collision(grid, workflow_data, i)
         fill_grid(grid, workflow_data[i])
-    for i in range(len(grid)):
-        print(grid[i])
 
 
 def update_block_props(block_type, layout):
