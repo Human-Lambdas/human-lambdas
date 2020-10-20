@@ -60,6 +60,17 @@ def input2data(input_data, is_task=True):
         del data["subtype"]
         data[data["type"]]["subtype"] = input_data["subtype"]
     udata = underscore_conversion(data)
+    if "layout" not in udata:
+        udata["layout"] = {
+            "h": 12,
+            "i": udata["name"],
+            "w": 12,
+            "x": 1,
+            "y": 1,
+            "maxW": 2048,
+            "minH": 1,
+            "minW": 2,
+        }
     return udata
 
 
