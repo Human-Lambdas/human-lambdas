@@ -17,6 +17,13 @@ from .models import Workflow, Task, Source, WorkflowNotification, WebHook, TaskA
 logger = logging.getLogger(__file__)
 
 
+def clean_form_sequence(data):
+    for idata in data:
+        if idata["type"] == "form_sequence":
+            for form_data in idata["data"]:
+                form_data["value"] = None
+
+
 def validate_output_structure(validated_data_items):
     for validated_data in validated_data_items:
         if validated_data["type"] in ["single_selection", "multiple_selection"]:
@@ -97,6 +104,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
         wf_name = validated_data["name"]
         description = validated_data.get("description", "")
         data = validated_data["data"]
+        clean_form_sequence(data)
         organization_obj = Organization.objects.filter(user=user)
         if organization_obj.exists() and organization_obj.count() == 1:
             organization = organization_obj.first()
@@ -134,7 +142,10 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 )
             instance.name = workflow_name
         instance.description = validated_data.get("description", instance.description)
-        instance.data = validated_data.get("data", instance.data)
+        data = validated_data.get("data")
+        if data:
+            clean_form_sequence(data)
+            instance.data = data
         disabled = validated_data.get("disabled")
         if disabled:
             instance.disabled = disabled
