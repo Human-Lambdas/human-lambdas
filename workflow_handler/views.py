@@ -395,13 +395,13 @@ class NextTaskView(APIView):
 
         # 2 get first pending
         with transaction.atomic():
-            obj = queryset.select_for_update().filter(status="open").first()
+            obj = (
+                queryset.select_for_update()
+                .filter(Q(status="pending") | Q(status="new"))
+                .first()  # TODO: Remove pending in the future
+            )
             if not obj:
-                obj = (
-                    queryset.select_for_update()
-                    .filter(Q(status="pending") | Q(status="new"))
-                    .first()
-                )
+                obj = queryset.select_for_update().filter(status="open").first()
             if not obj:
                 return Response({"status_code": 204}, status=204)
             obj.status = "in_progress"

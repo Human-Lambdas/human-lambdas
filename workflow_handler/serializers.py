@@ -20,8 +20,8 @@ logger = logging.getLogger(__file__)
 def clean_form_sequence(data):
     for idata in data:
         if idata["type"] == "form_sequence":
-            for form_data in idata["data"]:
-                form_data["value"] = None
+            for form_data in idata["form_sequence"]["data"]:
+                form_data[form_data["type"]]["value"] = None
 
 
 def validate_output_structure(validated_data_items):
