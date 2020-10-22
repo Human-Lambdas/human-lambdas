@@ -37,6 +37,19 @@ class TestOrganizations(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], self.organization_name)
 
+    def test_update_organization(self):
+        response = self.client.post(
+            "/v1/users/token",
+            {"email": "foo@bar.com", "password": self.preset_user_password},
+        )
+        access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
+        response = self.client.patch(
+            "/v1/orgs/%s" % self.org_id, {"name": "new name"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["name"], "new name")
+
     def test_list_organization(self):
         response = self.client.post(
             "/v1/users/token",

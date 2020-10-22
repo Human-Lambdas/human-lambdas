@@ -11,7 +11,6 @@ class TestListWorkflow(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -25,7 +24,6 @@ class TestListWorkflow(APITestCase):
             "email": "bar@bar.com",
             "password": "foowordbar",
             "organization": "barInc",
-            "is_admin": True,
             "name": "bar",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -40,14 +38,19 @@ class TestListWorkflow(APITestCase):
         workflow_data1 = {
             "name": self.wf_name1,
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -61,14 +64,19 @@ class TestListWorkflow(APITestCase):
         workflow_data1 = {
             "name": self.wf_name2,
             "description": "superb wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"]},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"]},
+                },
             ],
         }
         response = self.client.post(
@@ -96,6 +104,7 @@ class TestListWorkflow(APITestCase):
         result_1 = response.data[0]
         self.assertTrue(result_1.pop("id"))
         self.assertEqual(result_1.pop("name"), self.wf_name1)
+        self.assertEqual(result_1["active_users"], [])
 
     def test_list_workflow2(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token2)
@@ -113,7 +122,6 @@ class TestListNoWorkflow(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)

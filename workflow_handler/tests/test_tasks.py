@@ -1,12 +1,13 @@
 import logging
 import os
+import copy
 
 from django.utils import timezone
 from rest_framework.test import APITestCase
 from rest_framework import status
 
 from workflow_handler.models import Workflow, Task
-from user_handler.models import Organization, User
+from user_handler.models import Organization, User, Notification
 
 
 logger = logging.getLogger(__file__)
@@ -28,16 +29,27 @@ class TestTasks(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
-        _ = self.client.post("/v1/users/register", registration_data)
-
-        registration_data["email"] = "foojr@bar.com"
-        _ = self.client.post("/v1/users/register", registration_data)
-        registration_data["email"] = "foo@bar.com"
-
+        response = self.client.post("/v1/users/register", registration_data)
+        self.user_id = response.data["id"]
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
+
+        # create user and add in same org
+        org = Organization.objects.get(pk=self.org_id)
+        notification = Notification()
+        notification.save()
+        user = User(name="foo", email="foojr@bar.com", notifications=notification)
+        user.set_password("foowordbar")
+        user.save()
+        org.add_admin(user)
+
+        # registration_data["email"] =
+        # _ = self.client.post("/v1/users/register", registration_data)
+
+        # registration_data["email"] = "foo@bar.com"
+
+        # self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
@@ -47,23 +59,36 @@ class TestTasks(APITestCase):
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
+                    "type": "single_selection",
+                    "single_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         _ = self.client.post(
@@ -74,23 +99,36 @@ class TestTasks(APITestCase):
         second_workflow_data = {
             "name": "second workflow",
             "description": "great second wf",
-            "inputs": [
-                {"id": "Alpha", "name": "alpha", "type": "text"},
-                {"id": "Beta", "name": "beta", "type": "text"},
-                {"id": "Gamma", "name": "gamma", "type": "text"},
-            ],
-            "outputs": [
+            "data": [
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "bar",
                     "name": "bar",
-                    "type": "multiple-selection",
-                    "multiple-selection": {
+                    "type": "multiple_selection",
+                    "multiple_selection": {
                         "options": [
                             {"id": "foo2", "name": "foo2"},
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         _ = self.client.post(
@@ -136,56 +174,43 @@ class TestTasks(APITestCase):
                 )
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-            self.assertEqual("pending", response.data["status"])
-            self.assertTrue(len(response.data["inputs"]))
-
-    def test_retrieve_task_output(self):
-        workflow = Workflow.objects.get(id=self.workflow_id)
-        tasks = Task.objects.filter(workflow=workflow).all()
-        for task in tasks:
-            response = self.client.get(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
-                    self.org_id, self.workflow_id, task.id
-                )
-            )
-            self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-            self.assertEqual("pending", response.data["status"])
-            self.assertEqual(workflow.outputs, response.data["outputs"])
+            self.assertEqual("in_progress", response.data["status"])
+            self.assertTrue(len(response.data["data"]))
+            for itask in response.data["data"]:
+                if itask[itask["type"]].get("read_only"):
+                    self.assertTrue("value" in itask[itask["type"]])
 
     def test_complete_single_selection_task(self):
         workflow = Workflow.objects.get(id=self.workflow_id)
         tasks = Task.objects.filter(workflow=workflow).all()
         output_values = ["foo1", "bar1"]
-        expected_outputs = workflow.outputs
         for output_value, task in zip(output_values, tasks):
-            exp_output = next(item for item in expected_outputs if item["id"] == "foo")
-            exp_output[exp_output["type"]]["value"] = output_value
-            output_list = [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {
-                        "value": output_value,
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
-                }
-            ]
-            data = {"inputs": task.inputs, "outputs": output_list}
+            data = copy.deepcopy(task.data)
+
+            _ = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/assign".format(
+                    self.org_id, self.workflow_id, task.id
+                ),
+                data={"assigned_to": self.user_id},
+                format="json",
+            )
+
+            for idata in data:
+                if idata["id"] == "foo":
+                    idata["single_selection"]["value"] = output_value
+            data_payload = {"data": data, "assigned_to": self.user_id}
+
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task.id
                 ),
-                data=data,
+                data=data_payload,
                 format="json",
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("completed", response.data["status"])
-            self.assertEqual(expected_outputs, response.data["outputs"])
+            self.assertEqual(data, response.data["data"])
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
 
             # test retrieving the same task
@@ -195,59 +220,39 @@ class TestTasks(APITestCase):
                 )
             )
             self.assertEqual("completed", response.data["status"])
-            self.assertEqual(expected_outputs, response.data["outputs"])
-            task = Task.objects.get(id=task.id)
-            self.assertIn("value", task.outputs[0]["single-selection"])
+            self.assertEqual(data, response.data["data"])
 
     def test_complete_multiple_selection_task(self):
         workflow = Workflow.objects.get(id=self.second_workflow_id)
         tasks = Task.objects.filter(workflow=workflow).all()
         output_values = [["foo1"], ["foo1", "bar1"]]
-        expected_outputs = workflow.outputs
         for output_value, task in zip(output_values, tasks):
-            exp_output = next(item for item in expected_outputs if item["id"] == "bar")
-            exp_output[exp_output["type"]]["value"] = output_value
-            output_list = [
-                {
-                    "id": "bar",
-                    "name": "bar",
-                    "type": "multiple-selection",
-                    "multiple-selection": {
-                        "value": output_value,
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
-                }
-            ]
-            data = {"inputs": task.inputs, "outputs": output_list}
+            data = copy.deepcopy(task.data)
+
+            _ = self.client.post(
+                "/v1/orgs/{0}/workflows/{1}/tasks/{2}/assign".format(
+                    self.org_id, self.second_workflow_id, task.id
+                ),
+                data={"assigned_to": self.user_id},
+                format="json",
+            )
+
+            for idata in data:
+                if idata["id"] == "bar":
+                    idata["multiple_selection"]["value"] = output_value
+            data_reponse = {"data": data}  # , "assigned_to": self.user_id}
             response = self.client.patch(
                 "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
                     self.org_id, self.second_workflow_id, task.id
                 ),
-                data=data,
+                data=data_reponse,
                 format="json",
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.assertEqual("completed", response.data["status"])
-            self.assertEqual(expected_outputs, response.data["outputs"])
+            self.assertEqual(data, response.data["data"])
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
-
-    def test_update_task(self):
-        task = Task.objects.first()
-        data = {"status": "testing"}
-        response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
-                self.org_id, self.workflow_id, task.id
-            ),
-            data=data,
-            format="json",
-        )
-        self.assertEqual(
-            response.status_code, status.HTTP_400_BAD_REQUEST, response.content
-        )
 
     def test_next_task(self):
         response = self.client.get(
@@ -256,9 +261,9 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual("assigned", response.data["status"], response.content)
+        self.assertEqual("in_progress", response.data["status"], response.content)
         task = Task.objects.get(id=response.data["id"])
-        self.assertEqual(task.status, "assigned")
+        self.assertEqual(task.status, "in_progress")
 
     def test_next_task_repeatedly(self):
         response = self.client.get(
@@ -267,7 +272,7 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual("assigned", response.data["status"], response.content)
+        self.assertEqual("in_progress", response.data["status"], response.content)
 
         task_id = response.data["id"]
         response = self.client.get(
@@ -278,7 +283,7 @@ class TestTasks(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(response.data["id"], task_id)
 
-        # get next task by client 2 should be different because task_id assigned_at has not expired
+        # get next task by client 2 should be different
         self.setUserClient("foojr@bar.com")
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
@@ -287,31 +292,6 @@ class TestTasks(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertNotEqual(response.data["id"], task_id)
-
-        # unassign from client 2
-        task = Task.objects.get(pk=response.data["id"])
-        task.status = "pending"
-        task.save()
-
-        task = Task.objects.get(pk=task_id)
-        task.assigned_at = timezone.now() - timezone.timedelta(hours=24)
-        task.save()
-
-        # get next task by client 2 should be task_id because assigned_at has expired
-        response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
-                self.org_id, self.workflow_id
-            )
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual(response.data["id"], task_id)
-
-        task = Task.objects.get(pk=task_id)
-        user = User.objects.get(email="foo@bar.com")
-        self.assertEqual(task.status, "assigned")
-        self.assertNotEqual(task.assigned_to, user)
-        self.assertIsNotNone(task.assigned_at)
-        self.setUserClient("foo@bar.com")
 
     def test_next_task_different_workflow(self):
         response = self.client.get(
@@ -344,7 +324,7 @@ class TestTasks(APITestCase):
 
     def test_change_outputs_retrieve_task(self):
         workflow = Workflow.objects.get(id=self.workflow_id)
-        workflow.outputs[0]["name"] = "new_name"
+        workflow.data[0]["name"] = "new_name"
         workflow.save()
         tasks = Task.objects.filter(workflow=workflow).all()
         for task in tasks:
@@ -354,11 +334,11 @@ class TestTasks(APITestCase):
                 )
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-            self.assertEqual(response.data["outputs"][0]["name"], "new_name")
+            self.assertEqual(response.data["data"][0]["name"], "new_name")
 
-    def test_next_task_change_outputs(self):
+    def test_next_task_change_data(self):
         workflow = Workflow.objects.get(id=self.workflow_id)
-        workflow.outputs[0]["name"] = "new_name"
+        workflow.data[0]["name"] = "new_name"
         workflow.save()
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
@@ -366,16 +346,60 @@ class TestTasks(APITestCase):
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual(response.data["outputs"][0]["name"], "new_name")
+        self.assertEqual(response.data["data"][0]["name"], "new_name")
 
-    def test_next_task_change_inputs(self):
-        workflow = Workflow.objects.get(id=self.workflow_id)
-        workflow.inputs[0]["name"] = "new_name"
-        workflow.save()
+    def test_get_pending_tasks(self):
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
+                self.org_id, self.workflow_id,
+            )
+        )
+        self.assertEqual(response.data["count"], 3)
+        self.assertEqual(response.data["next"], None)
+        for idata in response.data["tasks"]:
+            self.assertEqual(idata["status"], "new")
+
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
                 self.org_id, self.workflow_id
             )
         )
+        task_id = response.data["id"]
+        task_data = response.data["data"]
+
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
+                self.org_id, self.workflow_id,
+            )
+        )
+        self.assertEqual(response.data["count"], 3)
+        self.assertEqual(
+            len(
+                [
+                    idata
+                    for idata in response.data["tasks"]
+                    if idata["status"] == "in_progress"
+                ]
+            ),
+            1,
+        )
+        for t_data in task_data:
+            if t_data["id"] == "foo":
+                t_data[t_data["type"]]["value"] = "foo2"
+        data = {"data": task_data}
+        response = self.client.patch(
+            "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                self.org_id, self.workflow_id, task_id
+            ),
+            data=data,
+            format="json",
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual(response.data["inputs"][0]["name"], "new_name")
+
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
+                self.org_id, self.workflow_id,
+            )
+        )
+        self.assertEqual(response.data["count"], 2)
+        self.assertEqual(response.data["tasks"][0]["n_comments"], 0)
