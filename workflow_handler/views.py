@@ -87,6 +87,7 @@ class CreateWorkflowView(CreateAPIView):
         return Workflow.objects.filter(
             Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
+            & Q(disabled=False)
         )
 
     def perform_create(self, serializer):
