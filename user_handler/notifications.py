@@ -79,7 +79,8 @@ def send_notification(workflow):
         template_data = {
             "workflow_name": workflow.name,
             "org_id": workflow.organization.pk,
-            "hl_url": settings.FRONT_END_BASE_URL + "workflows/" + str(workflow.pk),
+            "hl_url": settings.FRONT_END_BASE_URL,
+            "workflow_id": workflow.pk,
         }
         UserHandlerConfig.emailclient.send_email(
             to_email=emails,
