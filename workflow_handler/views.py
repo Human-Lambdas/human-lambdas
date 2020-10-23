@@ -87,6 +87,7 @@ class CreateWorkflowView(CreateAPIView):
         return Workflow.objects.filter(
             Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
+            & Q(disabled=False)
         )
 
     def perform_create(self, serializer):
@@ -372,7 +373,7 @@ class NextTaskView(APIView):
         )
         return Task.objects.filter(
             Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
-        ).order_by("-created_at")
+        ).order_by("created_at")
 
     def get(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
