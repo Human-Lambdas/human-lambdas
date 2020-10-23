@@ -7,6 +7,7 @@ from django.conf import settings
 
 from .apps import UserHandlerConfig
 from .models import Notification, User
+from hl_rest_api import analytics
 
 
 class NotificationSerializer(serializers.ModelSerializer):
@@ -23,6 +24,7 @@ class NotificationSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.enabled = validated_data.get("enabled", instance.enabled)
         workflow_notifications = validated_data.get("workflow_notifications", [])
+        any_enabled = False
         for workflow_notification in workflow_notifications:
             wfnotification_obj = instance.workflownotification_set.filter(
                 workflow__pk=workflow_notification["workflow_id"],
@@ -31,7 +33,13 @@ class NotificationSerializer(serializers.ModelSerializer):
             if wfnotification_obj:
                 wfnotification_obj.enabled = workflow_notification["enabled"]
                 wfnotification_obj.save()
+                any_enabled = True if workflow_notification["enabled"] else False
         instance.save()
+        analytics.track(
+            self.context["request"].user.pk,
+            "Notifications Update",
+            {"all_enabled": instance.enabled, "any_enabled": any_enabled},
+        )
         return instance
 
 
@@ -71,7 +79,7 @@ def send_notification(workflow):
         template_data = {
             "workflow_name": workflow.name,
             "org_id": workflow.organization.pk,
-            "hl_url": settings.FRONT_END_BASE_URL,
+            "hl_url": settings.FRONT_END_BASE_URL + "workflows/" + str(workflow.pk),
         }
         UserHandlerConfig.emailclient.send_email(
             to_email=emails,
