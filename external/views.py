@@ -35,6 +35,9 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
             & Q(organization__pk=self.kwargs["org_id"])
         )
         workflow = get_object_or_404(workflows, pk=self.kwargs["workflow_id"])
+        analytics.track(
+            user.pk, "Get Completed Tasks", {"workflow_id": self.kwargs["workflow_id"]}
+        )
         return (
             Task.objects.filter(Q(workflow=workflow) & Q(status="completed"))
             .filter(*args, **kwargs)
@@ -78,17 +81,6 @@ class CreateTaskView(CreateAPIView):
 
     def preprocess_data(self):
         workflow = get_object_or_404(Workflow, pk=self.kwargs["workflow_id"])
-        analytics.track(
-            self.request.user.pk,
-            "Task Create Attempt",
-            {
-                "user_id": self.request.user.pk,
-                "user_email": self.request.user.email,
-                "org_id": self.request.user.current_organization_id,
-                "workflow_id": workflow.id,
-                "source": "API",
-            },
-        )
         formatted_data = []
         for w_data in workflow.data:
             task_data = copy.deepcopy(w_data)
@@ -112,17 +104,6 @@ class CreateTaskView(CreateAPIView):
 
     def create_success(self, workflow):
         send_notification(workflow)
-        analytics.track(
-            self.request.user.pk,
-            "Task Create Success",
-            {
-                "user_id": self.request.user.pk,
-                "user_email": self.request.user.email,
-                "org_id": self.request.user.current_organization_id,
-                "workflow_id": workflow.id,
-                "source": "API",
-            },
-        )
 
     def perform_create(self, serializer):
         formatted_data, workflow = self.preprocess_data()
