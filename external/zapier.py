@@ -127,6 +127,8 @@ class ZapierAuthentication(APIView):
 
 
 class ZapierCreateTask(CreateTaskView):
+    permission_classes = (IsAuthenticated,)
+
     def get_queryset(self):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()

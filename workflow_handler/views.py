@@ -493,7 +493,7 @@ class AssignTaskView(APIView):
 
 
 class CreateTaskFormView(CreateAPIView):
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
 
     def get_queryset(self):
