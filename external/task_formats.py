@@ -1,18 +1,19 @@
-def process_output_value(output_value):
+def process_output_value(output):
+    output_value = output.get("value")
     if isinstance(output_value, list):
         return [
             ioutput["value"] if isinstance(ioutput, dict) else ioutput
             for ioutput in output_value
         ]
+    if not output_value and "data" in output:
+        data = output.get("data")
+        output_value = {idata["id"]: idata[idata["type"]]["value"] for idata in data}
     return output_value
 
 
 def process_external_completed_tasks(data):
-    data["inputs"] = {d_input["id"]: d_input["value"] for d_input in data["inputs"]}
-    data["outputs"] = {
-        d_output["id"]: process_output_value(
-            d_output.get(d_output["type"], {}).get("value")
-        )
-        for d_output in data["outputs"]
+    data["data"] = {
+        d_output["id"]: process_output_value(d_output.get(d_output["type"], {}))
+        for d_output in data["data"]
     }
     return data

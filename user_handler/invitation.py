@@ -8,6 +8,7 @@ from user_handler.models import User, Organization, Invitation, Notification
 from django.shortcuts import get_object_or_404
 from workflow_handler.models import WorkflowNotification
 from hl_rest_api.utils import is_invalid_email, generate_unique_token
+from hl_rest_api import analytics
 
 from .apps import UserHandlerConfig
 
@@ -40,7 +41,7 @@ class SendInviteView(APIView):
                 invalid_email_list.append(email)
                 continue
 
-            if Organization.objects.filter(user__email=email).exists():
+            if organization.user.filter(email=email).exists():
                 already_added_email_list.append(email)
                 continue
 
@@ -56,9 +57,14 @@ class SendInviteView(APIView):
 
             if not User.objects.filter(email=email).exists():
                 invite_link = "{0}invite/{1}".format(settings.FRONT_END_BASE_URL, token)
+                analytics.track(self.request.user.pk, "Invite user", {"new_user": True})
+                analytics.track(email, "Invited new user")
             else:
                 invite_link = "{0}invite/success/{1}".format(
                     settings.FRONT_END_BASE_URL, token
+                )
+                analytics.track(
+                    self.request.user.pk, "Invite user", {"new_user": False}
                 )
 
             template_data.append(
@@ -143,6 +149,7 @@ class InvitationView(APIView):
             invite.email,
             invite.organization.name,
         )
+        analytics.track(invite.email, "Invited new user visit")
         return Response(
             {
                 "status_code": 200,
@@ -194,6 +201,9 @@ class InvitationView(APIView):
                 },
                 "status": 201,
             }
+            analytics.track(user.email, "Invited new user signed up")
+            analytics.alias(user.pk, user.email)
+            analytics.track(user.pk, "User Signup", {"source": "invite"})
         else:
             response_data = {
                 "data": {
@@ -203,16 +213,40 @@ class InvitationView(APIView):
                 },
                 "status": 200,
             }
+            analytics.track(user.pk, "Existing user joined new org", {"new": False})
 
         for workflow in invitation_org.workflow_set.all():
             WorkflowNotification(workflow=workflow, notification=notification).save()
 
         if invite.admin:
             invitation_org.add_admin(user)
+            analytics.identify(
+                user.pk,
+                {
+                    "is_admin": True,
+                    "org_id": invitation_org.pk,
+                    "org_name": invitation_org.name,
+                    "name": user.name,
+                    "email": user.email,
+                    "user_id": user.pk,
+                },
+            )
         else:
             invitation_org.user.add(user)
+            analytics.identify(
+                user.pk,
+                {
+                    "is_admin": False,
+                    "org_id": invitation_org.pk,
+                    "org_name": invitation_org.name,
+                    "name": user.name,
+                    "email": user.email,
+                    "user_id": user.pk,
+                },
+            )
 
         Invitation.objects.filter(
             organization__pk=invitation_org.id, email=invite.email
         ).all().delete()
+
         return Response(**response_data)

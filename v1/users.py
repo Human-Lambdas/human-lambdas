@@ -14,7 +14,6 @@ from user_handler.password_retrieval import (
 )
 from user_handler.notifications import NotificationView
 
-
 urlpatterns = [
     path("/register", RegistrationView.as_view(), name="user-registration"),
     path("/token", HLTokenObtainPairView.as_view(), name="token-obtain-pair"),

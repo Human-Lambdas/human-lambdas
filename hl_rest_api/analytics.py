@@ -2,6 +2,11 @@ import analytics
 from django.conf import settings
 
 
+def alias(new_id, old_id):
+    if not settings.DEBUG:
+        analytics.alias(new_id, old_id)
+
+
 def identify(*args):
     if not settings.DEBUG:
         analytics.identify(*args)
@@ -12,20 +17,17 @@ def track(*args):
         analytics.track(*args)
 
 
-def register_events(user_obj, organization_obj, existing_org):
+def signup_events(user_obj, organization_obj):
     data = {
         "org_id": organization_obj.pk,
         "org_name": organization_obj.name,
         "user_id": user_obj.pk,
-        "user_email": user_obj.email,
+        "email": user_obj.email,
+        "name": user_obj.name,
+        "is_admin": True,
     }
     identify(
         user_obj.pk, data,
     )
-    if not existing_org:
-        track(
-            user_obj.pk, "Org Created", data,
-        )
-    track(
-        user_obj.pk, "User Created", data,
-    )
+    track(user_obj.pk, "New Organization", {"source": "website signup"})
+    track(user_obj.pk, "User Signup", {"source": "website"})

@@ -12,9 +12,12 @@ logger = logging.getLogger(__file__)
 # Serializers define the API representation.
 class UserSerializer(serializers.ModelSerializer):
     organization = serializers.CharField(
-        max_length=128, allow_blank=False, write_only=True
+        max_length=128,
+        allow_blank=True,
+        write_only=True,
+        allow_null=True,
+        required=False,
     )
-    is_admin = serializers.BooleanField(write_only=True)
     password = serializers.CharField(min_length=8, write_only=True)
 
     class Meta:
@@ -24,7 +27,6 @@ class UserSerializer(serializers.ModelSerializer):
             "password",
             "email",
             "organization",
-            "is_admin",
             "current_organization_id",
             "id",
         ]
@@ -38,29 +40,20 @@ class UserSerializer(serializers.ModelSerializer):
         name = validated_data["name"]
         password = validated_data["password"]
         email = validated_data["email"].lower()
-        is_admin = validated_data["is_admin"]
-        organization_name = validated_data["organization"]
         notification = Notification()
         notification.save()
         user_obj = User(name=name, email=email, notifications=notification)
         user_obj.set_password(password)
         user_obj.save()
-        organization_obj = Organization.objects.filter(name=organization_name)
-        existing_org = organization_obj.exists()
-        if existing_org:
-            organization_obj = organization_obj.first()
-        else:
-            organization_obj = Organization(name=organization_name)
-            organization_obj.save()
-
-        organization_obj.user.add(user_obj)
-        if is_admin:
-            organization_obj.admin.add(user_obj)
-        user_obj.current_organization_id = organization_obj.pk
+        organization_name = validated_data.get("organization")
+        if not organization_name:
+            organization_name = f"{name}'s organization"
+        org = Organization(name=organization_name)
+        org.save()
+        org.add_admin(user_obj)
+        user_obj.current_organization_id = org.pk
         user_obj.save()
-
-        analytics.register_events(user_obj, organization_obj, existing_org)
-
+        analytics.signup_events(user_obj, org)
         return user_obj
 
     def update(self, instance, validated_data):

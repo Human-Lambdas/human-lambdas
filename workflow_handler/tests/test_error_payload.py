@@ -11,7 +11,6 @@ class TestErrorPayloadStructure(APITestCase):
             "email": "foo@bar.com",
             "password": "foowordbar",
             "organization": "fooInc",
-            "is_admin": True,
             "name": "foo",
         }
         _ = self.client.post("/v1/users/register", registration_data)
@@ -25,13 +24,18 @@ class TestErrorPayloadStructure(APITestCase):
         self.complete_workflow_data = {
             "name": "foowf",
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"],},
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"],},
                 },
             ],
         }
@@ -58,14 +62,19 @@ class TestErrorPayloadStructure(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "description": "great wf",
-            "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
-            "outputs": [
+            "data": [
                 {
                     "id": "foo",
                     "name": "foo",
-                    "type": "single-selection",
-                    "single-selection": {"options": ["foo1", "bar1"],},
-                }
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "foo",
+                    "name": "foo",
+                    "type": "single_selection",
+                    "single_selection": {"options": ["foo1", "bar1"],},
+                },
             ],
         }
         response = self.client.post(

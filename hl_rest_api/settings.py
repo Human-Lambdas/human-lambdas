@@ -148,6 +148,7 @@ else:
     ALLOWED_HOSTS = [
         "human-lambdas-api.eu-west-2.elasticbeanstalk.com",
         "human-lambdas-api-stg.eu-west-2.elasticbeanstalk.com",
+        "human-lambdas-api-redesign.eu-west-2.elasticbeanstalk.com",
         "api.humanlambdas.com",
         "api-stg.humanlambdas.com",
         "localhost",
@@ -156,7 +157,7 @@ else:
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
+    # or allow read_only access for unauthenticated users.
     "DEFAULT_PERMISSION_CLASSES": [DEFAULT_PERMISSION],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -283,7 +284,6 @@ except requests.exceptions.RequestException:
 if LOCAL_IP and not DEBUG:
     ALLOWED_HOSTS.append(LOCAL_IP)
 
-TASK_EXPIRATION_MIN = 60  # Minutes
 
 SEGMENT_KEY = os.environ.get("SEGMENT_KEY")
 
