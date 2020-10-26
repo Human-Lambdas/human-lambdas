@@ -77,7 +77,7 @@ class GetCompletedTasksCSVView(APIView):
         return (
             Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
             .filter(*args, **kwargs)
-            .order_by("-completed_at")
+            .order_by("completed_at")
         )
 
     def get(self, request, *args, **kwargs):

@@ -1,4 +1,5 @@
 import copy
+from math import ceil
 
 from schema import SchemaError, Schema, And, Or, Optional
 
@@ -60,6 +61,17 @@ def input2data(input_data, is_task=True):
         del data["subtype"]
         data[data["type"]]["subtype"] = input_data["subtype"]
     udata = underscore_conversion(data)
+    if "layout" not in udata:
+        udata["layout"] = {
+            "h": 12,
+            "i": udata["name"],
+            "w": 12,
+            "x": 1,
+            "y": 1,
+            "maxW": 2048,
+            "minH": 1,
+            "minW": 2,
+        }
     return udata
 
 
@@ -77,10 +89,10 @@ def new_row():
 
 def is_collision(grid, block):
     x, y, w, h = (
-        block["layout"]["x"],
-        block["layout"]["y"],
-        block["layout"]["w"],
-        block["layout"]["h"],
+        round(block["layout"]["x"]),
+        round(block["layout"]["y"]),
+        ceil(block["layout"]["w"]),
+        ceil(block["layout"]["h"]),
     )
     if x + w > len(grid[0]):
         return True
@@ -116,10 +128,10 @@ def fix_collision(grid, workflow_data, i):
 
 def fill_grid(grid, block):
     x, y, w, h = (
-        block["layout"]["x"],
-        block["layout"]["y"],
-        block["layout"]["w"],
-        block["layout"]["h"],
+        round(block["layout"]["x"]),
+        round(block["layout"]["y"]),
+        ceil(block["layout"]["w"]),
+        ceil(block["layout"]["h"]),
     )
     for i in range(h):
         for j in range(w):
@@ -132,8 +144,6 @@ def fix_collisions(workflow_data):
         if is_collision(grid, workflow_data[i]):
             fix_collision(grid, workflow_data, i)
         fill_grid(grid, workflow_data[i])
-    for i in range(len(grid)):
-        print(grid[i])
 
 
 def update_block_props(block_type, layout):
