@@ -245,9 +245,9 @@ class TestCompletedTasksToCSV(APITestCase):
         )
         needed_csv = repr(
             """Alpha,Beta,Gamma,foo,secondary_output,tertiary_output
-1,2,3,bar2,SO2,TO2
+1,2,3,foo2,SO1,
 4,5,6,bar2,SO2,
-7,8,9,foo2,SO1,""".strip()
+7,8,9,bar2,SO2,TO2""".strip()
         )
         received_csv = repr(
             response.getvalue().decode("utf-8").rstrip().replace("\r", "")
@@ -332,9 +332,9 @@ class TestCompletedTasksToCSV(APITestCase):
         )
         needed_csv = repr(
             """Alpha,Beta,Gamma,foo
-1,2,3,bar2
+1,2,3,foo2
 4,5,6,bar2
-7,8,9,foo2""".strip()
+7,8,9,bar2""".strip()
         )
         received_csv = repr(
             response.getvalue().decode("utf-8").rstrip().replace("\r", "")
