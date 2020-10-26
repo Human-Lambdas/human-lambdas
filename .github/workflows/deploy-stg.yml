@@ -24,7 +24,7 @@ jobs:
           DOCKER_GROUP: "hlambdas"
       - name: Get release version
         id: get_version
-        run: echo "${RELEASE_VERSION}=$(echo ${GITHUB_SHA})" >> $GITHUB_ENV
+        run: echo "${{ env.RELEASE_VERSION }}=$(echo ${GITHUB_SHA})" >> $GITHUB_ENV
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
