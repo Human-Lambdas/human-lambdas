@@ -2,6 +2,7 @@ import logging
 
 from rest_framework import serializers
 from hl_rest_api import analytics
+from workflow_handler.utils import create_template
 
 from .models import User, Organization, Notification
 
@@ -54,6 +55,7 @@ class UserSerializer(serializers.ModelSerializer):
         user_obj.current_organization_id = org.pk
         user_obj.save()
         analytics.signup_events(user_obj, org)
+        create_template(validated_data.get("template_id"), user_obj, org)
         return user_obj
 
     def update(self, instance, validated_data):
