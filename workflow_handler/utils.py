@@ -4,7 +4,9 @@ import cchardet
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 
-from .models import WebHook
+from .models import WebHook, Workflow, WorkflowNotification
+
+TEMPLATE_ORG_ID = 40
 
 
 def sync_workflow_task(workflow, task):
@@ -88,3 +90,23 @@ class TaskPagination(LimitOffsetPagination):
             },
             status=200,
         )
+
+
+def create_template(template_id, user, org):
+    if template_id:
+        workflow = Workflow.objects.filter(
+            organization=TEMPLATE_ORG_ID, pk=template_id
+        ).first()
+        if workflow:
+            Workflow(
+                name=workflow.name,
+                description=workflow.description,
+                created_by=user,
+                data=copy.deepcopy(workflow.data),
+                organization=org,
+            ).save()
+            for org_user in org.user.all():
+                wfnotification = WorkflowNotification(
+                    workflow=workflow, notification=org_user.notifications, enabled=True
+                )
+                wfnotification.save()

@@ -92,40 +92,6 @@ class TestUsers(APITestCase):
         self.assertEqual(len(User.objects.all()), 0)
 
 
-class TestAPIRegistration(APITestCase):
-    def test_registration(self):
-        response = self.client.post(
-            "/v1/users/register",
-            {
-                "email": "foo@bar.com",
-                "password": "foowordbar",
-                "name": "foo",
-                "organization": "barinc",
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertFalse("password" in response.data)
-
-    def test_registration_without_organization(self):
-        response = self.client.post(
-            "/v1/users/register",
-            {"email": "foo@bar.com", "password": "foowordbar", "name": "foo",},
-        )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def test_registration_short_password(self):
-        response = self.client.post(
-            "/v1/users/register",
-            {
-                "email": "foo@bar.com",
-                "password": "fooword",
-                "name": "foo",
-                "organization": "barinc",
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-
 class TestAPIUserCRUD(APITestCase):
     def setUp(self):
         response = self.client.post(
