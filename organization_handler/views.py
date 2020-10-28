@@ -109,15 +109,7 @@ class ListOrgUsersView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        organization = (
-            Organization.objects.filter(pk=self.kwargs["org_id"])
-            .filter(admin=user)
-            .first()
-        )
-        if organization:
-            return User.objects.filter(organization=organization)
-        else:
-            return User.objects.filter(pk=user.pk)
+        return User.objects.filter(organization__user=user)
 
     def list(self, request, *args, **kwargs):
         obj = get_list_or_404(self.get_queryset())
