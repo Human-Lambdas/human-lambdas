@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.models import Token
+from hl_rest_api import analytics
 
 from .permissions import IsOrgAdmin
 from .models import User, Organization
@@ -26,10 +27,14 @@ class RegistrationView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        template_id = self.request.query_params.get("template_id")
+        self.perform_create(serializer, template_id)
         headers = self.get_success_headers(serializer.data)
         serializer.data["status_code"] = 201
         return Response(serializer.data, status=201, headers=headers)
+
+    def perform_create(self, serializer, template_id):
+        serializer.save(template_id=template_id)
 
 
 class HelloView(APIView):
@@ -127,6 +132,10 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
             try:
                 if request.data["admin"]:
                     org.admin.add(user)
+                    analytics.track(
+                        self.request.user.pk, "Change Role", {"role": "admin"}
+                    )
+                    analytics.identify(self.request.user.pk, {"is_admin": True})
                     return Response(
                         {
                             "status_code": 200,
@@ -136,6 +145,10 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                     )
                 else:
                     org.admin.remove(user)
+                    analytics.track(
+                        self.request.user.pk, "Change Role", {"role": "worker"}
+                    )
+                    analytics.identify(self.request.user.pk, {"is_admin": False})
                     return Response(
                         {
                             "status_code": 200,
@@ -168,6 +181,9 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
             all_orgs_member = Organization.objects.filter(user=user)
             if all_orgs_member.count() == 1:
                 user.delete()
+                analytics.track(
+                    self.request.user.pk, "Removed from Org", {"orgs_left": False}
+                )
                 return Response(
                     {"status_code": 204, "message": "User was deleted"}, status=204
                 )
@@ -175,6 +191,9 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                 org = all_orgs_member.get(pk=kwargs["org_id"])
                 org.user.remove(user)
                 org.admin.remove(user)
+                analytics.track(
+                    self.request.user.pk, "Removed from Org", {"orgs_left": True}
+                )
                 return Response(
                     {
                         "status_code": 204,

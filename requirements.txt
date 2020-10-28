@@ -4,7 +4,7 @@ djangorestframework==3.11.1
 djangorestframework-simplejwt==4.3.0
 django-cors-headers==3.4.0
 drf-chunked-upload==0.4.2
-sentry_sdk==0.17.8
+sentry_sdk==0.19.1
 schema==0.7.2
 gunicorn==20.0.04
 git+https://github.com/zapier/django-rest-hooks.git@d21a070b9a099b5e9c755b2afa6b81c9d8b26e7c#egg=django_rest_hooks-1.6.0
