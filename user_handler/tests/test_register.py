@@ -74,12 +74,13 @@ class TestAPIRegistrationTemplate(APITestCase):
 
     def test_template_registration(self):
         response = self.client.post(
-            f"/v1/users/register?template_id={self.template_id}",
+            f"/v1/users/register",
             {
                 "email": "bar@bar.com",
                 "password": "foowordbar",
                 "name": "bar",
                 "organization": "barinc",
+                "template_id": self.template_id,
             },
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

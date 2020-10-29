@@ -27,14 +27,14 @@ class RegistrationView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        template_id = self.request.query_params.get("template_id")
-        self.perform_create(serializer, template_id)
+        # template_id = self.request.query_params.get("template_id")
+        self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         serializer.data["status_code"] = 201
         return Response(serializer.data, status=201, headers=headers)
 
-    def perform_create(self, serializer, template_id):
-        serializer.save(template_id=template_id)
+    # def perform_create(self, serializer, template_id):
+    #     serializer.save(template_id=template_id)
 
 
 class HelloView(APIView):

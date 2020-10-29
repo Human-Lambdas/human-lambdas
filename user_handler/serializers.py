@@ -20,6 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
         required=False,
     )
     password = serializers.CharField(min_length=8, write_only=True)
+    template_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = User
@@ -30,9 +31,11 @@ class UserSerializer(serializers.ModelSerializer):
             "organization",
             "current_organization_id",
             "id",
+            "template_id",
         ]
         extra_kwargs = {
             "password": {"write_only": True},
+            "template_id": {"write_only": True},
             "id": {"read_only": True},
             "current_organization_id": {"read_only": True},
         }
