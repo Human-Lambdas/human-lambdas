@@ -56,7 +56,7 @@ def get_aht(**kwargs):
     return aht / timezone.timedelta(seconds=1) if aht else 0
 
 
-def get_tat(**kwargs):
+def get_tat(**kwargs):  # change
     basic_query = process_kwargs(**kwargs)
     result = Task.objects.filter(
         basic_query
@@ -232,7 +232,8 @@ class WorkerMetrics(APIView):
             organization = self.get_queryset().first()
             if worker_id:
                 users = User.objects.filter(
-                    organization=organization, pk__in=worker_id,
+                    organization=organization,
+                    pk__in=worker_id,
                 ).all()
             else:
                 users = User.objects.filter(organization=organization).all()
