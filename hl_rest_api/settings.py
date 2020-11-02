@@ -303,12 +303,8 @@ FORGOTTEN_PASSWORD_TEMPLATE = os.environ.get("FORGOTTEN_PASSWORD_TEMPLATE")
 
 
 # Swagger
-# SWAGGER_SETTINGS = {
-#     'SECURITY_DEFINITIONS': {
-#         'JWT': {
-#                 "type": "apiKey",
-#                 "name": "Authorization",
-#                 "in": "header"
-#         }
-#     },
-# }
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Token": {"type": "apiKey", "name": "Authorization", "in": "header"},
+    },
+}
