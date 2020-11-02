@@ -35,7 +35,7 @@ class Source(models.Model):
         return self.name
 
 
-class Task(models.Model):  # change
+class Task(models.Model):
     status = models.CharField(max_length=128, default="new")
     completed_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)

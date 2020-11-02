@@ -56,7 +56,7 @@ def get_aht(**kwargs):
     return aht / timezone.timedelta(seconds=1) if aht else 0
 
 
-def get_tat(**kwargs):  # change
+def get_tat(**kwargs):
     basic_query = process_kwargs(**kwargs)
     result = Task.objects.filter(
         basic_query

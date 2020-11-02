@@ -40,6 +40,19 @@ Run the tests outside of any docker container
 python manage.py test
 ```
 
+## QA Test API using Swagger
+
+Start server locally:
+
+```
+gunicorn hl_rest_api.wsgi -b 0.0.0.0:8000 -w 4 --reload
+```
+
+Open swagger:
+Go to http://localhost:8000/swagger/
+
+Click 'authorize' and paste in `bearer {your_token}`. You can find your token in the web inspector when viewing your local instance of the web front end.
+
 ## Running API locally with Docker-Compose
 
 You will need to install `docker` and `docker-compose` to be able to run the API locally.
