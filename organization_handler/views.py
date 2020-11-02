@@ -2,6 +2,7 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
+    CreateAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -11,6 +12,16 @@ from user_handler.serializers import UserSerializer
 from user_handler.permissions import IsAdminOrReadOnly
 
 from .serializers import OrganizationSerializer
+
+
+class CreateOrganization(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = OrganizationSerializer
+
+    def post(self, request, *args, **kwargs):
+        request.data["user"] = [request.user.pk]
+        request.data["admin"] = [request.user.pk]
+        return self.create(request, *args, **kwargs)
 
 
 class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):

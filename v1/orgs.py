@@ -4,6 +4,7 @@ from organization_handler.views import (
     ListOrganizationView,
     ListOrgUsersView,
     RetrieveUpdateRemoveUserOrgView,
+    CreateOrganization,
 )
 from user_handler.invitation import SendInviteView
 
@@ -11,6 +12,7 @@ from user_handler.invitation import SendInviteView
 urlpatterns = [
     # organization
     path("", ListOrganizationView.as_view(), name="list-organization"),
+    path("/create", CreateOrganization.as_view(), name="create-organization"),
     path("/<int:org_id>", GetOrganizationView.as_view(), name="get-organization"),
     # organization user management
     path(
