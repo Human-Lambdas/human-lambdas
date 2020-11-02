@@ -54,6 +54,10 @@ class RDActivityView(RetrieveDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if getattr(self, "swagger_fake_view", False):
+            # queryset just for schema generation metadata
+            return TaskActivity.objects.none()
+
         organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
             Q(organization__in=organizations)
