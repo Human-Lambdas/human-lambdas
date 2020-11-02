@@ -27,7 +27,8 @@ def signup_events(user_obj, organization_obj):
         "is_admin": True,
     }
     identify(
-        user_obj.pk, data,
+        user_obj.pk,
+        data,
     )
     track(user_obj.pk, "New Organization", {"source": "website signup"})
     track(user_obj.pk, "User Signup", {"source": "website"})

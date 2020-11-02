@@ -60,7 +60,10 @@ class ForgottenPasswordView(APIView):
             token=self.kwargs["token"]
         )
         if forgotten_password.exists():
-            return Response({"status_code": 200}, status=200,)
+            return Response(
+                {"status_code": 200},
+                status=200,
+            )
         else:
             return Response(
                 {
