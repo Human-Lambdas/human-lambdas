@@ -10,6 +10,7 @@ from workflow_handler.models import Workflow, Task, WebHook
 from django.conf import settings
 from rest_framework import serializers, exceptions
 from rest_framework import status
+from hl_rest_api import analytics
 
 
 from .views import CreateTaskView
@@ -62,7 +63,7 @@ class GetZapierTaskInputs(APIView):
         obj = get_object_or_404(self.get_queryset())
         children = []
         for w_input in obj.data:
-            children.append({"key": w_input["id"]})
+            children.append({"key": w_input["id"], "label": w_input["name"]})
         result = {
             "key": "data",
             "label": "Data",
@@ -126,6 +127,8 @@ class ZapierAuthentication(APIView):
 
 
 class ZapierCreateTask(CreateTaskView):
+    permission_classes = (IsAuthenticated,)
+
     def get_queryset(self):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
@@ -173,6 +176,11 @@ class ZapierHook(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
+        analytics.track(
+            request.user.pk,
+            "Register Zapier Hook",
+            {"workflow_id": request.data["workflow_id"]},
+        )
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )

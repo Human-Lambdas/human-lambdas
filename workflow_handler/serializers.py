@@ -9,12 +9,20 @@ from schema import SchemaError
 from hl_rest_api.utils import is_valid_url
 from django.db import transaction
 from django.db.models import Q, F
+from hl_rest_api import analytics
 
 from .schemas import DATA_SCHEMA
 from .models import Workflow, Task, Source, WorkflowNotification, WebHook, TaskActivity
 
 
 logger = logging.getLogger(__file__)
+
+
+def clean_form_sequence(data):
+    for idata in data:
+        if idata["type"] == "form_sequence":
+            for form_data in idata["form_sequence"]["data"]:
+                form_data[form_data["type"]]["value"] = None
 
 
 def validate_output_structure(validated_data_items):
@@ -52,6 +60,11 @@ class HookSerializer(serializers.ModelSerializer):
         )
         webhook = WebHook(**validated_data)
         webhook.save()
+        analytics.track(
+            self.context["request"].user.pk,
+            "Register Webhook",
+            {"workflow_id": self.context["view"].kwargs["workflow_id"]},
+        )
         return webhook
 
 
@@ -97,6 +110,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
         wf_name = validated_data["name"]
         description = validated_data.get("description", "")
         data = validated_data["data"]
+        clean_form_sequence(data)
         organization_obj = Organization.objects.filter(user=user)
         if organization_obj.exists() and organization_obj.count() == 1:
             organization = organization_obj.first()
@@ -110,6 +124,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
             data=data,
         )
         workflow.save()
+        analytics.track(
+            user.pk, "Created Workflow", {"name": wf_name, "workflow_id": workflow.pk}
+        )
         webhook_data = validated_data.get("webhook")
         if webhook_data:
             webhook_data["event"] = "task.completed"
@@ -121,6 +138,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 workflow=workflow, notification=org_user.notifications, enabled=True
             )
             wfnotification.save()
+
         return workflow
 
     def update(self, instance, validated_data):
@@ -134,7 +152,10 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 )
             instance.name = workflow_name
         instance.description = validated_data.get("description", instance.description)
-        instance.data = validated_data.get("data", instance.data)
+        data = validated_data.get("data")
+        if data:
+            clean_form_sequence(data)
+            instance.data = data
         disabled = validated_data.get("disabled")
         if disabled:
             instance.disabled = disabled
@@ -145,6 +166,12 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 wnotification.enabled = False
                 wnotification.save()
         instance.save()
+        event_name = "Deleted" if disabled else "Updated"
+        analytics.track(
+            self.context["request"].user.pk,
+            "%s Workflow" % event_name,
+            {"name": instance.name, "workflow_id": instance.pk},
+        )
         webhook_data = validated_data.get("webhook")
         if webhook_data or self.context.get("remove_webhook"):
             hook_instance = WebHook.objects.filter(workflow=instance)
@@ -160,6 +187,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 webhook_data["user"] = self.context["request"].user
                 webhook_data["workflow"] = instance
                 WebHook.objects.create(**webhook_data)
+
         return super(WorkflowSerializer, self).update(instance, validated_data)
 
     def validate_data(self, data):
@@ -223,6 +251,17 @@ class TaskSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             workflow.n_tasks = F("n_tasks") + 1
             workflow.save()
+
+        analytics.track(
+            self.context["request"].user.pk,
+            "Task Created",
+            {
+                "org_id": workflow.organization.pk,
+                "workflow_id": workflow.id,
+                "source": source_name,
+            },
+        )
+
         return task
 
     def update(self, instance, validated_data):
@@ -242,6 +281,16 @@ class TaskSerializer(serializers.ModelSerializer):
             else:
                 instance.save()
                 TaskActivity(task=instance, action="saved", created_by=user).save()
+            event_name = "Completed" if validated_data["submit_task"] else "Saved"
+            analytics.track(
+                user.pk,
+                "Task %s" % event_name,
+                {
+                    "org_id": instance.workflow.organization.pk,
+                    "workflow_id": instance.workflow.id,
+                    "source": instance.source.name,
+                },
+            )
         else:
             raise serializers.ValidationError("User not assigned to task")
         return instance

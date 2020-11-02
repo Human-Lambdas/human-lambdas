@@ -26,6 +26,11 @@ class SendForgottenPasswordView(APIView):
                 status=400,
             )
 
+        if not User.objects.filter(email=request.data["email"]).exists():
+            return Response(
+                {"status_code": 404, "errors": [{"message": "Email does not exist"}]},
+                status=200,
+            )
         token = generate_unique_token(request.data["email"])
         ForgottenPassword(
             email=request.data["email"],

@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.shortcuts import get_list_or_404, get_object_or_404
 from user_handler.permissions import IsOrgAdmin
 from next_prev import next_in_order, prev_in_order
+from hl_rest_api import analytics
 
 from .utils import TaskPagination, process_query_params
 from .serializers import (
@@ -77,7 +78,7 @@ class GetCompletedTasksCSVView(APIView):
         return (
             Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
             .filter(*args, **kwargs)
-            .order_by("-completed_at")
+            .order_by("completed_at")
         )
 
     def get(self, request, *args, **kwargs):
@@ -91,6 +92,11 @@ class GetCompletedTasksCSVView(APIView):
             )
         filters = process_query_params(request.query_params)
         tasks = get_list_or_404(self.get_queryset(**filters))
+        analytics.track(
+            request.user.pk,
+            "Download CSV tasks",
+            {"workflow_id": request.query_params["workflow_id"]},
+        )
         return task_list_to_csv_response(tasks)
 
 

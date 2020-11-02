@@ -2,6 +2,7 @@ import logging
 
 from rest_framework import serializers
 from hl_rest_api import analytics
+from workflow_handler.utils import create_template
 
 from .models import User, Organization, Notification
 
@@ -19,6 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
         required=False,
     )
     password = serializers.CharField(min_length=8, write_only=True)
+    template_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = User
@@ -29,9 +31,11 @@ class UserSerializer(serializers.ModelSerializer):
             "organization",
             "current_organization_id",
             "id",
+            "template_id",
         ]
         extra_kwargs = {
             "password": {"write_only": True},
+            "template_id": {"write_only": True},
             "id": {"read_only": True},
             "current_organization_id": {"read_only": True},
         }
@@ -53,7 +57,8 @@ class UserSerializer(serializers.ModelSerializer):
         org.add_admin(user_obj)
         user_obj.current_organization_id = org.pk
         user_obj.save()
-        analytics.register_events(user_obj, org, None)
+        analytics.signup_events(user_obj, org)
+        create_template(validated_data.get("template_id"), user_obj, org)
         return user_obj
 
     def update(self, instance, validated_data):

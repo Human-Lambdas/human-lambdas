@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.conf import settings
+from hl_rest_api import analytics
 
 from .apps import UserHandlerConfig
 from .models import Notification, User
@@ -23,6 +24,7 @@ class NotificationSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.enabled = validated_data.get("enabled", instance.enabled)
         workflow_notifications = validated_data.get("workflow_notifications", [])
+        any_enabled = False
         for workflow_notification in workflow_notifications:
             wfnotification_obj = instance.workflownotification_set.filter(
                 workflow__pk=workflow_notification["workflow_id"],
@@ -31,7 +33,13 @@ class NotificationSerializer(serializers.ModelSerializer):
             if wfnotification_obj:
                 wfnotification_obj.enabled = workflow_notification["enabled"]
                 wfnotification_obj.save()
+                any_enabled = True if workflow_notification["enabled"] else False
         instance.save()
+        analytics.track(
+            self.context["request"].user.pk,
+            "Notifications Update",
+            {"all_enabled": instance.enabled, "any_enabled": any_enabled},
+        )
         return instance
 
 
@@ -72,6 +80,7 @@ def send_notification(workflow):
             "workflow_name": workflow.name,
             "org_id": workflow.organization.pk,
             "hl_url": settings.FRONT_END_BASE_URL,
+            "workflow_id": workflow.pk,
         }
         UserHandlerConfig.emailclient.send_email(
             to_email=emails,

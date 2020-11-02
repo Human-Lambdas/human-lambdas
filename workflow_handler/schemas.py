@@ -22,7 +22,7 @@ DATA_SCHEMA = Schema(
             "type": _DATA_TYPES,
             Optional("layout"): dict,
             _DATA_TYPES: {
-                Optional("placeholder"): Or(str, float, int, bool, list),
+                Optional("placeholder"): Or(str, float, int, bool, list, None),
                 Optional("read_only"): bool,
                 Optional("is_required"): bool,
                 Optional("subtype"): And(str, len),
