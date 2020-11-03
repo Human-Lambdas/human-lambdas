@@ -148,15 +148,10 @@ class OrganizationMetrics(APIView):
     def get(self, request, *args, **kwargs):
         self.validate_data(request.data)
         data = []
-        query_deserializer = WorkflowMetricsQuerySerializer(data=request.query_params)
-        if not query_deserializer.is_valid():
-            logger.warning("Ignoring invalid querystring")
-
-        query = query_deserializer.validated_data
-        qtypes = query["type"]
+        qtypes = request.query_params.getlist("type")
         if any([qtype in METRICS for qtype in qtypes]):
             organization = self.get_queryset().first()
-            time_ranges = self.process_time_range(query["range"])
+            time_ranges = self.process_time_range(request.query_params.get("range"))
             for start_time, end_time in reversed(time_ranges):
                 data_dict = {
                     "date": (end_time - timezone.timedelta(microseconds=1)).replace(
