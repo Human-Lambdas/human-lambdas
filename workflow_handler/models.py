@@ -26,7 +26,7 @@ class Workflow(models.Model):
 
 
 class Source(models.Model):
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=512)
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)

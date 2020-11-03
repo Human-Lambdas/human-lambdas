@@ -63,7 +63,7 @@ class GetZapierTaskInputs(APIView):
         obj = get_object_or_404(self.get_queryset())
         children = []
         for w_input in obj.data:
-            children.append({"key": w_input["id"]})
+            children.append({"key": w_input["id"], "label": w_input["name"]})
         result = {
             "key": "data",
             "label": "Data",
