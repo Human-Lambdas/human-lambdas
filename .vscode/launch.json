@@ -12,6 +12,18 @@
             "program": "manage.py",
             "args": ["runserver"],
             "console": "integratedTerminal",
+        },
+        {   "name": "Test File",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "test",
+                "--noinput",
+                "--keepdb",
+                "metrics.tests.test_metrics"
+            ],
+            "django": true
         }
     ]
 }

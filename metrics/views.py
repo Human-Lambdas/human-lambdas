@@ -10,6 +10,9 @@ from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
 from user_handler.models import Organization, User
 from drf_yasg.utils import swagger_auto_schema
+import logging
+
+logger = logging.getLogger(__file__)
 
 MONTHS_BACK = 12
 WEEKS_BACK = 14
@@ -147,7 +150,8 @@ class OrganizationMetrics(APIView):
         data = []
         query_deserializer = WorkflowMetricsQuerySerializer(data=request.query_params)
         if not query_deserializer.is_valid():
-            raise Exception("invalid query params")
+            logger.warning("Ignoring invalid querystring")
+
         query = query_deserializer.validated_data
         qtypes = query["type"]
         if any([qtype in METRICS for qtype in qtypes]):
