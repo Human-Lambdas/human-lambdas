@@ -13,3 +13,4 @@ analytics-python==1.2.9
 cchardet==0.3.5
 django-next-prev
 python-logstash==0.4.6
+drf-yasg
