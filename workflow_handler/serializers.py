@@ -268,6 +268,14 @@ class TaskSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         if instance.assigned_to == user:
             instance.data = validated_data.get("data", instance.data)
+
+            if instance.session_started_at:
+                session_duration_seconds = (
+                    timezone.now() - instance.session_started_at
+                ) / timezone.timedelta(seconds=1)
+
+                instance.handling_time_seconds += session_duration_seconds
+
             if validated_data["submit_task"]:
                 instance.status = "completed"
                 instance.completed_at = timezone.now()

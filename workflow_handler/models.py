@@ -41,6 +41,8 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     assigned_at = models.DateTimeField(null=True)
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    session_started_at = models.DateTimeField(null=True)
+    handling_time_seconds = models.IntegerField(default=0)
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE)
     inputs = JSONField(default=list)
     outputs = JSONField(default=list)
