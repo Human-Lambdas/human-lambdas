@@ -73,6 +73,7 @@ class ActivityView(ListCreateAPIView):
 
         if user.id == task.assigned_to.id:
             task.handling_time_seconds += get_session_duration_seconds(task)
+            task.session_started_at = None
             task.save()
 
         return self.create(request, *args, **kwargs)
@@ -108,5 +109,7 @@ class RDActivityView(RetrieveDestroyAPIView):
 
         if user.id == task.assigned_to.id:
             task.handling_time_seconds += get_session_duration_seconds(task)
+            task.session_started_at = None
             task.save()
+
         return self.destroy(request, *args, **kwargs)
