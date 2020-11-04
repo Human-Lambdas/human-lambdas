@@ -12,6 +12,10 @@ _DATA_TYPES = Or(
     "single_selection",
     "multiple_selection",
     "form_sequence",
+    "email",
+    "link",
+    "pdf",
+    "embed",
 )
 DATA_SCHEMA = Schema(
     [
