@@ -3,11 +3,16 @@ from uuid import uuid4
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import serializers
 from django.utils import timezone
 from django.db.models import Q, F, Avg
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
 from user_handler.models import Organization, User
+from drf_yasg.utils import swagger_auto_schema
+import logging
+
+logger = logging.getLogger(__file__)
 
 MONTHS_BACK = 12
 WEEKS_BACK = 14
@@ -80,6 +85,11 @@ WORKER_METRICS = {
 }
 
 
+class WorkflowMetricsQuerySerializer(serializers.Serializer):
+    range = serializers.CharField(required=False)
+    type = serializers.MultipleChoiceField(list(METRICS.keys()), required=False)
+
+
 def process_monthly():
     end = timezone.now()
     start = end.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -134,6 +144,7 @@ class OrganizationMetrics(APIView):
     def process_time_range(self, range_name):
         return _TIME_RANGE_DICT[range_name]()
 
+    @swagger_auto_schema(query_serializer=WorkflowMetricsQuerySerializer)
     def get(self, request, *args, **kwargs):
         self.validate_data(request.data)
         data = []

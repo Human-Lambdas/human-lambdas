@@ -209,4 +209,4 @@ static/
 # src files
 src/
 
-.vscode
+.vscode/settings.json

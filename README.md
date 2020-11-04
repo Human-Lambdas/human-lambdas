@@ -45,8 +45,18 @@ python manage.py test
 Start server locally:
 
 ```
-gunicorn hl_rest_api.wsgi -b 0.0.0.0:8000 -w 4 --reload
+gunicorn hl_rest_api.wsgi -b 0.0.0.0:8000 --reload
 ```
+
+In case you lose track of gunicorn worker(s) and need to kill them:
+
+```
+alias killgunicorn="ps aux | grep gunicorn | awk '{print $2;}' | xargs kill -9 2>/dev/null"
+```
+
+## Debugging with VSCode
+
+.vscode/launch.json adds a debug option when in VSCode (see the debug tab in the sidebar)
 
 Open swagger:
 Go to http://localhost:8000/swagger/
