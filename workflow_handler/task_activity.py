@@ -6,6 +6,8 @@ from django.db.models import Q
 from django.utils import timezone
 
 from .models import TaskActivity, Task, Organization, Workflow
+from .serializers import TaskSerializer
+from .utils import get_session_duration_seconds
 
 
 class ActivitySerializer(serializers.ModelSerializer):
@@ -25,22 +27,30 @@ class ActivitySerializer(serializers.ModelSerializer):
         return obj.created_by.name
 
 
+def get_task(user, org_id, workflow_id, task_id):
+    organizations = Organization.objects.filter(user=user).all()
+    workflows = Workflow.objects.filter(
+        Q(organization__in=organizations) & Q(organization__pk=org_id)
+    )
+    return Task.objects.filter(
+        Q(workflow__in=workflows) & Q(workflow=workflow_id) & Q(pk=task_id)
+    ).first()
+
+
 class ActivityView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ActivitySerializer
+    task_serializer_class = TaskSerializer
 
     def get_queryset(self):
         user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
-        workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
+
+        task = get_task(
+            user,
+            self.kwargs["org_id"],
+            self.kwargs["workflow_id"],
+            self.kwargs["task_id"],
         )
-        task = Task.objects.filter(
-            Q(workflow__in=workflows)
-            & Q(workflow=self.kwargs["workflow_id"])
-            & Q(pk=self.kwargs["task_id"])
-        ).first()
 
         if user.id == task.assigned_to_id:
             task.session_started_at = timezone.now()
@@ -51,6 +61,20 @@ class ActivityView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         request.data["created_by"] = self.request.user.pk
         request.data["task"] = self.kwargs["task_id"]
+
+        user = self.request.user
+
+        task = get_task(
+            user,
+            self.kwargs["org_id"],
+            self.kwargs["workflow_id"],
+            self.kwargs["task_id"],
+        )
+
+        if user.id == task.assigned_to.id:
+            task.handling_time_seconds += get_session_duration_seconds(task)
+            task.save()
+
         return self.create(request, *args, **kwargs)
 
 
@@ -64,14 +88,25 @@ class RDActivityView(RetrieveDestroyAPIView):
             # queryset just for schema generation metadata
             return TaskActivity.objects.none()
 
-        organizations = Organization.objects.filter(user=user).all()
-        workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
+        task = get_task(
+            user,
+            self.kwargs["org_id"],
+            self.kwargs["workflow_id"],
+            self.kwargs["task_id"],
         )
-        task = Task.objects.filter(
-            Q(workflow__in=workflows)
-            & Q(workflow=self.kwargs["workflow_id"])
-            & Q(pk=self.kwargs["task_id"])
-        ).first()
+
         return TaskActivity.objects.filter(task=task, action="comment")
+
+    def delete(self, request, *args, **kwargs):
+        user = self.request.user
+        task = get_task(
+            user,
+            self.kwargs["org_id"],
+            self.kwargs["workflow_id"],
+            self.kwargs["task_id"],
+        )
+
+        if user.id == task.assigned_to.id:
+            task.handling_time_seconds += get_session_duration_seconds(task)
+            task.save()
+        return self.destroy(request, *args, **kwargs)
