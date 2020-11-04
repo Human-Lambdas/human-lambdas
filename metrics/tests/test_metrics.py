@@ -25,15 +25,32 @@ class TestMetrics(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/api-token",)
+        response = self.client.get(
+            "/v1/users/api-token",
+        )
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -44,7 +61,7 @@ class TestMetrics(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -70,7 +87,9 @@ class TestMetrics(APITestCase):
                 "type": ["pending"],
             }
             response = self.client.get(
-                "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+                "/v1/orgs/{}/metrics".format(self.org_id),
+                data,
+                format="json",
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -85,7 +104,9 @@ class TestMetrics(APITestCase):
             "type": ["pending", "completed"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id),
+            data,
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -112,15 +133,32 @@ class TestComplexMetrics(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/api-token",)
+        response = self.client.get(
+            "/v1/users/api-token",
+        )
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -131,7 +169,7 @@ class TestComplexMetrics(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -160,6 +198,10 @@ class TestComplexMetrics(APITestCase):
         task.assigned_to = User.objects.get(email="foo@bar.com")
         task.completed_at = completed_at
         task.created_at = created_at
+        handling_time_seconds = int(
+            (completed_at - assigned_at) / timezone.timedelta(seconds=1)
+        )
+        task.handling_time_seconds = handling_time_seconds
         task.save()
 
         data = {
@@ -167,7 +209,9 @@ class TestComplexMetrics(APITestCase):
             "type": ["completed", "aht", "tat"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id),
+            data,
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -175,10 +219,7 @@ class TestComplexMetrics(APITestCase):
         self.assertTrue(all(["tat" in idata for idata in response.data]))
         self.assertTrue(all(["completed" in idata for idata in response.data]))
         self.assertEqual(response.data[-1]["completed"], 1)
-        self.assertEqual(
-            response.data[-1]["aht"],
-            (completed_at - assigned_at) / timezone.timedelta(seconds=1),
-        )
+        self.assertEqual(response.data[-1]["aht"], handling_time_seconds)
         self.assertEqual(
             response.data[-1]["tat"],
             (completed_at - created_at) / timezone.timedelta(seconds=1),
@@ -205,15 +246,32 @@ class TestQueryMetrics(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/api-token",)
+        response = self.client.get(
+            "/v1/users/api-token",
+        )
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -224,7 +282,7 @@ class TestQueryMetrics(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -247,9 +305,24 @@ class TestQueryMetrics(APITestCase):
             "name": "uploader2",
             "description": "greater wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -260,7 +333,7 @@ class TestQueryMetrics(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -285,7 +358,9 @@ class TestQueryMetrics(APITestCase):
             "type": ["pending"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 12 + 1)
@@ -296,7 +371,9 @@ class TestQueryMetrics(APITestCase):
             "type": ["banana"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
@@ -311,7 +388,9 @@ class TestQueryMetrics(APITestCase):
             "type": ["pending"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[-1]["pending"], 3)
@@ -334,15 +413,32 @@ class TestWorkflowMetrics(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/api-token",)
+        response = self.client.get(
+            "/v1/users/api-token",
+        )
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -353,7 +449,7 @@ class TestWorkflowMetrics(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -376,9 +472,24 @@ class TestWorkflowMetrics(APITestCase):
             "name": "uploader2",
             "description": "greater wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -389,7 +500,7 @@ class TestWorkflowMetrics(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -418,7 +529,9 @@ class TestWorkflowMetrics(APITestCase):
             "type": "pending",
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["pending"]), 12 + 1)
@@ -433,6 +546,9 @@ class TestWorkflowMetrics(APITestCase):
         wf2_name = wf2.name
         assigned_at = timezone.now() - timezone.timedelta(days=7)
         completed_at = timezone.now() - timezone.timedelta(minutes=1)
+        handling_time_seconds = int(
+            (completed_at - assigned_at) / timezone.timedelta(seconds=1)
+        )
         created_at = assigned_at - timezone.timedelta(days=1)
         task = Task.objects.filter(workflow=wf1).first()
         task.status = "completed"
@@ -440,6 +556,7 @@ class TestWorkflowMetrics(APITestCase):
         task.assigned_to = User.objects.get(email="foo@bar.com")
         task.completed_at = completed_at
         task.created_at = created_at
+        task.handling_time_seconds = handling_time_seconds
         task.save()
 
         data = {
@@ -447,12 +564,15 @@ class TestWorkflowMetrics(APITestCase):
             "type": ["completed", "aht", "tat"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["completed"]), 12 + 1)
         self.assertEqual(
-            response.data["completed"][-1][wf1_name], 1,
+            response.data["completed"][-1][wf1_name],
+            1,
         )
         self.assertEqual(response.data["completed"][-1][wf2_name], 0)
         for idata in response.data["completed"][:-1]:
@@ -461,7 +581,7 @@ class TestWorkflowMetrics(APITestCase):
 
         self.assertEqual(
             response.data["aht"][-1][wf1_name],
-            (completed_at - assigned_at) / timezone.timedelta(seconds=1),
+            handling_time_seconds,
         )
         self.assertEqual(response.data["aht"][-1][wf2_name], 0)
         for idata in response.data["aht"][:-1]:
@@ -486,7 +606,9 @@ class TestWorkflowMetrics(APITestCase):
             "workflow_id": self.workflow_id,
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["pending"]), 12 + 1)
@@ -503,7 +625,9 @@ class TestWorkflowMetrics(APITestCase):
             "workflow_id": [self.workflow_id, self.workflow_id2],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["pending"]), 12 + 1)
@@ -523,7 +647,9 @@ class TestWorkflowMetrics(APITestCase):
             "type": ["pending"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertNotIn(disabled_workflow_name, response.data["pending"][0])
@@ -547,15 +673,32 @@ class TestWorkermetrics(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get("/v1/users/api-token",)
+        response = self.client.get(
+            "/v1/users/api-token",
+        )
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
             "description": "great wf",
             "data": [
-                {"id": "Alpha", "name": "alpha", "type": "text", "text": {"read_only": True}},
-                {"id": "Beta", "name": "beta", "type": "text", "text": {"read_only": True}},
-                {"id": "Gamma", "name": "gamma", "type": "text", "text": {"read_only": True}},
+                {
+                    "id": "Alpha",
+                    "name": "alpha",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Beta",
+                    "name": "beta",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
+                {
+                    "id": "Gamma",
+                    "name": "gamma",
+                    "type": "text",
+                    "text": {"read_only": True},
+                },
                 {
                     "id": "foo",
                     "name": "foo",
@@ -566,7 +709,7 @@ class TestWorkermetrics(APITestCase):
                             {"id": "bar2", "name": "bar2"},
                         ],
                     },
-                }
+                },
             ],
         }
         response = self.client.post(
@@ -595,6 +738,10 @@ class TestWorkermetrics(APITestCase):
         task.assigned_at = assigned_at
         task.assigned_to = worker
         task.completed_at = completed_at
+        handling_time_seconds = int(
+            (completed_at - assigned_at) / timezone.timedelta(seconds=1)
+        )
+        task.handling_time_seconds = handling_time_seconds
         task.created_at = created_at
         task.save()
 
@@ -603,12 +750,15 @@ class TestWorkermetrics(APITestCase):
             "type": ["completed"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics/workers".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["completed"]), 12 + 1)
         self.assertEqual(
-            response.data["completed"][-1][worker.name], 1,
+            response.data["completed"][-1][worker.name],
+            1,
         )
 
         data = {
@@ -616,13 +766,15 @@ class TestWorkermetrics(APITestCase):
             "type": "aht",
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics/workers".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(
             response.data["aht"][-1][worker.name],
-            (completed_at - assigned_at) / timezone.timedelta(seconds=1),
+            handling_time_seconds,
         )
         for idata in response.data["aht"][:-1]:
             self.assertEqual(idata[worker.name], 0)
@@ -631,7 +783,9 @@ class TestWorkermetrics(APITestCase):
         worker = User.objects.get(email="foo@bar.com")
         data = {"range": "monthly", "type": ["completed"], "worker_id": worker.pk}
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics/workers".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["completed"]), 12 + 1)
@@ -639,10 +793,11 @@ class TestWorkermetrics(APITestCase):
             self.assertIn(worker.name, idata)
 
     def test_worker_multiple_types(self):
-        worker = User.objects.get(email="foo@bar.com")
         data = {"range": "monthly", "type": ["completed", "aht"]}
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
+            "/v1/orgs/{}/metrics/workers".format(self.org_id),
+            data,
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["completed"]), 12 + 1)
