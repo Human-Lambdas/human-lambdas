@@ -3,7 +3,7 @@ import copy
 
 from rest_framework.test import APITestCase
 from rest_framework import status
-from workflow_handler.models import Task, Source
+from workflow_handler.models import Task, Source, TaskActivity
 from user_handler.models import Organization
 
 
@@ -240,7 +240,24 @@ class TestTaskAudit(APITestCase):
         self.assertEqual(response.data[-1]["accuracy"], 1.0)
 
     def test_when_no_tasks_completed_then_100_percent_accuracy(self):
-        assert False
+        tasks = Task.objects.all()
+        for t in tasks:
+            t.status = "assigned"
+            t.save()
+
+        # assert
+        data = {
+            "range": "daily",
+            "type": ["accuracy"],
+        }
+        response = self.client.get(
+            f"/v1/orgs/{self.org_id}/metrics",
+            data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[-1]["accuracy"], 1.0)
 
     def test_when_completed_task_audited_false_then_accuracy_declines(self):
         # arrange
@@ -249,6 +266,9 @@ class TestTaskAudit(APITestCase):
             .order_by("-completed_at")
             .first()
         )
+
+        n_tasks = float(len(Task.objects.all()))
+        expected_accuracy = (n_tasks - 1.0) / n_tasks
 
         # act
 
@@ -273,12 +293,28 @@ class TestTaskAudit(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.data[-1]["accuracy"], 0.75
-        )  # todo how to know how many tasks?
+        self.assertEqual(response.data[-1]["accuracy"], expected_accuracy)
 
     def test_when_task_audit_submitted_then_activity_log_entry_created(self):
-        assert False
+        # arrange
+        task = (
+            Task.objects.filter(workflow__pk=self.workflow_id, source__name="test.csv")
+            .order_by("-completed_at")
+            .first()
+        )
+
+        # act
+        data = {"correct": False}
+        response = self.client.put(
+            f"/v1/orgs/{self.org_id}/workflows/tasks/{task.id}/audit",
+            data=data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # assert
+        activity = TaskActivity.objects.last()
+        self.assertEqual(activity.action, "audited_incorrect")
 
 
 class TestEmptyTaskAudit(APITestCase):

@@ -18,7 +18,7 @@ from .serializers import (
     CompletedTaskSerializer,
     SourceSerializer,
 )
-from .models import Workflow, Task, Source
+from .models import TaskActivity, Workflow, Task, Source
 
 
 def make_task_filter_url(org_id, task_id, filters):
@@ -161,4 +161,16 @@ class AuditsGetTask(RetrieveUpdateDestroyAPIView):
         task = Task.objects.get(id=kwargs["task_id"])
         task.correct = request.data["correct"]
         task.save()
+
+        action_name_lookup = {
+            None: "audited_empty",
+            True: "audited_correct",
+            False: "audited_incorrect",
+        }
+
+        TaskActivity(
+            task=task,
+            created_by=request.user,
+            action=action_name_lookup[task.correct],
+        ).save()
         return Response()
