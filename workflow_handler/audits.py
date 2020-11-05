@@ -1,6 +1,6 @@
 from urllib.parse import urlencode
 
-from rest_framework.generics import ListAPIView, GenericAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from user_handler.models import Organization
 from rest_framework.views import APIView
@@ -18,7 +18,7 @@ from .serializers import (
     CompletedTaskSerializer,
     SourceSerializer,
 )
-from .models import Workflow, Task, Source
+from .models import TaskActivity, Workflow, Task, Source
 
 
 def make_task_filter_url(org_id, task_id, filters):
@@ -117,7 +117,7 @@ class ListSourcesView(ListAPIView):
         )
 
 
-class AuditsGetTask(GenericAPIView):
+class AuditsGetTask(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     serializer_class = TaskSerializer
 
@@ -156,3 +156,31 @@ class AuditsGetTask(GenericAPIView):
                 ),
             }
         )
+
+    def put(self, request, *args, **kwargs):
+        task = Task.objects.filter(id=kwargs["task_id"]).first()
+        if not task or task.status != "completed":
+            status = 400
+            return Response(
+                status=status,
+                data={
+                    "status_code": status,
+                    "errors": [{"message": "task is unknown or incomplete"}],
+                },
+            )
+
+        task.correct = request.data["correct"]
+        task.save()
+
+        action_name_lookup = {
+            None: "audited_empty",
+            True: "audited_correct",
+            False: "audited_incorrect",
+        }
+
+        TaskActivity(
+            task=task,
+            created_by=request.user,
+            action=action_name_lookup[task.correct],
+        ).save()
+        return Response()

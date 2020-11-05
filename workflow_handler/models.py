@@ -48,6 +48,7 @@ class Task(models.Model):
     outputs = JSONField(default=list)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, null=True)
     data = JSONField(blank=True, default=list)
+    correct = models.BooleanField(null=True)
 
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
@@ -146,6 +147,9 @@ ACTIVITY_ACTIONS = [
     ("completed", "completed"),
     ("saved", "saved"),
     ("comment", "comment"),
+    ("audited_correct", "audited_correct"),
+    ("audited_incorrect", "audited_incorrect"),
+    ("audited_empty", "audited_empty"),
 ]
 
 
