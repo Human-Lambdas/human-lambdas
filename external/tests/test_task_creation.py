@@ -192,3 +192,72 @@ class TestListTaskCreation(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         task = Task.objects.get(id=response.data["id"])
         self.assertIsNotNone(task)
+
+
+class TestFormSequenceTaskCreation(APITestCase):
+    def setUp(self):
+        registration_data = {
+            "email": "foo@bar.com",
+            "password": "foowordbar",
+            "organization": "fooInc",
+            "name": "foo",
+        }
+        _ = self.client.post("/v1/users/register", registration_data)
+        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
+        response = self.client.post(
+            "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
+        )
+        self.access_token = response.data["access"]
+
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        response = self.client.get("/v1/users/api-token")
+        self.token = response.data["token"]
+
+        workflow_data = {
+            "name": "uploader",
+            "description": "great wf",
+            "data": [
+                {
+                    "type": "form_sequence",
+                    "name": "the formz",
+                    "id": "the_formz",
+                    "form_sequence": {
+                        "is_required": True,
+                        "data": [
+                            {
+                                "id": "hello",
+                                "name": "hello",
+                                "type": "text",
+                                "text": {"value": None},
+                            },
+                            {
+                                "id": "numbah",
+                                "name": "numbah",
+                                "type": "number",
+                                "number": {"value": None},
+                            },
+                        ],
+                        "history": [],
+                    },
+                },
+            ],
+        }
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        self.workflow_id = response.data["id"]
+
+    def test_create_task(self):
+        task_data = {"data": {"the_formz": {"hello": "word", "numbah": 2}}}
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.post(
+            "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
+            task_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        task = Task.objects.get(id=response.data["id"])
+        self.assertIsNotNone(task)
+        self.assertIsNotNone(task.data[0]["form_sequence"].get("data"))
