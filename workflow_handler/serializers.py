@@ -14,6 +14,7 @@ from hl_rest_api import analytics
 from .schemas import DATA_SCHEMA
 from .models import Workflow, Task, Source, WorkflowNotification, WebHook, TaskActivity
 
+from .utils import get_session_duration_seconds
 
 logger = logging.getLogger(__file__)
 
@@ -268,6 +269,10 @@ class TaskSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         if instance.assigned_to == user:
             instance.data = validated_data.get("data", instance.data)
+
+            instance.handling_time_seconds += get_session_duration_seconds(instance)
+            instance.session_started_at = None
+
             if validated_data["submit_task"]:
                 instance.status = "completed"
                 instance.completed_at = timezone.now()

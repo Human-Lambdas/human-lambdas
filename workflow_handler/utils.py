@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 
 from .models import WebHook, Workflow, WorkflowNotification
+from django.utils import timezone
 
 TEMPLATE_ORG_ID = 40
 
@@ -112,3 +113,11 @@ def create_template(template_id, user, org):
                     workflow=workflow, notification=org_user.notifications, enabled=True
                 )
                 wfnotification.save()
+
+
+def get_session_duration_seconds(task):
+    if task.session_started_at:
+        delta_since_start = timezone.now() - task.session_started_at
+        return delta_since_start / timezone.timedelta(seconds=1)
+
+    return 0

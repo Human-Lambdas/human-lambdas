@@ -56,9 +56,9 @@ def get_aht(**kwargs):
         basic_query
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
-    ).aggregate(aht=Avg(F("completed_at") - F("assigned_at")))
+    ).aggregate(aht=Avg(F("handling_time_seconds")))
     aht = result["aht"]
-    return aht / timezone.timedelta(seconds=1) if aht else 0
+    return aht if aht else 0
 
 
 def get_tat(**kwargs):
