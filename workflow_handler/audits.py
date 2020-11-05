@@ -160,8 +160,13 @@ class AuditsGetTask(RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         task = Task.objects.filter(id=kwargs["task_id"]).first()
         if not task or task.status != "completed":
+            status = 400
             return Response(
-                status=400, data={"error_msg": "task is unknown or incomplete"}
+                status=status,
+                data={
+                    "status_code": status,
+                    "errors": [{"message": "task is unknown or incomplete"}],
+                },
             )
 
         task.correct = request.data["correct"]
