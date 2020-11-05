@@ -147,6 +147,9 @@ ACTIVITY_ACTIONS = [
     ("completed", "completed"),
     ("saved", "saved"),
     ("comment", "comment"),
+    ("audited_correct", "audited_correct"),
+    ("audited_incorrect", "audited_incorrect"),
+    ("audited_empty", "audited_empty"),
 ]
 
 
