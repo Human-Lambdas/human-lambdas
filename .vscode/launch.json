@@ -21,7 +21,7 @@
                 "test",
                 "--noinput",
                 "--keepdb",
-                "workflow_handler.tests.test_task_audits.TestTaskAudit.test_when_task_audit_submitted_then_activity_log_entry_created"
+                "workflow_handler.tests.test_task_audits.TestTaskAudit"
             ],
             "django": true
         }

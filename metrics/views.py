@@ -74,21 +74,18 @@ def get_tat(**kwargs):
 
 def get_accuracy(**kwargs):
     basic_query = process_kwargs(**kwargs)
-    all_completed = Task.objects.filter(
+    all_audited = Task.objects.filter(
         basic_query
-        & Q(status="completed")
+        & ~Q(correct=None)
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     )
 
-    num_completed = float(len(all_completed))
+    num_completed = float(len(all_audited))
 
     if num_completed == 0:
-        return 1.0
+        return None
 
-    all_incorrect = all_completed.filter(Q(correct=False))
-
-    num_incorrect = float(len(all_incorrect))
-    num_correct = num_completed - num_incorrect
+    num_correct = float(len(all_audited.filter(Q(correct=True))))
 
     return num_correct / num_completed
 

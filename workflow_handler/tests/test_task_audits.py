@@ -118,6 +118,15 @@ class TestTaskAudit(APITestCase):
                 format="json",
             )
 
+    def put_correctness_audit(self, task_id, correct):
+        data = {"correct": correct}
+        response = self.client.put(
+            f"/v1/orgs/{self.org_id}/workflows/tasks/{task_id}/audit",
+            data=data,
+            format="json",
+        )
+        return response
+
     def test_get_completed_task_list(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.get(
@@ -224,7 +233,7 @@ class TestTaskAudit(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
-    def test_when_no_tasks_audited_then_100_percent_accuracy(self):
+    def test_when_no_tasks_audited_then_null_accuracy(self):
         # assert
         data = {
             "range": "daily",
@@ -237,9 +246,9 @@ class TestTaskAudit(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[-1]["accuracy"], 1.0)
+        self.assertEqual(response.data[-1]["accuracy"], None)
 
-    def test_when_no_tasks_completed_then_100_percent_accuracy(self):
+    def test_when_no_tasks_completed_then_null_accuracy(self):
         tasks = Task.objects.all()
         for t in tasks:
             t.status = "assigned"
@@ -257,29 +266,59 @@ class TestTaskAudit(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[-1]["accuracy"], 1.0)
+        self.assertEqual(response.data[-1]["accuracy"], None)
 
-    def test_when_completed_task_audited_false_then_accuracy_declines(self):
+    def test_when_correctness_nulled_then_null_accuracy(self):
         # arrange
-        task = (
+        tasks = (
             Task.objects.filter(workflow__pk=self.workflow_id, source__name="test.csv")
             .order_by("-completed_at")
             .first()
         )
-
-        n_tasks = float(len(Task.objects.all()))
-        expected_accuracy = (n_tasks - 1.0) / n_tasks
+        response = self.put_correctness_audit(tasks.id, True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # act
+        response = self.put_correctness_audit(tasks.id, None)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        data = {"correct": False}
-        response = self.client.put(
-            f"/v1/orgs/{self.org_id}/workflows/tasks/{task.id}/audit",
-            data=data,
+        # assert
+        data = {
+            "range": "daily",
+            "type": ["accuracy"],
+        }
+        response = self.client.get(
+            f"/v1/orgs/{self.org_id}/metrics",
+            data,
             format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[-1]["accuracy"], None)
+
+    def test_when_completed_task_audited_false_then_accuracy_declines(self):
+
+        # arrange
+        tasks = (
+            Task.objects.filter(workflow__pk=self.workflow_id, source__name="test.csv")
+            .order_by("-completed_at")
+            .all()
+        )
+
+        correct = tasks[0:2]
+        incorrect = tasks[2:3]
+        num_correct = float(len(correct))
+        num_incorrect = float(len(incorrect))
+        expected_accuracy = num_correct / (num_incorrect + num_correct)
+
+        # act
+        for t in correct:
+            response = self.put_correctness_audit(t.id, True)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        for t in incorrect:
+            response = self.put_correctness_audit(t.id, False)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # assert
         data = {
@@ -315,6 +354,18 @@ class TestTaskAudit(APITestCase):
         # assert
         activity = TaskActivity.objects.last()
         self.assertEqual(activity.action, "audited_incorrect")
+
+    def test_when_incomplete_task_audited_then_error(self):
+        tasks = Task.objects.all()
+        for t in tasks:
+            t.status = "assigned"
+            t.save()
+
+        # act
+        response = self.put_correctness_audit(tasks[0].id, True)
+
+        # assert
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class TestEmptyTaskAudit(APITestCase):
