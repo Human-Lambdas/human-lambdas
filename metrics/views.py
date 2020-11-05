@@ -80,14 +80,14 @@ def get_accuracy(**kwargs):
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     )
 
-    num_completed = float(len(all_audited))
+    num_audited = float(len(all_audited))
 
-    if num_completed == 0:
+    if num_audited == 0:
         return None
 
     num_correct = float(len(all_audited.filter(Q(correct=True))))
 
-    return num_correct / num_completed
+    return num_correct / num_audited
 
 
 METRICS = {
