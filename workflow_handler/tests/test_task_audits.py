@@ -121,7 +121,9 @@ class TestTaskAudit(APITestCase):
     def test_get_completed_task_list(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed".format(self.org_id,)
+            "/v1/orgs/{}/workflows/tasks/completed".format(
+                self.org_id,
+            )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for itask in response.data["tasks"]:
@@ -198,14 +200,20 @@ class TestTaskAudit(APITestCase):
         if next_task:
             self.assertEqual(
                 response.data["next"],
-                f"/workflows/tasks/{next_task.pk}/audit?workflow_id={self.workflow_id}&source_id={source_id}",
+                (
+                    f"/workflows/tasks/{next_task.pk}/audit?workflow_id={self.workflow_id}"
+                    f"&source_id={source_id}"
+                ),
             )
         else:
             self.assertEqual(response.data["next"], None)
         if prev_task:
             self.assertEqual(
                 response.data["previous"],
-                f"/workflows/tasks/{prev_task.pk}/audit?workflow_id={self.workflow_id}&source_id={source_id}",
+                (
+                    f"/workflows/tasks/{prev_task.pk}/audit?workflow_id={self.workflow_id}"
+                    f"&source_id={source_id}"
+                ),
             )
         else:
             self.assertEqual(response.data["previous"], None)
@@ -215,6 +223,62 @@ class TestTaskAudit(APITestCase):
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+    def test_when_no_tasks_audited_then_100_percent_accuracy(self):
+        # assert
+        data = {
+            "range": "daily",
+            "type": ["accuracy"],
+        }
+        response = self.client.get(
+            f"/v1/orgs/{self.org_id}/metrics",
+            data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[-1]["accuracy"], 1.0)
+
+    def test_when_no_tasks_completed_then_100_percent_accuracy(self):
+        assert False
+
+    def test_when_completed_task_audited_false_then_accuracy_declines(self):
+        # arrange
+        task = (
+            Task.objects.filter(workflow__pk=self.workflow_id, source__name="test.csv")
+            .order_by("-completed_at")
+            .first()
+        )
+
+        # act
+
+        data = {"correct": False}
+        response = self.client.put(
+            f"/v1/orgs/{self.org_id}/workflows/tasks/{task.id}/audit",
+            data=data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # assert
+        data = {
+            "range": "daily",
+            "type": ["accuracy"],
+        }
+        response = self.client.get(
+            f"/v1/orgs/{self.org_id}/metrics",
+            data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data[-1]["accuracy"], 0.75
+        )  # todo how to know how many tasks?
+
+    def test_when_task_audit_submitted_then_activity_log_entry_created(self):
+        assert False
 
 
 class TestEmptyTaskAudit(APITestCase):
@@ -307,7 +371,9 @@ class TestEmptyTaskAudit(APITestCase):
     def test_get_empty_completed_task_list(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed".format(self.org_id,)
+            "/v1/orgs/{}/workflows/tasks/completed".format(
+                self.org_id,
+            )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["tasks"], [], response.data)

@@ -1,6 +1,6 @@
 from urllib.parse import urlencode
 
-from rest_framework.generics import ListAPIView, GenericAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from user_handler.models import Organization
 from rest_framework.views import APIView
@@ -117,7 +117,7 @@ class ListSourcesView(ListAPIView):
         )
 
 
-class AuditsGetTask(GenericAPIView):
+class AuditsGetTask(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     serializer_class = TaskSerializer
 
@@ -156,3 +156,9 @@ class AuditsGetTask(GenericAPIView):
                 ),
             }
         )
+
+    def put(self, request, *args, **kwargs):
+        task = Task.objects.get(id=kwargs["task_id"])
+        task.correct = request.data["correct"]
+        task.save()
+        return Response()

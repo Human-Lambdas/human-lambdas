@@ -72,16 +72,39 @@ def get_tat(**kwargs):
     return tat / timezone.timedelta(seconds=1) if tat else 0
 
 
+def get_accuracy(**kwargs):
+    basic_query = process_kwargs(**kwargs)
+    all_completed = Task.objects.filter(
+        basic_query
+        & Q(status="completed")
+        & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
+    )
+
+    num_completed = float(len(all_completed))
+
+    if num_completed == 0:
+        return 1.0
+
+    all_incorrect = all_completed.filter(Q(correct=False))
+
+    num_incorrect = float(len(all_incorrect))
+    num_correct = num_completed - num_incorrect
+
+    return num_correct / num_completed
+
+
 METRICS = {
     "completed": get_completed,
     "pending": get_pending,
     "aht": get_aht,
     "tat": get_tat,
+    "accuracy": get_accuracy,
 }
 
 WORKER_METRICS = {
     "completed": get_completed,
     "aht": get_aht,
+    "accuracy": get_accuracy,
 }
 
 
