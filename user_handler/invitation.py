@@ -202,7 +202,7 @@ class InvitationView(APIView):
                 "status": 201,
             }
             analytics.track(user.email, "Invited new user signed up")
-            analytics.alias(user.pk, user.email)
+            analytics.alias(user.email, user.pk)
             analytics.track(user.pk, "User Signup", {"source": "invite"})
         else:
             response_data = {
