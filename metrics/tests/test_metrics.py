@@ -6,8 +6,6 @@ from rest_framework import status
 from user_handler.models import Organization, User
 from workflow_handler.models import Task, Workflow
 from workflow_handler.tests import DATA_PATH
-from datetime import timedelta
-from unittest.mock import patch
 
 
 class TestMetrics(APITestCase):
@@ -407,68 +405,6 @@ class TestQueryMetrics(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[-1]["pending"], 3)
-
-    def test_when_resumed_task_submits_then_ht_is_sum_of_sessions(self):
-        # Arrange
-        data = {
-            "range": "monthly",
-            "type": ["aht"],
-        }
-
-        first_ht = 2
-        downtime = 8
-        second_ht = 6
-        total_ht = first_ht + second_ht
-        start_time = timezone.now()
-
-        def start_session():
-            response = self.client.get(
-                f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{self.task.id}/activity"
-            )
-            assert response.status_code == 200
-
-        def save_task():
-            data_payload = {"data": self.task.data}
-
-            response = self.client.patch(
-                f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{self.task.id}/save",
-                data=data_payload,
-                format="json",
-            )
-            assert response.status_code == 200
-
-        def submit_task():
-            response = self.client.patch(
-                f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{self.task.id}",
-                data={},
-                format="json",
-            )
-            assert response.status_code == 200
-
-        with patch("django.utils.timezone.now") as now:
-            # Act
-            now.return_value = start_time
-            start_session()
-
-            now.return_value += timedelta(seconds=first_ht)
-            save_task()
-
-            now.return_value += timedelta(seconds=downtime)
-            start_session()
-
-            now.return_value += timedelta(seconds=second_ht)
-
-            submit_task()
-
-            response = self.client.get(
-                "/v1/orgs/{}/metrics".format(self.org_id),
-                data,
-                format="json",
-            )
-
-            # Assert
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(response.data[-1]["aht"], total_ht)
 
 
 class TestWorkflowMetrics(APITestCase):
