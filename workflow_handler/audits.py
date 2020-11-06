@@ -1,24 +1,25 @@
 from urllib.parse import urlencode
 
-from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import IsAuthenticated
-from user_handler.models import Organization
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from workflow_handler.csv_utils import task_list_to_csv_response
 from django.db.models import Q
 from django.shortcuts import get_list_or_404, get_object_or_404
-from user_handler.permissions import IsOrgAdmin
 from next_prev import next_in_order, prev_in_order
-from hl_rest_api import analytics
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .utils import TaskPagination, process_query_params
+from hl_rest_api import analytics
+from user_handler.models import Organization
+from user_handler.permissions import IsOrgAdmin
+from workflow_handler.csv_utils import task_list_to_csv_response
+
+from .models import Source, Task, TaskActivity, Workflow
 from .serializers import (
-    TaskSerializer,
     CompletedTaskSerializer,
     SourceSerializer,
+    TaskSerializer,
 )
-from .models import TaskActivity, Workflow, Task, Source
+from .utils import TaskPagination, process_query_params
 
 
 def make_task_filter_url(org_id, task_id, filters):

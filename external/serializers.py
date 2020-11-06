@@ -1,6 +1,7 @@
-from workflow_handler.serializers import TaskSerializer
-from schema import SchemaError, Schema
 from rest_framework import serializers
+from schema import Schema, SchemaError
+
+from workflow_handler.serializers import TaskSerializer
 
 
 class CreateTaskSerializer(TaskSerializer):

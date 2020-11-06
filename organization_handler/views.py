@@ -1,15 +1,16 @@
+from django.shortcuts import get_list_or_404, get_object_or_404
 from rest_framework.generics import (
-    RetrieveUpdateAPIView,
-    ListAPIView,
-    RetrieveUpdateDestroyAPIView,
     CreateAPIView,
+    ListAPIView,
+    RetrieveUpdateAPIView,
+    RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404, get_list_or_404
-from user_handler.models import User, Organization
-from user_handler.serializers import UserSerializer
+
+from user_handler.models import Organization, User
 from user_handler.permissions import IsAdminOrReadOnly
+from user_handler.serializers import UserSerializer
 
 from .serializers import OrganizationSerializer
 

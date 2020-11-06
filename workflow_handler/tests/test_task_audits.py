@@ -1,11 +1,11 @@
-import os
 import copy
+import os
 
-from rest_framework.test import APITestCase
 from rest_framework import status
-from workflow_handler.models import Task, Source, TaskActivity
-from user_handler.models import Organization
+from rest_framework.test import APITestCase
 
+from user_handler.models import Organization
+from workflow_handler.models import Source, Task, TaskActivity
 
 _CURRENT_DIR = os.path.dirname(__file__)
 

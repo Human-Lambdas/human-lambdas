@@ -1,20 +1,21 @@
 import logging
 
+from django.shortcuts import get_object_or_404
+from rest_framework.authtoken.models import Token
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
+
 from hl_rest_api import analytics
 
+from .models import Organization, User
 from .permissions import IsOrgAdmin
-from .models import User, Organization
-from .serializers import UserSerializer, APITokenUserSerializer
+from .serializers import APITokenUserSerializer, UserSerializer
 
 logger = logging.getLogger(__file__)
 

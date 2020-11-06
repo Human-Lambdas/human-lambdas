@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
-from user_handler.models import User, Notification
+
+from user_handler.models import Notification, User
 from workflow_handler.models import WorkflowNotification
 
 

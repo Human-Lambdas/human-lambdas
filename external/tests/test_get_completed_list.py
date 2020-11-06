@@ -1,11 +1,11 @@
-import os
 import copy
+import os
 
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from workflow_handler.models import Task
 from user_handler.models import Organization
+from workflow_handler.models import Task
 from workflow_handler.tests import DATA_PATH
 
 

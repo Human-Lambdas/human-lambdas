@@ -1,11 +1,12 @@
-from rest_framework.views import APIView
-from user_handler.models import Organization
-from rest_framework.response import Response
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from workflow_handler.models import Workflow, Task
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from user_handler.models import Organization
+from workflow_handler.models import Task, Workflow
 
 
 class FlushTasksView(APIView):

@@ -1,18 +1,20 @@
 import os
+from datetime import timedelta
+from unittest.mock import patch
 
 from django.utils import timezone
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
+
 from user_handler.models import Organization, User
 from workflow_handler.models import Task, Workflow
 from workflow_handler.tests import DATA_PATH
-from datetime import timedelta
-from unittest.mock import patch
 
 
 class TestMetrics(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(DATA_PATH, "test.csv")
+
         self.total_rows = 3
         registration_data = {
             "email": "foo@bar.com",

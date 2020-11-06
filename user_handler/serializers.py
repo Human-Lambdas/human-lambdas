@@ -1,11 +1,11 @@
 import logging
 
 from rest_framework import serializers
+
 from hl_rest_api import analytics
 from workflow_handler.utils import create_template
 
-from .models import User, Organization, Notification
-
+from .models import Notification, Organization, User
 
 logger = logging.getLogger(__file__)
 

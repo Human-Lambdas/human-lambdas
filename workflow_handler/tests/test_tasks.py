@@ -1,14 +1,12 @@
+import copy
 import logging
 import os
-import copy
 
-from django.utils import timezone
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from workflow_handler.models import Workflow, Task
-from user_handler.models import Organization, User, Notification
-
+from user_handler.models import Notification, Organization, User
+from workflow_handler.models import Task, Workflow
 
 logger = logging.getLogger(__file__)
 
@@ -351,7 +349,8 @@ class TestTasks(APITestCase):
     def test_get_pending_tasks(self):
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
-                self.org_id, self.workflow_id,
+                self.org_id,
+                self.workflow_id,
             )
         )
         self.assertEqual(response.data["count"], 3)
@@ -369,7 +368,8 @@ class TestTasks(APITestCase):
 
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
-                self.org_id, self.workflow_id,
+                self.org_id,
+                self.workflow_id,
             )
         )
         self.assertEqual(response.data["count"], 3)
@@ -398,7 +398,8 @@ class TestTasks(APITestCase):
 
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
-                self.org_id, self.workflow_id,
+                self.org_id,
+                self.workflow_id,
             )
         )
         self.assertEqual(response.data["count"], 2)

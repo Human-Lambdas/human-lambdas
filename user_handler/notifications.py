@@ -1,9 +1,10 @@
-from rest_framework.generics import RetrieveUpdateAPIView
-from rest_framework import serializers
-from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.conf import settings
+from rest_framework import serializers
+from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.permissions import IsAuthenticated
+
 from hl_rest_api import analytics
 
 from .apps import UserHandlerConfig

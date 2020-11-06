@@ -26,6 +26,10 @@ Future commits will now be linted with black and flake8
 
 Note that when you add an environmental variable, it must also be added to the environment list in docker-compose.yml
 
+### Isort
+
+To sort imports for the whole project at once, rather than just staged files, run `isort -y`
+
 ## Testing API Against a containerised postgres instance
 
 Start the database:

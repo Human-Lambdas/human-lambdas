@@ -1,13 +1,12 @@
+import copy
 import logging
 import os
-import copy
 
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from workflow_handler.models import Workflow, Task, TaskActivity
 from user_handler.models import Organization
-
+from workflow_handler.models import Task, TaskActivity, Workflow
 
 logger = logging.getLogger(__file__)
 
@@ -100,7 +99,9 @@ class TestTasksActivity(APITestCase):
         task = Task.objects.filter(workflow=workflow).all()[0]
         response = self.client.post(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}/activity".format(
-                self.org_id, self.workflow_id, task.pk,
+                self.org_id,
+                self.workflow_id,
+                task.pk,
             ),
             data={"action": "comment", "comment": "hello world"},
             format="json",
@@ -113,7 +114,9 @@ class TestTasksActivity(APITestCase):
         task = Task.objects.filter(workflow=workflow).all()[0]
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}/activity".format(
-                self.org_id, self.workflow_id, task.pk,
+                self.org_id,
+                self.workflow_id,
+                task.pk,
             ),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -127,7 +130,9 @@ class TestTasksActivity(APITestCase):
         task = Task.objects.filter(workflow=workflow).all()[0]
         response = self.client.post(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}/activity".format(
-                self.org_id, self.workflow_id, task.pk,
+                self.org_id,
+                self.workflow_id,
+                task.pk,
             ),
             data={"action": "comment", "comment": "hello world"},
             format="json",
@@ -208,7 +213,9 @@ class TestTasksActivity(APITestCase):
         )
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}/activity".format(
-                self.org_id, self.workflow_id, task.pk,
+                self.org_id,
+                self.workflow_id,
+                task.pk,
             ),
         )
         self.assertEqual(response.data[0]["assignee_name"], "foo")

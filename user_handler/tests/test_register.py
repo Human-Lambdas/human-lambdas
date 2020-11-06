@@ -1,8 +1,9 @@
 import logging
 
-from rest_framework.test import APITestCase
 from rest_framework import status
-from user_handler.models import User, Organization
+from rest_framework.test import APITestCase
+
+from user_handler.models import Organization, User
 from workflow_handler.models import Workflow
 
 logger = logging.getLogger(__file__)
@@ -25,7 +26,11 @@ class TestAPIRegistration(APITestCase):
     def test_registration_without_organization(self):
         response = self.client.post(
             "/v1/users/register",
-            {"email": "foo@bar.com", "password": "foowordbar", "name": "foo",},
+            {
+                "email": "foo@bar.com",
+                "password": "foowordbar",
+                "name": "foo",
+            },
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -58,7 +63,12 @@ class TestAPIRegistrationTemplate(APITestCase):
         self.org_id = organization.id
         organization.add_admin(user)
         wf_data = [
-            {"id": "foo", "name": "foo", "type": "text", "text": {"read_only": True},},
+            {
+                "id": "foo",
+                "name": "foo",
+                "type": "text",
+                "text": {"read_only": True},
+            },
             {
                 "id": "foo",
                 "name": "foo",
@@ -74,7 +84,7 @@ class TestAPIRegistrationTemplate(APITestCase):
 
     def test_template_registration(self):
         response = self.client.post(
-            f"/v1/users/register",
+            "/v1/users/register",
             {
                 "email": "bar@bar.com",
                 "password": "foowordbar",

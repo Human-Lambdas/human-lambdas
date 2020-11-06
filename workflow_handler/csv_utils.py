@@ -1,9 +1,10 @@
-import csv
 import copy
+import csv
 from ast import literal_eval
 
 from django.db.models import F
 from django.http import HttpResponse
+
 from user_handler.notifications import send_notification
 
 from .models import Task, TaskActivity

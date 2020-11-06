@@ -1,16 +1,15 @@
 from django.urls import path
 
+from .flush import FlushTasksView
 from .views import CreateTaskView, GetExternalCompletedTaskView
 from .zapier import (
     GetZapierTaskInputs,
+    GetZapierTaskSampleData,
     GetZapierWorkflows,
     ZapierAuthentication,
     ZapierCreateTask,
     ZapierHook,
-    GetZapierTaskSampleData,
 )
-from .flush import FlushTasksView
-
 
 urlpatterns = [
     path(

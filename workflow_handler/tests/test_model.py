@@ -1,7 +1,7 @@
 from django.test import TestCase
-from user_handler.models import User, Organization
 
-from workflow_handler.models import Workflow, Task
+from user_handler.models import Organization, User
+from workflow_handler.models import Task, Workflow
 
 
 class TestModelWorkflow(TestCase):
