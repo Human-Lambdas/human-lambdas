@@ -120,7 +120,9 @@ class ListOrgUsersView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return User.objects.filter(organization__user=user)
+        return User.objects.filter(
+            organization__user=user, organization__pk=self.kwargs["org_id"]
+        )
 
     def list(self, request, *args, **kwargs):
         obj = get_list_or_404(self.get_queryset())
