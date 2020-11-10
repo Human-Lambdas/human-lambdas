@@ -13,7 +13,6 @@ from hl_rest_api import analytics
 
 from .schemas import DATA_SCHEMA
 from .models import Workflow, Task, Source, WorkflowNotification, WebHook, TaskActivity
-
 from .utils import get_session_duration_seconds
 
 logger = logging.getLogger(__file__)
@@ -112,7 +111,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
         description = validated_data.get("description", "")
         data = validated_data["data"]
         clean_form_sequence(data)
-        organization_obj = Organization.objects.filter(user=user)
+        organization_obj = Organization.objects.filter(
+            user=user, pk=int(self.context["view"].kwargs["org_id"])
+        )
         if organization_obj.exists() and organization_obj.count() == 1:
             organization = organization_obj.first()
         else:

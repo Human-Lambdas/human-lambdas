@@ -130,9 +130,7 @@ class TestTaskAudit(APITestCase):
     def test_get_completed_task_list(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed".format(
-                self.org_id,
-            )
+            "/v1/orgs/{}/workflows/tasks/completed".format(self.org_id,)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for itask in response.data["tasks"]:
@@ -240,9 +238,7 @@ class TestTaskAudit(APITestCase):
             "type": ["accuracy"],
         }
         response = self.client.get(
-            f"/v1/orgs/{self.org_id}/metrics",
-            data,
-            format="json",
+            f"/v1/orgs/{self.org_id}/metrics", data, format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -260,9 +256,7 @@ class TestTaskAudit(APITestCase):
             "type": ["accuracy"],
         }
         response = self.client.get(
-            f"/v1/orgs/{self.org_id}/metrics",
-            data,
-            format="json",
+            f"/v1/orgs/{self.org_id}/metrics", data, format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -288,9 +282,7 @@ class TestTaskAudit(APITestCase):
             "type": ["accuracy"],
         }
         response = self.client.get(
-            f"/v1/orgs/{self.org_id}/metrics",
-            data,
-            format="json",
+            f"/v1/orgs/{self.org_id}/metrics", data, format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -326,9 +318,7 @@ class TestTaskAudit(APITestCase):
             "type": ["accuracy"],
         }
         response = self.client.get(
-            f"/v1/orgs/{self.org_id}/metrics",
-            data,
-            format="json",
+            f"/v1/orgs/{self.org_id}/metrics", data, format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -458,9 +448,7 @@ class TestEmptyTaskAudit(APITestCase):
     def test_get_empty_completed_task_list(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed".format(
-                self.org_id,
-            )
+            "/v1/orgs/{}/workflows/tasks/completed".format(self.org_id,)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["tasks"], [], response.data)

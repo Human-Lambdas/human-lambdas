@@ -1,4 +1,5 @@
 from uuid import uuid4
+import logging
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -10,7 +11,7 @@ from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
 from user_handler.models import Organization, User
 from drf_yasg.utils import swagger_auto_schema
-import logging
+
 
 logger = logging.getLogger(__file__)
 
@@ -262,8 +263,7 @@ class WorkerMetrics(APIView):
             organization = self.get_queryset().first()
             if worker_id:
                 users = User.objects.filter(
-                    organization=organization,
-                    pk__in=worker_id,
+                    organization=organization, pk__in=worker_id,
                 ).all()
             else:
                 users = User.objects.filter(organization=organization).all()
