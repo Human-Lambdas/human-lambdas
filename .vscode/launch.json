@@ -21,7 +21,7 @@
                 "test",
                 "--noinput",
                 "--keepdb",
-                "metrics.tests.test_metrics"
+                "workflow_handler.tests.test_task_audits.TestTaskAudit"
             ],
             "django": true
         }

@@ -77,11 +77,7 @@ urlpatterns = [
         GetCompletedTasksCSVView.as_view(),
         name="completed-tasks-csv",
     ),
-    path(
-        "/tasks/<int:task_id>/audit",
-        AuditsGetTask.as_view(),
-        name="audit-task",
-    ),
+    path("/tasks/<int:task_id>/audit", AuditsGetTask.as_view(), name="audit-task",),
     path("/<int:workflow_id>/sources", ListSourcesView.as_view(), name="list-sources"),
     # temporary external API endpoints
     path(
@@ -90,9 +86,7 @@ urlpatterns = [
         name="external-completed-task",
     ),
     path(
-        "/<int:workflow_id>/tasks/create",
-        CreateTaskView.as_view(),
-        name="create-task",
+        "/<int:workflow_id>/tasks/create", CreateTaskView.as_view(), name="create-task",
     ),
     path(
         "/<int:workflow_id>/tasks/form",

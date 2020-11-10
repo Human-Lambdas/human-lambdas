@@ -1,4 +1,5 @@
 from uuid import uuid4
+import logging
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -10,7 +11,7 @@ from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
 from user_handler.models import Organization, User
 from drf_yasg.utils import swagger_auto_schema
-import logging
+
 
 logger = logging.getLogger(__file__)
 
@@ -56,9 +57,9 @@ def get_aht(**kwargs):
         basic_query
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
-    ).aggregate(aht=Avg(F("completed_at") - F("assigned_at")))
+    ).aggregate(aht=Avg(F("handling_time_seconds")))
     aht = result["aht"]
-    return aht / timezone.timedelta(seconds=1) if aht else 0
+    return aht if aht else 0
 
 
 def get_tat(**kwargs):
@@ -72,16 +73,35 @@ def get_tat(**kwargs):
     return tat / timezone.timedelta(seconds=1) if tat else 0
 
 
+def get_accuracy(**kwargs):
+    basic_query = process_kwargs(**kwargs)
+    all_audited = Task.objects.filter(
+        basic_query
+        & ~Q(correct=None)
+        & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
+    )
+
+    if not all_audited.exists():
+        return None
+
+    num_audited = float(len(all_audited))
+    num_correct = float(len(all_audited.filter(Q(correct=True))))
+
+    return num_correct / num_audited
+
+
 METRICS = {
     "completed": get_completed,
     "pending": get_pending,
     "aht": get_aht,
     "tat": get_tat,
+    "accuracy": get_accuracy,
 }
 
 WORKER_METRICS = {
     "completed": get_completed,
     "aht": get_aht,
+    "accuracy": get_accuracy,
 }
 
 
@@ -243,8 +263,7 @@ class WorkerMetrics(APIView):
             organization = self.get_queryset().first()
             if worker_id:
                 users = User.objects.filter(
-                    organization=organization,
-                    pk__in=worker_id,
+                    organization=organization, pk__in=worker_id,
                 ).all()
             else:
                 users = User.objects.filter(organization=organization).all()
