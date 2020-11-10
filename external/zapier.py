@@ -29,6 +29,8 @@ ZAPIER_TYPE_MAPPER = {
 
 SAMPLE_DATA = {
     "text": "sample text",
+    "email": "contact@humanlambdas.com",
+    "link": "https://humanlambdas.com",
     "image": "link/to/image",
     "number": 42,
     "date": "1999/12/31",
