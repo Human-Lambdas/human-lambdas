@@ -105,7 +105,7 @@ class GetZapierWorkflows(APIView):
             )
         result = {
             "key": "workflow_id",
-            "label": "Workflow ID",
+            "label": "Workflow",
             "choices": choices,
             "required": True,
             "altersDynamicFields": True,
