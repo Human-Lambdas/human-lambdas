@@ -31,6 +31,11 @@ SAMPLE_DATA = {
     "single_selection": "selection",
     "multiple_selection": "[selection1, selection2]",
     "binary": False,
+    "form_sequence": {
+        "id_1": True,
+        "id_2": "sample text",
+        "id_3": ["option_1", "option_2"],
+    },
 }
 
 
