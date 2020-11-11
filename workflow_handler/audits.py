@@ -179,8 +179,6 @@ class AuditsGetTask(RetrieveUpdateDestroyAPIView):
         }
 
         TaskActivity(
-            task=task,
-            created_by=request.user,
-            action=action_name_lookup[task.correct],
+            task=task, created_by=request.user, action=action_name_lookup[task.correct],
         ).save()
         return Response()

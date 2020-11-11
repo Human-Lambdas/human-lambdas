@@ -45,10 +45,6 @@ urlpatterns = [
         ZapierCreateTask.as_view(),
         name="zapier-create-task",
     ),
-    path(
-        "zapier/hook",
-        ZapierHook.as_view(),
-        name="zapier-hook",
-    ),
+    path("zapier/hook", ZapierHook.as_view(), name="zapier-hook",),
     path("zapier/sample-data", GetZapierTaskSampleData.as_view(), name="sample-data"),
 ]
