@@ -28,7 +28,7 @@ SAMPLE_DATA = {
     "date": "1999/12/31",
     "audio": "link/to/audio",
     "video": "link/to/video",
-    "single-selction": "selection",
+    "single_selection": "selection",
     "multiple_selection": "[selection1, selection2]",
     "binary": False,
 }
@@ -57,17 +57,30 @@ class GetZapierTaskInputs(APIView):
         obj = get_object_or_404(self.get_queryset())
         children = []
         for w_input in obj.data:
-            children.append(
-                {
-                    "key": w_input["id"],
-                    "label": w_input["name"],
-                    "type": (
-                        ZAPIER_TYPE_MAPPER[w_input["type"]]
-                        if w_input["type"] in ZAPIER_TYPE_MAPPER
-                        else "string"
-                    ),
-                }
-            )
+            child = {
+                "key": w_input["id"],
+                "label": w_input["name"],
+                "type": (
+                    ZAPIER_TYPE_MAPPER[w_input["type"]]
+                    if w_input["type"] in ZAPIER_TYPE_MAPPER
+                    else "string"
+                ),
+            }
+            if w_input["type"] in ["single_selection", "multiple_selection"]:
+                child["choices"] = []
+                for option in w_input[w_input["type"]]["options"]:
+                    child["choices"].append(
+                        {
+                            "label": option["name"],
+                            "value": option["id"],
+                            "sample": option["id"],
+                        }
+                    )
+            if w_input["type"] == "multiple_selection":
+                child["list"] = True
+            if w_input["type"] == "form_sequence":
+                child["dict"] = True
+            children.append(child)
         result = {
             "key": "data",
             "label": "Data",
