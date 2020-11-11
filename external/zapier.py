@@ -17,13 +17,8 @@ from .views import CreateTaskView
 
 
 ZAPIER_TYPE_MAPPER = {
-    "text": "string",
-    "image": "string",
-    "number": "integer",
-    "date": "string",
-    "audio": "string",
-    "video": "string",
-    # "list": "string",
+    "number": "number",
+    "binary": "boolean"
 }
 
 
@@ -65,7 +60,11 @@ class GetZapierTaskInputs(APIView):
         obj = get_object_or_404(self.get_queryset())
         children = []
         for w_input in obj.data:
-            children.append({"key": w_input["id"], "label": w_input["name"]})
+            children.append({
+                "key": w_input["id"], 
+                "label": w_input["name"],
+                "type": (ZAPIER_TYPE_MAPPER[w_input["type"]] if w_input["type"] in ZAPIER_TYPE_MAPPER else "string")
+            })
         result = {
             "key": "data",
             "label": "Data",
