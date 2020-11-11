@@ -16,27 +16,26 @@ from hl_rest_api import analytics
 from .views import CreateTaskView
 
 
-ZAPIER_TYPE_MAPPER = {
-    "text": "string",
-    "image": "string",
-    "number": "integer",
-    "date": "string",
-    "audio": "string",
-    "video": "string",
-    # "list": "string",
-}
+ZAPIER_TYPE_MAPPER = {"number": "number", "binary": "boolean"}
 
 
 SAMPLE_DATA = {
     "text": "sample text",
+    "email": "contact@humanlambdas.com",
+    "link": "https://humanlambdas.com",
     "image": "link/to/image",
     "number": 42,
     "date": "1999/12/31",
     "audio": "link/to/audio",
     "video": "link/to/video",
-    "single-selction": "selection",
+    "single_selection": "selection",
     "multiple_selection": "[selection1, selection2]",
     "binary": False,
+    "form_sequence": {
+        "id_1": True,
+        "id_2": "sample text",
+        "id_3": ["option_1", "option_2"],
+    },
 }
 
 
@@ -63,7 +62,30 @@ class GetZapierTaskInputs(APIView):
         obj = get_object_or_404(self.get_queryset())
         children = []
         for w_input in obj.data:
-            children.append({"key": w_input["id"], "label": w_input["name"]})
+            child = {
+                "key": w_input["id"],
+                "label": w_input["name"],
+                "type": (
+                    ZAPIER_TYPE_MAPPER[w_input["type"]]
+                    if w_input["type"] in ZAPIER_TYPE_MAPPER
+                    else "string"
+                ),
+            }
+            if w_input["type"] in ["single_selection", "multiple_selection"]:
+                child["choices"] = []
+                for option in w_input[w_input["type"]]["options"]:
+                    child["choices"].append(
+                        {
+                            "label": option["name"],
+                            "value": option["id"],
+                            "sample": option["id"],
+                        }
+                    )
+            if w_input["type"] == "multiple_selection":
+                child["list"] = True
+            if w_input["type"] == "form_sequence":
+                child["dict"] = True
+            children.append(child)
         result = {
             "key": "data",
             "label": "Data",
@@ -103,7 +125,7 @@ class GetZapierWorkflows(APIView):
             )
         result = {
             "key": "workflow_id",
-            "label": "Workflow ID",
+            "label": "Workflow",
             "choices": choices,
             "required": True,
             "altersDynamicFields": True,
