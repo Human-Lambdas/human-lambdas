@@ -25,9 +25,7 @@ class TestMetrics(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get(
-            "/v1/users/api-token",
-        )
+        response = self.client.get("/v1/users/api-token",)
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
@@ -87,9 +85,7 @@ class TestMetrics(APITestCase):
                 "type": ["pending"],
             }
             response = self.client.get(
-                "/v1/orgs/{}/metrics".format(self.org_id),
-                data,
-                format="json",
+                "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -104,9 +100,7 @@ class TestMetrics(APITestCase):
             "type": ["pending", "completed"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -133,9 +127,7 @@ class TestComplexMetrics(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get(
-            "/v1/users/api-token",
-        )
+        response = self.client.get("/v1/users/api-token",)
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
@@ -209,9 +201,7 @@ class TestComplexMetrics(APITestCase):
             "type": ["completed", "aht", "tat"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -246,9 +236,7 @@ class TestQueryMetrics(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get(
-            "/v1/users/api-token",
-        )
+        response = self.client.get("/v1/users/api-token",)
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
@@ -369,9 +357,7 @@ class TestQueryMetrics(APITestCase):
             "type": ["pending"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 12 + 1)
@@ -382,9 +368,7 @@ class TestQueryMetrics(APITestCase):
             "type": ["banana"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
@@ -399,13 +383,71 @@ class TestQueryMetrics(APITestCase):
             "type": ["pending"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[-1]["pending"], 3)
 
+    def test_when_resumed_task_submits_then_ht_is_sum_of_sessions(self):
+        # Arrange
+        data = {
+            "range": "monthly",
+            "type": ["aht"],
+        }
+
+        first_ht = 2
+        downtime = 8
+        second_ht = 6
+        total_ht = first_ht + second_ht
+        start_time = timezone.now()
+
+        def start_session():
+            response = self.client.get(
+                f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{self.task.id}/activity"
+            )
+            assert response.status_code == 200
+
+        def save_task():
+            data_payload = {"data": self.task.data}
+
+            response = self.client.patch(
+                f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{self.task.id}/save",
+                data=data_payload,
+                format="json",
+            )
+            assert response.status_code == 200
+
+        def submit_task():
+            response = self.client.patch(
+                f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{self.task.id}",
+                data={},
+                format="json",
+            )
+            assert response.status_code == 200
+
+        with patch("django.utils.timezone.now") as now:
+            # Act
+            now.return_value = start_time
+            start_session()
+
+            now.return_value += timedelta(seconds=first_ht)
+            save_task()
+
+            now.return_value += timedelta(seconds=downtime)
+            start_session()
+
+            now.return_value += timedelta(seconds=second_ht)
+
+            submit_task()
+
+            response = self.client.get(
+                "/v1/orgs/{}/metrics".format(self.org_id), data, format="json",
+            )
+
+            # Assert
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.data[-1]["aht"], total_ht)
+            
 
 class TestWorkflowMetrics(APITestCase):
     def setUp(self):
@@ -424,9 +466,7 @@ class TestWorkflowMetrics(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get(
-            "/v1/users/api-token",
-        )
+        response = self.client.get("/v1/users/api-token",)
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
@@ -540,9 +580,7 @@ class TestWorkflowMetrics(APITestCase):
             "type": "pending",
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["pending"]), 12 + 1)
@@ -575,15 +613,12 @@ class TestWorkflowMetrics(APITestCase):
             "type": ["completed", "aht", "tat"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["completed"]), 12 + 1)
         self.assertEqual(
-            response.data["completed"][-1][wf1_name],
-            1,
+            response.data["completed"][-1][wf1_name], 1,
         )
         self.assertEqual(response.data["completed"][-1][wf2_name], 0)
         for idata in response.data["completed"][:-1]:
@@ -591,8 +626,7 @@ class TestWorkflowMetrics(APITestCase):
             self.assertEqual(idata[wf2_name], 0)
 
         self.assertEqual(
-            response.data["aht"][-1][wf1_name],
-            handling_time_seconds,
+            response.data["aht"][-1][wf1_name], handling_time_seconds,
         )
         self.assertEqual(response.data["aht"][-1][wf2_name], 0)
         for idata in response.data["aht"][:-1]:
@@ -617,9 +651,7 @@ class TestWorkflowMetrics(APITestCase):
             "workflow_id": self.workflow_id,
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["pending"]), 12 + 1)
@@ -636,9 +668,7 @@ class TestWorkflowMetrics(APITestCase):
             "workflow_id": [self.workflow_id, self.workflow_id2],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["pending"]), 12 + 1)
@@ -658,9 +688,7 @@ class TestWorkflowMetrics(APITestCase):
             "type": ["pending"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workflows".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics/workflows".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertNotIn(disabled_workflow_name, response.data["pending"][0])
@@ -684,9 +712,7 @@ class TestWorkermetrics(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get(
-            "/v1/users/api-token",
-        )
+        response = self.client.get("/v1/users/api-token",)
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
@@ -761,15 +787,12 @@ class TestWorkermetrics(APITestCase):
             "type": ["completed"],
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workers".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["completed"]), 12 + 1)
         self.assertEqual(
-            response.data["completed"][-1][worker.name],
-            1,
+            response.data["completed"][-1][worker.name], 1,
         )
 
         data = {
@@ -777,15 +800,12 @@ class TestWorkermetrics(APITestCase):
             "type": "aht",
         }
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workers".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(
-            response.data["aht"][-1][worker.name],
-            handling_time_seconds,
+            response.data["aht"][-1][worker.name], handling_time_seconds,
         )
         for idata in response.data["aht"][:-1]:
             self.assertEqual(idata[worker.name], 0)
@@ -794,9 +814,7 @@ class TestWorkermetrics(APITestCase):
         worker = User.objects.get(email="foo@bar.com")
         data = {"range": "monthly", "type": ["completed"], "worker_id": worker.pk}
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workers".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["completed"]), 12 + 1)
@@ -806,9 +824,7 @@ class TestWorkermetrics(APITestCase):
     def test_worker_multiple_types(self):
         data = {"range": "monthly", "type": ["completed", "aht"]}
         response = self.client.get(
-            "/v1/orgs/{}/metrics/workers".format(self.org_id),
-            data,
-            format="json",
+            "/v1/orgs/{}/metrics/workers".format(self.org_id), data, format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["completed"]), 12 + 1)
