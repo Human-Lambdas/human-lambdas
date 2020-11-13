@@ -217,7 +217,9 @@ class InvitationView(APIView):
             analytics.track(user.pk, "Existing user joined new org", {"new": False})
 
         for workflow in invitation_org.workflow_set.all():
-            WorkflowNotification(workflow=workflow, notification=notification).save()
+            WorkflowNotification(
+                workflow=workflow, notification=user.notifications
+            ).save()
 
         if invite.admin:
             invitation_org.add_admin(user)

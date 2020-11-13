@@ -76,8 +76,7 @@ class CreateTaskView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         if "data" not in self.request.data or not self.request.data["data"]:
             return Response(
-                {"status_code": 400, "errors": [{"message": "No data"}]},
-                status=400,
+                {"status_code": 400, "errors": [{"message": "No data"}]}, status=400,
             )
         return self.create(request, *args, **kwargs)
 

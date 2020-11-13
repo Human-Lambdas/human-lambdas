@@ -50,6 +50,20 @@ class TestCreateWorkflow(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertTrue(Workflow.objects.filter(name=workflow_data["name"]).exists())
 
+    def test_create_workflow_with_no_data(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
+        workflow_data = {
+            "name": "foowf",
+            "data": [],
+        }
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_create_workflow_too_long_name(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 

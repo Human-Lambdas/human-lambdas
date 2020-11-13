@@ -76,10 +76,7 @@ class TestZapierHook(APITestCase):
         hook_url = "https://some.url.se"
         response = self.client.post(
             "/zapier/hook",
-            {
-                "target": hook_url,
-                "workflow_id": self.workflow_id,
-            },
+            {"target": hook_url, "workflow_id": self.workflow_id,},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
@@ -93,10 +90,7 @@ class TestZapierHook(APITestCase):
         hook_url = "https://some.url.se"
         response = self.client.post(
             "/zapier/hook",
-            {
-                "target": hook_url,
-                "workflow_id": self.workflow_id,
-            },
+            {"target": hook_url, "workflow_id": self.workflow_id,},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
@@ -105,9 +99,7 @@ class TestZapierHook(APITestCase):
         self.assertTrue(webhook.exists())
 
         response = self.client.delete(
-            "/zapier/hook",
-            {"hook_id": hook_id},
-            format="json",
+            "/zapier/hook", {"hook_id": hook_id}, format="json",
         )
         self.assertEqual(
             response.status_code, status.HTTP_204_NO_CONTENT, response.data

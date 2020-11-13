@@ -21,6 +21,7 @@ from .models import (
     WorkflowNotification,
 )
 from .schemas import DATA_SCHEMA
+from .models import Workflow, Task, Source, WorkflowNotification, WebHook, TaskActivity
 from .utils import get_session_duration_seconds
 
 logger = logging.getLogger(__file__)
@@ -34,6 +35,8 @@ def clean_form_sequence(data):
 
 
 def validate_output_structure(validated_data_items):
+    if not validated_data_items:
+        raise serializers.ValidationError("Workflow cannot be empty")
     for validated_data in validated_data_items:
         if validated_data["type"] in ["single_selection", "multiple_selection"]:
             type_data = validated_data.get(validated_data["type"])
@@ -119,7 +122,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
         description = validated_data.get("description", "")
         data = validated_data["data"]
         clean_form_sequence(data)
-        organization_obj = Organization.objects.filter(user=user)
+        organization_obj = Organization.objects.filter(
+            user=user, pk=int(self.context["view"].kwargs["org_id"])
+        )
         if organization_obj.exists() and organization_obj.count() == 1:
             organization = organization_obj.first()
         else:

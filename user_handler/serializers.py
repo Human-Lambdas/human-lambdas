@@ -37,7 +37,6 @@ class UserSerializer(serializers.ModelSerializer):
             "password": {"write_only": True},
             "template_id": {"write_only": True},
             "id": {"read_only": True},
-            "current_organization_id": {"read_only": True},
         }
 
     def create(self, validated_data):
