@@ -26,6 +26,19 @@ class TestOrganizations(APITestCase):
         user.set_password("wrong_user")
         user.save()
 
+    def test_create_organization(self):
+        response = self.client.post(
+            "/v1/users/token",
+            {"email": "foo@bar.com", "password": self.preset_user_password},
+        )
+        access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
+        data = {"name": "new_org"}
+        response = self.client.post("/v1/orgs/create", data, format="json")
+        self.assertEqual(response.data["name"], data["name"])
+        org_obj = Organization.objects.get(name=data["name"])
+        self.assertTrue(org_obj.admin.filter(email="foo@bar.com").exists())
+
     def test_get_organization(self):
         response = self.client.post(
             "/v1/users/token",

@@ -149,22 +149,33 @@ def fix_collisions(workflow_data):
 def update_block_props(block_type, layout):
     if block_type == "audio":
         layout["w"], layout["h"] = 5, 2
+        return
     if block_type == "binary":
         layout["w"], layout["h"] = 4, 4
+        return
     if block_type == "image":
         layout["w"], layout["h"] = 4, 4
+        return
     if block_type == "number":
         layout["w"], layout["h"] = 5, 2
+        return
     if block_type == "single_selection":
         layout["w"], layout["h"] = 5, 4
+        return
     if block_type == "multiple_selection":
         layout["w"], layout["h"] = 5, 4
+        return
     if block_type == "form_sequence":
         layout["w"], layout["h"] = 5, 4
+        return
     if block_type == "text":
         layout["w"], layout["h"] = 5, 3
+        return
     if block_type == "video":
         layout["w"], layout["h"] = 6, 4
+        return
+    layout["w"], layout["h"] = 6, 4
+    return
 
 
 def output2data(output_data, is_task=False):

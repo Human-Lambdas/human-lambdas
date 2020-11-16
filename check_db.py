@@ -5,8 +5,10 @@ import os
 """ Check if port is open, avoid docker-compose race condition """
 # arguments
 service_name = "postgreSQL"
-port = int(os.getenv("POSTGRES_PORT"))
-ip = os.getenv("POSTGRES_HOST")
+port = int(os.getenv("POSTGRES_PORT") or "5432")
+ip = os.getenv("POSTGRES_HOST") or "localhost"
+
+print(f"checking {ip}:{port}")
 
 # Infinite loop
 while True:
