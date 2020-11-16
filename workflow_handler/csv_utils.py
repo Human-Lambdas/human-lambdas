@@ -1,5 +1,5 @@
-import csv
 import copy
+import csv
 from ast import literal_eval
 
 from django.db.models import F

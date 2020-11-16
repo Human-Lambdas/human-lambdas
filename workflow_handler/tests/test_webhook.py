@@ -1,13 +1,11 @@
 import logging
 import os
 
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from workflow_handler.models import WebHook
-from workflow_handler.models import Workflow, Task
-from user_handler.models import User, Organization, Notification
-
+from user_handler.models import Notification, Organization, User
+from workflow_handler.models import Task, WebHook, Workflow
 
 logger = logging.getLogger(__file__)
 

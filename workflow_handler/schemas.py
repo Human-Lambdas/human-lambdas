@@ -1,4 +1,4 @@
-from schema import Schema, And, Or, Optional
+from schema import And, Optional, Or, Schema
 
 _DATA_TYPES = Or(
     "binary",

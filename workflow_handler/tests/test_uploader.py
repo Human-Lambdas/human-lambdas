@@ -1,16 +1,15 @@
+import csv
 import logging
 import os
 from io import StringIO
-import csv
 
 from django.test import TestCase
-from user_handler.models import User, Organization
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from workflow_handler.models import Workflow, Task
-from workflow_handler.csv_utils import validate_keys, process_csv
-
+from user_handler.models import Organization, User
+from workflow_handler.csv_utils import process_csv, validate_keys
+from workflow_handler.models import Task, Workflow
 
 logger = logging.getLogger(__file__)
 

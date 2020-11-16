@@ -1,9 +1,9 @@
 import logging
 
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from user_handler.models import User, Organization
+from user_handler.models import Organization, User
 
 logger = logging.getLogger(__file__)
 

@@ -1,10 +1,10 @@
-from django.urls import path, include
+from django.urls import include, path
 from organization_handler.views import (
+    CreateOrganization,
     GetOrganizationView,
     ListOrganizationView,
     ListOrgUsersView,
     RetrieveUpdateRemoveUserOrgView,
-    CreateOrganization,
 )
 from user_handler.invitation import SendInviteView
 

@@ -1,5 +1,5 @@
 from django.urls import path
-from metrics.views import OrganizationMetrics, WorkflowMetrics, WorkerMetrics
+from metrics.views import OrganizationMetrics, WorkerMetrics, WorkflowMetrics
 
 
 urlpatterns = [

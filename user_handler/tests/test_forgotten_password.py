@@ -1,9 +1,10 @@
 import logging
 
-from rest_framework.test import APITestCase
-from rest_framework import status
 from django.test.utils import override_settings
 from django.utils import timezone
+from rest_framework import status
+from rest_framework.test import APITestCase
+
 from user_handler.models import ForgottenPassword, User
 
 logger = logging.getLogger(__file__)
