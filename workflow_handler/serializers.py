@@ -26,6 +26,8 @@ def clean_form_sequence(data):
 
 
 def validate_output_structure(validated_data_items):
+    if not validated_data_items:
+        raise serializers.ValidationError("Workflow cannot be empty")
     for validated_data in validated_data_items:
         if validated_data["type"] in ["single_selection", "multiple_selection"]:
             type_data = validated_data.get(validated_data["type"])
