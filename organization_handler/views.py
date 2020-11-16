@@ -1,13 +1,15 @@
-from django.shortcuts import get_list_or_404, get_object_or_404
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
-    RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
+from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from user_handler.models import Organization, User
+from rest_framework import status
+from django.shortcuts import get_object_or_404, get_list_or_404
+from django.db.models import Q
+from user_handler.models import User, Organization, Invitation
 from user_handler.permissions import IsAdminOrReadOnly
 from user_handler.serializers import UserSerializer
 
@@ -138,7 +140,7 @@ class ListOrgUsersView(ListAPIView):
         return Response(result)
 
 
-class GetOrganizationView(RetrieveUpdateAPIView):
+class GetOrganizationView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
@@ -150,6 +152,20 @@ class GetOrganizationView(RetrieveUpdateAPIView):
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["org_id"])
         return obj
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        for invitation in Invitation.objects.filter(organization=instance):
+            invitation.expires_at = timezone.now()
+            invitation.save()
+        for user in instance.user.all():
+            if user.current_organization_id == instance.pk:
+                user.current_organization_id = user.organization.filter(
+                    ~Q(pk=instance.pk)
+                ).first()
+                user.save()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ListOrganizationView(ListAPIView):
