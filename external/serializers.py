@@ -16,6 +16,6 @@ class CreateTaskSerializer(TaskSerializer):
             raise serializers.ValidationError(exception_text)
 
 
-class CompletedTaskSerializer(TaskSerializer):
+class ExternalCompletedTaskSerializer(TaskSerializer):
     def to_representation(self, instance):
         return instance.get_formatted_task_external()

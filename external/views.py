@@ -14,7 +14,7 @@ from workflow_handler.audits import GetCompletedTaskView
 from user_handler.notifications import send_notification
 from user_handler.permissions import IsOrgAdmin
 
-from .serializers import CompletedTaskSerializer, CreateTaskSerializer
+from .serializers import ExternalCompletedTaskSerializer, CreateTaskSerializer
 
 
 class GetExternalCompletedTaskView(GetCompletedTaskView):
@@ -24,7 +24,7 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
 
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     authentication_classes = (TokenAuthentication,)
-    serializer_class = CompletedTaskSerializer
+    serializer_class = ExternalCompletedTaskSerializer
 
     def get_queryset(self, *args, **kwargs):
         user = self.request.user
@@ -90,9 +90,16 @@ class CreateTaskView(CreateAPIView):
                 if task_data["type"] not in task_data:
                     task_data[task_data["type"]] = {}
                 if w_data["id"] in self.request.data["data"]:
-                    task_data[task_data["type"]]["value"] = get_data_value(
-                        self.request.data["data"], task_data
-                    )
+                    #
+                    if "data" in w_data[w_data["type"]]:
+                        for fs_data in task_data[task_data["type"]]["data"]:
+                            fs_data[fs_data["type"]]["value"] = self.request.data[
+                                "data"
+                            ][w_data["id"]].get(fs_data["id"], None)
+                    else:
+                        task_data[task_data["type"]]["value"] = get_data_value(
+                            self.request.data["data"], task_data
+                        )
                 else:
                     task_data[task_data["type"]]["value"] = None
             except KeyError:

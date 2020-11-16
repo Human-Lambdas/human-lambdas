@@ -202,7 +202,7 @@ class InvitationView(APIView):
                 "status": 201,
             }
             analytics.track(user.email, "Invited new user signed up")
-            analytics.alias(user.pk, user.email)
+            analytics.alias(user.email, user.pk)
             analytics.track(user.pk, "User Signup", {"source": "invite"})
         else:
             response_data = {
@@ -216,7 +216,9 @@ class InvitationView(APIView):
             analytics.track(user.pk, "Existing user joined new org", {"new": False})
 
         for workflow in invitation_org.workflow_set.all():
-            WorkflowNotification(workflow=workflow, notification=notification).save()
+            WorkflowNotification(
+                workflow=workflow, notification=user.notifications
+            ).save()
 
         if invite.admin:
             invitation_org.add_admin(user)

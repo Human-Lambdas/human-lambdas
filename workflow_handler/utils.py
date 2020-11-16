@@ -3,8 +3,11 @@ import copy
 import cchardet
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
+from django.utils import timezone
 
-from .models import WebHook
+from .models import WebHook, Workflow, WorkflowNotification
+
+TEMPLATE_ORG_ID = 40
 
 
 def sync_workflow_task(workflow, task):
@@ -27,9 +30,11 @@ def sync_workflow_task(workflow, task):
                     final_data[final_data["type"]]["data"] = t_data[t_data["type"]][
                         "data"
                     ]
-                    final_data[final_data["type"]]["history"] = t_data[t_data["type"]][
-                        "history"
-                    ]
+                    if "history" in t_data[t_data["type"]]:
+                        history = t_data[t_data["type"]]["history"]
+                    else:
+                        history = []
+                    final_data[final_data["type"]]["history"] = history
             updated_data.append(final_data)
         task.data = updated_data
 
@@ -88,3 +93,31 @@ class TaskPagination(LimitOffsetPagination):
             },
             status=200,
         )
+
+
+def create_template(template_id, user, org):
+    if template_id:
+        workflow = Workflow.objects.filter(
+            organization=TEMPLATE_ORG_ID, pk=template_id
+        ).first()
+        if workflow:
+            Workflow(
+                name=workflow.name,
+                description=workflow.description,
+                created_by=user,
+                data=copy.deepcopy(workflow.data),
+                organization=org,
+            ).save()
+            for org_user in org.user.all():
+                wfnotification = WorkflowNotification(
+                    workflow=workflow, notification=org_user.notifications, enabled=True
+                )
+                wfnotification.save()
+
+
+def get_session_duration_seconds(task):
+    if task.session_started_at:
+        delta_since_start = timezone.now() - task.session_started_at
+        return delta_since_start / timezone.timedelta(seconds=1)
+
+    return 0

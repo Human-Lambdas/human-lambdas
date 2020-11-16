@@ -1,16 +1,29 @@
+from django.utils import timezone
 from rest_framework.generics import (
-    RetrieveUpdateAPIView,
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
+    CreateAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework import status
 from django.shortcuts import get_object_or_404, get_list_or_404
-from user_handler.models import User, Organization
+from django.db.models import Q
+from user_handler.models import User, Organization, Invitation
 from user_handler.serializers import UserSerializer
 from user_handler.permissions import IsAdminOrReadOnly
 
 from .serializers import OrganizationSerializer
+
+
+class CreateOrganization(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = OrganizationSerializer
+
+    def post(self, request, *args, **kwargs):
+        request.data["user"] = [request.user.pk]
+        request.data["admin"] = [request.user.pk]
+        return self.create(request, *args, **kwargs)
 
 
 class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
@@ -109,15 +122,9 @@ class ListOrgUsersView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        organization = (
-            Organization.objects.filter(pk=self.kwargs["org_id"])
-            .filter(admin=user)
-            .first()
+        return User.objects.filter(
+            organization__user=user, organization__pk=self.kwargs["org_id"]
         )
-        if organization:
-            return User.objects.filter(organization=organization)
-        else:
-            return User.objects.filter(pk=user.pk)
 
     def list(self, request, *args, **kwargs):
         obj = get_list_or_404(self.get_queryset())
@@ -133,7 +140,7 @@ class ListOrgUsersView(ListAPIView):
         return Response(result)
 
 
-class GetOrganizationView(RetrieveUpdateAPIView):
+class GetOrganizationView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
@@ -145,6 +152,20 @@ class GetOrganizationView(RetrieveUpdateAPIView):
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["org_id"])
         return obj
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        for invitation in Invitation.objects.filter(organization=instance):
+            invitation.expires_at = timezone.now()
+            invitation.save()
+        for user in instance.user.all():
+            if user.current_organization_id == instance.pk:
+                user.current_organization_id = user.organization.filter(
+                    ~Q(pk=instance.pk)
+                ).first()
+                user.save()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ListOrganizationView(ListAPIView):

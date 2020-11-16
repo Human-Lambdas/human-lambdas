@@ -208,3 +208,5 @@ static/
 
 # src files
 src/
+
+.vscode/settings.json

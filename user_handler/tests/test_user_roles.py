@@ -48,9 +48,7 @@ class TestUserRoles(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.worker_access_token)
         response = self.client.get("/v1/orgs/{}/users".format(self.org_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 1)
-        self.assertTrue(self.admin_email not in [i["email"] for i in response.data])
-        self.assertTrue(self.worker_email in [i["email"] for i in response.data])
+        self.assertEqual(len(response.data), 2)
 
     def test_admin_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)

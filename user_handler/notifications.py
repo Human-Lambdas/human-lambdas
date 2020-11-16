@@ -4,10 +4,10 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.conf import settings
+from hl_rest_api import analytics
 
 from .apps import UserHandlerConfig
 from .models import Notification, User
-from hl_rest_api import analytics
 
 
 class NotificationSerializer(serializers.ModelSerializer):

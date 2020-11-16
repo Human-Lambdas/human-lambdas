@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+set -x
 
 # Checking if database is ready
 echo "checking if database is ready"
