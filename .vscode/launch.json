@@ -16,12 +16,9 @@
         {   "name": "Test File",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
+            "program": "${workspaceFolder}/.vscode/run_test_file.py",
             "args": [
-                "test",
-                "--noinput",
-                "--keepdb",
-                "workflow_handler.tests.test_task_audits.TestTaskAudit"
+                "${relativeFile}"
             ],
             "django": true
         }
