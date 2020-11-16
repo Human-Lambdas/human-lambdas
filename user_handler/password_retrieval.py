@@ -5,7 +5,6 @@ from django.utils import timezone
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from hl_rest_api.utils import generate_unique_token, is_invalid_email
 
 from .apps import UserHandlerConfig

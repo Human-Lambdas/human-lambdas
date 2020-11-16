@@ -1,19 +1,17 @@
-import logging
 from uuid import uuid4
 import logging
 
 from django.db.models import Avg, F, Q
 from django.utils import timezone
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from user_handler.models import Organization, User
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
 from drf_yasg.utils import swagger_auto_schema
+
 
 logger = logging.getLogger(__file__)
 

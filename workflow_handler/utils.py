@@ -1,7 +1,6 @@
 import copy
 
 import cchardet
-from django.utils import timezone
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from django.utils import timezone

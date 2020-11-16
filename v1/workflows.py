@@ -1,5 +1,4 @@
 from django.urls import path
-
 from external.views import CreateTaskView, GetExternalCompletedTaskView
 from workflow_handler.audits import (
     AuditsGetTask,
@@ -23,6 +22,7 @@ from workflow_handler.views import (
     RUWebhookView,
     SaveTaskView,
 )
+
 
 urlpatterns = [
     path("/create", CreateWorkflowView.as_view(), name="create-workflow"),

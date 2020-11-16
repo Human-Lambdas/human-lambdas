@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from user_handler.models import Organization
 
 

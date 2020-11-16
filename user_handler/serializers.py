@@ -1,7 +1,6 @@
 import logging
 
 from rest_framework import serializers
-
 from hl_rest_api import analytics
 from workflow_handler.utils import create_template
 

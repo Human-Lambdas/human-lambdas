@@ -1,5 +1,4 @@
 from django.urls import include, path
-
 from organization_handler.views import (
     CreateOrganization,
     GetOrganizationView,
@@ -8,6 +7,7 @@ from organization_handler.views import (
     RetrieveUpdateRemoveUserOrgView,
 )
 from user_handler.invitation import SendInviteView
+
 
 urlpatterns = [
     # organization

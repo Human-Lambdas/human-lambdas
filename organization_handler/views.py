@@ -7,7 +7,6 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from user_handler.models import Organization, User
 from user_handler.permissions import IsAdminOrReadOnly
 from user_handler.serializers import UserSerializer

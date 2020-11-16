@@ -7,7 +7,6 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from hl_rest_api import analytics
 from user_handler.models import Organization
 from workflow_handler.models import Task, WebHook, Workflow

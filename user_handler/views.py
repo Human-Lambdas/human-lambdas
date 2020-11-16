@@ -10,7 +10,6 @@ from rest_framework.generics import (
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from hl_rest_api import analytics
 
 from .models import Organization, User

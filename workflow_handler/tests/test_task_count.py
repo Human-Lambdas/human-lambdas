@@ -30,9 +30,7 @@ class TestTaskCount(APITestCase):
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        response = self.client.get(
-            "/v1/users/api-token",
-        )
+        response = self.client.get("/v1/users/api-token",)
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
@@ -166,9 +164,7 @@ class TestTaskCount(APITestCase):
         self.assertEqual(workflow.n_tasks, n_tasks)
         _ = self.client.post(
             "/v1/orgs/{}/workflows/{}/tasks/{}/assign".format(
-                self.org_id,
-                self.workflow_id,
-                response.data["id"],
+                self.org_id, self.workflow_id, response.data["id"],
             ),
             data={"assigned_to": None},
             format="json",

@@ -1,7 +1,6 @@
 import analytics
 from django.apps import AppConfig
 from django.conf import settings
-
 from hl_rest_api.email_client import SendGrid
 
 

@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-
 from workflow_handler.data_mapping import migrate_data
 from workflow_handler.models import Workflow
 

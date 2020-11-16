@@ -2,9 +2,9 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from rest_hooks.models import AbstractHook
 from rest_hooks.signals import hook_event
-
 from external.task_formats import process_external_completed_tasks
 from user_handler.models import Notification, Organization, User
+
 
 STATUS_MAPPING = {"assigned": "in_progress", "pending": "new"}
 

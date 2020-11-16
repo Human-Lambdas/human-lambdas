@@ -1,6 +1,5 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-
 from hl_rest_api import analytics
 
 

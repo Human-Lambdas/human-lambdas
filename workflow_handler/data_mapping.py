@@ -3,6 +3,7 @@ from math import ceil
 
 from schema import And, Optional, Or, Schema, SchemaError
 
+
 WORKFLOW_INPUT_SCHEMA = Schema(
     [
         {

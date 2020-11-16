@@ -5,7 +5,6 @@ from unittest.mock import patch
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-
 from user_handler.models import Organization, User
 from workflow_handler.models import Task, Workflow
 from workflow_handler.tests import DATA_PATH
