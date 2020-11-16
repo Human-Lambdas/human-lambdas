@@ -39,6 +39,18 @@ class TestOrganizations(APITestCase):
         org_obj = Organization.objects.get(name=data["name"])
         self.assertTrue(org_obj.admin.filter(email="foo@bar.com").exists())
 
+    def test_delete_organization(self):
+        response = self.client.post(
+            "/v1/users/token",
+            {"email": "foo@bar.com", "password": self.preset_user_password},
+        )
+        access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
+        response = self.client.delete("/v1/orgs/%s" % self.org_id)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        user = User.objects.get(email=self.preset_user_email)
+        self.assertIsNone(user.current_organization_id)
+
     def test_get_organization(self):
         response = self.client.post(
             "/v1/users/token",
