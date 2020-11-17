@@ -82,12 +82,14 @@ class CreateTaskView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         formatted_data, workflow = self.preprocess_data()
-        serializer = self.get_serializer(data=formatted_data)
+        serializer = self.get_serializer(data={"data": formatted_data})
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         send_notification(workflow)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def preprocess_data(self):
         workflow = get_object_or_404(Workflow, pk=self.kwargs["workflow_id"])
