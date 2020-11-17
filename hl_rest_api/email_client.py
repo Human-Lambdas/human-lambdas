@@ -1,9 +1,10 @@
 import logging
 
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail as SGMail
-from sendgrid.helpers.mail import Email, Personalization, GroupId, Asm
 from django.conf import settings
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Asm, Email, GroupId
+from sendgrid.helpers.mail import Mail as SGMail
+from sendgrid.helpers.mail import Personalization
 
 logger = logging.getLogger(__file__)
 

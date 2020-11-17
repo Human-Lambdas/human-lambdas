@@ -1,8 +1,8 @@
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from workflow_handler.models import Workflow
 from user_handler.models import Organization
+from workflow_handler.models import Workflow
 
 
 class TestErrorPayloadStructure(APITestCase):
@@ -20,7 +20,11 @@ class TestErrorPayloadStructure(APITestCase):
         )
         self.access_token = response.data["access"]
         self.refresh = response.data["refresh"]
-        self.invalid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        self.invalid_token = (
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+            ".eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0Ij"
+            "oxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        )
         self.complete_workflow_data = {
             "name": "foowf",
             "description": "great wf",

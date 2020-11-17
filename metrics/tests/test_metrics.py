@@ -1,18 +1,20 @@
 import os
+from datetime import timedelta
+from unittest.mock import patch
 
+from unittest.mock import patch
 from django.utils import timezone
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 from user_handler.models import Organization, User
 from workflow_handler.models import Task, Workflow
 from workflow_handler.tests import DATA_PATH
-from datetime import timedelta
-from unittest.mock import patch
 
 
 class TestMetrics(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(DATA_PATH, "test.csv")
+
         self.total_rows = 3
         registration_data = {
             "email": "foo@bar.com",
@@ -432,13 +434,13 @@ class TestQueryMetrics(APITestCase):
             now.return_value = start_time
             start_session()
 
-            now.return_value += timedelta(seconds=first_ht)
+            now.return_value += timezone.timedelta(seconds=first_ht)
             save_task()
 
-            now.return_value += timedelta(seconds=downtime)
+            now.return_value += timezone.timedelta(seconds=downtime)
             start_session()
 
-            now.return_value += timedelta(seconds=second_ht)
+            now.return_value += timezone.timedelta(seconds=second_ht)
 
             submit_task()
 
@@ -449,7 +451,7 @@ class TestQueryMetrics(APITestCase):
             # Assert
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.data[-1]["aht"], total_ht)
-
+            
 
 class TestWorkflowMetrics(APITestCase):
     def setUp(self):

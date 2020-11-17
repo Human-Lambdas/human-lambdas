@@ -1,11 +1,10 @@
+import ctypes
 import logging
 import re
-import ctypes
 
 from django.utils import timezone
-from rest_framework.views import exception_handler
 from rest_framework.exceptions import ErrorDetail
-
+from rest_framework.views import exception_handler
 
 logger = logging.getLogger(__file__)
 

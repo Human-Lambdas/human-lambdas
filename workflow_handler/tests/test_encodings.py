@@ -1,8 +1,9 @@
 import os
 
-from rest_framework.test import APITestCase
-from workflow_handler.utils import unidecode
 import cchardet
+from rest_framework.test import APITestCase
+
+from workflow_handler.utils import unidecode
 
 from . import DATA_PATH
 

@@ -1,6 +1,6 @@
+import os
 import socket
 import time
-import os
 
 """ Check if port is open, avoid docker-compose race condition """
 # arguments

@@ -1,11 +1,10 @@
-from rest_framework.generics import ListCreateAPIView
-from rest_framework.generics import RetrieveDestroyAPIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import serializers
 from django.db.models import Q
 from django.utils import timezone
+from rest_framework import serializers
+from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView
+from rest_framework.permissions import IsAuthenticated
 
-from .models import TaskActivity, Task, Organization, Workflow
+from .models import Organization, Task, TaskActivity, Workflow
 from .serializers import TaskSerializer
 from .utils import get_session_duration_seconds
 

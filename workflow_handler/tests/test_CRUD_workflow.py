@@ -1,8 +1,8 @@
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
+from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Workflow
-from user_handler.models import Organization, User, Notification
 
 
 class TestCRUDWorkflow(APITestCase):
