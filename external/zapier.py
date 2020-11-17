@@ -14,6 +14,7 @@ from hl_rest_api import analytics
 
 
 from .views import CreateTaskView
+from external.task_formats import process_external_completed_tasks
 
 
 ZAPIER_TYPE_MAPPER = {"number": "number", "binary": "boolean"}
@@ -245,10 +246,7 @@ class GetZapierTaskSampleData(APIView):
     def get_dict_or_sample(self, queryset):
         if queryset.exists():
             task = queryset.first()
-            perform_dict = {
-                t_data["id"]: t_data[t_data["type"]]["value"] for t_data in task.data
-            }
-            # )
+            perform_dict = process_external_completed_tasks(task.data)['data']
         else:
             workflow = self.get_workflow()
             perform_dict = {
