@@ -1,27 +1,27 @@
 from django.urls import path
-from workflow_handler.views import (
-    CreateWorkflowView,
-    RUDWorkflowView,
-    ListWorkflowView,
-    FileUploadView,
-    ListTaskView,
-    RUDTaskView,
-    AssignTaskView,
-    NextTaskView,
-    ListNonCompleteTaskView,
-    RUWebhookView,
-    SaveTaskView,
-    CreateTaskFormView,
-    RefreshTaskView,
-)
+from external.views import CreateTaskView, GetExternalCompletedTaskView
 from workflow_handler.audits import (
+    AuditsGetTask,
     GetCompletedTasksCSVView,
     GetCompletedTaskView,
     ListSourcesView,
-    AuditsGetTask,
 )
 from workflow_handler.task_activity import ActivityView, RDActivityView
-from external.views import GetExternalCompletedTaskView, CreateTaskView
+from workflow_handler.views import (
+    AssignTaskView,
+    CreateTaskFormView,
+    CreateWorkflowView,
+    FileUploadView,
+    ListNonCompleteTaskView,
+    ListTaskView,
+    ListWorkflowView,
+    NextTaskView,
+    RefreshTaskView,
+    RUDTaskView,
+    RUDWorkflowView,
+    RUWebhookView,
+    SaveTaskView,
+)
 
 
 urlpatterns = [

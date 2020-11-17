@@ -1,7 +1,7 @@
 import copy
 from math import ceil
 
-from schema import SchemaError, Schema, And, Or, Optional
+from schema import And, Optional, Or, Schema, SchemaError
 
 
 WORKFLOW_INPUT_SCHEMA = Schema(

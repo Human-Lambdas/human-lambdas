@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from .models import Workflow, Task, TaskActivity, WorkflowNotification
-
+from .models import Task, TaskActivity, Workflow, WorkflowNotification
 
 admin.site.register(Workflow)
 admin.site.register(Task)

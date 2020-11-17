@@ -1,8 +1,9 @@
-from rest_framework.test import APITestCase
 from rest_framework import status
-from user_handler.models import Notification, Organization, User
-from workflow_handler.models import Workflow, WorkflowNotification
+from rest_framework.test import APITestCase
+
+from user_handler.models import Organization
 from user_handler.notifications import send_notification
+from workflow_handler.models import Workflow, WorkflowNotification
 
 
 class TestNotifications(APITestCase):
@@ -14,7 +15,6 @@ class TestNotifications(APITestCase):
             "name": "foo",
         }
         response = self.client.post("/v1/users/register", registration_data)
-        user_id = response.data["id"]
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
@@ -49,7 +49,9 @@ class TestNotifications(APITestCase):
         self.workflow_id = workflow.pk
 
     def test_notification_retrieval(self):
-        response = self.client.get("/v1/users/notifications",)
+        response = self.client.get(
+            "/v1/users/notifications",
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["workflow_notifications"]), 1)
         self.assertTrue(response.data["workflow_notifications"][0]["enabled"])

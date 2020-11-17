@@ -1,19 +1,18 @@
-from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
-from user_handler.models import Organization
-from rest_framework.response import Response
+from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from workflow_handler.models import Workflow, Task, WebHook
-from django.conf import settings
-from rest_framework import serializers, exceptions
-from rest_framework import status
+from rest_framework import exceptions, serializers, status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from hl_rest_api import analytics
-
+from user_handler.models import Organization
+from workflow_handler.models import Task, WebHook, Workflow
 
 from .views import CreateTaskView
+from external.task_formats import process_external_completed_tasks
 
 
 ZAPIER_TYPE_MAPPER = {"number": "number", "binary": "boolean"}
@@ -245,10 +244,7 @@ class GetZapierTaskSampleData(APIView):
     def get_dict_or_sample(self, queryset):
         if queryset.exists():
             task = queryset.first()
-            perform_dict = {
-                t_data["id"]: t_data[t_data["type"]]["value"] for t_data in task.data
-            }
-            # )
+            perform_dict = process_external_completed_tasks(task.data)['data']
         else:
             workflow = self.get_workflow()
             perform_dict = {

@@ -1,14 +1,14 @@
 import logging
 
-from rest_framework.permissions import AllowAny
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from django.utils import timezone
 from django.conf import settings
-from hl_rest_api.utils import is_invalid_email, generate_unique_token
+from django.utils import timezone
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from hl_rest_api.utils import generate_unique_token, is_invalid_email
 
-from .models import User, ForgottenPassword
 from .apps import UserHandlerConfig
+from .models import ForgottenPassword, User
 
 logger = logging.getLogger(__file__)
 
