@@ -244,7 +244,7 @@ class GetZapierTaskSampleData(APIView):
     def get_dict_or_sample(self, queryset):
         if queryset.exists():
             task = queryset.first()
-            perform_dict = process_external_completed_tasks(task.data)['data']
+            perform_dict = process_external_completed_tasks(task)['data']
         else:
             workflow = self.get_workflow()
             perform_dict = {
