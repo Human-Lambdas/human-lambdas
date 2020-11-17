@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from .models import User, Organization, Invitation, ForgottenPassword, Notification
+from .models import (
+    ForgottenPassword,
+    Invitation,
+    Notification,
+    Organization,
+    User,
+)
 
 # Register your models here.
 

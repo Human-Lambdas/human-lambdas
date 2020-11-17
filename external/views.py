@@ -1,21 +1,21 @@
 import copy
 
-from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
-from user_handler.models import Organization
-from rest_framework.response import Response
-from rest_framework import serializers
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from rest_framework import serializers
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from hl_rest_api import analytics
-from workflow_handler.models import Workflow, Task
-from workflow_handler.audits import GetCompletedTaskView
+from user_handler.models import Organization
 from user_handler.notifications import send_notification
 from user_handler.permissions import IsOrgAdmin
 from rest_framework import status
+from workflow_handler.audits import GetCompletedTaskView
+from workflow_handler.models import Task, Workflow
 
-from .serializers import ExternalCompletedTaskSerializer, CreateTaskSerializer
+from .serializers import ExternalTaskSerializer
 
 
 class GetExternalCompletedTaskView(GetCompletedTaskView):
@@ -25,7 +25,7 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
 
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     authentication_classes = (TokenAuthentication,)
-    serializer_class = ExternalCompletedTaskSerializer
+    serializer_class = ExternalTaskSerializer
 
     def get_queryset(self, *args, **kwargs):
         user = self.request.user
@@ -60,7 +60,7 @@ class CreateTaskView(CreateAPIView):
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOrgAdmin)
-    serializer_class = CreateTaskSerializer
+    serializer_class = ExternalTaskSerializer
 
     def get_queryset(self):
         user = self.request.user

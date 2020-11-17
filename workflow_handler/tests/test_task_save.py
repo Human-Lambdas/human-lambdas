@@ -1,13 +1,12 @@
+import copy
 import logging
 import os
-import copy
 
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from workflow_handler.models import Workflow, Task
-from user_handler.models import Organization, User
-
+from user_handler.models import Organization
+from workflow_handler.models import Task, Workflow
 
 logger = logging.getLogger(__file__)
 

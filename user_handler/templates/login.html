@@ -1,3 +1,8 @@
 <html>
-    Implement a login page here so you can login to swagger
+    <h2>Login</h2>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Login</button>
+    </form>
 </html>
