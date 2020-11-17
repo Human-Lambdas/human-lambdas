@@ -10,9 +10,9 @@ from rest_framework.views import APIView
 from hl_rest_api import analytics
 from user_handler.models import Organization
 from workflow_handler.models import Task, WebHook, Workflow
+from external.task_formats import process_external_completed_tasks
 
 from .views import CreateTaskView
-from external.task_formats import process_external_completed_tasks
 
 
 ZAPIER_TYPE_MAPPER = {"number": "number", "binary": "boolean"}
@@ -244,7 +244,7 @@ class GetZapierTaskSampleData(APIView):
     def get_dict_or_sample(self, queryset):
         if queryset.exists():
             task = queryset.first()
-            perform_dict = process_external_completed_tasks(task.data)['data']
+            perform_dict = process_external_completed_tasks(task.data)["data"]
         else:
             workflow = self.get_workflow()
             perform_dict = {
