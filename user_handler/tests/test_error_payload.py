@@ -34,8 +34,7 @@ class TestErrorPayloadStructure(APITestCase):
     # Register user endpoint tests
     def test_register_user_invalid_data(self):
         response = self.client.post(
-            "/v1/users/register",
-            self.invalid_registration_data,
+            "/v1/users/register", self.invalid_registration_data,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIsInstance(response.data["errors"], list)
