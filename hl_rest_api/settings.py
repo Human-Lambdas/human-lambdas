@@ -49,10 +49,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "user_handler",
     "workflow_handler",
+    "external",
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-    "rest_framework.authtoken",
+    # "rest_framework.authtoken",
     "rest_hooks",
     "drf_yasg",
 ]

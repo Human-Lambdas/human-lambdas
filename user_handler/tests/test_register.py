@@ -26,11 +26,7 @@ class TestAPIRegistration(APITestCase):
     def test_registration_without_organization(self):
         response = self.client.post(
             "/v1/users/register",
-            {
-                "email": "foo@bar.com",
-                "password": "foowordbar",
-                "name": "foo",
-            },
+            {"email": "foo@bar.com", "password": "foowordbar", "name": "foo",},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -63,12 +59,7 @@ class TestAPIRegistrationTemplate(APITestCase):
         self.org_id = organization.id
         organization.add_admin(user)
         wf_data = [
-            {
-                "id": "foo",
-                "name": "foo",
-                "type": "text",
-                "text": {"read_only": True},
-            },
+            {"id": "foo", "name": "foo", "type": "text", "text": {"read_only": True},},
             {
                 "id": "foo",
                 "name": "foo",

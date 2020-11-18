@@ -1,7 +1,7 @@
 import logging
 
 from django.shortcuts import get_object_or_404
-from rest_framework.authtoken.models import Token
+from external.models import Token
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateAPIView,
@@ -209,13 +209,27 @@ class APIAuthToken(APIView):
         )
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
-        token, created = Token.objects.get_or_create(user=user)
-        return Response(
-            {
-                "status_code": 200,
-                "token": token.key,
-                "user_id": user.pk,
-                "email": user.email,
-            },
-            status=200,
-        )
+        if user.current_organization_id:
+            token, created = Token.objects.get_or_create(
+                user=user, organization=user.get_current_organization()
+            )
+            return Response(
+                {
+                    "status_code": 200,
+                    "token": token.key,
+                    "user_id": user.pk,
+                    "email": user.email,
+                    "organization_id": user.current_organization_id,
+                },
+                status=200,
+            )
+        else:
+            return Response(
+                {
+                    "status_code": 400,
+                    "errors": [
+                        {"message": "user does not have a current organization set"}
+                    ],
+                },
+                status=400,
+            )
