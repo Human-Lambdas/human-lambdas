@@ -5,6 +5,8 @@ import re
 from django.utils import timezone
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.views import exception_handler
+from email_validator import validate_email, EmailSyntaxError, EmailNotValidError
+
 
 logger = logging.getLogger(__file__)
 
@@ -57,11 +59,11 @@ def custom_exception_handler(exc, context):
 
 
 def is_invalid_email(email):
-    regex = r"^([a-zA-Z0-9_+!\"\$ \-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|"
-    regex += r"(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$"
-    if bool(re.fullmatch(regex, email)):
+    try:
+        validate_email(email)
         return False
-    else:
+    except (EmailSyntaxError, EmailNotValidError) as e:
+        logger.info(f"{e}")
         return True
 
 

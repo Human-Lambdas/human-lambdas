@@ -40,9 +40,9 @@ def sync_workflow_task(workflow, task):
                         )
                         if t_idata:
                             idata["value"] = t_idata.get("value")
-                    final_data[final_data["type"]]["data"] = t_data[t_data["type"]][
-                        "data"
-                    ]
+                    # final_data[final_data["type"]]["data"] = t_data[t_data["type"]][
+                    #     "data"
+                    # ]
                     if "history" in t_data[t_data["type"]]:
                         history = t_data[t_data["type"]]["history"]
                     else:
