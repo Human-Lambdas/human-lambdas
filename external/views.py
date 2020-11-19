@@ -3,7 +3,7 @@ import copy
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.authentication import TokenAuthentication
+from external.authentication import TokenAuthentication
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -11,10 +11,11 @@ from hl_rest_api import analytics
 from user_handler.models import Organization
 from user_handler.notifications import send_notification
 from user_handler.permissions import IsOrgAdmin
+from rest_framework import status
 from workflow_handler.audits import GetCompletedTaskView
 from workflow_handler.models import Task, Workflow
 
-from .serializers import CreateTaskSerializer, ExternalCompletedTaskSerializer
+from .serializers import ExternalTaskSerializer
 
 
 class GetExternalCompletedTaskView(GetCompletedTaskView):
@@ -24,7 +25,7 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
 
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     authentication_classes = (TokenAuthentication,)
-    serializer_class = ExternalCompletedTaskSerializer
+    serializer_class = ExternalTaskSerializer
 
     def get_queryset(self, *args, **kwargs):
         user = self.request.user
@@ -59,7 +60,7 @@ class CreateTaskView(CreateAPIView):
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOrgAdmin)
-    serializer_class = CreateTaskSerializer
+    serializer_class = ExternalTaskSerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -78,6 +79,17 @@ class CreateTaskView(CreateAPIView):
                 {"status_code": 400, "errors": [{"message": "No data"}]}, status=400,
             )
         return self.create(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        formatted_data, workflow = self.preprocess_data()
+        serializer = self.get_serializer(data={"data": formatted_data})
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        send_notification(workflow)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def preprocess_data(self):
         workflow = get_object_or_404(Workflow, pk=self.kwargs["workflow_id"])
@@ -109,10 +121,5 @@ class CreateTaskView(CreateAPIView):
             formatted_data.append(task_data)
         return formatted_data, workflow
 
-    def create_success(self, workflow):
-        send_notification(workflow)
-
     def perform_create(self, serializer):
-        formatted_data, workflow = self.preprocess_data()
-        serializer.save(data=formatted_data, source_name="api")
-        self.create_success(workflow)
+        serializer.save(source_name="api")

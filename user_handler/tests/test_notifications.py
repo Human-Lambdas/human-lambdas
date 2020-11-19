@@ -49,9 +49,7 @@ class TestNotifications(APITestCase):
         self.workflow_id = workflow.pk
 
     def test_notification_retrieval(self):
-        response = self.client.get(
-            "/v1/users/notifications",
-        )
+        response = self.client.get("/v1/users/notifications",)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["workflow_notifications"]), 1)
         self.assertTrue(response.data["workflow_notifications"][0]["enabled"])

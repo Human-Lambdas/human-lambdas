@@ -96,6 +96,9 @@ class User(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return self.is_superuser
 
+    def get_current_organization(self):
+        return self.organization_set.filter(pk=self.current_organization_id).first()
+
     @is_staff.setter
     def is_staff(self, value):
         self._is_staff = value
