@@ -230,7 +230,9 @@ class GetZapierTaskSampleData(APIView):
             Q(organization__in=organizations)
             & Q(pk=self.request.query_params["workflow_id"])
         )
-        return Task.objects.filter(workflow=workflows.first(), status="completed")
+        return Task.objects.filter(
+            workflow=workflows.first(), status="completed"
+        ).order_by("-completed_at")
 
     def get_workflow(self):
         user = self.request.user
@@ -243,8 +245,8 @@ class GetZapierTaskSampleData(APIView):
 
     def get_dict_or_sample(self, queryset):
         if queryset.exists():
-            task = queryset.first()
-            perform_dict = process_external_completed_tasks(task.data)["data"]
+            task = queryset.first().get_simple_formatted_task()
+            perform_dict = process_external_completed_tasks(task)["data"]
         else:
             workflow = self.get_workflow()
             perform_dict = {
