@@ -159,9 +159,7 @@ class ZapierCreateTask(CreateTaskView):
         return Task.objects.filter(workflows=workflow)
 
     def perform_create(self, serializer):
-        formatted_data, workflow = self.preprocess_data()
-        serializer.save(data=formatted_data, source_name="zapier")
-        self.create_success(workflow)
+        serializer.save(source_name="zapier")
 
 
 class ZapierHookSerializer(serializers.ModelSerializer):
