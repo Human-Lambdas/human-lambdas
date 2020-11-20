@@ -1,6 +1,7 @@
 import analytics
 from django.conf import settings
 
+from .hl_client import enqueue_signup
 
 def alias(new_id, old_id):
     if not settings.DEBUG:
@@ -31,3 +32,4 @@ def signup_events(user_obj, organization_obj):
     )
     track(user_obj.pk, "New Organization", {"source": "website signup"})
     track(user_obj.pk, "User Signup", {"source": "website"})
+    enqueue_signup(user_obj.pk, user_obj.email, user_obj.name)
