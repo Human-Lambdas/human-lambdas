@@ -3,6 +3,7 @@ from django.conf import settings
 
 from .hl_client import enqueue_signup
 
+
 def alias(new_id, old_id):
     if not settings.DEBUG:
         analytics.alias(new_id, old_id)
