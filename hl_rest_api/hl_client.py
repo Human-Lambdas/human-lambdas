@@ -1,4 +1,5 @@
-import logging, re
+import logging
+import re
 
 from django.conf import settings
 import requests
