@@ -13,9 +13,10 @@ class TestUtils(APITestCase):
         self.assertFalse(is_invalid_email("mailhost!username@example.org"))
         self.assertFalse(is_invalid_email("_somename@example.com"))
         self.assertFalse(is_invalid_email("$A12345@example.com"))
-        self.assertFalse(is_invalid_email('""Fred Bloggs"@example.com'))
         self.assertFalse(is_invalid_email("user.nametagsorting@example.com"))
         self.assertFalse(is_invalid_email("valid@valid.com"))
+        self.assertFalse(is_invalid_email("vlad@founders.network"))
+        self.assertTrue(is_invalid_email('""Fred Bloggs"@example.com'))
 
     def test_generate_unique_token(self):
         self.assertNotEqual(

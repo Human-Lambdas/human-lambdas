@@ -15,3 +15,4 @@ django-next-prev
 python-logstash==0.4.6
 drf-yasg
 python-dotenv
+email-validator==1.1.2

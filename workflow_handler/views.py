@@ -521,6 +521,8 @@ class CreateTaskFormView(CreateAPIView):
                 "video",
                 "image",
                 "audio",
+                "embed",
+                "pdf",
             ]:
                 read_data = copy.deepcopy(idata)
                 if "layout" in read_data:

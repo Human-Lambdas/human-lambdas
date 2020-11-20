@@ -27,9 +27,21 @@ def sync_workflow_task(workflow, task):
                     "data" in t_data[t_data["type"]]
                     and t_data["id"] == workflow_data["id"]
                 ):
-                    final_data[final_data["type"]]["data"] = t_data[t_data["type"]][
-                        "data"
-                    ]
+                    for idata in final_data[t_data["type"]]["data"]:
+                        t_idata = next(
+                            iter(
+                                [
+                                    i
+                                    for i in t_data[t_data["type"]]["data"]
+                                    if i["id"] == idata["id"]
+                                ]
+                            ),
+                            None,
+                        )
+                        if t_idata:
+                            idata[idata["type"]]["value"] = t_idata[
+                                t_idata["type"]
+                            ].get("value")
                     if "history" in t_data[t_data["type"]]:
                         history = t_data[t_data["type"]]["history"]
                     else:

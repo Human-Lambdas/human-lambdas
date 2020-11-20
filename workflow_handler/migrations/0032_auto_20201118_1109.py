@@ -6,13 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow_handler', '0031_task_correct'),
+        ("workflow_handler", "0031_task_correct"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='taskactivity',
-            name='action',
-            field=models.CharField(choices=[('created', 'created'), ('assigned', 'assigned'), ('completed', 'completed'), ('saved', 'saved'), ('comment', 'comment'), ('audited_correct', 'audited_correct'), ('audited_incorrect', 'audited_incorrect'), ('audited_empty', 'audited_empty')], max_length=128),
+            model_name="taskactivity",
+            name="action",
+            field=models.CharField(
+                choices=[
+                    ("created", "created"),
+                    ("assigned", "assigned"),
+                    ("completed", "completed"),
+                    ("saved", "saved"),
+                    ("comment", "comment"),
+                    ("audited_correct", "audited_correct"),
+                    ("audited_incorrect", "audited_incorrect"),
+                    ("audited_empty", "audited_empty"),
+                ],
+                max_length=128,
+            ),
         ),
     ]
