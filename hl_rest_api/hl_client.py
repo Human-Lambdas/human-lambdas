@@ -19,8 +19,8 @@ def create_task(workflow_id, data):
         return logger.info(f"Testing, didn't enque task: {task}\n")
 
     headers = {"Authorization": "Token %s" % API_KEY}
-    PATH = "/orgs/%d/workflows/%d/tasks/create" % (int(ORG_ID), workflow_id)
-    r = requests.post(HL_API_URL + PATH, headers=headers, json=task)
+    path = "/orgs/%d/workflows/%d/tasks/create" % (int(ORG_ID), workflow_id)
+    r = requests.post(HL_API_URL + path, headers=headers, json=task)
 
     if r.status_code != 200:
         return logger.info(f"Task failed to enqueue: {r.text}\n")
@@ -29,7 +29,7 @@ def create_task(workflow_id, data):
 
 
 def enqueue_signup(user_id, email_address, name):
-    WORKFLOW_ID = 208
+    workflow_id = 208
 
     data = {
         "user_id": user_id,
@@ -38,4 +38,4 @@ def enqueue_signup(user_id, email_address, name):
         "domain": re.sub("^.*@", "https://", email_address),
     }
 
-    return create_task(WORKFLOW_ID, data)
+    return create_task(workflow_id, data)
