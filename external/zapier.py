@@ -47,10 +47,8 @@ class GetZapierTaskInputs(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
+            Q(organization__pk=self.request.auth.organization_id)
             & Q(pk=self.request.query_params["workflow_id"])
             & Q(disabled=False)
         )
@@ -104,10 +102,8 @@ class GetZapierWorkflows(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations) & Q(disabled=False)
+            Q(organization__pk=self.request.auth.organization_id) & Q(disabled=False)
         )
         return workflows
 
@@ -152,10 +148,8 @@ class ZapierCreateTask(CreateTaskView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
         workflow = Workflow.objects.filter(
-            Q(organization__in=organizations)
+            Q(organization__pk=self.request.auth.organization_id)
             & Q(pk=self.kwargs["workflow_id"])
             & Q(disabled=False)
         )
@@ -227,10 +221,8 @@ class GetZapierTaskSampleData(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
+            Q(organization__pk=self.request.auth.organization_id)
             & Q(pk=self.request.query_params["workflow_id"])
             & Q(disabled=False)
         )

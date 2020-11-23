@@ -8,7 +8,6 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from hl_rest_api import analytics
-from user_handler.models import Organization
 from user_handler.notifications import send_notification
 from user_handler.permissions import IsOrgAdmin
 from rest_framework import status
@@ -29,9 +28,8 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
 
     def get_queryset(self, *args, **kwargs):
         user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
+            Q(organization__pk=self.request.auth.organization_id)
             & Q(disabled=False)
             & Q(organization__pk=self.kwargs["org_id"])
         )
@@ -63,10 +61,8 @@ class CreateTaskView(CreateAPIView):
     serializer_class = ExternalTaskSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
+            Q(organization__pk=self.request.auth.organization_id)
             & Q(organization__pk=self.kwargs["org_id"] & Q(disabled=False))
         )
         return Task.objects.filter(
