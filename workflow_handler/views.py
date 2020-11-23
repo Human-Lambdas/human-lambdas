@@ -19,6 +19,7 @@ from rest_framework.views import APIView
 from user_handler.models import Organization
 from user_handler.permissions import IsAdminOrReadOnly, IsOrgAdmin
 from workflow_handler.csv_utils import process_csv
+from workflow_handler.utils import is_force
 
 from .models import Source, Task, TaskActivity, User, WebHook, Workflow
 from .serializers import (
@@ -346,7 +347,11 @@ class RUDTaskView(RetrieveUpdateAPIView):
         return Response(task, status=200)
 
     def perform_update(self, serializer, *args, **kwargs):
-        serializer.save(owner=self.request.user, submit_task=True)
+        serializer.save(
+            owner=self.request.user,
+            submit_task=True,
+            force=is_force(self.request.query_params),
+        )
 
 
 class RefreshTaskView(RUDTaskView):
@@ -362,7 +367,11 @@ class RefreshTaskView(RUDTaskView):
 
 class SaveTaskView(RUDTaskView):
     def perform_update(self, serializer, *args, **kwargs):
-        serializer.save(owner=self.request.user, submit_task=False)
+        serializer.save(
+            owner=self.request.user,
+            submit_task=False,
+            force=is_force(self.request.query_params),
+        )
 
 
 class NextTaskView(APIView):

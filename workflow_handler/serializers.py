@@ -270,7 +270,9 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         user = self.context["request"].user
-        if instance.assigned_to == user:
+        if instance.status == "completed" and not validated_data["force"]:
+            raise serializers.ValidationError("Cannot change a completed task")
+        elif instance.assigned_to == user:
             instance.data = validated_data.get("data", instance.data)
 
             instance.handling_time_seconds += get_session_duration_seconds(instance)

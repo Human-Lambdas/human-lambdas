@@ -415,7 +415,7 @@ class TestQueryMetrics(APITestCase):
             data_payload = {"data": self.task.data}
 
             response = self.client.patch(
-                f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{self.task.id}/save",
+                f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{self.task.id}/save?force=True",
                 data=data_payload,
                 format="json",
             )
@@ -423,7 +423,7 @@ class TestQueryMetrics(APITestCase):
 
         def submit_task():
             response = self.client.patch(
-                f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{self.task.id}",
+                f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{self.task.id}?force=True",
                 data={},
                 format="json",
             )
