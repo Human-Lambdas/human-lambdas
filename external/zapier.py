@@ -52,6 +52,7 @@ class GetZapierTaskInputs(APIView):
         workflows = Workflow.objects.filter(
             Q(organization__in=organizations)
             & Q(pk=self.request.query_params["workflow_id"])
+            & Q(disabled=False)
         )
         return workflows
 
@@ -154,7 +155,9 @@ class ZapierCreateTask(CreateTaskView):
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
         workflow = Workflow.objects.filter(
-            Q(organization__in=organizations) & Q(pk=self.kwargs["workflow_id"])
+            Q(organization__in=organizations)
+            & Q(pk=self.kwargs["workflow_id"])
+            & Q(disabled=False)
         )
         return Task.objects.filter(workflows=workflow)
 
@@ -229,6 +232,7 @@ class GetZapierTaskSampleData(APIView):
         workflows = Workflow.objects.filter(
             Q(organization__in=organizations)
             & Q(pk=self.request.query_params["workflow_id"])
+            & Q(disabled=False)
         )
         return Task.objects.filter(
             workflow=workflows.first(), status="completed"
