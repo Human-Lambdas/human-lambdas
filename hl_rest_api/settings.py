@@ -62,6 +62,9 @@ APPEND_SLASH = False
 
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
+HL_CLIENT_API_KEY = os.getenv("HL_CLIENT_API_KEY")
+HL_ORG_ID = os.getenv("HL_ORG_ID")
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
