@@ -12,7 +12,11 @@ ORG_ID = settings.HL_ORG_ID
 
 
 def create_task(workflow_id, data):
+
     task = {"data": data}
+
+    if settings.DEBUG:
+        return logger.info(f"Testing, didn't enque task: {task}\n")
 
     headers = {"Authorization": "Token %s" % API_KEY}
     PATH = "/orgs/%d/workflows/%d/tasks/create" % (int(ORG_ID), workflow_id)
