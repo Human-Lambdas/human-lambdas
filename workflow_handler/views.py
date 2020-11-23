@@ -455,9 +455,9 @@ class AssignTaskView(APIView):
         )
 
     def get_userset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
-        return User.objects.filter(Q(organization__in=organizations))
+        return User.objects.filter(
+            Q(organization__pk=self.request.user.current_organization_id)
+        )
 
     def post(self, request, *args, **kwargs):
         queryset = self.get_queryset()
