@@ -63,3 +63,5 @@ jobs:
         ACCOUNT_ASM_GROUPID: 10101
         FORGOTTEN_PASSWORD_TEMPLATE: "test"
         API_URL: "http://localhost:8000"
+        HL_CLIENT_API_KEY: ${{ secrets.HL_CLIENT_API_KEY }}
+        HL_ORG_ID: 61

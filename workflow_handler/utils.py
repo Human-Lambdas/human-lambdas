@@ -133,3 +133,10 @@ def get_session_duration_seconds(task):
         return delta_since_start / timezone.timedelta(seconds=1)
 
     return 0
+
+
+def is_force(query_params):
+    force = query_params.get("force")
+    if force:
+        return force.lower() == "true"
+    return False
