@@ -3,7 +3,7 @@ name: DB migrations
 on:
   push:
     branches:
-    - cloudrun
+    - develop
 
 jobs:
   migration:
