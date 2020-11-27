@@ -3,7 +3,7 @@ name: DB migrations
 on:
   push:
     branches:
-    - develop
+    - cloudrun
 
 jobs:
   migration:
@@ -24,8 +24,9 @@ jobs:
       run: |
         python manage.py migrate
       env:
-        POSTGRES_USER: ${{ secrets.POSTGRES_USER_STAGING }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_STAGING }}
-        POSTGRES_DB: ${{ secrets.POSTGRES_DB_STAGING }}
-        POSTGRES_PORT: ${{ secrets.POSTGRES_PORT_STAGING }}
-        POSTGRES_HOST: ${{ secrets.POSTGRES_HOST_STAGING }}
+        POSTGRES_USER: ${{ secrets.STAGING_DB_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+        POSTGRES_DB: ${{ secrets.STAGING_DB }}
+        POSTGRES_PORT: ${{ secrets.STAGING_DB_PORT }}
+        POSTGRES_HOST: ${{ secrets.STAGING_DB_HOST }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
