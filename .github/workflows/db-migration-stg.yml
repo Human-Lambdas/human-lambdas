@@ -1,0 +1,32 @@
+name: DB migrations
+
+on:
+  push:
+    branches:
+    - develop
+
+jobs:
+  migration:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.6
+    - name: Install dependencies
+      run: |
+        sudo apt-get install libpq-dev
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run migrations
+      run: |
+        python manage.py migrate
+      env:
+        POSTGRES_USER: ${{ secrets.STAGING_DB_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+        POSTGRES_DB: ${{ secrets.STAGING_DB }}
+        POSTGRES_PORT: ${{ secrets.STAGING_DB_PORT }}
+        POSTGRES_HOST: ${{ secrets.STAGING_DB_HOST }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
