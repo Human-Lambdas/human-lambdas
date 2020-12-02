@@ -16,6 +16,7 @@ _DATA_TYPES = Or(
     "link",
     "pdf",
     "embed",
+    "named_entity_recognition",
 )
 DATA_SCHEMA = Schema(
     [
