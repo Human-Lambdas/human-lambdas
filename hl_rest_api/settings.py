@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     "corsheaders",
     # "rest_framework.authtoken",
     "rest_hooks",
-    "drf_yasg",
+    "drf_yasg2",
 ]
 
 APPEND_SLASH = False

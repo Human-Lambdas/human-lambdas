@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from user_handler.models import Organization, User
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg2.utils import swagger_auto_schema
 
 
 logger = logging.getLogger(__file__)
