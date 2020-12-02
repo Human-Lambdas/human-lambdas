@@ -17,3 +17,4 @@ drf-yasg
 python-dotenv
 email-validator==1.1.2
 requests
+packaging
