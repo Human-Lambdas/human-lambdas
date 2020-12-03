@@ -54,7 +54,7 @@ def get_sample_data(block):
         return form_data
     if (
         "placeholder" in block[block["type"]]
-        and block[block["type"]]["placeholder"] != None
+        and block[block["type"]]["placeholder"] is not None
         and block[block["type"]]["placeholder"] != ""
     ):
         return block[block["type"]]["placeholder"]
