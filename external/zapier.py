@@ -139,7 +139,7 @@ class ZapierAuthentication(APIView):
 
     def get(self, request, *args, **kwargs):
         resp = {
-            "organization": Organization.objects.filter(admin=request.user).first().name
+            "organization": Organization.objects.filter(pk=request.auth.organization_id, admin=request.user).first().name
         }
         return Response(resp, status=200)
 
