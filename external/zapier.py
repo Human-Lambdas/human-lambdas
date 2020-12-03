@@ -37,6 +37,7 @@ SAMPLE_DATA = {
     },
 }
 
+
 def get_sample_data(block):
     if block["type"] == "single_selection":
         try:
@@ -49,13 +50,16 @@ def get_sample_data(block):
         except IndexError:
             return SAMPLE_DATA[block["type"]]
     if block["type"] == "form_sequence":
-        form_data = {
-            q["id"]: get_sample_data(q) for q in block[block["type"]]["data"]
-        }
+        form_data = {q["id"]: get_sample_data(q) for q in block[block["type"]]["data"]}
         return form_data
-    if "placeholder" in block[block["type"]] and block[block["type"]]["placeholder"] != None and block[block["type"]]["placeholder"] != "":
+    if (
+        "placeholder" in block[block["type"]]
+        and block[block["type"]]["placeholder"] != None
+        and block[block["type"]]["placeholder"] != ""
+    ):
         return block[block["type"]]["placeholder"]
     return SAMPLE_DATA[block["type"]]
+
 
 class GetZapierTaskInputs(APIView):
     """
@@ -158,7 +162,11 @@ class ZapierAuthentication(APIView):
 
     def get(self, request, *args, **kwargs):
         resp = {
-            "organization": Organization.objects.filter(pk=request.auth.organization_id, admin=request.user).first().name
+            "organization": Organization.objects.filter(
+                pk=request.auth.organization_id, admin=request.user
+            )
+            .first()
+            .name
         }
         return Response(resp, status=200)
 
@@ -229,6 +237,7 @@ class ZapierHook(CreateAPIView):
 
     def perform_destroy(self, instance):
         instance.delete()
+
 
 class GetZapierTaskSampleData(APIView):
     """
