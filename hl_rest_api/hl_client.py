@@ -9,13 +9,14 @@ logger = logging.getLogger(__file__)
 HL_API_URL = settings.API_URL
 API_KEY = settings.HL_CLIENT_API_KEY
 ORG_ID = settings.HL_ORG_ID
+DEBUG = settings.DEBUG
 
 
 def create_task(workflow_id, data):
 
     task = {"data": data}
 
-    if settings.DEBUG:
+    if DEBUG or not ORG_ID or not API_KEY:
         return logger.info(f"Testing, didn't enque task: {task}\n")
 
     headers = {"Authorization": "Token %s" % API_KEY}
