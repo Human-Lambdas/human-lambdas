@@ -219,8 +219,8 @@ class TestComplexMetrics(APITestCase):
             (completed_at - created_at) / timezone.timedelta(seconds=1),
         )
         for idata in response.data[:-1]:
-            self.assertEqual(idata["aht"], 0)
-            self.assertEqual(idata["tat"], 0)
+            self.assertEqual(idata["aht"], None)
+            self.assertEqual(idata["tat"], None)
 
 
 class TestQueryMetrics(APITestCase):
@@ -632,19 +632,19 @@ class TestWorkflowMetrics(APITestCase):
         self.assertEqual(
             response.data["aht"][-1][wf1_name], handling_time_seconds,
         )
-        self.assertEqual(response.data["aht"][-1][wf2_name], 0)
+        self.assertEqual(response.data["aht"][-1][wf2_name], None)
         for idata in response.data["aht"][:-1]:
-            self.assertEqual(idata[wf1_name], 0)
-            self.assertEqual(idata[wf2_name], 0)
+            self.assertEqual(idata[wf1_name], None)
+            self.assertEqual(idata[wf2_name], None)
 
         self.assertEqual(
             response.data["tat"][-1][wf1_name],
             (completed_at - created_at) / timezone.timedelta(seconds=1),
         )
-        self.assertEqual(response.data["tat"][-1][wf2_name], 0)
+        self.assertEqual(response.data["tat"][-1][wf2_name], None)
         for idata in response.data["tat"][:-1]:
-            self.assertEqual(idata[wf1_name], 0)
-            self.assertEqual(idata[wf2_name], 0)
+            self.assertEqual(idata[wf1_name], None)
+            self.assertEqual(idata[wf2_name], None)
 
     def test_workflow_id(self):
         wf1_name = Workflow.objects.get(pk=self.workflow_id).name
@@ -812,7 +812,7 @@ class TestWorkermetrics(APITestCase):
             response.data["aht"][-1][worker.name], handling_time_seconds,
         )
         for idata in response.data["aht"][:-1]:
-            self.assertEqual(idata[worker.name], 0)
+            self.assertEqual(idata[worker.name], None)
 
     def test_worker_id(self):
         worker = User.objects.get(email="foo@bar.com")
