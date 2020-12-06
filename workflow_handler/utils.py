@@ -23,6 +23,10 @@ def sync_workflow_task(workflow, task):
                     final_data[final_data["type"]]["value"] = t_data[t_data["type"]][
                         "value"
                     ]
+                    if "entities" in t_data[t_data["type"]]:
+                        final_data[final_data["type"]]["entities"] = t_data[
+                            t_data["type"]
+                        ]["entities"]
                 elif (
                     "data" in t_data[t_data["type"]]
                     and t_data["id"] == workflow_data["id"]
