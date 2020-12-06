@@ -59,7 +59,7 @@ def get_aht(**kwargs):
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(aht=Avg(F("handling_time_seconds")))
     aht = result["aht"]
-    return aht if aht else 0
+    return aht if aht else None
 
 
 def get_tat(**kwargs):
@@ -70,7 +70,7 @@ def get_tat(**kwargs):
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(tat=Avg(F("completed_at") - F("created_at")))
     tat = result["tat"]
-    return tat / timezone.timedelta(seconds=1) if tat else 0
+    return tat / timezone.timedelta(seconds=1) if tat else None
 
 
 def get_accuracy(**kwargs):
