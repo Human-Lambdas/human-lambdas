@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from user_handler.models import Organization, User
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg2.utils import swagger_auto_schema
 
 
 logger = logging.getLogger(__file__)
@@ -59,7 +59,7 @@ def get_aht(**kwargs):
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(aht=Avg(F("handling_time_seconds")))
     aht = result["aht"]
-    return aht if aht else 0
+    return aht if aht else None
 
 
 def get_tat(**kwargs):
@@ -70,7 +70,7 @@ def get_tat(**kwargs):
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
     ).aggregate(tat=Avg(F("completed_at") - F("created_at")))
     tat = result["tat"]
-    return tat / timezone.timedelta(seconds=1) if tat else 0
+    return tat / timezone.timedelta(seconds=1) if tat else None
 
 
 def get_accuracy(**kwargs):

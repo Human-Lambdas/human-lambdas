@@ -539,6 +539,7 @@ class CreateTaskFormView(CreateAPIView):
                 "image",
                 "audio",
                 "embed",
+                "named_entity_recognition",
                 "pdf",
             ]:
                 read_data = copy.deepcopy(idata)

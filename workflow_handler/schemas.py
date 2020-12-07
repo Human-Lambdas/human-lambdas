@@ -16,6 +16,7 @@ _DATA_TYPES = Or(
     "link",
     "pdf",
     "embed",
+    "named_entity_recognition",
 )
 DATA_SCHEMA = Schema(
     [
@@ -30,7 +31,10 @@ DATA_SCHEMA = Schema(
                 Optional("read_only"): bool,
                 Optional("is_required"): bool,
                 Optional("subtype"): And(str, len),
-                Optional("value"): Or(bool, str, And(list, len), float, int, None),
+                Optional("value"): Or(
+                    bool, str, And(list, len), float, int, dict, None
+                ),
+                Optional("entities"): list,
                 Optional("options"): list,
                 Optional("data"): list,
                 Optional("history"): list,

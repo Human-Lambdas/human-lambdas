@@ -38,6 +38,29 @@ SAMPLE_DATA = {
 }
 
 
+def get_sample_data(block):
+    if block["type"] == "single_selection":
+        try:
+            return block[block["type"]]["options"][0]["id"]
+        except IndexError:
+            return SAMPLE_DATA[block["type"]]
+    if block["type"] == "multiple_selection":
+        try:
+            return [el["id"] for el in block[block["type"]]["options"][0:2]]
+        except IndexError:
+            return SAMPLE_DATA[block["type"]]
+    if block["type"] == "form_sequence":
+        form_data = {q["id"]: get_sample_data(q) for q in block[block["type"]]["data"]}
+        return form_data
+    if (
+        "placeholder" in block[block["type"]]
+        and block[block["type"]]["placeholder"] is not None
+        and block[block["type"]]["placeholder"] != ""
+    ):
+        return block[block["type"]]["placeholder"]
+    return SAMPLE_DATA[block["type"]]
+
+
 class GetZapierTaskInputs(APIView):
     """
     API View for getting Task inputs for Zapier
@@ -139,7 +162,11 @@ class ZapierAuthentication(APIView):
 
     def get(self, request, *args, **kwargs):
         resp = {
-            "organization": Organization.objects.filter(admin=request.user).first().name
+            "organization": Organization.objects.filter(
+                pk=request.auth.organization_id, admin=request.user
+            )
+            .first()
+            .name
         }
         return Response(resp, status=200)
 
@@ -244,7 +271,7 @@ class GetZapierTaskSampleData(APIView):
         else:
             workflow = self.get_workflow()
             perform_dict = {
-                w_data["id"]: SAMPLE_DATA[w_data["type"]] for w_data in workflow.data
+                w_data["id"]: get_sample_data(w_data) for w_data in workflow.data
             }
         return perform_dict
 
