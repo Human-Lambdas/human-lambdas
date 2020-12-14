@@ -29,7 +29,7 @@ from .serializers import (
     TaskSerializer,
     WorkflowSerializer,
 )
-from .utils import TaskPagination, decode_csv  # , sync_workflow_task
+from .utils import TaskPagination, decode_csv
 
 
 class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):

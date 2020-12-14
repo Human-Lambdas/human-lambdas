@@ -1,5 +1,7 @@
 import copy
 
+from .data_validation import data_validation
+
 
 def iterate_matching(workflow_data, task_data):
     for wdata in workflow_data:
@@ -58,4 +60,4 @@ def sync_workflow_task(workflow, task):
                     final_data, task_data
                 )
             updated_data.append(final_data)
-        task.data = updated_data
+        task.data = data_validation(updated_data)
