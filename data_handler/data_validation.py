@@ -50,7 +50,7 @@ def validate_list(data):
         list_value = convert_string(list_value)
     if list_value and not isinstance(list_value, list):
         raise DataValidationError(
-            f"Data item with id {data['id']} is of type number thus should be a float or a integer"
+            f"Data item with id {data['id']} is of type list thus should be a list"
         )
     data[data["type"]]["value"] = list_value
 
@@ -71,6 +71,7 @@ VALIDATION_STATES = {
     "multiple_selection": validate_multiple_selection,
     "form_sequence": validate_form,
     "list": validate_list,
+    "number": validate_number,
 }
 
 
