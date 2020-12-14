@@ -1,8 +1,5 @@
-import copy
-
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers
 from external.authentication import TokenAuthentication
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -13,6 +10,7 @@ from user_handler.permissions import IsOrgAdmin
 from rest_framework import status
 from workflow_handler.audits import GetCompletedTaskView
 from workflow_handler.models import Task, Workflow
+from data_handler.data_transformation import transform_ext2int
 
 from .serializers import ExternalTaskSerializer
 
@@ -89,40 +87,11 @@ class CreateTaskView(CreateAPIView):
 
     def preprocess_data(self):
         workflow = get_object_or_404(Workflow, pk=self.kwargs["workflow_id"])
-        formatted_data = []
-        for w_data in workflow.data:
-            task_data = copy.deepcopy(w_data)
-            if "layout" in task_data:
-                del task_data["layout"]
-            try:
-                if task_data["type"] not in task_data:
-                    task_data[task_data["type"]] = {}
-                if w_data["id"] in self.request.data["data"]:
-                    # Special case: Form sequence
-                    if "data" in w_data[w_data["type"]]:
-                        for fs_data in task_data[task_data["type"]]["data"]:
-                            fs_data[fs_data["type"]]["value"] = self.request.data[
-                                "data"
-                            ][w_data["id"]].get(fs_data["id"], None)
-                    # Special case: Named Entity Recognition
-                    if task_data["type"] == "named_entity_recognition":
-                        task_data[task_data["type"]]["value"] = self.request.data[
-                            "data"
-                        ][w_data["id"]]["text"]
-                        task_data[task_data["type"]]["entities"] = self.request.data[
-                            "data"
-                        ][w_data["id"]]["entities"]
-                    else:
-                        task_data[task_data["type"]]["value"] = get_data_value(
-                            self.request.data["data"], task_data
-                        )
-                else:
-                    task_data[task_data["type"]]["value"] = None
-            except KeyError:
-                raise serializers.ValidationError(
-                    "Cannot find data with data id: {}".format(w_data["id"])
-                )
-            formatted_data.append(task_data)
+        formatted_data = transform_ext2int(workflow.data, self.request.data["data"])
+        #     except KeyError:
+        #         raise serializers.ValidationError(
+        #             "Cannot find data with data id: {}".format(w_data["id"])
+        #         )
         return formatted_data, workflow
 
     def perform_create(self, serializer):

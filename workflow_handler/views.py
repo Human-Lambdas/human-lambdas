@@ -20,6 +20,7 @@ from user_handler.models import Organization
 from user_handler.permissions import IsAdminOrReadOnly, IsOrgAdmin
 from workflow_handler.csv_utils import process_csv
 from workflow_handler.utils import is_force
+from data_handler.data_sync import sync_workflow_task
 
 from .models import Source, Task, TaskActivity, User, WebHook, Workflow
 from .serializers import (
@@ -28,7 +29,7 @@ from .serializers import (
     TaskSerializer,
     WorkflowSerializer,
 )
-from .utils import TaskPagination, decode_csv, sync_workflow_task
+from .utils import TaskPagination, decode_csv  # , sync_workflow_task
 
 
 class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
