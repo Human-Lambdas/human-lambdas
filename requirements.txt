@@ -8,7 +8,7 @@ sentry_sdk==0.19.5
 schema==0.7.2
 gunicorn==20.0.04
 git+https://github.com/zapier/django-rest-hooks.git@d21a070b9a099b5e9c755b2afa6b81c9d8b26e7c#egg=django-rest-hooks
-sendgrid==6.4.7
+sendgrid==6.4.8
 analytics-python==1.2.9
 cchardet==0.3.5
 django-next-prev
