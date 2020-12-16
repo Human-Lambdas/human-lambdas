@@ -22,7 +22,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run migrations
       run: |
-        python manage.py migrate --fake
+        python manage.py migrate
       env:
         POSTGRES_USER: ${{ secrets.STAGING_DB_USER }}
         POSTGRES_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
