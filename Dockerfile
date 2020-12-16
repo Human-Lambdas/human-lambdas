@@ -6,4 +6,5 @@ COPY requirements.txt /code/
 RUN pip install -r requirements.txt
 COPY . /code/
 EXPOSE 8000
+RUN python manage.py migrate
 CMD gunicorn hl_rest_api.wsgi -b 0.0.0.0:8000 -w 1 -t 1 --timeout 0 --preload
