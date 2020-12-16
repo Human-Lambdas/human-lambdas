@@ -435,7 +435,6 @@ class NextTaskView(APIView):
                 logger.info(f"Getting new task with task id {obj.pk}")
                 return Response(task, status=200)
         return Response(status=204)
-        #return Response({"status_code": 204}, status=204)
 
 
 class AssignTaskView(APIView):
