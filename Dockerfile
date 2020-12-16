@@ -12,6 +12,12 @@ COPY requirements.txt /code/
 RUN pip install -r requirements.txt
 COPY . /code/
 EXPOSE 8000
+RUN echo $POSTGRES_HOST
+RUN echo $POSTGRES_DB
+RUN echo $POSTGRES_USER
+RUN echo $POSTGRES_PASSWORD
+RUN echo $POSTGRES_PORT
+RUN echo $SECRET_KEY
 RUN python manage.py showmigrations
 RUN python manage.py migrate
 RUN python manage.py showmigrations
