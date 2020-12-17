@@ -17,6 +17,7 @@ _DATA_TYPES = Or(
     "pdf",
     "embed",
     "named_entity_recognition",
+    "rich_text"
 )
 DATA_SCHEMA = Schema(
     [
@@ -38,6 +39,7 @@ DATA_SCHEMA = Schema(
                 Optional("options"): list,
                 Optional("data"): list,
                 Optional("history"): list,
+                Optional("format"): str,
             },
             Optional("logic_jump"): dict,
         }
