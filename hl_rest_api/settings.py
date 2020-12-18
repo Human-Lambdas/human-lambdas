@@ -261,6 +261,7 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
     "SIGNING_KEY": os.getenv("SECRET_KEY"),
+    "ROTATE_REFRESH_TOKENS": True
 }
 
 
