@@ -419,23 +419,23 @@ class NextTaskView(APIView):
             )
             if not obj:
                 obj = queryset.select_for_update().filter(status="open").first()
-            if not obj:
-                return Response({"status_code": 204}, status=204)
-            obj.status = "in_progress"
-            obj.assigned_to = request.user
-            obj.assigned_at = timezone.now()
-            obj.save()
-            TaskActivity(
-                task=obj,
-                created_by=request.user,
-                action="assigned",
-                assignee=request.user,
-            ).save()
-            sync_workflow_task(workflow, obj)
-            task = self.serializer_class(obj).data
-            task["status_code"] = 200
-            logger.info(f"Getting new task with task id {obj.pk}")
-            return Response(task, status=200)
+            if obj:
+                obj.status = "in_progress"
+                obj.assigned_to = request.user
+                obj.assigned_at = timezone.now()
+                obj.save()
+                TaskActivity(
+                    task=obj,
+                    created_by=request.user,
+                    action="assigned",
+                    assignee=request.user,
+                ).save()
+                sync_workflow_task(workflow, obj)
+                task = self.serializer_class(obj).data
+                task["status_code"] = 200
+                logger.info(f"Getting new task with task id {obj.pk}")
+                return Response(task, status=200)
+        return Response(status=204)
 
 
 class AssignTaskView(APIView):
