@@ -10,51 +10,6 @@ from .models import WebHook, Workflow, WorkflowNotification
 TEMPLATE_ORG_ID = 40
 
 
-def sync_workflow_task(workflow, task):
-    if task.status != "completed":
-        updated_data = []
-        for workflow_data in workflow.data:
-            final_data = copy.deepcopy(workflow_data)
-            for t_data in task.data:
-                if (
-                    "value" in t_data[t_data["type"]]
-                    and t_data["id"] == workflow_data["id"]
-                ):
-                    final_data[final_data["type"]]["value"] = t_data[t_data["type"]][
-                        "value"
-                    ]
-                    if "entities" in t_data[t_data["type"]]:
-                        final_data[final_data["type"]]["entities"] = t_data[
-                            t_data["type"]
-                        ]["entities"]
-                elif (
-                    "data" in t_data[t_data["type"]]
-                    and t_data["id"] == workflow_data["id"]
-                ):
-                    for idata in final_data[t_data["type"]]["data"]:
-                        t_idata = next(
-                            iter(
-                                [
-                                    i
-                                    for i in t_data[t_data["type"]]["data"]
-                                    if i["id"] == idata["id"]
-                                ]
-                            ),
-                            None,
-                        )
-                        if t_idata:
-                            idata[idata["type"]]["value"] = t_idata[
-                                t_idata["type"]
-                            ].get("value")
-                    if "history" in t_data[t_data["type"]]:
-                        history = t_data[t_data["type"]]["history"]
-                    else:
-                        history = []
-                    final_data[final_data["type"]]["history"] = history
-            updated_data.append(final_data)
-        task.data = updated_data
-
-
 def find_and_fire_hook(event_name, instance, **kwargs):
     filters = {
         "event": event_name,

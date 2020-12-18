@@ -2,7 +2,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from rest_hooks.models import AbstractHook
 from rest_hooks.signals import hook_event
-from external.task_formats import process_external_completed_tasks
+from data_handler.data_transformation import transform_int2ext
 from user_handler.models import Notification, Organization, User
 
 
@@ -117,13 +117,13 @@ class Task(models.Model):
             "completed_by": worker_email,
             "workflow": self.workflow.name,
             "workflow_id": self.workflow.pk,
-            "data": self.data,
+            "data": transform_int2ext(self.data),
             "source": source_name,
         }
 
     def get_formatted_task_external(self):
         serilized_data = self.get_simple_formatted_task()
-        return process_external_completed_tasks(serilized_data)
+        return serilized_data  # process_external_completed_tasks(serilized_data)
 
     def serialize_hook(self, *args, **kwargs):
         return self.get_formatted_task_external()

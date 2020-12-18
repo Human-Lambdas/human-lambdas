@@ -6,14 +6,14 @@ from django.db import transaction
 from django.db.models import F, Q
 from django.utils import timezone
 from rest_framework import exceptions, serializers
-from schema import SchemaError
 from hl_rest_api import analytics
 from hl_rest_api.utils import is_valid_url
 from user_handler.models import Organization
+from data_handler.data_validation import data_validation, DataValidationError
 
-from .schemas import DATA_SCHEMA
 from .models import Workflow, Task, Source, WorkflowNotification, WebHook, TaskActivity
 from .utils import get_session_duration_seconds
+
 
 logger = logging.getLogger(__file__)
 
@@ -23,23 +23,6 @@ def clean_form_sequence(data):
         if idata["type"] == "form_sequence":
             for form_data in idata["form_sequence"]["data"]:
                 form_data[form_data["type"]]["value"] = None
-
-
-def validate_output_structure(validated_data_items):
-    if not validated_data_items:
-        raise serializers.ValidationError("Workflow cannot be empty")
-    for validated_data in validated_data_items:
-        if validated_data["type"] in ["single_selection", "multiple_selection"]:
-            type_data = validated_data.get(validated_data["type"])
-            if type_data is None:
-                raise serializers.ValidationError(
-                    "Type do not match to {}".format(validated_data["type"])
-                )
-            if "options" not in type_data:
-                raise serializers.ValidationError(
-                    "Output should have a list of options"
-                )
-    return validated_data_items
 
 
 class HookSerializer(serializers.ModelSerializer):
@@ -195,9 +178,11 @@ class WorkflowSerializer(serializers.ModelSerializer):
         return super(WorkflowSerializer, self).update(instance, validated_data)
 
     def validate_data(self, data):
+        if not data:
+            raise serializers.ValidationError("Workflow cannot be empty")
         try:
-            return validate_output_structure(DATA_SCHEMA.validate(data))
-        except SchemaError as exception_text:
+            return data_validation(data)
+        except DataValidationError as exception_text:
             raise serializers.ValidationError(exception_text)
 
     def validate_webhook(self, data):
@@ -230,7 +215,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "workflow",
             "workflow_id",
             "n_comments",
-            "correct"
+            "correct",
         ]
 
     def create(self, validated_data):
@@ -308,8 +293,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def validate_data(self, data):
         try:
-            return DATA_SCHEMA.validate(data)
-        except SchemaError as exception_text:
+            return data_validation(data)
+        except DataValidationError as exception_text:
             raise serializers.ValidationError(exception_text)
 
     def get_workflow(self, obj):

@@ -1,21 +1,12 @@
 import copy
 import csv
-from ast import literal_eval
 
 from django.db.models import F
 from django.http import HttpResponse
 from user_handler.notifications import send_notification
+from workflow_handler.models import Task, TaskActivity
 
-from .models import Task, TaskActivity
-
-
-def process_list(input_value):
-    return literal_eval(input_value)
-
-
-process_input = {
-    "list": process_list,
-}
+from .data_validation import data_validation
 
 
 def validate_keys(title_row, workflow):
@@ -33,8 +24,6 @@ def extract_value(w_data, row, title_row):
         del data_item["layout"]
     if data_item["id"] in title_row:
         input_value = row[title_row.index(data_item["id"])]
-        if data_item["type"] in process_input:
-            input_value = process_input[data_item["type"]](input_value)
         data_item[data_item["type"]]["value"] = input_value
     return data_item
 
@@ -45,7 +34,7 @@ def process_csv(csv_file, workflow, source, user, filename):
     validate_keys(title_row, workflow)
     for row in dataset:
         data = [extract_value(w_input, row, title_row) for w_input in workflow.data]
-        task = Task(data=data, workflow=workflow, source=source)
+        task = Task(data=data_validation(data), workflow=workflow, source=source)
         task.save()
         TaskActivity(
             task=task,
