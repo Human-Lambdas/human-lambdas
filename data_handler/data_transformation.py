@@ -15,7 +15,14 @@ def form_int2ext(int_data):
 
 def ner_int2ext(int_data):
     int_value = default_int2ext(int_data)
-    return {"text": int_value, "entities": int_data["entities"]}
+    entities = []
+    for entity in int_data["entities"]:
+        entity["category"] = entity["tag"]
+        del entity["tag"]
+        if "text" in entity: del entity["text"] 
+        if "color" in entity: del entity["color"]
+        entities.append(entity)
+    return {"text": int_value, "entities": entities}
 
 
 def default_int2ext(int_data):
@@ -63,8 +70,14 @@ def form_ext2int(task_data, request_data):
 
 def ner_ext2int(task_data, request_data):
     task_data[task_data["type"]]["value"] = request_data[task_data["id"]]["text"]
-    task_data[task_data["type"]]["entities"] = request_data[task_data["id"]]["entities"]
-
+    entities = []
+    for entity in request_data[task_data["id"]]["entities"]:
+        if "category" in entity:
+            entity["tag"] = entity["category"]
+            del entity["category"]
+        #if it doesn't have 'category' or 'start' or 'end' data validation will fail later on
+        entities.append(entity)
+    task_data[task_data["type"]]["entities"] = entities
 
 TRANSFORM_EXT2INT_STATES = {
     "list": list_ext2int,
