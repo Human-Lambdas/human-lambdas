@@ -17,7 +17,7 @@ _DATA_TYPES = Or(
     "pdf",
     "embed",
     "named_entity_recognition",
-    "rich_text"
+    "rich_text",
 )
 DATA_SCHEMA = Schema(
     [
