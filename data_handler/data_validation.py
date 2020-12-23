@@ -85,7 +85,9 @@ def validate_named_entity_recognition(data):
             or not isinstance(entity.get("end"), int)
             or not isinstance(entity.get("tag"), str)
         ):
-            raise DataValidationError(f"Entity missing one or more properties.")
+            raise DataValidationError(
+                f"Entity {entity} missing one or more properties."
+            )
 
 
 VALIDATION_STATES = {
