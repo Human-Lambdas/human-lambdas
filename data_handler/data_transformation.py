@@ -19,8 +19,10 @@ def ner_int2ext(int_data):
     for entity in int_data["entities"]:
         entity["category"] = entity["tag"]
         del entity["tag"]
-        if "text" in entity: del entity["text"] 
-        if "color" in entity: del entity["color"]
+        if "text" in entity:
+            del entity["text"]
+        if "color" in entity:
+            del entity["color"]
         entities.append(entity)
     return {"text": int_value, "entities": entities}
 
@@ -48,9 +50,7 @@ def transform_int2ext(data):  # rename: transform_int2ext
 
 # Transforming external to internal
 def default_ext2int(task_data, request_data):
-    task_data[task_data["type"]]["value"] = request_data[
-        task_data["id"]
-    ]
+    task_data[task_data["type"]]["value"] = request_data[task_data["id"]]
 
 
 def list_ext2int(task_data, request_data):
@@ -75,9 +75,10 @@ def ner_ext2int(task_data, request_data):
         if "category" in entity:
             entity["tag"] = entity["category"]
             del entity["category"]
-        #if it doesn't have 'category' or 'start' or 'end' data validation will fail later on
+        # if it doesn't have 'category' or 'start' or 'end' data validation will fail later on
         entities.append(entity)
     task_data[task_data["type"]]["entities"] = entities
+
 
 TRANSFORM_EXT2INT_STATES = {
     "list": list_ext2int,
