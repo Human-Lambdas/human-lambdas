@@ -65,16 +65,28 @@ def validate_number(data):
         )
     data[data["type"]]["value"] = number_value
 
+
 def validate_named_entity_recognition(data):
     if not isinstance(data[data["type"]].get("value"), str):
-        raise DataValidationError(f"Data item with id {data['id']} is missing 'value' or not a string.")
+        raise DataValidationError(
+            f"Data item with id {data['id']} is missing 'value' or not a string."
+        )
     if not isinstance(data[data["type"]].get("entities"), list):
-        raise DataValidationError(f"Data item with id {data['id']} is missing 'entities' or not a list.")
+        raise DataValidationError(
+            f"Data item with id {data['id']} is missing 'entities' or not a list."
+        )
     if not isinstance(data[data["type"]].get("options"), list):
-        raise DataValidationError(f"Data item with id {data['id']} is missing 'options' or not a list.")
+        raise DataValidationError(
+            f"Data item with id {data['id']} is missing 'options' or not a list."
+        )
     for entity in data[data["type"]].get("entities"):
-        if not isinstance(entity.get("start"), int) or not isinstance(entity.get("end"), int) or not isinstance(entity.get("tag"), str):
+        if (
+            not isinstance(entity.get("start"), int)
+            or not isinstance(entity.get("end"), int)
+            or not isinstance(entity.get("tag"), str)
+        ):
             raise DataValidationError(f"Entity missing one or more properties.")
+
 
 VALIDATION_STATES = {
     "single_selection": validate_single_selection,
