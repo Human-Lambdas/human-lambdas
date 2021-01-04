@@ -30,6 +30,7 @@ DATA_SCHEMA = Schema(
             _DATA_TYPES: {
                 Optional("placeholder"): Or(str, float, int, bool, list, None),
                 Optional("read_only"): bool,
+                Optional("use_placeholder"): bool,
                 Optional("is_required"): bool,
                 Optional("subtype"): And(str, len),
                 Optional("value"): Or(
