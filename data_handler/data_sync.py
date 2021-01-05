@@ -17,7 +17,7 @@ def iterate_matching(workflow_data, task_data):
 def form_sync(workflow_data, task_data):
     for w_data, t_data in iterate_matching(
         workflow_data[workflow_data["type"]]["data"],
-        task_data[task_data["type"]["data"]],
+        task_data[task_data["type"]]["data"],
     ):  # TODO: valdation of data here
         w_data[w_data["type"]]["value"] = t_data[t_data["type"]].get("value")
     if "history" in task_data[task_data["type"]]:
