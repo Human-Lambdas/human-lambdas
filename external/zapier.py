@@ -107,6 +107,8 @@ class GetZapierTaskInputs(APIView):
             if w_input["type"] == "form_sequence":
                 child["dict"] = True
             if w_input["type"] == "named_entity_recognition":
+                del child["type"]
+                child["dict"] = True
                 child["children"] = [{
                     "key": "text",
                     "label": "Text",
