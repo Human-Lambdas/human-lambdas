@@ -108,12 +108,16 @@ class GetZapierTaskInputs(APIView):
                 child["dict"] = True
             if w_input["type"] == "named_entity_recognition":
                 del child["type"]
-                child["children"] = [{
-                    "key": "text",
-                    "label": "Text",
-                    "type": "string"
-                }]
-                
+                child["children"] = [
+                    {"key": "text", "label": "Text", "type": "string"},
+                    {
+                        "key": "entities",
+                        "label": "Entities",
+                        "type": "string",
+                        "helpText": "Optional field, in JSON format. See the Human Lambdas docs for more details.",
+                    },
+                ]
+
             children.append(child)
         result = {
             "key": "data",
