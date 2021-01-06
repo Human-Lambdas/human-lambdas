@@ -42,6 +42,9 @@ def default_data_sync(workflow_data, task_data):
     workflow_data[workflow_data["type"]]["value"] = task_data[task_data["type"]].get(
         "value"
     )
+    if workflow_data[workflow_data["type"]]["value"] == None and workflow_data[workflow_data["type"]].get("use_placeholder", False) == True:
+        workflow_data[workflow_data["type"]]["value"] = workflow_data[workflow_data["type"]].get("placeholder")
+
 
 
 SYNC_STATES = {
