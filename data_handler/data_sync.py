@@ -51,9 +51,10 @@ def ner_sync(workflow_data, task_data):
 
 
 def default_data_sync(workflow_data, task_data):
-    # TODO: validate this value
-    workflow_data[workflow_data["type"]]["value"] = task_data[task_data["type"]].get(
-        "value"
+    workflow_data[workflow_data["type"]]["value"] = (
+        task_data[task_data["type"]].get("value", None)
+        if task_data is not None
+        else None
     )
     if (
         workflow_data[workflow_data["type"]]["value"] is None
@@ -75,9 +76,8 @@ def sync_workflow_task(workflow, task):
         updated_data = []
         for workflow_data, task_data in iterate_matching(workflow.data, task.data):
             final_data = copy.deepcopy(workflow_data)
-            if task_data:
-                SYNC_STATES.get(final_data["type"], default_data_sync)(
-                    final_data, task_data
-                )
+            SYNC_STATES.get(final_data["type"], default_data_sync)(
+                final_data, task_data
+            )
             updated_data.append(final_data)
         task.data = data_validation(updated_data)
