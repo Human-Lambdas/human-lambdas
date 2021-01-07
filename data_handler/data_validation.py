@@ -67,15 +67,26 @@ def validate_number(data):
 
 
 def validate_named_entity_recognition(data):
-    if not isinstance(data[data["type"]].get("entities"), list):
+    if "value" not in data[data["type"]] or not isinstance(
+        data[data["type"]].get("value"), str
+    ):
+        raise DataValidationError(
+            # Externally 'value' is set on 'text' key
+            f"Data item with id {data['id']} is missing 'text' or is not a string."
+        )
+    if "entities" in data[data["type"]] and not isinstance(
+        data[data["type"]]["entities"], list
+    ):
         raise DataValidationError(
             f"Data item with id {data['id']} is missing 'entities' or not a list."
         )
-    if not isinstance(data[data["type"]].get("options"), list):
+    if "options" in data[data["type"]] and not isinstance(
+        data[data["type"]].get("options"), list
+    ):
         raise DataValidationError(
             f"Data item with id {data['id']} is missing 'options' or not a list."
         )
-    for entity in data[data["type"]].get("entities"):
+    for entity in data[data["type"]].get("entities", []):
         if (
             not isinstance(entity.get("start"), int)
             or not isinstance(entity.get("end"), int)

@@ -32,9 +32,9 @@ def ner_sync(workflow_data, task_data):
         workflow_data[workflow_data["type"]]["value"] = task_data[task_data["type"]][
             "value"
         ]
-        workflow_data[workflow_data["type"]]["entities"] = task_data[task_data["type"]][
-            "entities"
-        ]  # TODO: need a validation for this
+        workflow_data[workflow_data["type"]]["entities"] = task_data[
+            task_data["type"]
+        ].get("entities", [])
 
 
 def default_data_sync(workflow_data, task_data):
@@ -43,8 +43,8 @@ def default_data_sync(workflow_data, task_data):
         "value"
     )
     if (
-        workflow_data[workflow_data["type"]]["value"] == None
-        and workflow_data[workflow_data["type"]].get("use_placeholder", False) == True
+        workflow_data[workflow_data["type"]]["value"] is None
+        and workflow_data[workflow_data["type"]].get("use_placeholder", False) is True
     ):
         workflow_data[workflow_data["type"]]["value"] = workflow_data[
             workflow_data["type"]

@@ -69,9 +69,14 @@ def form_ext2int(task_data, request_data):
 
 
 def ner_ext2int(task_data, request_data):
+    if (
+        not isinstance(request_data[task_data["id"]], dict)
+        or "text" not in request_data[task_data["id"]]
+    ):
+        return
     task_data[task_data["type"]]["value"] = request_data[task_data["id"]]["text"]
     entities = []
-    for entity in request_data[task_data["id"]]["entities"]:
+    for entity in request_data[task_data["id"]].get("entities", []):
         if "category" in entity:
             entity["tag"] = entity["category"]
             del entity["category"]
