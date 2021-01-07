@@ -181,7 +181,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
         if not data:
             raise serializers.ValidationError("Workflow cannot be empty")
         try:
-            return data_validation(data)
+            return data_validation(data, is_workflow=True)
         except DataValidationError as exception_text:
             raise serializers.ValidationError(exception_text)
 

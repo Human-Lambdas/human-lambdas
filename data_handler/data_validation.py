@@ -20,11 +20,11 @@ def convert_string(input_value):
         )
 
 
-def default_data_validation(data):
+def default_data_validation(data, is_workflow):
     pass
 
 
-def validate_selection(data):
+def validate_selection(data, is_workflow):
     type_data = data.get(data["type"])
     if type_data is None:
         raise DataValidationError("Type do not match to {}".format(data["type"]))
@@ -32,19 +32,19 @@ def validate_selection(data):
         raise DataValidationError("Selection blocks should have a list of options")
 
 
-def validate_single_selection(data):
-    validate_selection(data)
+def validate_single_selection(data, is_workflow):
+    validate_selection(data, is_workflow)
 
 
-def validate_multiple_selection(data):
-    validate_selection(data)
+def validate_multiple_selection(data, is_workflow):
+    validate_selection(data, is_workflow)
 
 
-def validate_form(data):
+def validate_form(data, is_workflow):
     pass
 
 
-def validate_list(data):
+def validate_list(data, is_workflow):
     list_value = data[data["type"]].get("value")
     if isinstance(list_value, str):
         list_value = convert_string(list_value)
@@ -55,7 +55,7 @@ def validate_list(data):
     data[data["type"]]["value"] = list_value
 
 
-def validate_number(data):
+def validate_number(data, is_workflow):
     number_value = data[data["type"]].get("value")
     if isinstance(number_value, str):
         number_value = convert_string(number_value)
@@ -66,9 +66,10 @@ def validate_number(data):
     data[data["type"]]["value"] = number_value
 
 
-def validate_named_entity_recognition(data):
-    if "value" not in data[data["type"]] or not isinstance(
-        data[data["type"]].get("value"), str
+def validate_named_entity_recognition(data, is_workflow):
+    if not is_workflow and (
+        "value" not in data[data["type"]]
+        or not isinstance(data[data["type"]].get("value"), str)
     ):
         raise DataValidationError(
             # Externally 'value' is set on 'text' key
@@ -107,11 +108,13 @@ VALIDATION_STATES = {
 }
 
 
-def data_validation(data):
+def data_validation(data, is_workflow=False):
     try:
         data = DATA_SCHEMA.validate(data)
     except SchemaError as exception_text:
         raise DataValidationError(exception_text)
     for data_item in data:
-        VALIDATION_STATES.get(data_item["type"], default_data_validation)(data_item)
+        VALIDATION_STATES.get(data_item["type"], default_data_validation)(
+            data_item, is_workflow
+        )
     return data
