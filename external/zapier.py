@@ -114,7 +114,8 @@ class GetZapierTaskInputs(APIView):
                         "key": "entities",
                         "label": "Entities",
                         "type": "string",
-                        "helpText": "Optional field, in JSON format. See the Human Lambdas docs for more details.",
+                        "helpText": "Optional field, in JSON format."
+                        + "See the Human Lambdas docs for more details.",
                     },
                 ]
 
