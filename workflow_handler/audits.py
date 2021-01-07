@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from hl_rest_api import analytics
 from user_handler.models import Organization
 from user_handler.permissions import IsOrgAdmin
-from workflow_handler.csv_utils import task_list_to_csv_response
+from data_handler.csv_utils import task_list_to_csv_response
 
 from .models import Source, Task, TaskActivity, Workflow
 from .serializers import (
