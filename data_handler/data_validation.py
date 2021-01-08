@@ -67,9 +67,10 @@ def validate_number(data, is_workflow):
 
 
 def validate_named_entity_recognition(data, is_workflow):
-    if not is_workflow and (
-        "value" not in data[data["type"]]
-        or not isinstance(data[data["type"]].get("value"), str)
+    if (
+        not is_workflow
+        and "value" in data[data["type"]]
+        and not isinstance(data[data["type"]].get("value"), (str, type(None)))
     ):
         raise DataValidationError(
             # Externally 'value' is set on 'text' key

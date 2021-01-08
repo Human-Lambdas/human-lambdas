@@ -28,7 +28,7 @@ def ner_int2ext(int_data):
 
 
 def default_int2ext(int_data):
-    return int_data["value"]
+    return int_data.get("value")
 
 
 TRANSFORM_INT2EXT_STATES = {
