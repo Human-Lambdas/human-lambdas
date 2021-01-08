@@ -29,8 +29,8 @@ def form_sync(workflow_data, task_data):
 
 def ner_sync(workflow_data, task_data):
     # Value gets cloned if it exists, otherwise we don't set it at all
-    # Setting to null breaks the frontend
-    if "value" in task_data[workflow_data["type"]]:
+    # Setting value to null breaks the frontend
+    if task_data is not None and "value" in task_data[workflow_data["type"]]:
         workflow_data[workflow_data["type"]]["value"] = task_data[
             task_data["type"]
         ].get("value")
@@ -45,8 +45,10 @@ def ner_sync(workflow_data, task_data):
         ].get("placeholder")
 
     # Entities always gets cloned
-    workflow_data[workflow_data["type"]]["entities"] = task_data[task_data["type"]].get(
-        "entities", []
+    workflow_data[workflow_data["type"]]["entities"] = (
+        task_data[task_data["type"]].get("entities", [])
+        if task_data is not None
+        else []
     )
 
 
