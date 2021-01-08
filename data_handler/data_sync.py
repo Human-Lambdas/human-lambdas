@@ -15,6 +15,8 @@ def iterate_matching(workflow_data, task_data):
 
 
 def form_sync(workflow_data, task_data):
+    if task_data is None:
+        return
     for w_data, t_data in iterate_matching(
         workflow_data[workflow_data["type"]]["data"],
         task_data[task_data["type"]]["data"],
