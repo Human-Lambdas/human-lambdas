@@ -180,7 +180,9 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                 analytics.track(
                     self.request.user.pk, "Removed from Org", {"orgs_left": False}
                 )
-                return Response(status=204)
+                return Response(
+                    {"status_code": 204, "message": "User was deleted"}, status=204
+                )
             else:
                 org = all_orgs_member.get(pk=kwargs["org_id"])
                 org.user.remove(user)
@@ -188,7 +190,13 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                 analytics.track(
                     self.request.user.pk, "Removed from Org", {"orgs_left": True}
                 )
-                return Response(status=204)
+                return Response(
+                    {
+                        "status_code": 204,
+                        "message": "User was deleted from organization",
+                    },
+                    status=204,
+                )
 
 
 class APIAuthToken(APIView):
