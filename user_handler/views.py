@@ -181,7 +181,7 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                     self.request.user.pk, "Removed from Org", {"orgs_left": False}
                 )
                 return Response(
-                    {"status_code": 204, "message": "User was deleted"}, status=204
+                    {"status_code": 200, "message": "User was deleted"}, status=200
                 )
             else:
                 org = all_orgs_member.get(pk=kwargs["org_id"])
@@ -192,10 +192,10 @@ class RetrieveUpdateRemoveUserOrgView(RetrieveUpdateDestroyAPIView):
                 )
                 return Response(
                     {
-                        "status_code": 204,
+                        "status_code": 200,
                         "message": "User was deleted from organization",
                     },
-                    status=204,
+                    status=200,
                 )
 
 
