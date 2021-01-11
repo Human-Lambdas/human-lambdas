@@ -23,16 +23,15 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 10
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v1
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
       with:
         python-version: 3.8
     - name: Install dependencies
       run: |
         sudo apt-get install libpq-dev
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r requirements.txt -r requirements-dev.txt
     - name: Lint with flake8
       run: |
         pip install flake8
@@ -40,7 +39,7 @@ jobs:
     - name: Test with pytest
       run: |
         python manage.py migrate
-        python manage.py test --debug-mode
+        pytest
       env:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: "test"
