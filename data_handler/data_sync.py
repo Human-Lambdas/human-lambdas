@@ -53,6 +53,42 @@ def ner_sync(workflow_data, task_data):
         else []
     )
 
+def bb_sync(workflow_data, task_data):
+    #Check task_data has the right format, and set it to the right empty state if not
+    if (
+        isinstance(task_data, dict) is False 
+        or isinstance(task_data.get(workflow_data['type']), dict) is False 
+        or isinstance(task_data[workflow_data['type'].get("value")], dict) is False
+    ):
+        # task_data has no useful data, assume it's empty
+        # Initialize value object
+        workflow_data[workflow_data['type']]['value'] = {}
+
+        # Intiialize image to null or placeholder
+        workflow_data[workflow_data['type']]['value']['image'] = (
+            workflow_data[workflow_data['type']]['placeholder']
+            if workflow_data[workflow_data["type"]].get("use_placeholder", False)
+            else None
+        )
+
+        # Initialize object list
+        workflow_data[workflow_data['type']]['value']['objects'] = []
+
+    else:
+        # Set image to value or fallback to placeholder or null
+        workflow_data[workflow_data['type']]['value']['image'] = (
+            task_data[workflow_data['type']]['value']['image']
+            if task_data[workflow_data['type']]['value'].get('image') is not None
+            else (
+                workflow_data[workflow_data['type']]['placeholder']
+                if workflow_data[workflow_data["type"]].get("use_placeholder", False)
+                else None
+            )
+        )
+
+        # Set objects
+        workflow_data[workflow_data['type']]['value']['objects'] = task_data[workflow_data['type']]['value'].get("objects", [])
+
 
 def default_data_sync(workflow_data, task_data):
     workflow_data[workflow_data["type"]]["value"] = (
@@ -72,6 +108,7 @@ def default_data_sync(workflow_data, task_data):
 SYNC_STATES = {
     "form_sequence": form_sync,
     "named_entity_recognition": ner_sync,
+    "bounding_boxes": bb_sync,
 }
 
 
