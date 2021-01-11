@@ -114,7 +114,8 @@ class TestInvite(APITestCase):
     def test_endpoint_call_delete(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/invite".format(self.org_id), {"emails": "delete@me.com"},
+            "/v1/orgs/{0}/invite".format(self.org_id),
+            {"emails": "delete@me.com"},
         )
         response = self.client.delete(
             "/v1/orgs/{0}/invite".format(self.org_id), {"email": "delete@me.com"}
@@ -124,7 +125,8 @@ class TestInvite(APITestCase):
     def test_endpoint_call_patch(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         response = self.client.post(
-            "/v1/orgs/{0}/invite".format(self.org_id), {"emails": "patch@me.com"},
+            "/v1/orgs/{0}/invite".format(self.org_id),
+            {"emails": "patch@me.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.patch(

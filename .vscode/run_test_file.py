@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import sys
 import os
+import sys
 
 # this script lets vscode trigger django tests by converting the filename to a python module name
 # to use this: Open test file in vs code, put in a breakpoint, and click run in the debug tab

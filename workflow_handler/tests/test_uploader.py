@@ -7,8 +7,8 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from user_handler.models import Organization, User
 from data_handler.csv_utils import process_csv, validate_keys
+from user_handler.models import Organization, User
 from workflow_handler.models import Task, Workflow
 
 logger = logging.getLogger(__file__)

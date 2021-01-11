@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="webhook", old_name="Workflow", new_name="workflow",
+            model_name="webhook",
+            old_name="Workflow",
+            new_name="workflow",
         ),
     ]

@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="source", name="name", field=models.CharField(max_length=512),
+            model_name="source",
+            name="name",
+            field=models.CharField(max_length=512),
         ),
     ]
