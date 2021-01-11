@@ -70,7 +70,3 @@ Go to http://localhost:8000/swagger/
 
 Click 'authorize' and paste in `bearer {your_token}`. You can find your token in the web inspector when viewing your local instance of the web front end.
 
-
-## Debug with VSCode
-
-.vscode/launch.json adds a debug option when in VSCode (see the debug tab in the sidebar)
