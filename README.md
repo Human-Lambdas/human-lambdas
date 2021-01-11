@@ -35,10 +35,6 @@ pre-commit run --all-files
 ```bash
 docker run \
   -p 5432:5432 \
-  --health-cmd pg_isready \
-  --health-interval 10s \
-  --health-timeout 5s \
-  --health-retries 10 \
   -e "POSTGRES_USER=$POSTGRES_USER" \
   -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
   -e "POSTGRES_DB=$POSTGRES_DB" \
