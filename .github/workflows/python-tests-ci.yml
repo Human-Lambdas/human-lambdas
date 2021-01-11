@@ -36,26 +36,26 @@ jobs:
       with:
         extra_args: --verbose --all-files
     - name: Test with pytest
-      run: |
-        python manage.py migrate
+    - run: python manage.py migrate
+    - run: |
+        export POSTGRES_USER="postgres"
+        export POSTGRES_PASSWORD="test"
+        export POSTGRES_DB="postgres"
+        export POSTGRES_PORT="${{ job.services.postgres.ports[5432] }}"
+        export POSTGRES_HOST="localhost"
+        export SECRET_KEY="${{ secrets.SECRET_KEY }}"
+        export SENTRY_KEY="${{ secrets.SENTRY_KEY }}"
+        export SENTRY_PROJECT="${{ secrets.SENTRY_PROJECT }}"
+        export SENDGRID_API_KEY="${{ secrets.SENDGRID_API_KEY }}"
+        export DEBUG="True"
+        export APP_URL="https://app.humanlambdas.com/"
+        export SEGMENT_KEY="${{ secrets.SEGMENT_KEY }}"
+        export NOTIFICATION_ASM_GROUPID="${{ secrets.NOTIFICATION_ASM_GROUPID }}"
+        export INVITATION_TEMPLATE="test"
+        export ACCOUNT_ASM_GROUPID="10101"
+        export FORGOTTEN_PASSWORD_TEMPLATE="test"
+        export API_URL="http://localhost:8000"
+        export HL_CLIENT_API_KEY="${{ secrets.HL_CLIENT_API_KEY }}"
+        export HL_ORG_ID="61"
+
         pytest
-      env:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: "test"
-        POSTGRES_DB: postgres
-        POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
-        POSTGRES_HOST: localhost
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        SENTRY_KEY: ${{ secrets.SENTRY_KEY }}
-        SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-        DEBUG: True
-        APP_URL: https://app.humanlambdas.com/
-        SEGMENT_KEY: ${{ secrets.SEGMENT_KEY }}
-        NOTIFICATION_ASM_GROUPID: ${{ secrets.NOTIFICATION_ASM_GROUPID }}
-        INVITATION_TEMPLATE: "test"
-        ACCOUNT_ASM_GROUPID: 10101
-        FORGOTTEN_PASSWORD_TEMPLATE: "test"
-        API_URL: "http://localhost:8000"
-        HL_CLIENT_API_KEY: ${{ secrets.HL_CLIENT_API_KEY }}
-        HL_ORG_ID: 61
