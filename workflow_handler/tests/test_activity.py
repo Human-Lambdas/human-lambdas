@@ -99,7 +99,9 @@ class TestTasksActivity(APITestCase):
         task = Task.objects.filter(workflow=workflow).all()[0]
         response = self.client.post(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}/activity".format(
-                self.org_id, self.workflow_id, task.pk,
+                self.org_id,
+                self.workflow_id,
+                task.pk,
             ),
             data={"action": "comment", "comment": "hello world"},
             format="json",
@@ -112,7 +114,9 @@ class TestTasksActivity(APITestCase):
         task = Task.objects.filter(workflow=workflow).all()[0]
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}/activity".format(
-                self.org_id, self.workflow_id, task.pk,
+                self.org_id,
+                self.workflow_id,
+                task.pk,
             ),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -126,7 +130,9 @@ class TestTasksActivity(APITestCase):
         task = Task.objects.filter(workflow=workflow).all()[0]
         response = self.client.post(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}/activity".format(
-                self.org_id, self.workflow_id, task.pk,
+                self.org_id,
+                self.workflow_id,
+                task.pk,
             ),
             data={"action": "comment", "comment": "hello world"},
             format="json",
@@ -207,7 +213,9 @@ class TestTasksActivity(APITestCase):
         )
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/{2}/activity".format(
-                self.org_id, self.workflow_id, task.pk,
+                self.org_id,
+                self.workflow_id,
+                task.pk,
             ),
         )
         self.assertEqual(response.data[0]["assignee_name"], "foo")

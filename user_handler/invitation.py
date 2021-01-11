@@ -4,6 +4,7 @@ from django.utils import timezone
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from hl_rest_api import analytics
 from hl_rest_api.utils import generate_unique_token, is_invalid_email
 from user_handler.models import Invitation, Notification, Organization, User

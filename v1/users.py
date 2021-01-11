@@ -1,5 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
+
 from user_handler.invitation import InvitationView
 from user_handler.jwt_token import HLTokenObtainPairView
 from user_handler.notifications import NotificationView
@@ -13,7 +14,6 @@ from user_handler.views import (
     RegistrationView,
     RetrieveUpdateUserView,
 )
-
 
 urlpatterns = [
     path("/register", RegistrationView.as_view(), name="user-registration"),

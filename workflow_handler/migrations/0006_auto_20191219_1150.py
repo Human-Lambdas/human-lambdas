@@ -11,9 +11,13 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="task", old_name="input_data", new_name="inputs",
+            model_name="task",
+            old_name="input_data",
+            new_name="inputs",
         ),
         migrations.RenameField(
-            model_name="task", old_name="output_data", new_name="outputs",
+            model_name="task",
+            old_name="output_data",
+            new_name="outputs",
         ),
     ]

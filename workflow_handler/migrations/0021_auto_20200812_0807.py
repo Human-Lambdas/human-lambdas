@@ -15,5 +15,7 @@ class Migration(migrations.Migration):
             name="hook_id",
             field=models.IntegerField(blank=True, null=True),
         ),
-        migrations.DeleteModel(name="WorkflowHook",),
+        migrations.DeleteModel(
+            name="WorkflowHook",
+        ),
     ]

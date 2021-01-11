@@ -2,18 +2,18 @@ from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import exceptions, serializers, status
-from external.authentication import TokenAuthentication
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from external.authentication import TokenAuthentication
+from external.task_formats import process_external_completed_tasks
 from hl_rest_api import analytics
 from user_handler.models import Organization
 from workflow_handler.models import Task, WebHook, Workflow
-from external.task_formats import process_external_completed_tasks
 
 from .views import CreateTaskView
-
 
 ZAPIER_TYPE_MAPPER = {"number": "number", "binary": "boolean"}
 

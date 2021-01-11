@@ -12,7 +12,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="task", name="completed", field=models.DateTimeField(null=True),
+            model_name="task",
+            name="completed",
+            field=models.DateTimeField(null=True),
         ),
         migrations.AlterField(
             model_name="task",

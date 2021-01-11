@@ -3,10 +3,13 @@ import logging
 import re
 
 from django.utils import timezone
+from email_validator import (
+    EmailNotValidError,
+    EmailSyntaxError,
+    validate_email,
+)
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.views import exception_handler
-from email_validator import validate_email, EmailSyntaxError, EmailNotValidError
-
 
 logger = logging.getLogger(__file__)
 

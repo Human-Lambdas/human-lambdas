@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="workflow", name="n_tasks", field=models.IntegerField(default=0),
+            model_name="workflow",
+            name="n_tasks",
+            field=models.IntegerField(default=0),
         ),
     ]

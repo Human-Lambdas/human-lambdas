@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="workflow", name="name", field=models.CharField(max_length=140),
+            model_name="workflow",
+            name="name",
+            field=models.CharField(max_length=140),
         ),
     ]
