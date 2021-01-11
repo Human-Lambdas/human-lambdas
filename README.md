@@ -60,7 +60,7 @@ python manage.py runserver
 ## Unit Test
 
 ```
-python manage.py test
+pytest
 ```
 
 
@@ -69,4 +69,16 @@ python manage.py test
 Go to http://localhost:8000/swagger/
 
 Click 'authorize' and paste in `bearer {your_token}`. You can find your token in the web inspector when viewing your local instance of the web front end.
+
+## QA with front end
+
+In Django admin set your superuser's organisation ID to `1`
+
+```
+export APP_URL=http://localhost:8000
+yarn install
+yarn dev
+```
+
+then login at http://localhost:3000
 
