@@ -28,11 +28,12 @@ jobs:
         python-version: 3.8
     - run: sudo apt-get install libpq-dev
     - run: pip install -r requirements.txt -r requirements-dev.txt
-    - run: pytest --collect-only # ensure IDE pytest integration works
     - uses: pre-commit/action@v2.0.0
       with:
         extra_args: --verbose --all-files
     - run: |
+        set -e -x
+        pytest --collect-only # ensure IDE pytest integration works
         python manage.py migrate
         python manage.py test --debug-mode
       env:
