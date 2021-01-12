@@ -125,8 +125,8 @@ def validate_named_entity_recognition(data, is_workflow):
 
 
 def validate_bounding_boxes(data, is_workflow):
-    # Enforce options is list
-    if not isinstance(data[data["type"]].get("options"), []):
+    # Enforce options is list if included
+    if not isinstance(data[data["type"]].get("options"), (list, type(None))):
         raise DataValidationError(
             f"Data item with id {data['id']} is missing 'options' or not a list."
         )
