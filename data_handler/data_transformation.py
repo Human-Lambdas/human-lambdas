@@ -1,5 +1,13 @@
 import copy
 
+"""
+Transformations handle internal<>external conversions.
+
+external->internal is most important because we want to avoid garbage entering the system.
+Still, there's a validation stage after this, so we don't need to validate here.
+The goal is to pick up any relevant data that's meaningful for the type in question
+"""
+
 
 def list_int2ext(int_data):
     return [
@@ -85,10 +93,22 @@ def ner_ext2int(task_data, request_data):
     task_data[task_data["type"]]["entities"] = entities
 
 
+def bounding_boxes_int2ext(task_data, request_data):
+    # Try to extract data if value has the right format
+    if isinstance(request_data[task_data["id"]], dict):
+        task_data[task_data["type"]]["value"] = request_data[task_data["id"]].get(
+            "image"
+        )
+        task_data[task_data["type"]]["value"] = request_data[task_data["id"]].get(
+            "objects"
+        )
+
+
 TRANSFORM_EXT2INT_STATES = {
     "list": list_ext2int,
     "form_sequence": form_ext2int,
     "named_entity_recognition": ner_ext2int,
+    "bounding_boxes": bounding_boxes_int2ext,
 }
 
 
@@ -101,7 +121,7 @@ def transform_ext2int(workflow_data, request_data):
             del task_data["layout"]
 
         # if there are any cases left which do not include the type data
-        if task_data["type"] not in task_data:
+        if isinstance(task_data.get("type"), dict):
             task_data[task_data["type"]] = {}
         if w_data["id"] in request_data:
             TRANSFORM_EXT2INT_STATES.get(w_data["type"], default_ext2int)(
