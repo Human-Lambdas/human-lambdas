@@ -6,6 +6,10 @@ from .data_validation import data_validation
 Every time a task is fetched, we have to merge the task's data values with the workflow object.
 We store these separately because a workflow's blocks configuration can change.
 If it does, we want to reflect these changes on any task that is not completed.
+
+The entry function is sync_workflow_task and should only be called by
+those endpoints which are meant to return a non-complete task and
+such task should not be persisted to the DB post-sync.
 """
 
 
