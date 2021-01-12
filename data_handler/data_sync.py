@@ -59,7 +59,7 @@ def bb_sync(workflow_data, task_data):
     if (
         isinstance(task_data, dict) is False
         or isinstance(task_data.get(workflow_data["type"]), dict) is False
-        or isinstance(task_data[workflow_data["type"].get("value")], dict) is False
+        or isinstance(task_data[workflow_data["type"]].get("value")], dict) is False
     ):
         # task_data has no useful data, assume it's empty
         # Initialize value object
