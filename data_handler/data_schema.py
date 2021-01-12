@@ -18,7 +18,7 @@ _DATA_TYPES = Or(
     "embed",
     "named_entity_recognition",
     "rich_text",
-    "bounding_boxes"
+    "bounding_boxes",
 )
 DATA_SCHEMA = Schema(
     [
