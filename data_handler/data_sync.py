@@ -86,6 +86,9 @@ def bb_sync(workflow_data, task_data):
         workflow_data[workflow_data["type"]]["value"]["objects"] = []
 
     else:
+        # Initialize "value" - wf should never have value
+        workflow_data[workflow_data["type"]]["value"] = {}
+
         # Set image to value or fallback to placeholder or null
         workflow_data[workflow_data["type"]]["value"]["image"] = (
             task_data[workflow_data["type"]]["value"]["image"]
