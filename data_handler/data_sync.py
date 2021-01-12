@@ -2,6 +2,12 @@ import copy
 
 from .data_validation import data_validation
 
+"""
+Every time a task is fetched, we have to merge the task's data values with the workflow object.
+We store these separately because a workflow's blocks configuration can change.
+If it does, we want to reflect these changes on any task that is not completed.
+"""
+
 
 def iterate_matching(workflow_data, task_data):
     for wdata in workflow_data:
@@ -59,7 +65,7 @@ def bb_sync(workflow_data, task_data):
     if (
         isinstance(task_data, dict) is False
         or isinstance(task_data.get(workflow_data["type"]), dict) is False
-        or isinstance(task_data[workflow_data["type"]].get("value")], dict) is False
+        or isinstance(task_data[workflow_data["type"]].get("value"), dict) is False
     ):
         # task_data has no useful data, assume it's empty
         # Initialize value object
