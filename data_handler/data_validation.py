@@ -153,19 +153,20 @@ def validate_bounding_boxes(data, is_workflow):
                 f"Data item with id {data['id']} doesn't have a valid 'objects' value."
             )
 
-        # Enforce objects schema if there is any
+        # Enforce 'objects' schema if any has been provided
         for bounding_box in data[data["type"]]["value"].get("objects", []):
             if (
                 not isinstance(bounding_box, dict)
-                or not isinstance(bounding_box.get("x"), str)
-                or not isinstance(bounding_box.get("y"), str)
-                or not isinstance(bounding_box.get("w"), str)
-                or not isinstance(bounding_box.get("h"), str)
+                or not isinstance(bounding_box.get("x"), float)
+                or not isinstance(bounding_box.get("y"), float)
+                or not isinstance(bounding_box.get("w"), float)
+                or not isinstance(bounding_box.get("h"), float)
                 or not isinstance(bounding_box.get("category"), str)
             ):
                 raise DataValidationError(
                     f"Data item with id {data['id']} doesn't have a valid object in 'objects'."
                 )
+            # TO-DO: Enforce 0-1 bounds
 
 
 VALIDATION_STATES = {

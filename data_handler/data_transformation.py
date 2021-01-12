@@ -35,6 +35,23 @@ def ner_int2ext(int_data):
     return {"text": int_value, "entities": entities}
 
 
+def bounding_boxes_int2ext(int_data):
+    # Parse 'value'
+    int_value = default_int2ext(int_data)
+
+    # Guarantee 'objects' exists
+    int_value["objects"] = int_value.get("objects", [])
+
+    # Convert percent to decimal percentage representation
+    for i, obj in enumerate(int_value["objects"]):
+        obj["x"] = obj["x"] / 100
+        obj["y"] = obj["y"] / 100
+        obj["w"] = obj["w"] / 100
+        obj["h"] = obj["h"] / 100
+        int_value["objects"][i] = obj
+    return int_value
+
+
 def default_int2ext(int_data):
     return int_data.get("value")
 
@@ -43,6 +60,7 @@ TRANSFORM_INT2EXT_STATES = {
     "list": list_int2ext,
     "form_sequence": form_int2ext,
     "named_entity_recognition": ner_int2ext,
+    "bounding_boxes": bounding_boxes_int2ext,
 }
 
 
@@ -93,22 +111,45 @@ def ner_ext2int(task_data, request_data):
     task_data[task_data["type"]]["entities"] = entities
 
 
-def bounding_boxes_int2ext(task_data, request_data):
+def bounding_boxes_ext2int(task_data, request_data):
     # Try to extract data if value has the right format
     if isinstance(request_data[task_data["id"]], dict):
         task_data[task_data["type"]]["value"] = request_data[task_data["id"]].get(
             "image"
         )
-        task_data[task_data["type"]]["value"] = request_data[task_data["id"]].get(
-            "objects"
+        task_data[task_data["type"]]["objects"] = request_data[task_data["id"]].get(
+            "objects", []
         )
+        for i in range(len(task_data[task_data["type"]]["objects"])):
+            obj = task_data[task_data["type"]]["objects"][i]
+            obj["x"] = (
+                obj["x"] * 100
+                if isinstance(obj.get("x"), (int, float))
+                else obj.get("x")
+            )
+            obj["y"] = (
+                obj["y"] * 100
+                if isinstance(obj.get("y"), (int, float))
+                else obj.get("y")
+            )
+            obj["w"] = (
+                obj["w"] * 100
+                if isinstance(obj.get("w"), (int, float))
+                else obj.get("w")
+            )
+            obj["h"] = (
+                obj["h"] * 100
+                if isinstance(obj.get("h"), (int, float))
+                else obj.get("h")
+            )
+            task_data[task_data["type"]]["objects"][i] = obj
 
 
 TRANSFORM_EXT2INT_STATES = {
     "list": list_ext2int,
     "form_sequence": form_ext2int,
     "named_entity_recognition": ner_ext2int,
-    "bounding_boxes": bounding_boxes_int2ext,
+    "bounding_boxes": bounding_boxes_ext2int,
 }
 
 
