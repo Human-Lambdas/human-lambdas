@@ -11,7 +11,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="task", old_name="completed_by", new_name="assigned_to",
+            model_name="task",
+            old_name="completed_by",
+            new_name="assigned_to",
         ),
         migrations.AddField(
             model_name="task",

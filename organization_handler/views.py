@@ -1,15 +1,16 @@
+from django.db.models import Q
+from django.shortcuts import get_list_or_404, get_object_or_404
+from django.utils import timezone
+from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404, get_list_or_404
-from django.db.models import Q
-from user_handler.models import User, Organization, Invitation
+
+from user_handler.models import Invitation, Organization, User
 from user_handler.permissions import IsAdminOrReadOnly
 from user_handler.serializers import UserSerializer
 

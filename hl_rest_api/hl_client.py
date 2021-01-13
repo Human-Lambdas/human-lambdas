@@ -1,8 +1,8 @@
 import logging
 import re
 
-from django.conf import settings
 import requests
+from django.conf import settings
 
 logger = logging.getLogger(__file__)
 

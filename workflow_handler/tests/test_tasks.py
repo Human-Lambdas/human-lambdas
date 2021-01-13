@@ -349,7 +349,8 @@ class TestTasks(APITestCase):
     def test_get_pending_tasks(self):
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
-                self.org_id, self.workflow_id,
+                self.org_id,
+                self.workflow_id,
             )
         )
         self.assertEqual(response.data["count"], 3)
@@ -367,7 +368,8 @@ class TestTasks(APITestCase):
 
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
-                self.org_id, self.workflow_id,
+                self.org_id,
+                self.workflow_id,
             )
         )
         self.assertEqual(response.data["count"], 3)
@@ -396,7 +398,8 @@ class TestTasks(APITestCase):
 
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/pending".format(
-                self.org_id, self.workflow_id,
+                self.org_id,
+                self.workflow_id,
             )
         )
         self.assertEqual(response.data["count"], 2)

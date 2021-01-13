@@ -33,10 +33,9 @@ jobs:
         sudo apt-get install libpq-dev
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Lint with flake8
-      run: |
-        pip install flake8
-        flake8 .
+    - uses: pre-commit/action@v2.0.0
+      with:
+        extra_args: --verbose --all-files
     - name: Test with pytest
       run: |
         python manage.py migrate

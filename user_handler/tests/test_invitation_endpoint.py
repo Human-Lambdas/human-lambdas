@@ -66,7 +66,8 @@ class TestInvite(APITestCase):
     def test_invitation_post_call_new_user(self):
         recipient = "new@user.com"
         _ = self.client.post(
-            "/v1/users/invite", {"emails": recipient, "organization_id": self.org_id},
+            "/v1/users/invite",
+            {"emails": recipient, "organization_id": self.org_id},
         )
 
         token = hash(str(recipient) + str(self.org_id) + str(datetime.datetime.now()))
@@ -159,7 +160,8 @@ class TestInvite(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         recipient = "new@user.com"
         _ = self.client.post(
-            "/v1/users/invite", {"emails": recipient, "organization_id": self.org_id},
+            "/v1/users/invite",
+            {"emails": recipient, "organization_id": self.org_id},
         )
 
         token = hash(str(recipient) + str(self.org_id) + str(datetime.datetime.now()))
