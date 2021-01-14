@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Workflow
+from workflow_handler.utils import TEMPLATE_ORG_ID
 
 
 class TestCRUDWorkflow(APITestCase):
@@ -28,6 +29,7 @@ class TestCRUDWorkflow(APITestCase):
         user.set_password("foowordbar")
         user.save()
         org.user.add(user)
+        self.user = user
         response = self.client.post(
             "/v1/users/token", {"email": "worker@bar.com", "password": "foowordbar"}
         )
@@ -91,6 +93,26 @@ class TestCRUDWorkflow(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertFalse(Workflow.objects.filter(name=workflow_data["name"]).exists())
+
+    def test_retrieve_template(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        templates_org = Organization(id=TEMPLATE_ORG_ID, name="")
+        templates_org.save()
+        workflow_id = 777
+        Workflow(
+            id=workflow_id,
+            name="template1",
+            description="",
+            created_by=self.user,
+            data={},
+            organization=templates_org,
+        ).save()
+
+        response = self.client.get(
+            f"/v1/orgs/{TEMPLATE_ORG_ID}/workflows/{workflow_id}"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_retrieve_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
