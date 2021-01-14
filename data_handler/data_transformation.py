@@ -114,13 +114,14 @@ def ner_ext2int(task_data, request_data):
 def bounding_boxes_ext2int(task_data, request_data):
     # Try to extract data if value has the right format
     if isinstance(request_data[task_data["id"]], dict):
-        task_data[task_data["type"]]["value"] = request_data[task_data["id"]].get(
-            "image"
-        )
-        task_data[task_data["type"]]["objects"] = request_data[task_data["id"]].get(
-            "objects", []
-        )
-        for i in range(len(task_data[task_data["type"]]["objects"])):
+        task_data[task_data["type"]]["value"] = {}
+        task_data[task_data["type"]]["value"]["image"] = request_data[
+            task_data["id"]
+        ].get("image")
+        task_data[task_data["type"]]["value"]["objects"] = request_data[
+            task_data["id"]
+        ].get("objects", [])
+        for i in range(len(task_data[task_data["type"]]["value"]["objects"])):
             obj = task_data[task_data["type"]]["objects"][i]
             obj["x"] = (
                 obj["x"] * 100
