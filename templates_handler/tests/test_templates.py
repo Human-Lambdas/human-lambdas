@@ -18,6 +18,10 @@ class TestTemplates(APITestCase):
 
         assert response.status_code == 200
         assert len(response.data) == 4
+        for tt in response.data:
+            assert "name" in tt
+            assert "summary" in tt
+            assert "thumbnail" in tt
 
     def test_when_invalid_json_then_empty_response(self):
         with patch("pathlib.Path.read_text") as read_text:

@@ -12,15 +12,15 @@ logger = logging.getLogger(__file__)
 
 
 class Template(models.Model):
-    name = models.CharField(max_length=140)
-    summary = models.CharField(max_length=140)
-    thumbnail = models.CharField(max_length=140)
+    name = models.TextField()
+    summary = models.TextField()
+    thumbnail = models.TextField()
 
 
 class TemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Template
-        fields = ["name"]
+        fields = ["name", "summary", "thumbnail"]
 
 
 class TemplatesView(ListAPIView):
