@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -eu -o pipefail
+
+echo 'Checking jq is installed...' >&2
+which jq > /dev/null
+echo 'done' >&2
+
+echo 'Checking API key defined...' >&2
+echo "$WEBFLOW_API_KEY" > /dev/null
+echo 'done' >&2
+
+# https://developers.webflow.com/#get-all-items-for-a-collection
+TEMPLATES_COLLECTION_ID='5f7357152f0423138a8797c1'
+
+RESP=$(curl \
+  --silent \
+  -H "Authorization: Bearer ${WEBFLOW_API_KEY}" \
+  -H 'accept-version: 1.0.0' \
+  https://api.webflow.com/collections/${TEMPLATES_COLLECTION_ID}/items \
+)
+
+N_ITEMS_TOTAL=$(echo "$RESP" | jq '.total')
+N_ITEMS_RETURNED=$(echo "$RESP" | jq '.count')
+
+if [[ $N_ITEMS_TOTAL -gt $N_ITEMS_RETURNED ]]; then
+  echo 'FATAL: Collection cannot be read in 1 query!'
+  exit 1
+fi
+
+OUT=$(echo "$RESP" | jq '
+  [
+    .items[] | 
+    {
+      id: .["template-id"],
+      name: .name,
+      summary: .summary,
+      thumbnail: .["thumbnail-image"].url,
+    } |
+    select(
+      .id != null
+      and .name != null
+      and .summary != null
+      and .thumbnail != null
+    )
+  ]
+')
+
+if [[ "$OUT" == '[]' ]]; then
+  echo No valid templates >&2
+  exit 1
+fi
+
+echo "$OUT"

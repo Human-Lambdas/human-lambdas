@@ -1,3 +1,5 @@
+from subprocess import check_output
+
 from django.core.management.base import BaseCommand
 
 from user_handler.models import Organization, User
@@ -10,6 +12,9 @@ class Command(BaseCommand):
     help = "NOT FOR PROD: Sets up template org in the DB"
 
     def handle(self, *args, **options):
+
+        check_output("dev_tools/get-templates > templates.json", shell=True)
+
         templates_org = Organization(id=TEMPLATE_ORG_ID, name="templates")
         templates_org.save()
         admin_id = 999

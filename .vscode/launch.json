@@ -12,7 +12,7 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "debug server",
+            "name": "debug django",
             "type": "python",
             "request": "launch",
             "django": true,

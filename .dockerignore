@@ -1,6 +1,6 @@
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
 .git
 .gitignore
 venv
+.venv
 .vscode
+templates.json
