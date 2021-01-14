@@ -19,6 +19,7 @@ class TestTemplates(APITestCase):
         assert response.status_code == 200
         assert len(response.data) == 4
         for tt in response.data:
+            assert "id" in tt
             assert "name" in tt
             assert "summary" in tt
             assert "thumbnail" in tt

@@ -20,7 +20,7 @@ class Template(models.Model):
 class TemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Template
-        fields = ["name", "summary", "thumbnail"]
+        fields = ["name", "summary", "thumbnail", "id"]
 
 
 class TemplatesView(ListAPIView):
