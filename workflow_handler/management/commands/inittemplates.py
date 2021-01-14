@@ -22,7 +22,7 @@ class Command(BaseCommand):
         try:
             user = User.objects.get(id=admin_id)
         except User.DoesNotExist:
-            user = User(id=999, name="template_admin", email="templates@_.com")
+            user = User(id=admin_id, name="template_admin", email="templates@_.com")
             user.save()
             templates_org.user.add(user)
 
