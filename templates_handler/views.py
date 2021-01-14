@@ -4,7 +4,6 @@ import pathlib
 from django.db import models
 from rest_framework import serializers
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
 
 from user_handler.models import User
 
@@ -22,7 +21,6 @@ class TemplatesSerializer(serializers.ModelSerializer):
 
 
 class TemplatesView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = TemplatesSerializer
 
