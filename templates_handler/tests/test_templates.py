@@ -18,3 +18,23 @@ class TestTemplates(APITestCase):
 
         assert response.status_code == 200
         assert len(response.data) == 4
+
+    def test_when_invalid_json_then_empty_response(self):
+        with patch("pathlib.Path.read_text") as read_text:
+            read_text.return_value = "blah"
+            response = self.client.get(
+                "/v1/templates",
+            )
+
+        assert response.status_code == 200
+        assert len(response.data) == 0
+
+    def test_when_missing_templates_then_empty_response(self):
+        with patch("pathlib.Path.read_text") as read_text:
+            read_text.side_effect = FileNotFoundError
+            response = self.client.get(
+                "/v1/templates",
+            )
+
+        assert response.status_code == 200
+        assert len(response.data) == 0

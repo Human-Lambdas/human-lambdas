@@ -1,4 +1,5 @@
 import json
+import logging
 import pathlib
 
 from django.db import models
@@ -6,6 +7,8 @@ from rest_framework import serializers
 from rest_framework.generics import ListAPIView
 
 from user_handler.models import User
+
+logger = logging.getLogger(__file__)
 
 
 class Template(models.Model):
@@ -25,5 +28,9 @@ class TemplatesView(ListAPIView):
     serializer_class = TemplatesSerializer
 
     def get_queryset(self):
-        text = pathlib.Path("templates.json").read_text()
-        return map(lambda t: Template(**t), json.loads(text))
+        try:
+            text = pathlib.Path("templates.json").read_text()
+            return map(lambda t: Template(**t), json.loads(text))
+        except Exception:
+            logger.exception("failed to read templates json")
+            return []
