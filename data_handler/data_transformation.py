@@ -44,10 +44,10 @@ def bounding_boxes_int2ext(int_data):
 
     # Convert percent to decimal percentage representation
     for i, obj in enumerate(int_value["objects"]):
-        obj["x"] = obj["x"] / 100
-        obj["y"] = obj["y"] / 100
-        obj["w"] = obj["w"] / 100
-        obj["h"] = obj["h"] / 100
+        obj["x"] = round(obj["x"] / 100, 4)
+        obj["y"] = round(obj["y"] / 100, 4)
+        obj["w"] = round(obj["w"] / 100, 4)
+        obj["h"] = round(obj["h"] / 100, 4)
         int_value["objects"][i] = obj
     return int_value
 
@@ -122,28 +122,28 @@ def bounding_boxes_ext2int(task_data, request_data):
             task_data["id"]
         ].get("objects", [])
         for i in range(len(task_data[task_data["type"]]["value"]["objects"])):
-            obj = task_data[task_data["type"]]["objects"][i]
+            obj = task_data[task_data["type"]]["value"]["objects"][i]
             obj["x"] = (
-                obj["x"] * 100
+                round(obj["x"] * 100, 2)
                 if isinstance(obj.get("x"), (int, float))
                 else obj.get("x")
             )
             obj["y"] = (
-                obj["y"] * 100
+                round(obj["y"] * 100, 2)
                 if isinstance(obj.get("y"), (int, float))
                 else obj.get("y")
             )
             obj["w"] = (
-                obj["w"] * 100
+                round(obj["w"] * 100, 2)
                 if isinstance(obj.get("w"), (int, float))
                 else obj.get("w")
             )
             obj["h"] = (
-                obj["h"] * 100
+                round(obj["h"] * 100, 2)
                 if isinstance(obj.get("h"), (int, float))
                 else obj.get("h")
             )
-            task_data[task_data["type"]]["objects"][i] = obj
+            task_data[task_data["type"]]["value"]["objects"][i] = obj
 
 
 TRANSFORM_EXT2INT_STATES = {
