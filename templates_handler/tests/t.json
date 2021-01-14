@@ -1,0 +1,26 @@
+[
+    {
+      "id": 270,
+      "name": "Wikipedia Data Entry",
+      "summary": "Make a bespoke tool optimized for your research and data entry workflows.",
+      "thumbnail": "https://uploads-ssl.webflow.com/5e725508d4ed747a650c0747/5ff86d454bf6ce2be53a854f_Online%20data%20entry.png"
+    },
+    {
+      "id": 268,
+      "name": "Named Entity Recognition Annotations",
+      "summary": "Built a custom UI with text highlighting functionality for your Named Entity Recognition jobs",
+      "thumbnail": "https://uploads-ssl.webflow.com/5e725508d4ed747a650c0747/5ff86a048c01dc55abed395a_NER.png"
+    },
+    {
+      "id": 201,
+      "name": "Expense Approvals",
+      "summary": "Create an expense approvals management system that can be customized to your team's needs, whatever those are.",
+      "thumbnail": "https://uploads-ssl.webflow.com/5e725508d4ed747a650c0747/5faa6f05f63b60acee4f9a59_expense.png"
+    },
+    {
+      "id": 199,
+      "name": "Car Damage Evaluation",
+      "summary": "Create a data labelling tool to inspect a car from all sides at once so you can generate high quality training data more efficiently.",
+      "thumbnail": "https://uploads-ssl.webflow.com/5e725508d4ed747a650c0747/5fa95d24bb4eb2f566af66f8_car%20inspection.png"
+    }
+]

@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Workflow
+from workflow_handler.tests.constants import WORKFLOW_DATA
 from workflow_handler.utils import TEMPLATE_ORG_ID
 
 
@@ -38,24 +39,7 @@ class TestCRUDWorkflow(APITestCase):
     def test_create_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
@@ -116,24 +100,7 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_retrieve_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
@@ -150,24 +117,7 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_retrieve_workflow_worker(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
@@ -185,24 +135,7 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_update_workflow_worker(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
@@ -230,24 +163,7 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_update_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,

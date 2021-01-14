@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "user_handler",
     "workflow_handler",
+    "templates_handler",
     "external",
     "rest_framework",
     "rest_framework_simplejwt",

@@ -212,3 +212,5 @@ src/
 .vscode/settings.json
 .DS_store
 typeshed
+
+templates.json
