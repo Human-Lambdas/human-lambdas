@@ -11,7 +11,7 @@
     "workflow_handler"
   ],
   "typeCheckingMode": "basic",
-  "reportUnusedImport": "none",
+  "reportUnusedImport": "warning",
   "pythonVersion": "3.7",
   "typeshedPath": "typeshed",
   "enableTypeIgnoreComments": true,
@@ -19,10 +19,10 @@
   "reportUnknownParameterType": "none",
   "reportUnknownVariableType": "none",
   "reportUnknownArgumentType": "none",
-  "reportPrivateUsage": "none",
+  "reportPrivateUsage": "warning",
   "reportUntypedFunctionDecorator": "none",
   "reportMissingTypeStubs": false,
-  "reportUnboundVariable": "none",
+  "reportUnboundVariable": "warning",
   "reportMissingImports":"none",
   "reportGeneralTypeIssues":"none"
 

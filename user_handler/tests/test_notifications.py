@@ -4,6 +4,7 @@ from rest_framework.test import APITestCase
 from user_handler.models import Organization
 from user_handler.notifications import send_notification
 from workflow_handler.models import Workflow, WorkflowNotification
+from workflow_handler.tests.constants import WORKFLOW_DATA
 
 
 class TestNotifications(APITestCase):
@@ -21,24 +22,7 @@ class TestNotifications(APITestCase):
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
