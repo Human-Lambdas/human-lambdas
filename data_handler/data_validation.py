@@ -136,7 +136,7 @@ def validate_bounding_boxes(data, is_workflow):
         # Enforce value of dict type
         if not isinstance(data[data["type"]].get("value"), dict):
             raise DataValidationError(
-                f"Data item with id {data['id']} is not an object."
+                f"Data item with id {data['id']} must be an object."
             )
 
         # Enforce image key with string type
