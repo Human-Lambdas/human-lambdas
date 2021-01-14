@@ -30,7 +30,7 @@ from .serializers import (
     TaskSerializer,
     WorkflowSerializer,
 )
-from .utils import TaskPagination, decode_csv
+from .utils import TEMPLATE_ORG_ID, TaskPagination, decode_csv
 
 
 class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
@@ -158,7 +158,9 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+        organizations = Organization.objects.filter(
+            Q(user=user) | Q(id=TEMPLATE_ORG_ID)
+        ).all()
         return Workflow.objects.filter(
             Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
