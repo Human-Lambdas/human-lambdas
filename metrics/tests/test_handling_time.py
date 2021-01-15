@@ -1,13 +1,14 @@
 import os
-
-from django.utils import timezone
-from rest_framework.test import APITestCase
-from rest_framework import status
-from user_handler.models import Organization
-from workflow_handler.tests import DATA_PATH
 from datetime import timedelta
 from unittest.mock import patch
-from workflow_handler.models import Task, Workflow, User
+
+from django.utils import timezone
+from rest_framework import status
+from rest_framework.test import APITestCase
+
+from user_handler.models import Organization
+from workflow_handler.models import Task, User, Workflow
+from workflow_handler.tests import DATA_PATH
 
 
 class TestHandlingTime(APITestCase):

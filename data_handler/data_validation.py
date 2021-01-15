@@ -4,6 +4,20 @@ from schema import SchemaError
 
 from .data_schema import DATA_SCHEMA
 
+"""
+The goal of these functions is to validate incoming data from external sources
+according to each block type.
+
+Data validation is run in the task serializer,
+CSV processing (which runs outside of the serializer)
+and the workflow serializer.
+
+data_validation is the entry point.
+It validates according to the internal definition of each block's value.
+We use the internal and not external definition because validation is applied
+after we have transformed from our external to internal representations.
+"""
+
 
 class DataValidationError(Exception):
     """Data validation error"""
@@ -67,6 +81,7 @@ def validate_number(data, is_workflow):
 
 
 def validate_named_entity_recognition(data, is_workflow):
+    # Require a value key with string value when it's a task
     if (
         not is_workflow
         and "value" in data[data["type"]]
@@ -76,18 +91,28 @@ def validate_named_entity_recognition(data, is_workflow):
             # Externally 'value' is set on 'text' key
             f"Data item with id {data['id']} is missing 'text' or is not a string."
         )
+    # Require an entities key with list type
     if "entities" in data[data["type"]] and not isinstance(
         data[data["type"]]["entities"], list
     ):
         raise DataValidationError(
             f"Data item with id {data['id']} is missing 'entities' or not a list."
         )
+    # Require an options key with list type
     if "options" in data[data["type"]] and not isinstance(
         data[data["type"]].get("options"), list
     ):
         raise DataValidationError(
             f"Data item with id {data['id']} is missing 'options' or not a list."
         )
+
+        # Enforce objects key with list type
+        if not isinstance(data[data["type"]].get("entities"), (list, type(None))):
+            raise DataValidationError(
+                f"Data item with id {data['id']} doesn't have a valid 'entities' value."
+            )
+
+    # Enforce entity schema for any entity
     for entity in data[data["type"]].get("entities", []):
         if (
             not isinstance(entity.get("start"), int)
@@ -99,6 +124,51 @@ def validate_named_entity_recognition(data, is_workflow):
             )
 
 
+def validate_bounding_boxes(data, is_workflow):
+    # Enforce options is list if included
+    if not isinstance(data[data["type"]].get("options"), (list, type(None))):
+        raise DataValidationError(
+            f"Data item with id {data['id']} is missing 'options' or not a list."
+        )
+
+    # if it's a task
+    if not is_workflow:
+        # Enforce value of dict type
+        if not isinstance(data[data["type"]].get("value"), dict):
+            raise DataValidationError(
+                f"Data item with id {data['id']} must be an object."
+            )
+
+        # Enforce image key with string type
+        if not isinstance(data[data["type"]]["value"].get("image"), (str, type(None))):
+            raise DataValidationError(
+                f"Data item with id {data['id']} doesn't have a valid 'image' value."
+            )
+
+        # Enforce objects key with list type
+        if not isinstance(
+            data[data["type"]]["value"].get("objects"), (list, type(None))
+        ):
+            raise DataValidationError(
+                f"Data item with id {data['id']} doesn't have a valid 'objects' value."
+            )
+
+        # Enforce 'objects' schema if any has been provided
+        for bounding_box in data[data["type"]]["value"].get("objects", []):
+            if (
+                not isinstance(bounding_box, dict)
+                or not isinstance(bounding_box.get("x"), float)
+                or not isinstance(bounding_box.get("y"), float)
+                or not isinstance(bounding_box.get("w"), float)
+                or not isinstance(bounding_box.get("h"), float)
+                or not isinstance(bounding_box.get("category"), str)
+            ):
+                raise DataValidationError(
+                    f"Data item with id {data['id']} doesn't have a valid object in 'objects'."
+                )
+            # TO-DO: Enforce 0-1 bounds
+
+
 VALIDATION_STATES = {
     "single_selection": validate_single_selection,
     "multiple_selection": validate_multiple_selection,
@@ -106,6 +176,7 @@ VALIDATION_STATES = {
     "list": validate_list,
     "number": validate_number,
     "named_entity_recognition": validate_named_entity_recognition,
+    "bounding_boxes": validate_bounding_boxes,
 }
 
 

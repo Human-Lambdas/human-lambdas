@@ -1,17 +1,17 @@
-from uuid import uuid4
 import logging
+from uuid import uuid4
 
 from django.db.models import Avg, F, Q
 from django.utils import timezone
+from drf_yasg2.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from user_handler.models import Organization, User
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
-from drf_yasg2.utils import swagger_auto_schema
-
 
 logger = logging.getLogger(__file__)
 
@@ -263,7 +263,8 @@ class WorkerMetrics(APIView):
             organization = self.get_queryset().first()
             if worker_id:
                 users = User.objects.filter(
-                    organization=organization, pk__in=worker_id,
+                    organization=organization,
+                    pk__in=worker_id,
                 ).all()
             else:
                 users = User.objects.filter(organization=organization).all()

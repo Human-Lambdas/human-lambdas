@@ -3,6 +3,8 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Workflow
+from workflow_handler.tests.constants import WORKFLOW_DATA
+from workflow_handler.utils import TEMPLATE_ORG_ID
 
 
 class TestCRUDWorkflow(APITestCase):
@@ -28,6 +30,7 @@ class TestCRUDWorkflow(APITestCase):
         user.set_password("foowordbar")
         user.save()
         org.user.add(user)
+        self.user = user
         response = self.client.post(
             "/v1/users/token", {"email": "worker@bar.com", "password": "foowordbar"}
         )
@@ -36,24 +39,7 @@ class TestCRUDWorkflow(APITestCase):
     def test_create_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
@@ -92,26 +78,29 @@ class TestCRUDWorkflow(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertFalse(Workflow.objects.filter(name=workflow_data["name"]).exists())
 
+    def test_retrieve_template(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        templates_org = Organization(id=TEMPLATE_ORG_ID, name="")
+        templates_org.save()
+        workflow_id = 777
+        Workflow(
+            id=workflow_id,
+            name="template1",
+            description="",
+            created_by=self.user,
+            data={},
+            organization=templates_org,
+        ).save()
+
+        response = self.client.get(
+            f"/v1/orgs/{TEMPLATE_ORG_ID}/workflows/{workflow_id}"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
     def test_retrieve_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
@@ -128,24 +117,7 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_retrieve_workflow_worker(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
@@ -163,24 +135,7 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_update_workflow_worker(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,
@@ -208,24 +163,7 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_update_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data,

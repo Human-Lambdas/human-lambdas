@@ -10,7 +10,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="task", name="disabled",),
+        migrations.RemoveField(
+            model_name="task",
+            name="disabled",
+        ),
         migrations.AddField(
             model_name="workflow",
             name="disabled",

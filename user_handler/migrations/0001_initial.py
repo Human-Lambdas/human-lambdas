@@ -34,7 +34,9 @@ class Migration(migrations.Migration):
                 ("email", models.EmailField(max_length=254)),
                 ("is_admin", models.BooleanField(default=False)),
             ],
-            options={"abstract": False,},
+            options={
+                "abstract": False,
+            },
         ),
         migrations.CreateModel(
             name="Organization",

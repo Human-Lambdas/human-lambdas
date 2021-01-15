@@ -1,5 +1,13 @@
 import copy
 
+"""
+Transformations handle internal<>external conversions.
+
+external->internal is most important because we want to avoid garbage entering the system.
+Still, there's a validation stage after this, so we don't need to validate here.
+The goal is to pick up any relevant data that's meaningful for the type in question
+"""
+
 
 def list_int2ext(int_data):
     return [
@@ -27,6 +35,23 @@ def ner_int2ext(int_data):
     return {"text": int_value, "entities": entities}
 
 
+def bounding_boxes_int2ext(int_data):
+    # Parse 'value'
+    int_value = default_int2ext(int_data)
+
+    # Guarantee 'objects' exists
+    int_value["objects"] = int_value.get("objects", [])
+
+    # Convert percent to decimal percentage representation
+    for i, obj in enumerate(int_value["objects"]):
+        obj["x"] = round(obj["x"] / 100, 4)
+        obj["y"] = round(obj["y"] / 100, 4)
+        obj["w"] = round(obj["w"] / 100, 4)
+        obj["h"] = round(obj["h"] / 100, 4)
+        int_value["objects"][i] = obj
+    return int_value
+
+
 def default_int2ext(int_data):
     return int_data.get("value")
 
@@ -35,6 +60,7 @@ TRANSFORM_INT2EXT_STATES = {
     "list": list_int2ext,
     "form_sequence": form_int2ext,
     "named_entity_recognition": ner_int2ext,
+    "bounding_boxes": bounding_boxes_int2ext,
 }
 
 
@@ -85,10 +111,46 @@ def ner_ext2int(task_data, request_data):
     task_data[task_data["type"]]["entities"] = entities
 
 
+def bounding_boxes_ext2int(task_data, request_data):
+    # Try to extract data if value has the right format
+    if isinstance(request_data[task_data["id"]], dict):
+        task_data[task_data["type"]]["value"] = {}
+        task_data[task_data["type"]]["value"]["image"] = request_data[
+            task_data["id"]
+        ].get("image")
+        task_data[task_data["type"]]["value"]["objects"] = request_data[
+            task_data["id"]
+        ].get("objects", [])
+        for i in range(len(task_data[task_data["type"]]["value"]["objects"])):
+            obj = task_data[task_data["type"]]["value"]["objects"][i]
+            obj["x"] = (
+                round(obj["x"] * 100, 2)
+                if isinstance(obj.get("x"), (int, float))
+                else obj.get("x")
+            )
+            obj["y"] = (
+                round(obj["y"] * 100, 2)
+                if isinstance(obj.get("y"), (int, float))
+                else obj.get("y")
+            )
+            obj["w"] = (
+                round(obj["w"] * 100, 2)
+                if isinstance(obj.get("w"), (int, float))
+                else obj.get("w")
+            )
+            obj["h"] = (
+                round(obj["h"] * 100, 2)
+                if isinstance(obj.get("h"), (int, float))
+                else obj.get("h")
+            )
+            task_data[task_data["type"]]["value"]["objects"][i] = obj
+
+
 TRANSFORM_EXT2INT_STATES = {
     "list": list_ext2int,
     "form_sequence": form_ext2int,
     "named_entity_recognition": ner_ext2int,
+    "bounding_boxes": bounding_boxes_ext2int,
 }
 
 
@@ -101,7 +163,7 @@ def transform_ext2int(workflow_data, request_data):
             del task_data["layout"]
 
         # if there are any cases left which do not include the type data
-        if task_data["type"] not in task_data:
+        if isinstance(task_data.get("type"), dict):
             task_data[task_data["type"]] = {}
         if w_data["id"] in request_data:
             TRANSFORM_EXT2INT_STATES.get(w_data["type"], default_ext2int)(

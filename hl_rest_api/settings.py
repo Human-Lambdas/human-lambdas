@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "user_handler",
     "workflow_handler",
+    "templates_handler",
     "external",
     "rest_framework",
     "rest_framework_simplejwt",
@@ -261,7 +262,7 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
     "SIGNING_KEY": os.getenv("SECRET_KEY"),
-    "ROTATE_REFRESH_TOKENS": True
+    "ROTATE_REFRESH_TOKENS": True,
 }
 
 

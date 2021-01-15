@@ -106,7 +106,7 @@ class TestUserRoles(APITestCase):
         response = self.client.delete(
             "/v1/orgs/{0}/users/{1}".format(self.org_id, self.worker_id)
         )
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.delete(
             "/v1/orgs/{0}/users/{1}".format(self.org_id, self.admin_id)
         )

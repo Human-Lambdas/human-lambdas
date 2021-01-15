@@ -7,10 +7,11 @@ from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from data_handler.csv_utils import task_list_to_csv_response
 from hl_rest_api import analytics
 from user_handler.models import Organization
 from user_handler.permissions import IsOrgAdmin
-from data_handler.csv_utils import task_list_to_csv_response
 
 from .models import Source, Task, TaskActivity, Workflow
 from .serializers import (
@@ -179,6 +180,8 @@ class AuditsGetTask(RetrieveUpdateDestroyAPIView):
         }
 
         TaskActivity(
-            task=task, created_by=request.user, action=action_name_lookup[task.correct],
+            task=task,
+            created_by=request.user,
+            action=action_name_lookup[task.correct],
         ).save()
         return Response()

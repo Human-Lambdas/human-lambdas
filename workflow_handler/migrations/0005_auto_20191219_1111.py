@@ -11,9 +11,14 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="task", old_name="completed", new_name="completed_at",
+            model_name="task",
+            old_name="completed",
+            new_name="completed_at",
         ),
-        migrations.RemoveField(model_name="task", name="name",),
+        migrations.RemoveField(
+            model_name="task",
+            name="name",
+        ),
         migrations.AddField(
             model_name="task",
             name="status",

@@ -1,0 +1,29 @@
+{
+  "include": [
+    "data_handler",
+    "external",
+    "hl_rest_api",
+    "manage.py",
+    "metrics",
+    "organization_handler",
+    "user_handler",
+    "v1",
+    "workflow_handler"
+  ],
+  "typeCheckingMode": "basic",
+  "reportUnusedImport": "warning",
+  "pythonVersion": "3.7",
+  "typeshedPath": "typeshed",
+  "enableTypeIgnoreComments": true,
+  "reportUnknownMemberType": "none",
+  "reportUnknownParameterType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportPrivateUsage": "warning",
+  "reportUntypedFunctionDecorator": "none",
+  "reportMissingTypeStubs": false,
+  "reportUnboundVariable": "warning",
+  "reportMissingImports":"none",
+  "reportGeneralTypeIssues":"none"
+
+}

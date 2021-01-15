@@ -16,11 +16,12 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from data_handler.csv_utils import process_csv
+from data_handler.data_sync import sync_workflow_task
 from user_handler.models import Organization
 from user_handler.permissions import IsAdminOrReadOnly, IsOrgAdmin
-from data_handler.csv_utils import process_csv
 from workflow_handler.utils import is_force
-from data_handler.data_sync import sync_workflow_task
 
 from .models import Source, Task, TaskActivity, User, WebHook, Workflow
 from .serializers import (
@@ -29,7 +30,7 @@ from .serializers import (
     TaskSerializer,
     WorkflowSerializer,
 )
-from .utils import TaskPagination, decode_csv
+from .utils import TEMPLATE_ORG_ID, TaskPagination, decode_csv
 
 
 class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
@@ -157,7 +158,9 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+        organizations = Organization.objects.filter(
+            Q(user=user) | Q(id=TEMPLATE_ORG_ID)
+        ).all()
         return Workflow.objects.filter(
             Q(organization__in=organizations)
             & Q(organization__pk=self.kwargs["org_id"])
@@ -542,6 +545,7 @@ class CreateTaskFormView(CreateAPIView):
                 "embed",
                 "named_entity_recognition",
                 "pdf",
+                "bounding_boxes",
             ]:
                 read_data = copy.deepcopy(idata)
                 if "layout" in read_data:

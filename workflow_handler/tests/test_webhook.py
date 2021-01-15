@@ -6,6 +6,7 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Task, WebHook, Workflow
+from workflow_handler.tests.constants import WORKFLOW_DATA
 
 logger = logging.getLogger(__file__)
 
@@ -360,24 +361,7 @@ class TestWebhookEndpoint(APITestCase):
         )
         self.admin_access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
-        self.workflow_data = {
-            "name": "foowf",
-            "description": "great wf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        self.workflow_data = WORKFLOW_DATA
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             self.workflow_data,

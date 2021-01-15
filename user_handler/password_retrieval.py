@@ -5,6 +5,7 @@ from django.utils import timezone
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from hl_rest_api.utils import generate_unique_token, is_invalid_email
 
 from .apps import UserHandlerConfig
@@ -60,7 +61,10 @@ class ForgottenPasswordView(APIView):
             token=self.kwargs["token"]
         )
         if forgotten_password.exists():
-            return Response({"status_code": 200}, status=200,)
+            return Response(
+                {"status_code": 200},
+                status=200,
+            )
         else:
             return Response(
                 {
