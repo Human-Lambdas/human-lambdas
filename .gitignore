@@ -214,3 +214,6 @@ src/
 typeshed
 
 templates.json
+
+cloudbuild.yaml
+.gcloudignore
