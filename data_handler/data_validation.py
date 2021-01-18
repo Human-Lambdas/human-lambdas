@@ -157,10 +157,10 @@ def validate_bounding_boxes(data, is_workflow):
         for bounding_box in data[data["type"]]["value"].get("objects", []):
             if (
                 not isinstance(bounding_box, dict)
-                or not isinstance(bounding_box.get("x"), float)
-                or not isinstance(bounding_box.get("y"), float)
-                or not isinstance(bounding_box.get("w"), float)
-                or not isinstance(bounding_box.get("h"), float)
+                or not isinstance(bounding_box.get("x"), (int, float))
+                or not isinstance(bounding_box.get("y"), (int, float))
+                or not isinstance(bounding_box.get("w"), (int, float))
+                or not isinstance(bounding_box.get("h"), (int, float))
                 or not isinstance(bounding_box.get("category"), str)
             ):
                 raise DataValidationError(
