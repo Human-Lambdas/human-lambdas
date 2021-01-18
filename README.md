@@ -78,3 +78,17 @@ yarn dev
 
 then login at http://localhost:3000
 
+## Build Image to test against localhost DB
+
+```bash
+docker build \
+  -t hl \
+  --build-arg SECRET_KEY=$SECRET_KEY \
+  --build-arg POSTGRES_DB=$POSTGRES_DB \
+  --build-arg POSTGRES_HOST=host.docker.internal \
+  --build-arg POSTGRES_USER=$POSTGRES_USER \
+  --build-arg POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
+  --build-arg POSTGRES_PORT=$POSTGRES_PORT \
+  --build-arg WEBFLOW_API_KEY=$WEBFLOW_API_KEY \
+  .
+```
