@@ -1,9 +1,12 @@
 from django.conf import settings
+from google.auth.transport import requests
+from google.oauth2 import id_token
 from rest_framework import serializers
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from hl_rest_api import analytics
@@ -22,11 +25,6 @@ class HLTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class HLTokenObtainPairView(TokenObtainPairView):
     serializer_class = HLTokenObtainPairSerializer
-
-
-from google.auth.transport import requests
-from google.oauth2 import id_token
-from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class GoogleTokenSerializer(serializers.Serializer):
