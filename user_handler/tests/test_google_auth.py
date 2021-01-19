@@ -12,6 +12,18 @@ class TestGoogleAuth(APITestCase):
     email = "foo@bar.com"
     name = "foo"
     organization = "barinc"
+    mock_token = "blah"
+
+    def mock_verify(self, token, request, client_id):
+        if token != self.mock_token:
+            raise Exception()
+        if client_id != GOOGLE_OAUTH_CLIENT_ID:
+            raise Exception()
+        return {"email": "foo@bar.com"}
+
+    def isUserAuthed(self, id):
+        response = self.client.get(f"/v1/users/{id}")
+        return response.status_code == status.HTTP_200_OK
 
     def test_when_register_without_password_then_ok(self):
         response = self.client.post(
@@ -29,24 +41,14 @@ class TestGoogleAuth(APITestCase):
         google_user = User.objects.create(
             email=self.email, name=self.name, organization=self.organization
         )
-        mock_token = "blah"
-
-        def mock_verify(token, request, client_id):
-            if token != mock_token:
-                raise Exception()
-            if client_id != GOOGLE_OAUTH_CLIENT_ID:
-                raise Exception()
-
-            return {"email": "foo@bar.com"}
 
         with patch("google.oauth2.id_token.verify_oauth2_token") as verify:
-
-            verify.side_effect = mock_verify
+            verify.side_effect = self.mock_verify
 
             response = self.client.post(
                 "/v1/users/token/google",
                 {
-                    "token": mock_token,
+                    "token": self.mock_token,
                 },
             )
             access_token = response.data["access"]
@@ -57,6 +59,30 @@ class TestGoogleAuth(APITestCase):
             self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
             assert self.isUserAuthed(google_user.id)
 
-    def isUserAuthed(self, id):
-        response = self.client.get(f"/v1/users/{id}")
-        return response.status_code == status.HTTP_200_OK
+    def test_when_no_user_for_token_then_bad_request(self):
+        with patch("google.oauth2.id_token.verify_oauth2_token") as verify:
+            verify.side_effect = self.mock_verify
+
+            response = self.client.post(
+                "/v1/users/token/google",
+                {
+                    "token": self.mock_token,
+                },
+            )
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_when_no_token_then_bad_request(self):
+        response = self.client.post(
+            "/v1/users/token/google",
+            {},
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_when_token_is_malformed_then_bad_request(self):
+        response = self.client.post(
+            "/v1/users/token/google",
+            {
+                "token": "iuhiohoiuh",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
