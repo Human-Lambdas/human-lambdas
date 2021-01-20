@@ -7,6 +7,7 @@
         {
             "name": "Python: Current File",
             "type": "python",
+            "justMyCode": false,
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
@@ -14,6 +15,7 @@
         {
             "name": "debug django",
             "type": "python",
+            "justMyCode": false,
             "request": "launch",
             "django": true,
             "program": "manage.py",
