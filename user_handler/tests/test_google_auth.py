@@ -59,6 +59,25 @@ class TestGoogleAuth(APITestCase):
             self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
             assert self.isUserAuthed(google_user.id)
 
+    def test_when_password_signin_on_google_account_then_fails(self):
+        User.objects.create(
+            email=self.email, name=self.name, organization=self.organization
+        )
+
+        response = self.client.post(
+            "/v1/users/token",
+            {
+                "email": self.email,
+                "password": "a",
+            },
+        )
+        pass
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(
+            response.data["errors"][0]["message"],
+            "This account only uses Google sign in",
+        )
+
     def test_when_no_user_for_token_then_bad_request(self):
         with patch("google.oauth2.id_token.verify_oauth2_token") as verify:
             verify.side_effect = self.mock_verify
