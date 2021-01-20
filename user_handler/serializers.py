@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
-    password = serializers.CharField(min_length=8, write_only=True)
+    password = serializers.CharField(min_length=8, write_only=True, required=False)
     template_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
@@ -41,12 +41,13 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         name = validated_data["name"]
-        password = validated_data["password"]
+        password = validated_data.get("password")
         email = validated_data["email"].lower()
         notification = Notification()
         notification.save()
         user_obj = User(name=name, email=email, notifications=notification)
-        user_obj.set_password(password)
+        if password:
+            user_obj.set_password(password)
         user_obj.save()
         organization_name = validated_data.get("organization")
         if not organization_name:

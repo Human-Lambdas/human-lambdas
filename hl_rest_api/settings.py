@@ -315,3 +315,7 @@ SWAGGER_SETTINGS = {
         "Token": {"type": "apiKey", "name": "Authorization", "in": "header"},
     },
 }
+
+GOOGLE_OAUTH_CLIENT_ID = (
+    "725636052597-sp46vdemr0u2s0hh698nqupjdvucoa3o.apps.googleusercontent.com"
+)
