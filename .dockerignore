@@ -4,3 +4,5 @@ venv
 .venv
 .vscode
 templates.json
+_whaler
+typeshed
