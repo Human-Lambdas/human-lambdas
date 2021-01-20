@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -14,6 +15,14 @@ from user_handler.models import User
 
 
 class HLTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def is_valid(self, raise_exception):
+        user = User.objects.filter(email=self.initial_data["email"]).first()
+
+        if user and len(user.password) == 0:
+            raise TokenError("This account only uses Google sign in")
+
+        return super().is_valid(raise_exception=raise_exception)
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -29,9 +38,6 @@ class HLTokenObtainPairView(TokenObtainPairView):
 
 class GoogleTokenSerializer(serializers.Serializer):
     token = serializers.CharField()
-
-    def is_valid(self, raise_exception):
-        return super().is_valid(raise_exception=raise_exception)
 
 
 class GoogleToken(CreateAPIView):
