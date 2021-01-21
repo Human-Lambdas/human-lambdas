@@ -2,6 +2,8 @@ from ast import literal_eval
 
 from schema import SchemaError
 
+from hl_rest_api.utils import is_invalid_email
+
 from .data_schema import DATA_SCHEMA
 
 """
@@ -35,6 +37,7 @@ def convert_string(input_value):
 
 
 def default_data_validation(data, is_workflow):
+    print(f"no validator for {data['type']}")
     pass
 
 
@@ -54,8 +57,40 @@ def validate_multiple_selection(data, is_workflow):
     validate_selection(data, is_workflow)
 
 
+def validate_email(data, is_workflow):
+    email = data["email"]
+    for k in ["value", "placeholder"]:
+        v = email.get(k, None)
+        if v and len(v) > 0 and is_invalid_email(v):
+            raise DataValidationError(f"Invalid email {k}:{v}")
+
+
 def validate_form(data, is_workflow):
+    data_validation(data["form_sequence"]["data"])
+
+
+def validate_embed(data, is_workflow):
     pass
+
+
+def validate_audio(data, is_workflow):
+    pass
+
+
+def validate_image(data, is_workflow):
+    pass
+
+
+def validate_video(data, is_workflow):
+    pass
+
+
+def validate_pdf(data, is_workflow):
+    pass
+
+
+def validate_link(data, is_workflow):
+    pass  # is_valid_url
 
 
 def validate_list(data, is_workflow):
@@ -177,6 +212,13 @@ VALIDATION_STATES = {
     "number": validate_number,
     "named_entity_recognition": validate_named_entity_recognition,
     "bounding_boxes": validate_bounding_boxes,
+    "email": validate_email,
+    "embed": validate_embed,
+    "audio": validate_audio,
+    "image": validate_image,
+    "video": validate_video,
+    "pdf": validate_pdf,
+    "link": validate_link,
 }
 
 
