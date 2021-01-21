@@ -67,7 +67,6 @@ def validate_email(data, is_workflow):
 
 def validate_form(data, is_workflow):
     data_validation(data["form_sequence"]["data"])
-    pass
 
 
 def validate_embed(data, is_workflow):
@@ -214,6 +213,12 @@ VALIDATION_STATES = {
     "named_entity_recognition": validate_named_entity_recognition,
     "bounding_boxes": validate_bounding_boxes,
     "email": validate_email,
+    "embed": validate_embed,
+    "audio": validate_audio,
+    "image": validate_image,
+    "video": validate_video,
+    "pdf": validate_pdf,
+    "link": validate_link,
 }
 
 
