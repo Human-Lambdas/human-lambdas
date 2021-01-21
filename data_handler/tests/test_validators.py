@@ -92,7 +92,7 @@ class TestValidators(unittest.TestCase):
         except DataValidationError:
             pass
 
-    def test_when_no_empty_then_pass(self):
+    def test_when_email_empty_then_pass(self):
         data_validation([create_email_block("")])
 
     def test_when_email_form_then_pass(self):
