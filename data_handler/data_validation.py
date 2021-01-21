@@ -70,6 +70,30 @@ def validate_form(data, is_workflow):
     pass
 
 
+def validate_embed(data, is_workflow):
+    pass
+
+
+def validate_audio(data, is_workflow):
+    pass
+
+
+def validate_image(data, is_workflow):
+    pass
+
+
+def validate_video(data, is_workflow):
+    pass
+
+
+def validate_pdf(data, is_workflow):
+    pass
+
+
+def validate_link(data, is_workflow):
+    pass  # is_valid_url
+
+
 def validate_list(data, is_workflow):
     list_value = data[data["type"]].get("value")
     if isinstance(list_value, str):
