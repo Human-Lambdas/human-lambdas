@@ -37,7 +37,6 @@ def convert_string(input_value):
 
 
 def default_data_validation(data, is_workflow):
-    print(f"no validator for {data['type']}")
     pass
 
 
