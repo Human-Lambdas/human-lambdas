@@ -135,8 +135,32 @@ class TestValidators:
         }
 
         block[type][field] = url
+
+        if type == "bounding_boxes":
+            block["bounding_boxes"]["value"] = (
+                {"image": url} if field == "value" else {}
+            )
+
         if url == INVALID_URL:
             with pytest.raises(DataValidationError):
-                data_validation([block], is_workflow=True)
+                data_validation([block])
         else:
-            data_validation([block], is_workflow=True)
+            data_validation([block])
+
+    def test_when_empty_bounding_boxes_workflow_then_pass(self):
+        block = {
+            "_id": "c97e6561-fe75-42f9-b5e3-caf47521b789",
+            "bounding_boxes": {
+                "options": [
+                    {"id": "option_1", "name": "Option 1"},
+                    {"id": "option_2", "name": "Option 2"},
+                ],
+                "placeholder": "",
+            },
+            "id": "bounding_boxes_id",
+            "layout": LAYOUT,
+            "name": "Bounding Boxes Block Title",
+            "type": "bounding_boxes",
+        }
+
+        data_validation([block], is_workflow=True)

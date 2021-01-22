@@ -167,7 +167,13 @@ def validate_bounding_boxes(data, is_workflow):
             f"Data item with id {data['id']} is missing 'options' or not a list."
         )
 
-    _validate_url(data[data["type"]])
+    bb = data[data["type"]]
+    _validate_url(
+        UrlPayload(
+            value=bb.get("value", {}).get("image"), placeholder=bb.get("placeholder")
+        )
+    )
+
     # if it's a task
     if not is_workflow:
         # Enforce value of dict type
@@ -236,13 +242,13 @@ def data_validation(data, is_workflow=False):
     return data
 
 
-class Payload(TypedDict):
+class UrlPayload(TypedDict):
     value: Optional[str]
     placeholder: Optional[str]
 
 
-def _validate_url(p: Payload):
+def _validate_url(p: UrlPayload):
     for k in ["value", "placeholder"]:
         v = p.get(k, None)
         if v and len(v) > 0 and not is_valid_url(v):
-            raise DataValidationError(f"Invalid url {k}:{v}")
+            raise DataValidationError(f"Invalid url {k}: {v}")
