@@ -1,6 +1,10 @@
 from ast import literal_eval
+from typing import Optional
 
 from schema import SchemaError
+from typing_extensions import TypedDict
+
+from hl_rest_api.utils import is_invalid_email, is_valid_url
 
 from .data_schema import DATA_SCHEMA
 
@@ -54,8 +58,40 @@ def validate_multiple_selection(data, is_workflow):
     validate_selection(data, is_workflow)
 
 
+def validate_email(data, is_workflow):
+    email = data["email"]
+    for k in ["value", "placeholder"]:
+        v = email.get(k, None)
+        if v and len(v) > 0 and is_invalid_email(v):
+            raise DataValidationError(f"Invalid email {k}:{v}")
+
+
 def validate_form(data, is_workflow):
-    pass
+    data_validation(data["form_sequence"]["data"])
+
+
+def validate_embed(data, is_workflow):
+    _validate_url(data[data["type"]])
+
+
+def validate_audio(data, is_workflow):
+    _validate_url(data[data["type"]])
+
+
+def validate_image(data, is_workflow):
+    _validate_url(data[data["type"]])
+
+
+def validate_video(data, is_workflow):
+    _validate_url(data[data["type"]])
+
+
+def validate_pdf(data, is_workflow):
+    _validate_url(data[data["type"]])
+
+
+def validate_link(data, is_workflow):
+    _validate_url(data[data["type"]])
 
 
 def validate_list(data, is_workflow):
@@ -131,6 +167,13 @@ def validate_bounding_boxes(data, is_workflow):
             f"Data item with id {data['id']} is missing 'options' or not a list."
         )
 
+    bb = data[data["type"]]
+    _validate_url(
+        UrlPayload(
+            value=bb.get("value", {}).get("image"), placeholder=bb.get("placeholder")
+        )
+    )
+
     # if it's a task
     if not is_workflow:
         # Enforce value of dict type
@@ -157,10 +200,10 @@ def validate_bounding_boxes(data, is_workflow):
         for bounding_box in data[data["type"]]["value"].get("objects", []):
             if (
                 not isinstance(bounding_box, dict)
-                or not isinstance(bounding_box.get("x"), float)
-                or not isinstance(bounding_box.get("y"), float)
-                or not isinstance(bounding_box.get("w"), float)
-                or not isinstance(bounding_box.get("h"), float)
+                or not isinstance(bounding_box.get("x"), (int, float))
+                or not isinstance(bounding_box.get("y"), (int, float))
+                or not isinstance(bounding_box.get("w"), (int, float))
+                or not isinstance(bounding_box.get("h"), (int, float))
                 or not isinstance(bounding_box.get("category"), str)
             ):
                 raise DataValidationError(
@@ -177,6 +220,13 @@ VALIDATION_STATES = {
     "number": validate_number,
     "named_entity_recognition": validate_named_entity_recognition,
     "bounding_boxes": validate_bounding_boxes,
+    "email": validate_email,
+    "embed": validate_embed,
+    "audio": validate_audio,
+    "image": validate_image,
+    "video": validate_video,
+    "pdf": validate_pdf,
+    "link": validate_link,
 }
 
 
@@ -190,3 +240,15 @@ def data_validation(data, is_workflow=False):
             data_item, is_workflow
         )
     return data
+
+
+class UrlPayload(TypedDict):
+    value: Optional[str]
+    placeholder: Optional[str]
+
+
+def _validate_url(p: UrlPayload):
+    for k in ["value", "placeholder"]:
+        v = p.get(k, None)
+        if v and len(v) > 0 and not is_valid_url(v):
+            raise DataValidationError(f"Invalid url {k}: {v}")
