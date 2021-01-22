@@ -1,8 +1,10 @@
 from ast import literal_eval
+from typing import Optional
 
 from schema import SchemaError
+from typing_extensions import TypedDict
 
-from hl_rest_api.utils import is_invalid_email
+from hl_rest_api.utils import is_invalid_email, is_valid_url
 
 from .data_schema import DATA_SCHEMA
 
@@ -69,27 +71,27 @@ def validate_form(data, is_workflow):
 
 
 def validate_embed(data, is_workflow):
-    pass
+    _validate_url(data[data["type"]])
 
 
 def validate_audio(data, is_workflow):
-    pass
+    _validate_url(data[data["type"]])
 
 
 def validate_image(data, is_workflow):
-    pass
+    _validate_url(data[data["type"]])
 
 
 def validate_video(data, is_workflow):
-    pass
+    _validate_url(data[data["type"]])
 
 
 def validate_pdf(data, is_workflow):
-    pass
+    _validate_url(data[data["type"]])
 
 
 def validate_link(data, is_workflow):
-    pass  # is_valid_url
+    _validate_url(data[data["type"]])
 
 
 def validate_list(data, is_workflow):
@@ -165,6 +167,7 @@ def validate_bounding_boxes(data, is_workflow):
             f"Data item with id {data['id']} is missing 'options' or not a list."
         )
 
+    _validate_url(data[data["type"]])
     # if it's a task
     if not is_workflow:
         # Enforce value of dict type
@@ -231,3 +234,15 @@ def data_validation(data, is_workflow=False):
             data_item, is_workflow
         )
     return data
+
+
+class Payload(TypedDict):
+    value: Optional[str]
+    placeholder: Optional[str]
+
+
+def _validate_url(p: Payload):
+    for k in ["value", "placeholder"]:
+        v = p.get(k, None)
+        if v and len(v) > 0 and not is_valid_url(v):
+            raise DataValidationError(f"Invalid url {k}:{v}")

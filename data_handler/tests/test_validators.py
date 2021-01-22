@@ -1,6 +1,21 @@
-import unittest
+import pytest
 
 from data_handler.data_validation import DataValidationError, data_validation
+
+VALID_URL = "http://localhost.com/workflows/10/edit.png"
+INVALID_URL = "http:/"
+
+LAYOUT = {
+    "h": 2,
+    "i": "6c9d6441-5be5-4a15-814c-1c9413e8dd22",
+    "minH": 2,
+    "minW": 4,
+    "moved": False,
+    "static": False,
+    "w": 5,
+    "x": 7,
+    "y": 0,
+}
 
 
 def create_email_block(value):
@@ -12,17 +27,7 @@ def create_email_block(value):
             "use_placeholder": True,
         },
         "id": "email_id",
-        "layout": {
-            "h": 2,
-            "i": "6c9d6441-5be5-4a15-814c-1c9413e8dd22",
-            "minH": 2,
-            "minW": 4,
-            "moved": False,
-            "static": False,
-            "w": 5,
-            "x": 7,
-            "y": 0,
-        },
+        "layout": LAYOUT,
         "name": "Email Block Title",
         "type": "email",
     }
@@ -47,17 +52,7 @@ def create_email_form_block(value):
             "is_required": True,
         },
         "id": "form_sequence_id",
-        "layout": {
-            "h": 4,
-            "i": "74f041cc-c30a-49fb-9970-c1895cb79b59",
-            "minH": 4,
-            "minW": 4,
-            "moved": False,
-            "static": False,
-            "w": 5,
-            "x": 7,
-            "y": 0,
-        },
+        "layout": LAYOUT,
         "name": "Form Sequence Block Title",
         "type": "form_sequence",
     }
@@ -66,7 +61,24 @@ def create_email_form_block(value):
     return block
 
 
-class TestValidators(unittest.TestCase):
+def get_url_test():
+    tests = []
+    for field in ["value", "placeholder"]:
+        for url in [VALID_URL, INVALID_URL, None, ""]:
+            for type in [
+                "embed",
+                "audio",
+                "image",
+                "video",
+                "pdf",
+                "link",
+                "bounding_boxes",
+            ]:
+                tests.append((field, url, type))
+    return tests
+
+
+class TestValidators:
     def test_when_invalid_email_then_fail(self):
         try:
             data_validation([create_email_block("bla")])
@@ -110,3 +122,21 @@ class TestValidators(unittest.TestCase):
             assert False
         except DataValidationError:
             pass
+
+    @pytest.mark.parametrize("field, url, type", get_url_test())
+    def test_url_validation(self, field, url, type):
+        block = {
+            "_id": "74f041cc-c30a-49fb-9970-c1895cb79b59",
+            type: {},
+            "id": "id",
+            "layout": LAYOUT,
+            "name": "asdf",
+            "type": type,
+        }
+
+        block[type][field] = url
+        if url == INVALID_URL:
+            with pytest.raises(DataValidationError):
+                data_validation([block], is_workflow=True)
+        else:
+            data_validation([block], is_workflow=True)
