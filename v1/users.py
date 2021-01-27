@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from user_handler.invitation import InvitationView
-from user_handler.jwt_token import HLTokenObtainPairView
+from user_handler.jwt_token import GoogleToken, HLTokenObtainPairView
 from user_handler.notifications import NotificationView
 from user_handler.password_retrieval import (
     ForgottenPasswordView,
@@ -18,6 +18,7 @@ from user_handler.views import (
 urlpatterns = [
     path("/register", RegistrationView.as_view(), name="user-registration"),
     path("/token", HLTokenObtainPairView.as_view(), name="token-obtain-pair"),
+    path("/token/google", GoogleToken.as_view()),
     path("/token/refresh", TokenRefreshView.as_view(), name="token-refresh"),
     path("/hello", HelloView.as_view(), name="hello"),
     path(

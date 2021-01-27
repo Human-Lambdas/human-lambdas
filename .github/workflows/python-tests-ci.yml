@@ -33,9 +33,8 @@ jobs:
         extra_args: --verbose --all-files
     - run: |
         set -e -x
-        pytest --collect-only # ensure IDE pytest integration works
         python manage.py migrate
-        python manage.py test --debug-mode
+        pytest -n=auto
       env:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: "test"

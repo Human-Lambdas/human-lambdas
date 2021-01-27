@@ -14,7 +14,6 @@ class TestErrorPayloadStructure(APITestCase):
             ".SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
         )
         self.invalid_registration_data = {
-            "email": "bar@foo.com",
             "organization": "barInc",
             "name": "bar",
         }
