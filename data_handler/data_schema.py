@@ -19,6 +19,7 @@ _DATA_TYPES = Or(
     "named_entity_recognition",
     "rich_text",
     "bounding_boxes",
+    "text_sequence",
 )
 DATA_SCHEMA = Schema(
     [
