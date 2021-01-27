@@ -16,7 +16,7 @@ django-next-prev
 python-logstash==0.4.6
 drf-yasg2
 python-dotenv
-email-validator==1.1.1
+email-validator==1.1.2
 requests
 google-auth==1.24.0
 typing_extensions==3.7.4
