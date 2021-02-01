@@ -16,9 +16,11 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from data_handler.csv_utils import process_csv
 from data_handler.data_sync import sync_workflow_task
+from external.authentication import TokenAuthentication
 from user_handler.models import Organization
 from user_handler.permissions import IsAdminOrReadOnly, IsOrgAdmin
 from workflow_handler.utils import is_force
@@ -34,7 +36,11 @@ from .utils import TEMPLATE_ORG_ID, TaskPagination, decode_csv
 
 
 class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    permission_classes = (
+        IsAuthenticated,
+        IsOrgAdmin,
+    )
+    authentication_classes = (TokenAuthentication, JWTAuthentication)
     serializer_class = HookSerializer
 
     def get_queryset(self):
@@ -103,6 +109,7 @@ class CreateWorkflowView(CreateAPIView):
 class ListWorkflowView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = WorkflowSerializer
+    authentication_classes = (TokenAuthentication, JWTAuthentication)
 
     def get_queryset(self):
         user = self.request.user
@@ -130,6 +137,7 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
 
     permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     serializer_class = WorkflowSerializer
+    authentication_classes = (TokenAuthentication, JWTAuthentication)
 
     def get_serializer(self, *args, **kwargs):
         """

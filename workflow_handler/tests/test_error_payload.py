@@ -127,7 +127,7 @@ class TestErrorPayloadStructure(APITestCase):
         self.assertEqual(
             response.status_code, status.HTTP_201_CREATED, response.content
         )
-        self.client.credentials(HTTP_AUTHORIZATION=None)
+        self.client.credentials(HTTP_AUTHORIZATION="")
         workflow_obj = Workflow.objects.filter(name=self.complete_workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
