@@ -1,6 +1,10 @@
 from django.urls import path
 
-from workflow_handler.views import ListWorkflowView, RUWebhookView
+from workflow_handler.views import (
+    ListWorkflowView,
+    RUDWorkflowView,
+    RUWebhookView,
+)
 
 from .flush import FlushTasksView
 from .views import CreateTaskView, GetExternalCompletedTaskView
@@ -15,8 +19,13 @@ from .zapier import (
 
 urlpatterns = [
     path(
-        "orgs/<int:org_id>/workflows/<int:workflow_id>",
+        "orgs/<int:org_id>/workflows",
         ListWorkflowView.as_view(),
+        name="create-task",
+    ),
+    path(
+        "orgs/<int:org_id>/workflows/<int:workflow_id>",
+        RUDWorkflowView.as_view(),
         name="list-workflows",
     ),
     path(
@@ -26,11 +35,6 @@ urlpatterns = [
     ),
     path(
         "orgs/<int:org_id>/workflows/<int:workflow_id>/tasks/create",
-        CreateTaskView.as_view(),
-        name="create-task",
-    ),
-    path(
-        "orgs/<int:org_id>/workflows",
         CreateTaskView.as_view(),
         name="create-task",
     ),
