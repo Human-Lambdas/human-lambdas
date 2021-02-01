@@ -30,7 +30,7 @@ urlpatterns = [
         name="create-task",
     ),
     path(
-        "orgs/{org_id}/workflows",
+        "orgs/<int:org_id>/workflows",
         CreateTaskView.as_view(),
         name="create-task",
     ),
