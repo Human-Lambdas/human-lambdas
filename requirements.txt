@@ -6,7 +6,7 @@ djangorestframework_simplejwt==4.3.0
 django-cors-headers==3.6.0
 drf-chunked-upload==0.4.2
 sentry_sdk==0.19.5
-schema==0.7.2
+schema==0.7.4
 gunicorn==20.0.04
 git+https://github.com/zapier/django-rest-hooks.git@d21a070b9a099b5e9c755b2afa6b81c9d8b26e7c#egg=django-rest-hooks
 sendgrid==6.4.8
