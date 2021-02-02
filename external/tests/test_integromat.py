@@ -38,22 +38,19 @@ class TestIntegromat(APITestCase):
                     "id": "news",
                     "name": "news",
                     "type": "text",
-                    "layout": {},
+                    "layout": {
+                        "h": 4,
+                        "i": "e8436384-205d-4d25-bf6a-a52f31cf79b5",
+                        "w": 6,
+                        "x": 6,
+                        "y": 12,
+                        "minH": 4,
+                        "minW": 4,
+                        "moved": False,
+                        "static": False,
+                    },
                     "text": {"read_only": True},
-                },
-                {
-                    "id": "type",
-                    "name": "type",
-                    "type": "text",
-                    "layout": {},
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
+                }
             ],
         }
         response = self.client.post(
@@ -68,11 +65,13 @@ class TestIntegromat(APITestCase):
         response = self.client.get(f"/orgs/{self.org_id}/workflows")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+        self.assertNotIn("data", response.data[0])
 
     def test_when_get_workflow_then_returned(self):
         response = self.client.get(f"/orgs/{self.org_id}/workflows/{self.workflow_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["id"], 1)
+        self.assertNotIn("layout", response.data["data"][0])
 
     def test_when_get_webhook_then_fetched(self):
         response = self.client.get(
