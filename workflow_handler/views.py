@@ -46,13 +46,16 @@ class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
     def get_queryset(self):
         return WebHook.objects.filter(workflow__pk=self.kwargs["workflow_id"])
 
-    def get_object(self):
+    def _get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
         return queryset.first()
 
+    def get_object(self):
+        return self._get_object() or {"target": ""}
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
-        instance = self.get_object()
+        instance = self._get_object()
         if not instance and request.data["target"]:
             response = self.create(request)
         elif not instance and not request.data["target"]:
@@ -74,7 +77,7 @@ class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
         return response
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
+        instance = self._get_object()
         self.check_object_permissions(self.request, instance)
         self.perform_destroy(instance)
         return Response(status=204)
@@ -124,10 +127,23 @@ class ListWorkflowView(ListAPIView):
             queryset = queryset.filter(task__status=task_status).distinct()
         return queryset
 
-    def list(self, request, *args, **kwargs):
+    def _list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return serializer.data
+
+    def list(self, request, *args, **kwargs):
+        return Response(self._list(self, request, *args, **kwargs))
+
+
+class ExternalListWorkflowView(ListWorkflowView):
+    def list(self, request, *args, **kwargs):
+        workflows = self._list(self, request, *args, **kwargs)
+
+        for d in workflows:
+            del d["data"]
+
+        return Response(workflows)
 
 
 class RUDWorkflowView(RetrieveUpdateAPIView):
@@ -180,7 +196,7 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
         return obj
 
-    def retrieve(self, request, *args, **kwargs):
+    def _retrieve(self):
         obj = get_object_or_404(self.get_queryset())
         workflow = self.serializer_class(obj).data
         if (
@@ -190,7 +206,11 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
             workflow["webhook"] = {
                 "target": WebHook.objects.get(workflow=obj, is_zapier=False).target
             }
-        return Response(workflow)
+
+        return workflow
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(self._retrieve(self, request, *args, **kwargs))
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
@@ -216,6 +236,15 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
             },
             status=403,
         )
+
+
+class ExternalRUDWorkflowView(RUDWorkflowView):
+    def retrieve(self, request, *args, **kwargs):
+        workflow = self._retrieve(self, request, *args, **kwargs)
+        for block in workflow["data"]:
+            del block["layout"]
+
+        return Response(workflow)
 
 
 class FileUploadView(APIView):

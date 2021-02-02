@@ -1,8 +1,8 @@
 from django.urls import path
 
 from workflow_handler.views import (
-    ListWorkflowView,
-    RUDWorkflowView,
+    ExternalListWorkflowView,
+    ExternalRUDWorkflowView,
     RUWebhookView,
 )
 
@@ -20,12 +20,12 @@ from .zapier import (
 urlpatterns = [
     path(
         "orgs/<int:org_id>/workflows",
-        ListWorkflowView.as_view(),
+        ExternalListWorkflowView.as_view(),
         name="create-task",
     ),
     path(
         "orgs/<int:org_id>/workflows/<int:workflow_id>",
-        RUDWorkflowView.as_view(),
+        ExternalRUDWorkflowView.as_view(),
         name="list-workflows",
     ),
     path(
