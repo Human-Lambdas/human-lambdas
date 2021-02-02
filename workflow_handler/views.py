@@ -210,7 +210,7 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         return workflow
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(self._retrieve(self, request, *args, **kwargs))
+        return Response(self._retrieve())
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
@@ -240,7 +240,7 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
 
 class ExternalRUDWorkflowView(RUDWorkflowView):
     def retrieve(self, request, *args, **kwargs):
-        workflow = self._retrieve(self, request, *args, **kwargs)
+        workflow = self._retrieve()
         for block in workflow["data"]:
             del block["layout"]
 
