@@ -41,7 +41,7 @@ class HookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WebHook
-        fields = "__all__"
+        fields = ("target", "user", "event", "workflow", "id")
         read_only_fields = ("user", "event", "workflow", "id")
 
     def create(self, validated_data):

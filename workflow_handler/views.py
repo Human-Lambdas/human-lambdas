@@ -9,16 +9,19 @@ from rest_framework import serializers
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
+    RetrieveAPIView,
     RetrieveUpdateAPIView,
 )
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from data_handler.csv_utils import process_csv
 from data_handler.data_sync import sync_workflow_task
+from external.authentication import TokenAuthentication
 from user_handler.models import Organization
 from user_handler.permissions import IsAdminOrReadOnly, IsOrgAdmin
 from workflow_handler.utils import is_force
@@ -34,7 +37,11 @@ from .utils import TEMPLATE_ORG_ID, TaskPagination, decode_csv
 
 
 class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    permission_classes = (
+        IsAuthenticated,
+        IsOrgAdmin,
+    )
+    authentication_classes = (TokenAuthentication, JWTAuthentication)
     serializer_class = HookSerializer
 
     def get_queryset(self):
@@ -103,6 +110,7 @@ class CreateWorkflowView(CreateAPIView):
 class ListWorkflowView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = WorkflowSerializer
+    authentication_classes = (TokenAuthentication, JWTAuthentication)
 
     def get_queryset(self):
         user = self.request.user
@@ -120,16 +128,19 @@ class ListWorkflowView(ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
+        for d in serializer.data:
+            del d["data"]
         return Response(serializer.data)
 
 
-class RUDWorkflowView(RetrieveUpdateAPIView):
+class BaseWorkflowView(RetrieveAPIView):
     """
     Retrieve and Update for now, will add delete here later
     """
 
     permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     serializer_class = WorkflowSerializer
+    authentication_classes = (TokenAuthentication, JWTAuthentication)
 
     def get_serializer(self, *args, **kwargs):
         """
@@ -172,7 +183,7 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
         return obj
 
-    def retrieve(self, request, *args, **kwargs):
+    def _retrieve(self):
         obj = get_object_or_404(self.get_queryset())
         workflow = self.serializer_class(obj).data
         if (
@@ -182,8 +193,14 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
             workflow["webhook"] = {
                 "target": WebHook.objects.get(workflow=obj, is_zapier=False).target
             }
-        return Response(workflow)
 
+        return workflow
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(self._retrieve())
+
+
+class InternalWorkflowView(UpdateModelMixin, BaseWorkflowView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         instance = self.get_object()
@@ -208,6 +225,22 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
             },
             status=403,
         )
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+
+class ExternalWorkflowView(BaseWorkflowView):
+    def retrieve(self, request, *args, **kwargs):
+        workflow = self._retrieve()
+        for block in workflow["data"]:
+            block.pop("layout", None)
+            block.pop("_id", None)
+
+        return Response(workflow)
 
 
 class FileUploadView(APIView):
