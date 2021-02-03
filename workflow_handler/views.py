@@ -46,16 +46,13 @@ class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
     def get_queryset(self):
         return WebHook.objects.filter(workflow__pk=self.kwargs["workflow_id"])
 
-    def _get_object(self):
+    def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
         return queryset.first()
 
-    def get_object(self):
-        return self._get_object() or {"target": ""}
-
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
-        instance = self._get_object()
+        instance = self.get_object()
         if not instance and request.data["target"]:
             response = self.create(request)
         elif not instance and not request.data["target"]:
@@ -77,7 +74,7 @@ class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
         return response
 
     def destroy(self, request, *args, **kwargs):
-        instance = self._get_object()
+        instance = self.get_object()
         self.check_object_permissions(self.request, instance)
         self.perform_destroy(instance)
         return Response(status=204)
