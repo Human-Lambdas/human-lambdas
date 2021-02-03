@@ -9,9 +9,10 @@ from rest_framework import serializers
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
+    RetrieveAPIView,
     RetrieveUpdateAPIView,
 )
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -132,7 +133,7 @@ class ListWorkflowView(ListAPIView):
         return Response(serializer.data)
 
 
-class RUDWorkflowView(RetrieveUpdateAPIView):
+class BaseWorkflowView(RetrieveAPIView):
     """
     Retrieve and Update for now, will add delete here later
     """
@@ -198,6 +199,8 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
     def retrieve(self, request, *args, **kwargs):
         return Response(self._retrieve())
 
+
+class InternalRUDWorkflowView(UpdateModelMixin, BaseWorkflowView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         instance = self.get_object()
@@ -223,8 +226,14 @@ class RUDWorkflowView(RetrieveUpdateAPIView):
             status=403,
         )
 
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
-class ExternalRUDWorkflowView(RUDWorkflowView):
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+
+class ExternalRUDWorkflowView(BaseWorkflowView):
     def retrieve(self, request, *args, **kwargs):
         workflow = self._retrieve()
         for block in workflow["data"]:

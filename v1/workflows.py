@@ -13,13 +13,13 @@ from workflow_handler.views import (
     CreateTaskFormView,
     CreateWorkflowView,
     FileUploadView,
+    InternalRUDWorkflowView,
     ListNonCompleteTaskView,
     ListTaskView,
     ListWorkflowView,
     NextTaskView,
     RefreshTaskView,
     RUDTaskView,
-    RUDWorkflowView,
     RUWebhookView,
     SaveTaskView,
 )
@@ -27,7 +27,9 @@ from workflow_handler.views import (
 urlpatterns = [
     path("/create", CreateWorkflowView.as_view(), name="create-workflow"),
     path("", ListWorkflowView.as_view(), name="list-workflows"),
-    path("/<int:workflow_id>", RUDWorkflowView.as_view(), name="update-workflow"),
+    path(
+        "/<int:workflow_id>", InternalRUDWorkflowView.as_view(), name="update-workflow"
+    ),
     path("/<int:workflow_id>/upload", FileUploadView.as_view(), name="upload"),
     path("/<int:workflow_id>/tasks", ListTaskView.as_view(), name="list-tasks"),
     path(
