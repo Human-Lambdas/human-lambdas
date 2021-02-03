@@ -73,6 +73,7 @@ class TestIntegromat(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["id"], self.workflow_id)
         self.assertNotIn("layout", response.data["data"][0])
+        self.assertNotIn("_id", response.data["data"][0])
 
     def test_when_get_webhook_then_fetched(self):
         response = self.client.get(

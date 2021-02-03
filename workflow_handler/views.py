@@ -237,7 +237,8 @@ class ExternalWorkflowView(BaseWorkflowView):
     def retrieve(self, request, *args, **kwargs):
         workflow = self._retrieve()
         for block in workflow["data"]:
-            del block["layout"]
+            block.pop("layout", None)
+            block.pop("_id", None)
 
         return Response(workflow)
 
