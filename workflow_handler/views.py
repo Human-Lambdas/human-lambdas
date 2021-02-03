@@ -200,7 +200,7 @@ class BaseWorkflowView(RetrieveAPIView):
         return Response(self._retrieve())
 
 
-class InternalRUDWorkflowView(UpdateModelMixin, BaseWorkflowView):
+class InternalWorkflowView(UpdateModelMixin, BaseWorkflowView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         instance = self.get_object()
@@ -233,7 +233,7 @@ class InternalRUDWorkflowView(UpdateModelMixin, BaseWorkflowView):
         return self.partial_update(request, *args, **kwargs)
 
 
-class ExternalRUDWorkflowView(BaseWorkflowView):
+class ExternalWorkflowView(BaseWorkflowView):
     def retrieve(self, request, *args, **kwargs):
         workflow = self._retrieve()
         for block in workflow["data"]:

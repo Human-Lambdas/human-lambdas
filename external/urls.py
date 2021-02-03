@@ -1,7 +1,7 @@
 from django.urls import path
 
 from workflow_handler.views import (
-    ExternalRUDWorkflowView,
+    ExternalWorkflowView,
     ListWorkflowView,
     RUWebhookView,
 )
@@ -25,7 +25,7 @@ urlpatterns = [
     ),
     path(
         "orgs/<int:org_id>/workflows/<int:workflow_id>",
-        ExternalRUDWorkflowView.as_view(),
+        ExternalWorkflowView.as_view(),
         name="list-workflows",
     ),
     path(
