@@ -127,23 +127,12 @@ class ListWorkflowView(ListAPIView):
             queryset = queryset.filter(task__status=task_status).distinct()
         return queryset
 
-    def _list(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
-        return serializer.data
-
-    def list(self, request, *args, **kwargs):
-        return Response(self._list(self, request, *args, **kwargs))
-
-
-class ExternalListWorkflowView(ListWorkflowView):
-    def list(self, request, *args, **kwargs):
-        workflows = self._list(self, request, *args, **kwargs)
-
-        for d in workflows:
+        for d in serializer.data:
             del d["data"]
-
-        return Response(workflows)
+        return Response(serializer.data)
 
 
 class RUDWorkflowView(RetrieveUpdateAPIView):
