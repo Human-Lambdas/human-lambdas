@@ -219,18 +219,6 @@ class TestInvite(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
         email = "foo2@bar.com"
-        response = self.client.post(
-            f"/v1/orgs/{self.org_id}/invite",
-            {"emails": email, "organization_id": self.org_id},
-        )
-
-        response = self.client.get(f"/v1/orgs/{self.org_id}/invite")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["invited_users"]), 1)
-        self.assertEqual(
-            response.data["invited_users"][0],
-            {"email": email, "is_admin": False, "pending": True},
-        )
 
         response = self.client.post(
             f"/v1/orgs/{self.org_id}/invite",
@@ -244,3 +232,45 @@ class TestInvite(APITestCase):
             response.data["invited_users"][0],
             {"email": email, "is_admin": False, "pending": True},
         )
+
+        response = self.client.post(
+            f"/v1/orgs/{self.org_id}/invite",
+            {"emails": email, "organization_id": self.org_id},
+        )
+
+        response = self.client.get(f"/v1/orgs/{self.org_id}/invite")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["invited_users"]), 1)
+        self.assertEqual(
+            response.data["invited_users"][0],
+            {"email": email, "is_admin": False, "pending": True},
+        )
+
+    def test_when_duplicate_invite_deleted_then_other_invites_unaffected(self):
+        Invitation.objects.get_queryset().delete()
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
+        email = "foo2@bar.com"
+        other_email = "other@bar.com"
+
+        response = self.client.post(
+            f"/v1/orgs/{self.org_id}/invite",
+            {"emails": email, "organization_id": self.org_id},
+        )
+        response = self.client.post(
+            f"/v1/orgs/{self.org_id}/invite",
+            {"emails": other_email, "organization_id": self.org_id},
+        )
+
+        response = self.client.get(f"/v1/orgs/{self.org_id}/invite")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["invited_users"]), 2)
+
+        response = self.client.post(
+            f"/v1/orgs/{self.org_id}/invite",
+            {"emails": email, "organization_id": self.org_id},
+        )
+
+        response = self.client.get(f"/v1/orgs/{self.org_id}/invite")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["invited_users"]), 2)
