@@ -46,6 +46,9 @@ class SendInviteView(APIView):
                 already_added_email_list.append(email)
                 continue
 
+            for inv in self.get_queryset().filter(email=email):
+                inv.delete()
+
             token = generate_unique_token(email, kwargs["org_id"])
             Invitation(
                 email=email,

@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+from django.utils import timezone
 from django.utils.timezone import make_aware
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -213,3 +214,47 @@ class TestInvite(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for invite in response.data["invited_users"]:
             self.assertNotEqual(invite["email"], "new@user.com")
+
+    def test_when_duplicate_invite_then_prev_invite_overwritten(self):
+        Invitation.objects.get_queryset().delete()
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
+        other_org = Organization(name="baz")
+        other_org.save()
+        email = "foo2@bar.com"
+        other_email = "other@bar.com"
+        test_invs = (
+            (email, self.organization),
+            (other_email, self.organization),
+            (email, other_org),
+        )
+        initial_expiry = timezone.now() + timezone.timedelta(days=1)
+
+        for (email, org) in test_invs:
+            Invitation(
+                email=email,
+                organization=org,
+                invited_by=self.user,
+                token="asdf",
+                expires_at=initial_expiry,
+                admin=False,
+            ).save()
+
+        # act
+        response = self.client.post(
+            f"/v1/orgs/{self.org_id}/invite",
+            {"emails": email, "organization_id": self.org_id},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_invite = Invitation.objects.get(
+            email=email, organization=self.organization
+        )
+        self.assertGreater(updated_invite.expires_at, initial_expiry)
+        unaffected_invite1 = Invitation.objects.get(
+            email=other_email, organization=self.organization
+        )
+        unaffected_invite2 = Invitation.objects.get(email=email, organization=other_org)
+        self.assertEqual(
+            unaffected_invite1.expires_at, unaffected_invite2.expires_at, initial_expiry
+        )

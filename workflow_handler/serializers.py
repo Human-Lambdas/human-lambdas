@@ -41,7 +41,7 @@ class HookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WebHook
-        fields = "__all__"
+        fields = ("target", "user", "event", "workflow", "id")
         read_only_fields = ("user", "event", "workflow", "id")
 
     def create(self, validated_data):
@@ -226,6 +226,7 @@ class TaskSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        logger.info(f"taskserializer: create")
         source_name = validated_data.get("source_name")
         if not source_name:
             raise serializers.ValidationError("No source name given!")
@@ -262,6 +263,7 @@ class TaskSerializer(serializers.ModelSerializer):
         return task
 
     def update(self, instance, validated_data):
+        logger.info(f"taskserializer: update")
         user = self.context["request"].user
         if instance.status == "completed" and not validated_data["force"]:
             raise serializers.ValidationError("Cannot change a completed task")

@@ -13,7 +13,6 @@
   "typeCheckingMode": "basic",
   "reportUnusedImport": "warning",
   "pythonVersion": "3.7",
-  "typeshedPath": "typeshed",
   "enableTypeIgnoreComments": true,
   "reportUnknownMemberType": "none",
   "reportUnknownParameterType": "none",
@@ -25,5 +24,4 @@
   "reportUnboundVariable": "warning",
   "reportMissingImports":"none",
   "reportGeneralTypeIssues":"none"
-
 }

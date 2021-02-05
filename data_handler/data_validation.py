@@ -42,10 +42,41 @@ def default_data_validation(data, is_workflow):
     pass
 
 
+def validate_string_list(str_list):
+    if not isinstance(str_list, list):
+        return False
+    if sum([0 if isinstance(item, str) is True else 1 for item in str_list]) > 0:
+        return False
+    return True
+
+
+def validate_text_sequence(data, is_workflow):
+    value = data.get(data.get("type"), {}).get("value")
+    if value is not None and not validate_string_list(value):
+        raise DataValidationError(
+            f"Text Sequence Block with id {data['id']} is not a list of strings"
+        )
+
+
 def validate_selection(data, is_workflow):
     type_data = data.get(data["type"])
+    value = data.get(data.get("type"), {}).get("value")
     if type_data is None:
         raise DataValidationError("Type do not match to {}".format(data["type"]))
+    if data.get("type") == "single_selection" and not isinstance(
+        value, (str, type(None))
+    ):
+        raise DataValidationError(
+            f"Single Selection with id {data['id']} is not a string"
+        )
+    if (
+        data.get("type") == "multiple_selection"
+        and value is not None
+        and (not isinstance(value, list) or not validate_string_list(value))
+    ):
+        raise DataValidationError(
+            f"Multiple Selection with id {data['id']} is not a list of strings"
+        )
     if "options" not in type_data:
         raise DataValidationError("Selection blocks should have a list of options")
 
@@ -227,6 +258,7 @@ VALIDATION_STATES = {
     "video": validate_video,
     "pdf": validate_pdf,
     "link": validate_link,
+    "text_sequence": validate_text_sequence,
 }
 
 
