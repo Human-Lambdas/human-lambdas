@@ -428,17 +428,20 @@ class NextTaskView(APIView):
         ).order_by("created_at")
 
     def get(self, request, *args, **kwargs):
+        logger.info(f"/next start")
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.get_queryset()
 
         # 1 get assigned to self
         with transaction.atomic():
+            logger.info(f"/next getting assigned | in_progress")
             obj = (
                 queryset.filter(Q(status="assigned") | Q(status="in_progress"))
                 .filter(assigned_to=request.user)
                 .first()
             )
             if obj:
+                logger.info(f"/next returning assigned/in_prog task")
                 obj.assigned_at = timezone.now()
                 obj.save()
                 sync_workflow_task(workflow, obj)
@@ -446,26 +449,31 @@ class NextTaskView(APIView):
                 task["status_code"] = 200
                 return Response(task, status=200)
 
-        # 2 get first pending
+        # 2 get first pending, can take +1.3s
         with transaction.atomic():
+            logger.info(f"/next getting pending/new")
             obj = (
                 queryset.select_for_update()
                 .filter(Q(status="pending") | Q(status="new"))
                 .first()  # TODO: Remove pending in the future
             )
             if not obj:
+                logger.info(f"/next getting open")
                 obj = queryset.select_for_update().filter(status="open").first()
             if obj:
+                logger.info(f"/next assigning task")
                 obj.status = "in_progress"
                 obj.assigned_to = request.user
                 obj.assigned_at = timezone.now()
                 obj.save()
+                logger.info(f"/next saving taskactivity")
                 TaskActivity(
                     task=obj,
                     created_by=request.user,
                     action="assigned",
                     assignee=request.user,
                 ).save()
+                logger.info(f"/next hydrating task")
                 sync_workflow_task(workflow, obj)
                 task = self.serializer_class(obj).data
                 task["status_code"] = 200
