@@ -33,7 +33,6 @@ class TestTaskAudit(APITestCase):
 
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -390,7 +389,6 @@ class TestEmptyTaskAudit(APITestCase):
 
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",

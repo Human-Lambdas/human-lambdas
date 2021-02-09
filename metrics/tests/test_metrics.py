@@ -35,7 +35,6 @@ class TestMetrics(APITestCase):
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -143,7 +142,6 @@ class TestComplexMetrics(APITestCase):
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -256,7 +254,6 @@ class TestQueryMetrics(APITestCase):
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -307,7 +304,6 @@ class TestQueryMetrics(APITestCase):
 
         workflow_data = {
             "name": "uploader2",
-            "description": "greater wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -496,7 +492,6 @@ class TestWorkflowMetrics(APITestCase):
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -547,7 +542,6 @@ class TestWorkflowMetrics(APITestCase):
 
         workflow_data = {
             "name": "uploader2",
-            "description": "greater wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -756,7 +750,6 @@ class TestWorkermetrics(APITestCase):
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",

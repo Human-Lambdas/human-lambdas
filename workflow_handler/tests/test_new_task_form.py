@@ -26,7 +26,6 @@ class TestTaskForm(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         self.workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "news",
@@ -86,4 +85,4 @@ class TestTaskForm(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         task = Task.objects.filter(pk=response.data["id"])
         self.assertTrue(task.exists())
-        self.assertEqual(len(task.first().data), len(self.workflow_data))
+        self.assertEqual(len(task.first().data), len(self.workflow_data["data"]))

@@ -36,7 +36,6 @@ class TestTaskCount(APITestCase):
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",

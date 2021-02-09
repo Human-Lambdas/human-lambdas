@@ -53,7 +53,6 @@ class TestCRUDWorkflow(APITestCase):
 
         workflow_data = {
             "name": "workerwf",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -86,7 +85,6 @@ class TestCRUDWorkflow(APITestCase):
         Workflow(
             id=workflow_id,
             name="template1",
-            description="",
             created_by=self.user,
             data={},
             organization=templates_org,
@@ -147,7 +145,7 @@ class TestCRUDWorkflow(APITestCase):
         workflow = workflow_obj.first()
         updated_text = "not so great wf"
         updated_workflow_data = {
-            "description": updated_text,
+            "name": updated_text,
         }
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token_worker)
         response = self.client.patch(
@@ -159,7 +157,7 @@ class TestCRUDWorkflow(APITestCase):
 
         workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
         workflow = workflow_obj.first()
-        self.assertNotEqual(updated_text, workflow.description)
+        self.assertNotEqual(updated_text, workflow.name)
 
     def test_update_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
@@ -176,7 +174,6 @@ class TestCRUDWorkflow(APITestCase):
 
         workflow_data2 = {
             "name": "foowf2",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -201,7 +198,7 @@ class TestCRUDWorkflow(APITestCase):
 
         updated_text = "not so great wf"
         updated_workflow_data = {
-            "description": updated_text,
+            "name": updated_text,
         }
 
         response = self.client.patch(
@@ -210,10 +207,10 @@ class TestCRUDWorkflow(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(updated_text, response.data["description"])
-        workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
+        self.assertEqual(updated_text, response.data["name"])
+        workflow_obj = Workflow.objects.filter(name=response.data["name"])
         workflow = workflow_obj.first()
-        self.assertEqual(updated_text, workflow.description)
+        self.assertEqual(updated_text, workflow.name)
         updated_workflow_data = {
             "name": workflow_data["name"],
         }
@@ -240,7 +237,6 @@ class TestCRUDWorkflow(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data1 = {
             "name": "foowf",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -264,7 +260,6 @@ class TestCRUDWorkflow(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         workflow_data2 = {
             "name": "foowf2",
-            "description": "greater wf",
             "data": [
                 {
                     "id": "foo",
@@ -311,7 +306,6 @@ class TestCRUDWorkflow(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data1 = {
             "name": "foowf",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -335,7 +329,6 @@ class TestCRUDWorkflow(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         workflow_data2 = {
             "name": "foowf2",
-            "description": "greater wf",
             "data": [
                 {
                     "id": "foo",
