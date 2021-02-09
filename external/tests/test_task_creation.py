@@ -26,7 +26,6 @@ class TestTaskCreation(APITestCase):
 
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -141,7 +140,6 @@ class TestListTaskCreation(APITestCase):
 
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -215,7 +213,6 @@ class TestFormSequenceTaskCreation(APITestCase):
 
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "type": "form_sequence",

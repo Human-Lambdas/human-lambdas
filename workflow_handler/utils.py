@@ -74,7 +74,6 @@ def create_template(template_id, user, org):
         if workflow:
             Workflow(
                 name=workflow.name,
-                description=workflow.description,
                 created_by=user,
                 data=copy.deepcopy(workflow.data),
                 organization=org,

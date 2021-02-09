@@ -37,7 +37,6 @@ class TestListWorkflow(APITestCase):
         self.wf_name1 = "foowf"
         workflow_data1 = {
             "name": self.wf_name1,
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -63,7 +62,6 @@ class TestListWorkflow(APITestCase):
         self.wf_name2 = "barwf"
         workflow_data1 = {
             "name": self.wf_name2,
-            "description": "superb wf",
             "data": [
                 {
                     "id": "foo",

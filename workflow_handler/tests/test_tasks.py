@@ -56,7 +56,6 @@ class TestTasks(APITestCase):
 
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -96,7 +95,6 @@ class TestTasks(APITestCase):
         )
         second_workflow_data = {
             "name": "second workflow",
-            "description": "great second wf",
             "data": [
                 {
                     "id": "Alpha",

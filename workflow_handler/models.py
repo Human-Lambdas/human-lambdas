@@ -11,7 +11,6 @@ STATUS_MAPPING = {"assigned": "in_progress", "pending": "new"}
 
 class Workflow(models.Model):
     name = models.CharField(max_length=140)
-    description = models.TextField(blank=True)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     inputs = JSONField(default=list)
     outputs = JSONField(default=list)

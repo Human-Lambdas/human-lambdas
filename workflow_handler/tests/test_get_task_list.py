@@ -27,7 +27,6 @@ class TestInternalTaskList(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "news",

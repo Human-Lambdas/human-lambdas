@@ -27,7 +27,6 @@ class TestErrorPayloadStructure(APITestCase):
         )
         self.complete_workflow_data = {
             "name": "foowf",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -67,7 +66,6 @@ class TestErrorPayloadStructure(APITestCase):
     def test_create_workflow_missing_data(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -132,7 +130,7 @@ class TestErrorPayloadStructure(APITestCase):
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
         self.complete_workflow_data = {
-            "description": "not so great wf",
+            "name": "not so great wf",
         }
         response = self.client.patch(
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
@@ -156,7 +154,7 @@ class TestErrorPayloadStructure(APITestCase):
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
         self.complete_workflow_data = {
-            "description": "not so great wf",
+            "name": "not so great wf",
         }
         response = self.client.patch(
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
@@ -179,7 +177,7 @@ class TestErrorPayloadStructure(APITestCase):
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
         self.complete_workflow_data = {
-            "description": "not so great wf",
+            "name": "not so great wf",
         }
         response = self.client.post(
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),

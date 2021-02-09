@@ -45,7 +45,6 @@ class TestTasksActivity(APITestCase):
 
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",

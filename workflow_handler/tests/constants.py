@@ -1,6 +1,5 @@
 WORKFLOW_DATA = {
     "name": "foowf",
-    "description": "great wf",
     "data": [
         {
             "id": "foo",
