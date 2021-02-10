@@ -97,6 +97,7 @@ class Task(models.Model):
             "source": source_name,
             "source_id": source_id,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
+            "correct": self.correct,
         }
 
     def get_simple_formatted_task(self):
