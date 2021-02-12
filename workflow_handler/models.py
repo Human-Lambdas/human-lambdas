@@ -11,7 +11,6 @@ STATUS_MAPPING = {"assigned": "in_progress", "pending": "new"}
 
 class Workflow(models.Model):
     name = models.CharField(max_length=140)
-    description = models.TextField(blank=True)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     inputs = JSONField(default=list)
     outputs = JSONField(default=list)
@@ -98,6 +97,7 @@ class Task(models.Model):
             "source": source_name,
             "source_id": source_id,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
+            "correct": self.correct,
         }
 
     def get_simple_formatted_task(self):

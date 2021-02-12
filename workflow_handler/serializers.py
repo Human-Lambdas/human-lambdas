@@ -71,7 +71,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
-            "description",
             "disabled",
             "n_tasks",
             "created_at",
@@ -100,7 +99,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context["request"].user
         wf_name = validated_data["name"]
-        description = validated_data.get("description", "")
         data = validated_data["data"]
         clean_form_sequence(data)
         organization_obj = Organization.objects.filter(
@@ -112,7 +110,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Organization not found!")
         workflow = Workflow(
             name=wf_name,
-            description=description,
             organization=organization,
             created_by=user,
             data=data,
@@ -145,7 +142,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
                     "Workflow with same name already exists"
                 )
             instance.name = workflow_name
-        instance.description = validated_data.get("description", instance.description)
         data = validated_data.get("data")
         if data:
             clean_form_sequence(data)

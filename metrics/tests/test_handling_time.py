@@ -34,7 +34,6 @@ class TestHandlingTime(APITestCase):
         self.token = response.data["token"]
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -85,7 +84,6 @@ class TestHandlingTime(APITestCase):
 
         workflow_data = {
             "name": "uploader2",
-            "description": "greater wf",
             "data": [
                 {
                     "id": "Alpha",

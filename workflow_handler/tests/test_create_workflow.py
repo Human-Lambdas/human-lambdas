@@ -27,7 +27,6 @@ class TestCreateWorkflow(APITestCase):
 
         workflow_data = {
             "name": "foowf",
-            # "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -73,7 +72,6 @@ class TestCreateWorkflow(APITestCase):
                 "foowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffo"
                 "owffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowffoowf"
             ),
-            "description": "great wf",
             "data": [
                 {"id": "foo", "name": "foo", "type": "text"},
                 {
@@ -100,7 +98,6 @@ class TestCreateWorkflow(APITestCase):
 
         workflow_data = {
             "name": "foowf",
-            "description": "great wf",
             "data": [{}],
         }
         response = self.client.post(
@@ -115,7 +112,6 @@ class TestCreateWorkflow(APITestCase):
 
         workflow_data = {
             "name": "foowf",
-            "description": "great wf",
             "data": [{"id": "foo"}],
         }
         response = self.client.post(
@@ -130,7 +126,6 @@ class TestCreateWorkflow(APITestCase):
 
         workflow_data = {
             "name": "foowf",
-            "description": "great wf",
             "data": [{"id": "foo", "name": "foo", "type": "game"}],
         }
         response = self.client.post(
@@ -148,7 +143,6 @@ class TestCreateWorkflow(APITestCase):
 
         workflow_data = {
             "name": "foowf",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -170,7 +164,6 @@ class TestCreateWorkflow(APITestCase):
 
         workflow_data = {
             "name": "foowf",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -197,7 +190,6 @@ class TestCreateWorkflow(APITestCase):
 
         workflow_data = {
             "name": "foowf",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -224,7 +216,6 @@ class TestCreateWorkflow(APITestCase):
 
         workflow_data = {
             "name": "foowf",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -246,7 +237,6 @@ class TestCreateWorkflow(APITestCase):
 
         workflow_data = {
             "name": "foowf",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",

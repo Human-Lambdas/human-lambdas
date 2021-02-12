@@ -33,7 +33,6 @@ class TestCompletedTasksToCSV(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         self.workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",

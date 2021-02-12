@@ -38,7 +38,6 @@ class TestUpload(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -87,7 +86,6 @@ class TestUpload(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "news",
@@ -127,7 +125,6 @@ class TestUpload(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -213,7 +210,6 @@ class TestCSV2Task(TestCase):
         org.add_admin(user)
         self.sample_workflow = Workflow(
             name="example",
-            description="description",
             inputs=[
                 {"id": "alpha", "name": "alpha", "type": "text"},
                 {"id": "beta", "name": "beta", "type": "text"},
@@ -294,7 +290,6 @@ class TestUploadExtremes(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "car",
@@ -340,7 +335,6 @@ class TestUploadExtremes(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "name": "feedback",
-            "description": "emoji wf",
             "data": [
                 {
                     "id": "submitter_picture",
@@ -424,7 +418,6 @@ class TestUploadList(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",

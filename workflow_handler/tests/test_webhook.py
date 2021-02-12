@@ -42,7 +42,6 @@ class TestWebhook(APITestCase):
         self.hook_url = "http://some.url.com"
         self.workflow_data = {
             "name": "foowf",
-            "description": "great wf",
             "data": [
                 {
                     "id": "foo",
@@ -127,7 +126,6 @@ class TestWebhook(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.admin_access_token)
         self.workflow_data = {
             "name": "bar2",
-            "description": "great bar",
             "inputs": [{"id": "foo", "name": "foo", "type": "text"}],
             "outputs": [
                 {
@@ -202,7 +200,6 @@ class TestWebhookTasks(APITestCase):
 
         workflow_data = {
             "name": "uploader",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
@@ -253,7 +250,6 @@ class TestWebhookTasks(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         workflow_data = {
             "name": "uploader2",
-            "description": "great wf",
             "data": [
                 {
                     "id": "Alpha",
