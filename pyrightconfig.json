@@ -15,13 +15,13 @@
   "pythonVersion": "3.7",
   "enableTypeIgnoreComments": true,
   "reportUnknownMemberType": "none",
-  "reportUnknownParameterType": "none",
-  "reportUnknownVariableType": "none",
-  "reportUnknownArgumentType": "none",
+  "reportUnknownParameterType": "warning",
+  "reportUnknownVariableType": "warning",
+  "reportUnknownArgumentType": "warning",
   "reportPrivateUsage": "warning",
   "reportUntypedFunctionDecorator": "none",
   "reportMissingTypeStubs": false,
   "reportUnboundVariable": "warning",
-  "reportMissingImports":"none",
-  "reportGeneralTypeIssues":"none"
+  "reportMissingImports":"warning",
+  "reportGeneralTypeIssues":"warning"
 }

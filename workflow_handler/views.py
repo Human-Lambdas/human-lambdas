@@ -1,7 +1,7 @@
 import copy
 import logging
 
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import Q
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.utils import timezone
@@ -24,6 +24,7 @@ from data_handler.data_sync import sync_workflow_task
 from external.authentication import TokenAuthentication
 from user_handler.models import Organization
 from user_handler.permissions import IsAdminOrReadOnly, IsOrgAdmin
+from workflow_handler.latency import QueryLogger
 from workflow_handler.utils import is_force
 
 from .models import Source, Task, TaskActivity, User, WebHook, Workflow
@@ -428,9 +429,13 @@ class NextTaskView(APIView):
         ).order_by("created_at")
 
     def get(self, request, *args, **kwargs):
-        logger.info(f"/next start")
-        workflow = Workflow.objects.get(id=kwargs["workflow_id"])
-        queryset = self.get_queryset()
+        ql = QueryLogger()
+        with connection.execute_wrapper(ql):
+            logger.info(f"/next start")
+            workflow = Workflow.objects.get(id=kwargs["workflow_id"])
+            logger.info(f"/next get_queryset")
+            queryset = self.get_queryset()
+            # logger.info(f"/next queryset: {queryset.explain()}")
 
         # 1 get assigned to self
         with transaction.atomic():
