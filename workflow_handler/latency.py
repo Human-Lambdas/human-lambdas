@@ -35,7 +35,7 @@ class QueryLogger:
             return result
         finally:
             duration = time.monotonic() - start
-            current_query["duration"] = duration
+            current_query["duration"] = round(duration * 1000, 3)
             logger.info(f"query: {json.dumps(current_query)}")
 
 
