@@ -3,17 +3,18 @@ import logging
 import time
 from typing import Any, Callable, Collection, Dict
 
-from django.core.handlers.wsgi import WSGIRequest
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger(__name__)
 
-"""
-https://docs.djangoproject.com/en/3.1/topics/db/instrumentation/
-"""
-
 
 class QueryLogger:
+    """
+    https://docs.djangoproject.com/en/3.1/topics/db/instrumentation/
+    """
+
     def __call__(
         self,
         execute: Callable[..., Any],
@@ -32,22 +33,21 @@ class QueryLogger:
             raise
         else:
             current_query["status"] = "ok"
-            return result
-        finally:
             duration = time.monotonic() - start
             current_query["duration"] = round(duration * 1000, 3)
             logger.info(f"query: {json.dumps(current_query)}")
+            return result
 
 
 class LatencyMiddleware(MiddlewareMixin):
-    def process_request(self, request: WSGIRequest):
+    def process_request(self, request: HttpRequest):
         if request.path.endswith("next"):
             logger.info(f"/next django middleware start")
             request.start_time = time.monotonic()
 
-    def process_response(self, request: Any, response: Any):
+    def process_response(self, request: HttpRequest, response: HttpResponse):
         if request.path.endswith("next"):
-            total = time.monotonic() - request.start_time
+            total: float = time.monotonic() - request.start_time
             logger.info(f"/next django latency: {round(total * 1000, 3)} ms")
 
         return response
