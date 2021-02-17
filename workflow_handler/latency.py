@@ -44,11 +44,22 @@ class LatencyMiddleware(MiddlewareMixin):
         if request.path.endswith("next"):
             m = time.monotonic()
             logger.info(f"/next django middleware start")
+            after_log_init = time.monotonic()
             request.start_time = m
+            request.after_log_init = after_log_init
+            logger.info(f"/next log initialised")
 
     def process_response(self, request: HttpRequest, response: HttpResponse):
         if request.path.endswith("next"):
-            total: float = time.monotonic() - request.start_time
-            logger.info(f"/next django latency: {round(total * 1000, 3)} ms")
+            end = time.monotonic()
+            excl_log_init = end - request.after_log_init
+            total: float = end - request.start_time
+            logger.info(
+                f"/next django latency: {latency_str(total)}, {latency_str(excl_log_init)})"
+            )
 
         return response
+
+
+def latency_str(latency: float):
+    return f"{round(latency * 1000, 3)} ms"
