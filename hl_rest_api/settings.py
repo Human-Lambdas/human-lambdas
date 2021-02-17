@@ -67,7 +67,6 @@ HL_CLIENT_API_KEY = os.getenv("HL_CLIENT_API_KEY")
 HL_ORG_ID = os.getenv("HL_ORG_ID")
 
 MIDDLEWARE = [
-    "workflow_handler.latency.LatencyMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -76,6 +75,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "workflow_handler.latency.LatencyMiddleware",
 ]
 
 ROOT_URLCONF = "hl_rest_api.urls"
