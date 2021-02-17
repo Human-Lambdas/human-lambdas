@@ -431,9 +431,9 @@ class NextTaskView(APIView):
     def get(self, request, *args, **kwargs):
         ql = QueryLogger()
         with connection.execute_wrapper(ql):
-            logger.info(f"/next start")
+            # logger.info(f"/next start")
             workflow = Workflow.objects.get(id=kwargs["workflow_id"])
-            logger.info(f"/next get_queryset")
+            # logger.info(f"/next get_queryset")
             queryset = self.get_queryset()
             # logger.info(f"/next queryset: {queryset.explain()}")
 

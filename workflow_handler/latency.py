@@ -35,14 +35,14 @@ class QueryLogger:
             current_query["status"] = "ok"
             duration = time.monotonic() - start
             current_query["duration"] = round(duration * 1000, 3)
-            logger.info(f"query: {json.dumps(current_query)}")
+            # logger.info(f"query: {json.dumps(current_query)}")
             return result
 
 
 class LatencyMiddleware(MiddlewareMixin):
     def process_request(self, request: HttpRequest):
-        m = time.monotonic()
         if request.path.endswith("next"):
+            m = time.monotonic()
             logger.info(f"/next django middleware start")
             request.start_time = m
 
