@@ -90,7 +90,6 @@ class TestIntegromat(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["id"], 1)
 
         response = self.client.get(
             f"/orgs/{self.org_id}/workflows/{self.workflow_id}/webhook"
