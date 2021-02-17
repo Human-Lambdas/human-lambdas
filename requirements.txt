@@ -13,7 +13,6 @@ sendgrid==6.4.8
 analytics-python==1.2.9
 cchardet==0.3.5
 django-next-prev
-python-logstash==0.4.6
 drf-yasg2
 python-dotenv
 email-validator==1.1.1

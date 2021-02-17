@@ -212,45 +212,35 @@ else:
                 "class": "logging.StreamHandler",
                 "formatter": "simple",
             },
-            "logstash": {
-                "level": "INFO",
-                "class": "logstash.TCPLogstashHandler",
-                "host": os.getenv("LOGS_IP", "localhost"),
-                "port": 5000,  # Default value: 5000
-                "version": 1,
-                "message_type": "django_logstash",  # 'type' field in logstash message.
-                "fqdn": False,  # Fully qualified domain name. Default value: false.
-                # 'tags': ['django.request'],  # list of tags. Default: None.
-            },
         },
         "loggers": {
             "django": {
-                "handlers": ["logstash", "console"],
+                "handlers": ["console"],
                 "level": "INFO",
                 "propagate": True,
             },
             "workflow_handler": {
-                "handlers": ["logstash", "console"],
+                "handlers": ["console"],
                 "level": "INFO",
                 "propagate": True,
             },
             "user_handler": {
-                "handlers": ["logstash", "console"],
+                "handlers": ["console"],
                 "level": "INFO",
                 "propagate": True,
             },
             "organization_handler": {
-                "handlers": ["logstash", "console"],
+                "handlers": ["console"],
                 "level": "INFO",
                 "propagate": True,
             },
             "metrics": {
-                "handlers": ["logstash", "console"],
+                "handlers": ["console"],
                 "level": "INFO",
                 "propagate": True,
             },
             "external": {
-                "handlers": ["logstash", "console"],
+                "handlers": ["console"],
                 "level": "INFO",
                 "propagate": True,
             },

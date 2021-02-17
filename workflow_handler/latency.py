@@ -47,7 +47,6 @@ class LatencyMiddleware(MiddlewareMixin):
             after_log_init = time.monotonic()
             request.start_time = m
             request.after_log_init = after_log_init
-            logger.info(f"/next log initialised")
 
     def process_response(self, request: HttpRequest, response: HttpResponse):
         if request.path.endswith("next"):
