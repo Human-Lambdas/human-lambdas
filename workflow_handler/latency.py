@@ -41,9 +41,10 @@ class QueryLogger:
 
 class LatencyMiddleware(MiddlewareMixin):
     def process_request(self, request: HttpRequest):
+        m = time.monotonic()
         if request.path.endswith("next"):
             logger.info(f"/next django middleware start")
-            request.start_time = time.monotonic()
+            request.start_time = m
 
     def process_response(self, request: HttpRequest, response: HttpResponse):
         if request.path.endswith("next"):
