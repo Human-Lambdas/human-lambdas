@@ -75,7 +75,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "workflow_handler.latency.LatencyMiddleware",
 ]
 
 ROOT_URLCONF = "hl_rest_api.urls"
