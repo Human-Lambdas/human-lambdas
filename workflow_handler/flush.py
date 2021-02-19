@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from external.authentication import TokenAuthentication
 from user_handler.models import Organization
@@ -11,7 +12,7 @@ from workflow_handler.models import Task, Workflow
 
 class FlushTasksView(APIView):
     permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, JWTAuthentication)
 
     def get_queryset(self, *args, **kwargs):
         user = self.request.user
