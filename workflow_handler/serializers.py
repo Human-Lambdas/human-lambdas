@@ -22,7 +22,7 @@ from .models import (
 )
 from .utils import get_session_duration_seconds
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 def clean_form_sequence(data):

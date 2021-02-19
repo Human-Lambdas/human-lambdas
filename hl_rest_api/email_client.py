@@ -6,7 +6,7 @@ from sendgrid.helpers.mail import Asm, Email, GroupId
 from sendgrid.helpers.mail import Mail as SGMail
 from sendgrid.helpers.mail import Personalization
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 def get_personalization(email, template_data):
