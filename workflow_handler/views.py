@@ -430,7 +430,6 @@ class NextTaskView(APIView):
         ).order_by("created_at")
 
     def get(self, request, *args, **kwargs):
-        logger.info(f"/next")
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
         queryset = self.get_queryset()
 
