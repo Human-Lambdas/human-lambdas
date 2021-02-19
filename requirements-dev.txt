@@ -1,8 +1,5 @@
-flake8-black
 pre-commit
-python-dotenv
 pytest
 pytest-django
 pytest-dotenv
 pytest-xdist
-pyjwt

@@ -192,59 +192,56 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "user_handler.serializers.UserCreateSerializer",
 }
 
-TESTING = "test" in sys.argv
-if TESTING:
-    LOGGING = {}
-else:
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "verbose": {
-                "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
-            },
-            "simple": {"format": "%(levelname)s %(asctime)s %(message)s"},
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
         },
-        "handlers": {
-            "console": {
-                "level": "INFO",
-                "class": "logging.StreamHandler",
-                "formatter": "simple",
-            },
+        "simple": {"format": "%(levelname)s %(asctime)s %(message)s"},
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
         },
-        "loggers": {
-            "django": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "workflow_handler": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "user_handler": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "organization_handler": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "metrics": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": True,
-            },
-            "external": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": True,
-            },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
         },
-    }
+        "workflow_handler": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "user_handler": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "organization_handler": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "metrics": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "external": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+}
 
 SIMPLE_JWT = {
     # https://github.com/davesque/django-rest-framework-simplejwt
@@ -309,3 +306,6 @@ SWAGGER_SETTINGS = {
 GOOGLE_OAUTH_CLIENT_ID = (
     "725636052597-sp46vdemr0u2s0hh698nqupjdvucoa3o.apps.googleusercontent.com"
 )
+
+# AU_DATA_BUCKET = os.environ["AU_DATA_BUCKET"]
+# NA_DATA_BUCKET = os.environ["NA_DATA_BUCKET"]
