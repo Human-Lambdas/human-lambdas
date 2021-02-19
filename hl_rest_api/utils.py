@@ -11,7 +11,7 @@ from email_validator import (
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.views import exception_handler
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 def process_errors(error):

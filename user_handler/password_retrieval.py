@@ -11,7 +11,7 @@ from hl_rest_api.utils import generate_unique_token, is_invalid_email
 from .apps import UserHandlerConfig
 from .models import ForgottenPassword, User
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class SendForgottenPasswordView(APIView):

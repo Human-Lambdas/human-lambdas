@@ -4,7 +4,7 @@ import re
 import requests
 from django.conf import settings
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 HL_API_URL = settings.API_URL
 API_KEY = settings.HL_CLIENT_API_KEY

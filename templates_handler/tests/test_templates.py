@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from rest_framework.test import APITestCase
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class TestTemplates(APITestCase):

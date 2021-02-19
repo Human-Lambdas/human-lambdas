@@ -17,7 +17,7 @@ from .models import Organization, User
 from .permissions import IsOrgAdmin
 from .serializers import APITokenUserSerializer, UserSerializer
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class RegistrationView(CreateAPIView):
