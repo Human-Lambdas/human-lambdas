@@ -1,5 +1,7 @@
 import copy
 import csv
+import json
+import re
 
 from django.db.models import F
 from django.http import HttpResponse
@@ -16,7 +18,7 @@ def validate_keys(title_row, workflow):
         # NER supports two mutually exclusive formats:
         # 1) A column with the identifier with full support for the NER JSON format
         # 2) A column with the identifier and the text sub-key as a short-hand to supply input text
-        if winput.get("type") is "named_entity_recognition":
+        if winput.get("type") == "named_entity_recognition":
             # Case 1: Validate key name
             value_count = title_row.count(winput["id"])
             # Case 2: Validate text subkey
@@ -34,21 +36,49 @@ def validate_keys(title_row, workflow):
                 raise Exception("The dataset is missing some columns")
 
 
+def clean_str_json(input_value):
+    # Handle emptiness
+    if len(input_value) < 1:
+        return "{}"
+    # Handle wrapping single quotes, which could be part of the CSV but make JSON parsing fail
+    if re.match(r"^[\'].*[\']$", input_value):
+        return input_value[1:-1]
+    # Otherwise return original
+    return input_value
+
+
+# NER is a special case since it follows a different set of conventions
+def extract_ner(data_item, row, title_row):
+    # NER standard case
+    if data_item["id"] in title_row:
+        if title_row.index(data_item["id"]) < len(row):
+            input_value = row[title_row.index(data_item["id"])]
+            try:
+                json_value = json.loads(clean_str_json(input_value))
+            except:
+                raise Exception(f'Column {data_item["id"]} is not a valid JSON')
+            data_item[data_item["type"]]["value"] = json_value.get("text", "")
+            data_item[data_item["type"]]["entities"] = json_value.get("entities", [])
+
+    # NER special case where the `text` sub-key is included
+    if f'{data_item["id"]}.text' in title_row:
+        if title_row.index(f'{data_item["id"]}.text') < len(row):
+            input_value = row[title_row.index(f'{data_item["id"]}.text')]
+            data_item[data_item["type"]]["value"] = input_value
+
+
 # TO-DO: modify to accept sub-keys for NER
 def extract_value(w_data, row, title_row):
     data_item = copy.deepcopy(w_data)
     if "layout" in data_item:
         del data_item["layout"]
+    if data_item["type"] == "named_entity_recognition":
+        extract_ner(data_item, row, title_row)
+        return data_item
     if data_item["id"] in title_row:
-        input_value = row[title_row.index(data_item["id"])]
-        data_item[data_item["type"]]["value"] = input_value
-    # NER special case where the `text` sub-key is included
-    if f'{data_item["id"]}.text' in title_row:
-        input_value = row[title_row.index(f'{data_item["id"]}.text')]
-        data_item[data_item["type"]]["value"] = {
-            "text": input_value,
-            "entities": [],
-        }
+        if title_row.index(data_item["id"]) < len(row):
+            input_value = row[title_row.index(data_item["id"])]
+            data_item[data_item["type"]]["value"] = input_value
     return data_item
 
 
