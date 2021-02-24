@@ -272,14 +272,13 @@ class FileUploadView(APIView):
             filename=filename,
         )
         try:
-            pass
-            """process_csv(
+            process_csv(
                 content,
                 workflow=workflow,
                 source=source,
                 user=request.user,
                 filename=filename,
-            )"""
+            )
         except Exception as exception:
             return Response(
                 {"status_code": 400, "errors": [{"message": str(exception)}]},

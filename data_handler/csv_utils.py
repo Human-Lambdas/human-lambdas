@@ -12,21 +12,24 @@ from workflow_handler.models import Task, TaskActivity
 from .data_validation import data_validation
 
 
-# TO-DO: modify to accept sub-keys for NER
+# NER supports two mutually exclusive formats:
+# 1) A column with the identifier with full support for the NER JSON format
+# 2) A column with the identifier and the text sub-key as a short-hand to supply input text
+def validate_keys_ner(title_row, winput):
+    # Case 1: Validate key name
+    value_count = title_row.count(winput["id"])
+    # Case 2: Validate text subkey
+    if f'{winput["id"]}.text' in title_row:
+        value_count += 1
+    # Raise exception if it has neither or both
+    if value_count > 1:
+        raise Exception("There are duplicate column names")
+
+
 def validate_keys(title_row, workflow):
     for winput in workflow.inputs:
-        # NER supports two mutually exclusive formats:
-        # 1) A column with the identifier with full support for the NER JSON format
-        # 2) A column with the identifier and the text sub-key as a short-hand to supply input text
         if winput.get("type") == "named_entity_recognition":
-            # Case 1: Validate key name
-            value_count = title_row.count(winput["id"])
-            # Case 2: Validate text subkey
-            if f'{winput["id"]}.text' in title_row:
-                value_count += 1
-            # Raise exception if it has neither or both
-            if value_count > 1:
-                raise Exception("There are duplicate column names")
+            validate_keys_ner(title_row, winput)
         else:
             value_count = title_row.count(winput["id"])
             if value_count > 1:
