@@ -42,6 +42,13 @@ def extract_value(w_data, row, title_row):
     if data_item["id"] in title_row:
         input_value = row[title_row.index(data_item["id"])]
         data_item[data_item["type"]]["value"] = input_value
+    # NER special case where the `text` sub-key is included
+    if f'{data_item["id"]}.text' in title_row:
+        input_value = row[title_row.index(f'{data_item["id"]}.text')]
+        data_item[data_item["type"]]["value"] = {
+            "text": input_value,
+            "entities": [],
+        }
     return data_item
 
 
