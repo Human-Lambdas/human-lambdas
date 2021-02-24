@@ -34,7 +34,6 @@ def validate_keys(title_row, workflow):
             value_count = title_row.count(winput["id"])
             if value_count > 1:
                 raise Exception("There are duplicate column names")
-            # TO-DO: Do we need this check? It should be fine to supply an incomplete task
             if value_count == 0:
                 raise Exception("The dataset is missing some columns")
 
@@ -70,7 +69,6 @@ def extract_ner(data_item, row, title_row):
             data_item[data_item["type"]]["value"] = input_value
 
 
-# TO-DO: modify to accept sub-keys for NER
 def extract_value(w_data, row, title_row):
     data_item = copy.deepcopy(w_data)
     if "layout" in data_item:
