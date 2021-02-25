@@ -1,3 +1,4 @@
+import ast
 import copy
 import csv
 import json
@@ -69,10 +70,33 @@ def extract_ner(data_item, row, title_row):
             data_item[data_item["type"]]["value"] = input_value
 
 
-def extract_value(w_data, row, title_row):
-    data_item = copy.deepcopy(w_data)
-    if "layout" in data_item:
-        del data_item["layout"]
+# Extract Python literals in number, list, object based types
+def extract_literals(data_item, row, title_row):
+    if data_item["id"] in title_row:
+        if title_row.index(data_item["id"]) < len(row):
+            input_value = row[title_row.index(data_item["id"])].strip()
+            try:
+                data_item[data_item["type"]]["value"] = (
+                    ast.literal_eval(input_value) if len(input_value) > 0 else None
+                )
+            except (ValueError, SyntaxError):
+                raise Exception(
+                    f"The value provided is not in right format: {input_value}"
+                )
+    return data_item
+
+
+SPECIAL_CASES = [
+    "text_sequence",
+    "multiple_selection",
+    "number",
+    "form_sequence",
+    "bounding_boxes",
+    "binary",
+]
+
+
+def extract_default(data_item, row, title_row):
     if data_item["type"] == "named_entity_recognition":
         extract_ner(data_item, row, title_row)
         return data_item
@@ -81,6 +105,16 @@ def extract_value(w_data, row, title_row):
             input_value = row[title_row.index(data_item["id"])]
             data_item[data_item["type"]]["value"] = input_value
     return data_item
+
+
+def extract_value(w_data, row, title_row):
+    data_item = copy.deepcopy(w_data)
+    if "layout" in data_item:
+        del data_item["layout"]
+    if data_item["type"] in SPECIAL_CASES:
+        return extract_literals(data_item, row, title_row)
+    else:
+        return extract_default(data_item, row, title_row)
 
 
 def process_csv(csv_file, workflow, source, user, filename):
