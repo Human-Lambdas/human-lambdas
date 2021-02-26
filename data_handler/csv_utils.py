@@ -1,7 +1,6 @@
 import ast
 import copy
 import csv
-import re
 
 from django.db.models import F
 from django.http import HttpResponse
@@ -37,17 +36,6 @@ def validate_keys(title_row, workflow):
                 raise Exception("There are duplicate column names")
             if value_count == 0:
                 raise Exception("The dataset is missing some columns")
-
-
-def clean_str_json(input_value):
-    # Handle emptiness
-    if len(input_value) < 1:
-        return "{}"
-    # Handle wrapping single quotes, which could be part of the CSV but make JSON parsing fail
-    if re.match(r"^[\'].*[\']$", input_value):
-        return input_value[1:-1]
-    # Otherwise return original
-    return input_value
 
 
 # NER is a special case since it follows a different set of conventions
