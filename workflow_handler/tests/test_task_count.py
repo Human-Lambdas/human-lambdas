@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Task, Workflow
+from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
 
 from . import DATA_PATH
 
@@ -37,24 +38,9 @@ class TestTaskCount(APITestCase):
         workflow_data = {
             "name": "uploader",
             "data": [
-                {
-                    "id": "Alpha",
-                    "name": "alpha",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Beta",
-                    "name": "beta",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Gamma",
-                    "name": "gamma",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                ALPHA,
+                BETA,
+                GAMMA,
                 {
                     "id": "foo",
                     "name": "foo",

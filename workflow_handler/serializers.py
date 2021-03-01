@@ -195,7 +195,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
         return data
 
 
-from workflow_handler.r13n import retrieve, store
+# from workflow_handler.r13n import store
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -238,7 +238,7 @@ class TaskSerializer(serializers.ModelSerializer):
         )
         source.save()
         task = Task(data=data, workflow=workflow, source=source)
-        store(task)
+        # store(task)
         task.save()
         TaskActivity(
             task=task,
@@ -285,7 +285,7 @@ class TaskSerializer(serializers.ModelSerializer):
                     workflow.save()
             else:
                 instance.save()
-                store(instance)
+                # store(instance)
                 TaskActivity(task=instance, action="saved", created_by=user).save()
             event_name = "Completed" if validated_data["submit_task"] else "Saved"
             analytics.track(

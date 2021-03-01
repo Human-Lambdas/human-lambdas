@@ -127,11 +127,11 @@ SYNC_STATES = {
     "bounding_boxes": bb_sync,
 }
 
-from workflow_handler.r13n import retrieve
+# from workflow_handler.r13n import retrieve
 
 
 def sync_workflow_task(workflow, task):
-    retrieve(task)  # move to new fn which also fetches task?
+    # retrieve(task)  # move to new fn which also fetches task?
     if task.status != "completed":
         updated_data = []
         for workflow_data, task_data in iterate_matching(workflow.data, task.data):
