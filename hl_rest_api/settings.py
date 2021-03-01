@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
 from datetime import timedelta
 
 import requests
@@ -191,56 +192,59 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "user_handler.serializers.UserCreateSerializer",
 }
 
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
+TESTING = "test" in sys.argv
+if TESTING:
+    LOGGING = {}
+else:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
+            },
+            "simple": {"format": "%(levelname)s %(asctime)s %(message)s"},
         },
-        "simple": {"format": "%(levelname)s %(asctime)s %(message)s"},
-    },
-    "handlers": {
-        "console": {
-            "level": "INFO",
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
+        "handlers": {
+            "console": {
+                "level": "INFO",
+                "class": "logging.StreamHandler",
+                "formatter": "simple",
+            },
         },
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": True,
+        "loggers": {
+            "django": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "workflow_handler": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "user_handler": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "organization_handler": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "metrics": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "external": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
         },
-        "workflow_handler": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        "user_handler": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        "organization_handler": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        "metrics": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        "external": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": True,
-        },
-    },
-}
+    }
 
 SIMPLE_JWT = {
     # https://github.com/davesque/django-rest-framework-simplejwt

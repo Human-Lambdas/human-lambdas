@@ -51,9 +51,9 @@ python manage.py createsuperuser # use email: a@a.com pass: a
 
 ### Storage Buckets
 
-```bash
+<!-- ```bash
 docker run -d --name fake-gcs-server -p 4443:4443 fsouza/fake-gcs-server
-```
+``` -->
 
 #### Initialise google auth
 
