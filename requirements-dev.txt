@@ -3,3 +3,4 @@ pytest
 pytest-django
 pytest-dotenv
 pytest-xdist
+pytest-randomly
