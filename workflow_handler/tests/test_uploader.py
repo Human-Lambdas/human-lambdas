@@ -434,3 +434,6 @@ class TestUploadList(APITestCase):
         for task in Task.objects.filter(workflow__pk=workflow_id).all():
             list_input = [tinput for tinput in task.data if tinput["id"] == "Alpha"][0]
             self.assertIsInstance(list_input["list"]["value"], list)
+
+    def test_when_non_eu_region_selected_then_confirmed_on_data(self):
+        pass

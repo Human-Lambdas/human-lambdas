@@ -222,6 +222,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "workflow_id",
             "n_comments",
             "correct",
+            "region",
         ]
 
     def create(self, validated_data):

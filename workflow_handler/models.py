@@ -48,9 +48,23 @@ class Task(models.Model):
     source = models.ForeignKey(Source, on_delete=models.CASCADE, null=True)
     data = JSONField(blank=True, default=list)
     correct = models.BooleanField(null=True)
+    region = models.CharField(max_length=128, null=True)
 
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
+
+    def __getattribute__(self, attr):
+        default_getter = super(Task, self).__getattribute__
+
+        if attr == "data" and default_getter("region") in ["US", "AU"]:
+            return {"blah": 34}
+
+        return default_getter(attr)
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        super(Task, self).save()
 
     def get_status(self):
         return STATUS_MAPPING.get(self.status, self.status)
@@ -72,6 +86,7 @@ class Task(models.Model):
             "data": self.data,
             "source": self.source.pk if self.source else None,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
+            # region?
         }
 
     def get_formatted_task(self):
