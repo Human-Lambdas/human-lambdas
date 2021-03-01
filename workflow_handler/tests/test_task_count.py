@@ -10,7 +10,7 @@ from workflow_handler.models import Task, Workflow
 
 from . import DATA_PATH
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class TestTaskCount(APITestCase):

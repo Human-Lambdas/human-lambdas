@@ -7,7 +7,7 @@ from workflow_handler.utils import create_template
 
 from .models import Notification, Organization, User
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 # Serializers define the API representation.

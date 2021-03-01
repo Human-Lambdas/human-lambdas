@@ -7,6 +7,7 @@ from workflow_handler.audits import (
     GetCompletedTaskView,
     ListSourcesView,
 )
+from workflow_handler.flush import FlushTasksView
 from workflow_handler.task_activity import ActivityView, RDActivityView
 from workflow_handler.views import (
     AssignTaskView,
@@ -98,5 +99,10 @@ urlpatterns = [
         "/<int:workflow_id>/tasks/form",
         CreateTaskFormView.as_view(),
         name="create-task-form",
+    ),
+    path(
+        "/<int:workflow_id>/flush",
+        FlushTasksView.as_view(),
+        name="flush-task",
     ),
 ]

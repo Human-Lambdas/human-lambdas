@@ -13,7 +13,7 @@ from user_handler.models import Organization, User
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import Task, Workflow
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 MONTHS_BACK = 12
 WEEKS_BACK = 14

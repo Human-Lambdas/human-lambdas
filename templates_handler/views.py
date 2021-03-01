@@ -8,7 +8,7 @@ from rest_framework.generics import ListAPIView
 
 from user_handler.models import User
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class Template(models.Model):

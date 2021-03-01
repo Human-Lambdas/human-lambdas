@@ -9,7 +9,7 @@ from user_handler.models import Organization
 
 from . import DATA_PATH
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class TestCompletedTasksToCSV(APITestCase):

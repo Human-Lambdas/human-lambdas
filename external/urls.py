@@ -1,12 +1,12 @@
 from django.urls import path
 
+from workflow_handler.flush import FlushTasksView
 from workflow_handler.views import (
     ExternalWorkflowView,
     ListWorkflowView,
     RUWebhookView,
 )
 
-from .flush import FlushTasksView
 from .views import CreateTaskView, GetExternalCompletedTaskView
 from .zapier import (
     GetZapierTaskInputs,

@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Organization, User
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class TestUsers(APITestCase):

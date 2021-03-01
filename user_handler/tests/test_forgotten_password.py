@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import ForgottenPassword, User
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class TestInvite(APITestCase):

@@ -11,7 +11,7 @@
     "workflow_handler"
   ],
   "typeCheckingMode": "basic",
-  "reportUnusedImport": "warning",
+  "reportUnusedImport": "error",
   "pythonVersion": "3.7",
   "enableTypeIgnoreComments": true,
   "reportUnknownMemberType": "none",
