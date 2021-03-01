@@ -36,7 +36,7 @@ DATA_SCHEMA = Schema(
                 Optional("is_required"): bool,
                 Optional("subtype"): And(str, len),
                 Optional("value"): Or(bool, str, list, float, int, dict, None),
-                Optional("entities"): list,
+                Optional("entities"): Or(list, None),
                 Optional("options"): list,
                 Optional("data"): list,
                 Optional("history"): list,

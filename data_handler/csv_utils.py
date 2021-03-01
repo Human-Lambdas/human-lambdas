@@ -47,7 +47,9 @@ def extract_ner(data_item, row, title_row):
             try:
                 # We expect an object containing NER properties, so we will need the AST parser
                 ner_object = (
-                    ast.literal_eval(input_value) if len(input_value) > 0 else {}
+                    ast.literal_eval(input_value)
+                    if len(input_value) > 0
+                    else {"text": ""}
                 )
             except (ValueError, SyntaxError):
                 raise Exception(
@@ -55,7 +57,8 @@ def extract_ner(data_item, row, title_row):
                 )
             # We should have an object matching the external API representation
             # We can leverage the API transformer
-            return ner_ext2int(data_item, {data_item["id"]: ner_object})
+            ner_ext2int(data_item, {data_item["id"]: ner_object})
+            return data_item
 
     # NER special case where the `text` sub-key is included
     if f'{data_item["id"]}.text' in title_row:
