@@ -9,6 +9,7 @@ from rest_framework.test import APITestCase
 from user_handler.models import Organization
 from workflow_handler.models import Task, User, Workflow
 from workflow_handler.tests import DATA_PATH
+from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
 
 
 class TestHandlingTime(APITestCase):
@@ -35,24 +36,9 @@ class TestHandlingTime(APITestCase):
         workflow_data = {
             "name": "uploader",
             "data": [
-                {
-                    "id": "Alpha",
-                    "name": "alpha",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Beta",
-                    "name": "beta",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Gamma",
-                    "name": "gamma",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                ALPHA,
+                BETA,
+                GAMMA,
                 {
                     "id": "foo",
                     "name": "foo",
@@ -85,24 +71,9 @@ class TestHandlingTime(APITestCase):
         workflow_data = {
             "name": "uploader2",
             "data": [
-                {
-                    "id": "Alpha",
-                    "name": "alpha",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Beta",
-                    "name": "beta",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Gamma",
-                    "name": "gamma",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                ALPHA,
+                BETA,
+                GAMMA,
                 {
                     "id": "foo",
                     "name": "foo",

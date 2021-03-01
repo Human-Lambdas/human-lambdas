@@ -10,6 +10,7 @@ from rest_framework.test import APITestCase
 from data_handler.csv_utils import process_csv, validate_keys
 from user_handler.models import Organization, User
 from workflow_handler.models import Task, Workflow
+from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
 
 logger = logging.getLogger(__name__)
 
@@ -39,24 +40,9 @@ class TestUpload(APITestCase):
         workflow_data = {
             "name": "uploader",
             "data": [
-                {
-                    "id": "Alpha",
-                    "name": "alpha",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Beta",
-                    "name": "beta",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Gamma",
-                    "name": "gamma",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                ALPHA,
+                BETA,
+                GAMMA,
                 {
                     "id": "foo",
                     "name": "foo",
@@ -126,24 +112,9 @@ class TestUpload(APITestCase):
         workflow_data = {
             "name": "uploader",
             "data": [
-                {
-                    "id": "Alpha",
-                    "name": "alpha",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Beta",
-                    "name": "beta",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Gamma",
-                    "name": "gamma",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                ALPHA,
+                BETA,
+                GAMMA,
                 {
                     "id": "foo",
                     "name": "foo",

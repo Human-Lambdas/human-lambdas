@@ -309,3 +309,6 @@ SWAGGER_SETTINGS = {
 GOOGLE_OAUTH_CLIENT_ID = (
     "725636052597-sp46vdemr0u2s0hh698nqupjdvucoa3o.apps.googleusercontent.com"
 )
+
+# AU_DATA_BUCKET = os.environ["AU_DATA_BUCKET"]
+# NA_DATA_BUCKET = os.environ["NA_DATA_BUCKET"]

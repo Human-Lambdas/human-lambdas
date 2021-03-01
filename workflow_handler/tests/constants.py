@@ -15,3 +15,22 @@ WORKFLOW_DATA = {
         },
     ],
 }
+
+ALPHA = {
+    "id": "Alpha",
+    "name": "alpha",
+    "type": "text",
+    "text": {"read_only": True},
+}
+BETA = {
+    "id": "Beta",
+    "name": "beta",
+    "type": "text",
+    "text": {"read_only": True},
+}
+GAMMA = {
+    "id": "Gamma",
+    "name": "gamma",
+    "type": "text",
+    "text": {"read_only": True},
+}

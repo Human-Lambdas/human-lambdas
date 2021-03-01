@@ -49,6 +49,18 @@ python manage.py migrate
 python manage.py createsuperuser # use email: a@a.com pass: a
 ```
 
+### Storage Buckets
+
+<!-- ```bash
+docker run -d --name fake-gcs-server -p 4443:4443 fsouza/fake-gcs-server
+``` -->
+
+#### Initialise google auth
+
+```bash
+gcloud auth application-default login
+```
+
 ### Backend
 ```
 python manage.py runserver

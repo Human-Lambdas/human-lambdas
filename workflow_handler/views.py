@@ -5,6 +5,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.utils import timezone
+from drf_yasg2.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework.generics import (
     CreateAPIView,
@@ -243,6 +244,10 @@ class ExternalWorkflowView(BaseWorkflowView):
         return Response(workflow)
 
 
+class FileUploadViewQuerySerializer(serializers.Serializer):
+    region = serializers.CharField(required=False)
+
+
 class FileUploadView(APIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin)
     parser_classes = [MultiPartParser]
@@ -257,7 +262,10 @@ class FileUploadView(APIView):
         )
         return workflows.filter(pk=self.kwargs["workflow_id"])
 
+    @swagger_auto_schema(query_serializer=FileUploadViewQuerySerializer)
     def post(self, request, *args, **kwargs):
+        # print(request.query_params.get("region", "EU"))
+
         file_obj = request.data["file"]
         workflow = get_object_or_404(self.get_queryset())
         content = decode_csv(file_obj)
