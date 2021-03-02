@@ -1,17 +1,28 @@
 import logging
+from enum import Enum
 from typing import Any, Dict
 
 from django.utils import timezone
 from google.cloud import storage
 
-from workflow_handler.models import Task
+
+class Region(Enum):
+    def __new__(cls, bucket: str):
+        obj = object.__new__(cls)
+        obj.bucket = bucket
+        return obj
+
+    EU = "eu-data-stg"
+    AU = "au-data-stg"
+    US = "us-data-stg"
+
 
 logger = logging.getLogger(__file__)
 
 buckets = ["us-data-stg", "eu-data-stg", "au-data-stg"]
 
 
-def store(task: Task) -> None:
+def store(pk: int, region: Region, data: Any) -> None:
     client = storage.Client()
 
     for b in buckets:
@@ -27,7 +38,7 @@ def store(task: Task) -> None:
     return None
 
 
-def retrieve(task: Task) -> Dict[Any, Any]:
+def retrieve(pk: int, region: Region) -> Dict[Any, Any]:
     client = storage.Client()
 
     for b in buckets:

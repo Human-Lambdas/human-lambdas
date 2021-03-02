@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from rest_hooks.models import AbstractHook
@@ -5,6 +7,8 @@ from rest_hooks.signals import hook_event
 
 from data_handler.data_transformation import transform_int2ext
 from user_handler.models import Notification, Organization, User
+from workflow_handler import r13n
+from workflow_handler.r13n import Region
 
 STATUS_MAPPING = {"assigned": "in_progress", "pending": "new"}
 
@@ -53,17 +57,29 @@ class Task(models.Model):
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
 
-    def __getattribute__(self, attr):
-        default_getter = super(Task, self).__getattribute__
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        task = super(Task, cls).from_db(db, field_names, values)
 
-        if attr == "data" and default_getter("region") in ["US", "AU"]:
-            return {"blah": 34}
+        if task.region:
+            region = Region[task.region]
+            if region != Region.EU:
+                task.data = r13n.retrieve(task.pk, region)
 
-        return default_getter(attr)
+        return task
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
+        if self.region:
+            region = Region[self.region]
+            if region != Region.EU:
+                r13n.store(self.pk, region, self.data)
+                db_task = deepcopy(self)
+                db_task.data = {}
+                super(Task, db_task).save()
+                return
+
         super(Task, self).save()
 
     def get_status(self):
