@@ -19,6 +19,37 @@ from .zapier import (
 
 urlpatterns = [
     path(
+        "orgs/<int:org_id>/queues",
+        ListWorkflowView.as_view(),
+        name="create-task",
+    ),
+    path(
+        "orgs/<int:org_id>/queues/<int:workflow_id>",
+        ExternalWorkflowView.as_view(),
+        name="list-workflows",
+    ),
+    path(
+        "orgs/<int:org_id>/queues/<int:workflow_id>/webhook",
+        RUWebhookView.as_view(),
+        name="webhook",
+    ),
+    path(
+        "orgs/<int:org_id>/queues/<int:workflow_id>/tasks/create",
+        CreateTaskView.as_view(),
+        name="create-task",
+    ),
+    path(
+        "orgs/<int:org_id>/queues/<int:workflow_id>/tasks/completed",
+        GetExternalCompletedTaskView.as_view(),
+        name="completed-task",
+    ),
+    path(
+        "orgs/<int:org_id>/queues/<int:workflow_id>/flush",
+        FlushTasksView.as_view(),
+        name="flush-task",
+    ),
+    # Legacy workflows terminology
+    path(
         "orgs/<int:org_id>/workflows",
         ListWorkflowView.as_view(),
         name="create-task",
