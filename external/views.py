@@ -32,9 +32,17 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
             & Q(disabled=False)
             & Q(organization__pk=self.kwargs["org_id"])
         )
-        workflow = get_object_or_404(workflows, pk=self.kwargs["workflow_id"])
+        workflow = get_object_or_404(
+            workflows, pk=self.kwargs.get("queue_id", self.kwargs.get("workflow_id"))
+        )
         analytics.track(
-            user.pk, "Get Completed Tasks", {"workflow_id": self.kwargs["workflow_id"]}
+            user.pk,
+            "Get Completed Tasks",
+            {
+                "workflow_id": self.kwargs.get(
+                    "queue_id", self.kwargs.get("workflow_id")
+                )
+            },
         )
         return (
             Task.objects.filter(Q(workflow=workflow) & Q(status="completed"))
@@ -65,7 +73,8 @@ class CreateTaskView(CreateAPIView):
             & Q(organization__pk=self.kwargs["org_id"] & Q(disabled=False))
         )
         return Task.objects.filter(
-            Q(workflow__in=workflows) & Q(workflow__id=self.kwargs["workflow_id"])
+            Q(workflow__in=workflows)
+            & Q(workflow__id=self.kwargs.get("queue_id", self.kwargs["workflow_id"]))
         )
 
     def post(self, request, *args, **kwargs):
@@ -88,7 +97,9 @@ class CreateTaskView(CreateAPIView):
         )
 
     def preprocess_data(self):
-        workflow = get_object_or_404(Workflow, pk=self.kwargs["workflow_id"])
+        workflow = get_object_or_404(
+            Workflow, pk=self.kwargs.get("queue_id", self.kwargs["workflow_id"])
+        )
         formatted_data = transform_ext2int(workflow.data, self.request.data["data"])
         #     except KeyError:
         #         raise serializers.ValidationError(

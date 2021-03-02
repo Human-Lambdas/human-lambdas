@@ -24,27 +24,27 @@ urlpatterns = [
         name="create-task",
     ),
     path(
-        "orgs/<int:org_id>/queues/<int:workflow_id>",
+        "orgs/<int:org_id>/queues/<int:queue_id>",
         ExternalWorkflowView.as_view(),
         name="list-workflows",
     ),
     path(
-        "orgs/<int:org_id>/queues/<int:workflow_id>/webhook",
+        "orgs/<int:org_id>/queues/<int:queue_id>/webhook",
         RUWebhookView.as_view(),
         name="webhook",
     ),
     path(
-        "orgs/<int:org_id>/queues/<int:workflow_id>/tasks/create",
+        "orgs/<int:org_id>/queues/<int:queue_id>/tasks/create",
         CreateTaskView.as_view(),
         name="create-task",
     ),
     path(
-        "orgs/<int:org_id>/queues/<int:workflow_id>/tasks/completed",
+        "orgs/<int:org_id>/queues/<int:queue_id>/tasks/completed",
         GetExternalCompletedTaskView.as_view(),
         name="completed-task",
     ),
     path(
-        "orgs/<int:org_id>/queues/<int:workflow_id>/flush",
+        "orgs/<int:org_id>/queues/<int:queue_id>/flush",
         FlushTasksView.as_view(),
         name="flush-task",
     ),

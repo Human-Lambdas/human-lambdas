@@ -115,8 +115,8 @@ class Task(models.Model):
             "completed_at": self.completed_at,
             "created_at": self.created_at,
             "completed_by": worker_email,
-            "workflow": self.workflow.name,
-            "workflow_id": self.workflow.pk,
+            "queue": self.workflow.name,
+            "queue_id": self.workflow.pk,
             "data": transform_int2ext(self.data),
             "source": source_name,
         }
