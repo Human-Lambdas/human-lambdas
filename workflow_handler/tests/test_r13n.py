@@ -57,6 +57,26 @@ class TestR13n(TestCase):
             assert len(calls) == 1
             assert calls[0].args == (1, region)
 
+    def test_when_non_eu_data_accessed_but_field_deferred_then_no_data(self):
+        task = Task(
+            pk=TASK_PK,
+            workflow=self.workflow,
+            inputs={},
+            outputs={},
+            data=DB_DATA,
+            region=Region.AU.name,
+        )
+
+        with patch("workflow_handler.r13n.retrieve") as retrieve, patch(
+            "workflow_handler.r13n.store"
+        ) as store:
+            task.save()
+
+            retrieve.return_value = BUCKET_DATA
+            t = Task.objects.defer("data").get(pk=TASK_PK)
+
+            assert len(retrieve.mock_calls) == 0
+
     @parameterized.expand([(Region.EU,), (None,)])
     def test_when_eu_data_accessed_then_pulled_from_db(self, region: Optional[Region]):
         task = Task(

@@ -37,7 +37,8 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
             user.pk, "Get Completed Tasks", {"workflow_id": self.kwargs["workflow_id"]}
         )
         return (
-            Task.objects.filter(Q(workflow=workflow) & Q(status="completed"))
+            Task.objects.defer("data")
+            .filter(Q(workflow=workflow) & Q(status="completed"))
             .filter(*args, **kwargs)
             .order_by("-completed_at")
         )
@@ -64,7 +65,7 @@ class CreateTaskView(CreateAPIView):
             Q(organization__pk=self.request.auth.organization_id)
             & Q(organization__pk=self.kwargs["org_id"] & Q(disabled=False))
         )
-        return Task.objects.filter(
+        return Task.objects.defer("data").filter(
             Q(workflow__in=workflows) & Q(workflow__id=self.kwargs["workflow_id"])
         )
 

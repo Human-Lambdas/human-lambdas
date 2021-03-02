@@ -33,7 +33,7 @@ def process_kwargs(**kwargs):
 
 def get_completed(**kwargs):
     basic_query = process_kwargs(**kwargs)
-    tasks = Task.objects.filter(
+    tasks = Task.objects.defer("data").filter(
         basic_query
         & Q(status="completed")
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
@@ -43,39 +43,51 @@ def get_completed(**kwargs):
 
 def get_pending(**kwargs):
     basic_query = process_kwargs(**kwargs)
-    result = Task.objects.filter(
-        basic_query
-        & Q(created_at__lte=kwargs["end_time"])
-        & Q(Q(completed_at__gt=kwargs["end_time"]) | Q(completed_at=None))
-    ).count()
+    result = (
+        Task.objects.defer("data")
+        .filter(
+            basic_query
+            & Q(created_at__lte=kwargs["end_time"])
+            & Q(Q(completed_at__gt=kwargs["end_time"]) | Q(completed_at=None))
+        )
+        .count()
+    )
     return result
 
 
 def get_aht(**kwargs):
     basic_query = process_kwargs(**kwargs)
-    result = Task.objects.filter(
-        basic_query
-        & Q(status="completed")
-        & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
-    ).aggregate(aht=Avg(F("handling_time_seconds")))
+    result = (
+        Task.objects.defer("data")
+        .filter(
+            basic_query
+            & Q(status="completed")
+            & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
+        )
+        .aggregate(aht=Avg(F("handling_time_seconds")))
+    )
     aht = result["aht"]
     return aht if aht else None
 
 
 def get_tat(**kwargs):
     basic_query = process_kwargs(**kwargs)
-    result = Task.objects.filter(
-        basic_query
-        & Q(status="completed")
-        & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
-    ).aggregate(tat=Avg(F("completed_at") - F("created_at")))
+    result = (
+        Task.objects.defer("data")
+        .filter(
+            basic_query
+            & Q(status="completed")
+            & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])
+        )
+        .aggregate(tat=Avg(F("completed_at") - F("created_at")))
+    )
     tat = result["tat"]
     return tat / timezone.timedelta(seconds=1) if tat else None
 
 
 def get_accuracy(**kwargs):
     basic_query = process_kwargs(**kwargs)
-    all_audited = Task.objects.filter(
+    all_audited = Task.objects.defer("data").filter(
         basic_query
         & ~Q(correct=None)
         & Q(completed_at__range=[kwargs["start_time"], kwargs["end_time"]])

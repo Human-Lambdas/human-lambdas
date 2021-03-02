@@ -23,9 +23,11 @@ class FlushTasksView(APIView):
             & Q(organization__pk=self.kwargs["org_id"])
         )
         workflow = get_object_or_404(workflows, pk=self.kwargs["workflow_id"])
-        return Task.objects.filter(
-            Q(workflow=workflow) & ~Q(status="completed")
-        ).filter(*args, **kwargs)
+        return (
+            Task.objects.defer("data")
+            .filter(Q(workflow=workflow) & ~Q(status="completed"))
+            .filter(*args, **kwargs)
+        )
 
     def put(self, request, *args, **kwargs):
         self.get_queryset().delete()

@@ -61,7 +61,7 @@ class Task(models.Model):
     def from_db(cls, db, field_names, values):
         task = super(Task, cls).from_db(db, field_names, values)
 
-        if task.region:
+        if "data" in field_names and task.region:
             region = Region[task.region]
             if region != Region.EU:
                 task.data = r13n.retrieve(task.pk, region)

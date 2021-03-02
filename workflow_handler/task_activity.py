@@ -31,9 +31,11 @@ def get_task(user, org_id, workflow_id, task_id):
     workflows = Workflow.objects.filter(
         Q(organization__in=organizations) & Q(organization__pk=org_id)
     )
-    return Task.objects.filter(
-        Q(workflow__in=workflows) & Q(workflow=workflow_id) & Q(pk=task_id)
-    ).first()
+    return (
+        Task.objects.defer("data")
+        .filter(Q(workflow__in=workflows) & Q(workflow=workflow_id) & Q(pk=task_id))
+        .first()
+    )
 
 
 class ActivityView(ListCreateAPIView):
