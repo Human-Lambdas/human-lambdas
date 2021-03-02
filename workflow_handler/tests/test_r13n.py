@@ -40,9 +40,12 @@ class TestR13n(TestCase):
             data=DB_DATA,
             region=region.name,
         )
-        task.save()
 
-        with patch("workflow_handler.r13n.retrieve") as retrieve:
+        with patch("workflow_handler.r13n.retrieve") as retrieve, patch(
+            "workflow_handler.r13n.store"
+        ) as store:
+            task.save()
+
             retrieve.return_value = BUCKET_DATA
             t = Task.objects.get(pk=TASK_PK)
 
@@ -75,14 +78,15 @@ class TestR13n(TestCase):
             assert data == DB_DATA
             assert len(retrieve.mock_calls) == 0
 
-    def test_when_eu_data_saved_then_stored_in_db(self):
+    @parameterized.expand([(Region.EU,), (None,)])
+    def test_when_eu_data_saved_then_stored_in_db(self, region: Optional[Region]):
         task = Task(
             pk=TASK_PK,
             workflow=self.workflow,
             inputs={},
             outputs={},
             data=DB_DATA,
-            region=Region.EU.name,
+            region=region and region.name,
         )
         with patch("workflow_handler.r13n.store") as store, patch(
             "django.db.models.Model.save", autospec=True
@@ -94,14 +98,15 @@ class TestR13n(TestCase):
             assert save.call_count == 1
             assert save.call_args[0][0].data == DB_DATA
 
-    def test_when_non_eu_data_saved_then_stored_in_bucket(self):
+    @parameterized.expand([(Region.US,), (Region.AU,)])
+    def test_when_non_eu_data_saved_then_stored_in_bucket(self, region: Region):
         task = Task(
             pk=TASK_PK,
             workflow=self.workflow,
             inputs={},
             outputs={},
             data=BUCKET_DATA,
-            region=Region.AU.name,
+            region=region.name,
         )
         with patch("workflow_handler.r13n.store") as store, patch(
             "django.db.models.Model.save", autospec=True
@@ -110,7 +115,7 @@ class TestR13n(TestCase):
             task.save()
 
             assert len(store.mock_calls) == 1
-            assert store.mock_calls[0].args == (1, Region.AU, BUCKET_DATA)
+            assert store.mock_calls[0].args == (1, region, BUCKET_DATA)
 
             assert save.call_count == 1
             assert save.call_args[0][0].data == {}

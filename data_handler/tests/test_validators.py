@@ -123,11 +123,7 @@ class TestValidators:
         except DataValidationError:
             pass
 
-    @pytest.mark.parametrize("region, url", [("b", "a")])
-    def test_when_eu_data_accessed_then_pulled_from_db(self, region, url):
-        pass
-
-    @pytest.mark.parametrize("field, url, type", [("a", "b", "c")])
+    @pytest.mark.parametrize("field, url, type", get_url_test())
     def test_url_validation(self, field, url, type):
         block = {
             "_id": "74f041cc-c30a-49fb-9970-c1895cb79b59",
