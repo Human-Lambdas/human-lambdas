@@ -1,12 +1,14 @@
 import ast
 import copy
 import csv
+from typing import Optional
 
 from django.db.models import F
 from django.http import HttpResponse
 
 from user_handler.notifications import send_notification
 from workflow_handler.models import Task, TaskActivity
+from workflow_handler.r13n import Region
 
 from .data_transformation import ner_ext2int, ner_int2ext
 from .data_validation import data_validation
@@ -115,13 +117,20 @@ def extract_value(w_data, row, title_row):
         return extract_default(data_item, row, title_row)
 
 
-def process_csv(csv_file, workflow, source, user, filename):
+def process_csv(
+    csv_file, workflow, source, user, filename, region: Optional[Region] = None
+):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
     validate_keys(title_row, workflow)
     for row in dataset:
         data = [extract_value(w_input, row, title_row) for w_input in workflow.data]
-        task = Task(data=data_validation(data), workflow=workflow, source=source)
+        task = Task(
+            data=data_validation(data),
+            workflow=workflow,
+            source=source,
+            region=region and region.name,
+        )
         task.save()
         TaskActivity(
             task=task,

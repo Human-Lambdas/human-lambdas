@@ -1,5 +1,6 @@
 import copy
 import logging
+from typing import Optional
 
 from django.db import transaction
 from django.db.models import Q
@@ -25,6 +26,7 @@ from data_handler.data_sync import sync_workflow_task
 from external.authentication import TokenAuthentication
 from user_handler.models import Organization
 from user_handler.permissions import IsAdminOrReadOnly, IsOrgAdmin
+from workflow_handler.r13n import Region
 from workflow_handler.utils import is_force
 
 from .models import Source, Task, TaskActivity, User, WebHook, Workflow
@@ -264,7 +266,11 @@ class FileUploadView(APIView):
 
     @swagger_auto_schema(query_serializer=FileUploadViewQuerySerializer)
     def post(self, request, *args, **kwargs):
-        # print(request.query_params.get("region", "EU"))
+        input_region: Optional[str] = request.query_params.get("region", None)
+        if input_region in ["EU", None]:
+            region = None
+        else:
+            region = Region[input_region]
 
         file_obj = request.data["file"]
         workflow = get_object_or_404(self.get_queryset())
@@ -279,6 +285,7 @@ class FileUploadView(APIView):
                 source=source,
                 user=request.user,
                 filename=filename,
+                region=region,
             )
         except Exception as exception:
             return Response(
