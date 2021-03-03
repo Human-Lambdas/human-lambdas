@@ -41,6 +41,9 @@ DATA_SCHEMA = Schema(
                 Optional("data"): list,
                 Optional("history"): list,
                 Optional("format"): str,
+                Optional("delete_disabled"): bool,
+                Optional("edit_disabled"): bool,
+                Optional("ordering_disabled"): bool,
             },
             Optional("logic_jump"): dict,
         }
