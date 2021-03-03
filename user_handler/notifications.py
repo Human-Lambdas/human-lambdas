@@ -12,7 +12,7 @@ from .models import Notification, User
 
 
 class NotificationSerializer(serializers.ModelSerializer):
-    workflow_notifications = serializers.JSONField()
+    queue_notifications = serializers.JSONField()
 
     class Meta:
         model = Notification
@@ -24,11 +24,11 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.enabled = validated_data.get("enabled", instance.enabled)
-        workflow_notifications = validated_data.get("workflow_notifications", [])
+        workflow_notifications = validated_data.get("queue_notifications", [])
         any_enabled = False
         for workflow_notification in workflow_notifications:
             wfnotification_obj = instance.workflownotification_set.filter(
-                workflow__pk=workflow_notification["workflow_id"],
+                workflow__pk=workflow_notification["queue_id"],
                 workflow__disabled=False,
             ).first()
             if wfnotification_obj:

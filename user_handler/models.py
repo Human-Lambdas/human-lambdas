@@ -8,10 +8,10 @@ class Notification(models.Model):
     def format_output(self):
         return {
             "enabled": self.enabled,
-            "workflow_notifications": [
+            "queue_notifications": [
                 {
-                    "workflow_id": wnotification.workflow.pk,
-                    "workflow_name": wnotification.workflow.name,
+                    "queue_id": wnotification.workflow.pk,
+                    "queue_name": wnotification.workflow.name,
                     "enabled": wnotification.enabled,
                 }
                 for wnotification in self.workflownotification_set.filter(

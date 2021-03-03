@@ -316,6 +316,9 @@ class TaskSerializer(serializers.ModelSerializer):
     def get_n_comments(self, obj):
         return obj.taskactivity_set.filter(action="comment").count()
 
+    def to_representation(self, instance):
+        return instance.get_formatted_task()
+
 
 class CompletedTaskSerializer(TaskSerializer):
     def to_representation(self, instance):
