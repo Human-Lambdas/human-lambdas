@@ -1,4 +1,4 @@
-from copy import deepcopy
+from typing import Any
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
@@ -74,10 +74,16 @@ class Task(models.Model):
         if self.region:
             region = Region[self.region]
             if region != Region.EU:
-                r13n.store(self.pk, region, self.data)
-                db_task = deepcopy(self)
-                db_task.data = {}
-                super(Task, db_task).save()
+                r13n.store(self.source_id, region, self.data)
+
+                # Save mutated task in DB *without* region-sensitive data. Beware: this is a hack
+                data: Any = self.data
+                self.data = {}
+                try:
+                    super(Task, self).save()
+                finally:
+                    # restore regional data on task
+                    self.data = data
                 return
 
         super(Task, self).save()
@@ -129,6 +135,7 @@ class Task(models.Model):
             "source_id": source_id,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
             "correct": self.correct,
+            "region": self.region,
         }
 
     def get_simple_formatted_task(self):
@@ -150,6 +157,7 @@ class Task(models.Model):
             "workflow_id": self.workflow.pk,
             "data": transform_int2ext(self.data),
             "source": source_name,
+            "region": self.region,
         }
 
     def get_formatted_task_external(self):

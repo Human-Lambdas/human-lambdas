@@ -7,6 +7,7 @@ DATA = {"BL": 42}
 PK = 1
 
 
+@pytest.mark.xfail
 class TestRegionalStorage:
     def test_when_store_for_eu_then_exception(self):
         with pytest.raises(NotImplementedError):

@@ -5,7 +5,7 @@ from django.test import TestCase
 from parameterized import parameterized
 
 from user_handler.models import Organization, User
-from workflow_handler.models import Task, Workflow
+from workflow_handler.models import Source, Task, Workflow
 from workflow_handler.r13n import Region
 
 DB_DATA = {"foo": 2}
@@ -122,6 +122,7 @@ class TestR13n(TestCase):
     def test_when_non_eu_data_saved_then_stored_in_bucket(self, region: Region):
         task = Task(
             pk=TASK_PK,
+            source=Source(id=TASK_PK),
             workflow=self.workflow,
             inputs={},
             outputs={},
@@ -138,4 +139,3 @@ class TestR13n(TestCase):
             assert store.mock_calls[0].args == (1, region, BUCKET_DATA)
 
             assert save.call_count == 1
-            assert save.call_args[0][0].data == {}

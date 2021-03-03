@@ -238,8 +238,12 @@ class TaskSerializer(serializers.ModelSerializer):
             workflow=workflow,
         )
         source.save()
-        task = Task(data=data, workflow=workflow, source=source)
-        # store(task)
+        task = Task(
+            data=data,
+            workflow=workflow,
+            source=source,
+            region=validated_data.get("region"),
+        )
         task.save()
         TaskActivity(
             task=task,

@@ -79,7 +79,7 @@ class CreateTaskView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         formatted_data, workflow = self.preprocess_data()
-        serializer = self.get_serializer(data={"data": formatted_data})
+        serializer = self.get_serializer(data={**request.data, "data": formatted_data})
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         send_notification(workflow)
