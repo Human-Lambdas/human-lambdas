@@ -290,7 +290,6 @@ class TaskSerializer(serializers.ModelSerializer):
                     workflow.save()
             else:
                 instance.save()
-                # store(instance)
                 TaskActivity(task=instance, action="saved", created_by=user).save()
             event_name = "Completed" if validated_data["submit_task"] else "Saved"
             analytics.track(

@@ -110,7 +110,7 @@ class Task(models.Model):
             "data": self.data,
             "source": self.source.pk if self.source else None,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
-            # region?
+            "region": self.region,
         }
 
     def get_formatted_task(self):
