@@ -73,9 +73,8 @@ class Task(models.Model):
         force_update=False,
         using=None,
         update_fields=None,
-        update_regional_data=True,
     ):
-        if self.region is None:
+        if self.region is None or "data" in self.get_deferred_fields():
             super(Task, self).save()
             return
 
@@ -86,13 +85,10 @@ class Task(models.Model):
         self.data = {}
         try:
             super(Task, self).save()
-            if update_regional_data:
-                r13n.store(self.pk, region, data)
+            r13n.store(self.pk, region, data)
         finally:
             # restore regional data on task
             self.data = data
-
-        return
 
     def get_status(self):
         return STATUS_MAPPING.get(self.status, self.status)

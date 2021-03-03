@@ -117,7 +117,7 @@ class TestR13n(TestCase):
             assert save.call_count == 1
             assert save.call_args[0][0].data == DB_DATA
 
-    def test_when_non_eu_data_saved_then_stored_in_bucket(self):
+    def test_when_non_eu_data_no_id_saved_then_stored_in_bucket(self):
         region = Region.AU
 
         task = Task(
@@ -143,18 +143,23 @@ class TestR13n(TestCase):
 
             assert save.call_count == 1
 
-    def test_when_update_data_false_then_no_update(self):
+    def test_when_data_not_fetched_then_no_regional_update(self):
         region = Region.AU
 
-        task = Task(
+        Task(
+            pk=TASK_PK,
             workflow=self.workflow,
             inputs={},
             outputs={},
             data=BUCKET_DATA,
             region=region.name,
-        )
+        ).save()
+
+        task = Task.objects.defer("data").get(pk=TASK_PK)
+
         with patch("workflow_handler.r13n.store") as store, patch(
-            "django.db.models.Model.save", autospec=True
-        ) as save:
-            task.save(update_regional_data=False)
+            "workflow_handler.r13n.retrieve"
+        ) as retrieve:
+            task.save()
             assert len(store.mock_calls) == 0
+            assert len(retrieve.mock_calls) == 0
