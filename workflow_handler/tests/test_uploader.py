@@ -236,6 +236,7 @@ class TestCSV2Task(TestCase):
         # Check each workflow key appears once in each task
         tasks = Task.objects.all()
         for task in tasks:
+            assert task.region is None
             for input_item in task.inputs:
                 self.assertEqual(1, title_row.count(input_item["id"]))
 
