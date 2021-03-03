@@ -63,30 +63,37 @@ class Task(models.Model):
 
         if "data" in field_names and task.region:
             region = Region[task.region]
-            if region != Region.EU:
-                task.data = r13n.retrieve(task.pk, region)
+            task.data = r13n.retrieve(task.pk, region)
 
         return task
 
     def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
+        self,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+        update_data=True,
     ):
-        if self.region:
-            region = Region[self.region]
-            if region != Region.EU:
-                r13n.store(self.source_id, region, self.data)
+        if (
+            self.region is None or not update_data
+        ):  # TODO test case where this results in regional data in db
+            super(Task, self).save()
+            return
 
-                # Save mutated task in DB *without* region-sensitive data. Beware: this is a hack
-                data: Any = self.data
-                self.data = {}
-                try:
-                    super(Task, self).save()
-                finally:
-                    # restore regional data on task
-                    self.data = data
-                return
+        region = Region[self.region]
 
-        super(Task, self).save()
+        # Save mutated task in DB *without* region-sensitive data. Beware: this is a hack
+        data: Any = self.data
+        self.data = {}
+        try:
+            super(Task, self).save()
+            r13n.store(self.pk, region, data)
+        finally:
+            # restore regional data on task
+            self.data = data
+
+        return
 
     def get_status(self):
         return STATUS_MAPPING.get(self.status, self.status)

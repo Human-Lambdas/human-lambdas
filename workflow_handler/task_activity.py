@@ -46,7 +46,7 @@ class ActivityView(ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        task = get_task(
+        task: Task = get_task(
             user,
             self.kwargs["org_id"],
             self.kwargs["workflow_id"],
@@ -55,7 +55,7 @@ class ActivityView(ListCreateAPIView):
 
         if user.id == task.assigned_to_id:
             task.session_started_at = timezone.now()
-            task.save()
+            task.save(update_data=False)
 
         return TaskActivity.objects.filter(task=task).order_by("-created_at")
 

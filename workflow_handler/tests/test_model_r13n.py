@@ -1,11 +1,10 @@
-from typing import Optional
 from unittest.mock import patch
 
 from django.test import TestCase
 from parameterized import parameterized
 
 from user_handler.models import Organization, User
-from workflow_handler.models import Source, Task, Workflow
+from workflow_handler.models import Task, Workflow
 from workflow_handler.r13n import Region
 
 DB_DATA = {"foo": 2}
@@ -77,8 +76,8 @@ class TestR13n(TestCase):
 
             assert len(retrieve.mock_calls) == 0
 
-    @parameterized.expand([(Region.EU,), (None,)])
-    def test_when_eu_data_accessed_then_pulled_from_db(self, region: Optional[Region]):
+    def test_when_eu_data_accessed_then_pulled_from_db(self):
+        region = None
         task = Task(
             pk=TASK_PK,
             workflow=self.workflow,
@@ -98,15 +97,15 @@ class TestR13n(TestCase):
             assert data == DB_DATA
             assert len(retrieve.mock_calls) == 0
 
-    @parameterized.expand([(Region.EU,), (None,)])
-    def test_when_eu_data_saved_then_stored_in_db(self, region: Optional[Region]):
+    def test_when_eu_data_saved_then_stored_in_db(self):
+        region = None
         task = Task(
             pk=TASK_PK,
             workflow=self.workflow,
             inputs={},
             outputs={},
             data=DB_DATA,
-            region=region and region.name,
+            region=region,
         )
         with patch("workflow_handler.r13n.store") as store, patch(
             "django.db.models.Model.save", autospec=True
@@ -118,11 +117,10 @@ class TestR13n(TestCase):
             assert save.call_count == 1
             assert save.call_args[0][0].data == DB_DATA
 
-    @parameterized.expand([(Region.US,), (Region.AU,)])
-    def test_when_non_eu_data_saved_then_stored_in_bucket(self, region: Region):
+    def test_when_non_eu_data_saved_then_stored_in_bucket(self):
+        region = Region.AU
+
         task = Task(
-            pk=TASK_PK,
-            source=Source(id=TASK_PK),
             workflow=self.workflow,
             inputs={},
             outputs={},
@@ -132,6 +130,11 @@ class TestR13n(TestCase):
         with patch("workflow_handler.r13n.store") as store, patch(
             "django.db.models.Model.save", autospec=True
         ) as save:
+
+            def set_id(self: Task):
+                self.pk = TASK_PK
+
+            save.side_effect = set_id
             store.return_value = BUCKET_DATA
             task.save()
 
