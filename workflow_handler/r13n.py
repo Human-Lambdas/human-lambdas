@@ -32,7 +32,7 @@ class Region(Enum):
             with timer(f"Connecting to cloud storage bucket {bucket_name}"):
                 client = storage.Client()
                 obj.bucket = client.get_bucket(bucket_name)
-        finally:
+        except:
             logger.warn(f"Failed!")  # TODO remove when dev env sorted.
         return obj
 
