@@ -29,7 +29,11 @@ class Region(Enum):
         client = storage.Client()
 
         obj = object.__new__(cls)
-        obj.bucket = client.get_bucket(bucket_name)
+        try:
+            with timer(f"Connecting to cloud storage bucket {bucket_name}"):
+                obj.bucket = client.get_bucket(bucket_name)
+        finally:
+            logger.warn(f"Failed!")  # TODO remove when dev env sorted.
         return obj
 
     AU = "au-data-stg"
