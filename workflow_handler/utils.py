@@ -34,7 +34,7 @@ def unidecode(text):
 
 def process_query_params(query_params):
     filter_mapper = [
-        ("workflow__pk", "workflow_id"),
+        ("workflow__pk", "queue_id"),
         ("assigned_to__pk", "worker_id"),
         ("source__pk", "source_id"),
     ]

@@ -9,5 +9,10 @@ urlpatterns = [
         WorkflowMetrics.as_view(),
         name="workflow-metrics",
     ),
+    path(
+        "/queues",
+        WorkflowMetrics.as_view(),
+        name="workflow-metrics",
+    ),
     path("/workers", WorkerMetrics.as_view(), name="worker-metrics"),
 ]

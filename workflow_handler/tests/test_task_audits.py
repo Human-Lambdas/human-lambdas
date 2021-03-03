@@ -167,8 +167,8 @@ class TestTaskAudit(APITestCase):
         )
         source_id = Source.objects.get(name="test.csv").pk
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/{}/audit".format(self.org_id, task.id),
-            data={"workflow_id": self.workflow_id, "source_id": source_id},
+            "/v1/orgs/{}/queues/tasks/{}/audit".format(self.org_id, task.id),
+            data={"queue_id": self.workflow_id, "source_id": source_id},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -195,7 +195,7 @@ class TestTaskAudit(APITestCase):
             self.assertEqual(
                 response.data["next"],
                 (
-                    f"/workflows/tasks/{next_task.pk}/audit?workflow_id={self.workflow_id}"
+                    f"/queues/tasks/{next_task.pk}/audit?queue_id={self.workflow_id}"
                     f"&source_id={source_id}"
                 ),
             )
@@ -205,14 +205,14 @@ class TestTaskAudit(APITestCase):
             self.assertEqual(
                 response.data["previous"],
                 (
-                    f"/workflows/tasks/{prev_task.pk}/audit?workflow_id={self.workflow_id}"
+                    f"/queues/tasks/{prev_task.pk}/audit?queue_id={self.workflow_id}"
                     f"&source_id={source_id}"
                 ),
             )
         else:
             self.assertEqual(response.data["previous"], None)
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/{}/audit?workflow_id={}&source_id=".format(
+            "/v1/orgs/{}/queues/tasks/{}/audit?queue_id={}&source_id=".format(
                 self.org_id, task.id, self.workflow_id
             )
         )
