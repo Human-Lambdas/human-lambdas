@@ -73,22 +73,21 @@ class Task(models.Model):
         force_update=False,
         using=None,
         update_fields=None,
-        update_data=True,
+        update_regional_data=True,
     ):
-        if (
-            self.region is None or not update_data
-        ):  # TODO test case where this results in regional data in db
+        if self.region is None:
             super(Task, self).save()
             return
 
         region = Region[self.region]
 
-        # Save mutated task in DB *without* region-sensitive data. Beware: this is a hack
+        # Save mutated task in DB *without* region-sensitive data. Beware: this is a hack which protects data sovereignty
         data: Any = self.data
         self.data = {}
         try:
             super(Task, self).save()
-            r13n.store(self.pk, region, data)
+            if update_regional_data:
+                r13n.store(self.pk, region, data)
         finally:
             # restore regional data on task
             self.data = data

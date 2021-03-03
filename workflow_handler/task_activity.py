@@ -55,7 +55,7 @@ class ActivityView(ListCreateAPIView):
 
         if user.id == task.assigned_to_id:
             task.session_started_at = timezone.now()
-            task.save(update_data=False)
+            task.save(update_regional_data=False)
 
         return TaskActivity.objects.filter(task=task).order_by("-created_at")
 

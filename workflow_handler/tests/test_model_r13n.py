@@ -142,3 +142,19 @@ class TestR13n(TestCase):
             assert store.mock_calls[0].args == (1, region, BUCKET_DATA)
 
             assert save.call_count == 1
+
+    def test_when_update_data_false_then_no_update(self):
+        region = Region.AU
+
+        task = Task(
+            workflow=self.workflow,
+            inputs={},
+            outputs={},
+            data=BUCKET_DATA,
+            region=region.name,
+        )
+        with patch("workflow_handler.r13n.store") as store, patch(
+            "django.db.models.Model.save", autospec=True
+        ) as save:
+            task.save(update_regional_data=False)
+            assert len(store.mock_calls) == 0
