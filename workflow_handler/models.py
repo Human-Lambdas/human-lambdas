@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
@@ -98,7 +98,7 @@ class Task(models.Model):
             sender=self.__class__, action="completed", instance=self, user=user
         )
 
-    def get_updated_status(self):
+    def get_updated_status(self) -> Dict[Any, Any]:
         return {
             "id": self.pk,
             "status": self.get_status(),
@@ -107,13 +107,13 @@ class Task(models.Model):
             "assigned_at": self.assigned_at,
             "assigned_to": self.assigned_to.name if self.assigned_to else None,
             "queue": self.workflow.pk,
-            "data": self.data,
+            "data": None,
             "source": self.source.pk if self.source else None,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
             "region": self.region,
         }
 
-    def get_formatted_task(self):
+    def get_formatted_task(self, include_data: bool = True) -> Dict[Any, Any]:
         if self.assigned_to:
             worker_id = self.assigned_to.pk
             worker_name = self.assigned_to.name
@@ -135,7 +135,7 @@ class Task(models.Model):
             "completed_by_email": worker_email,
             "queue": self.workflow.name,
             "queue_id": self.workflow.pk,
-            "data": self.data,
+            "data": self.data if include_data else None,
             "source": source_name,
             "source_id": source_id,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),

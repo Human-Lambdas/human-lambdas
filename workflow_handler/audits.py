@@ -15,8 +15,8 @@ from user_handler.permissions import IsOrgAdmin
 
 from .models import Source, Task, TaskActivity, Workflow
 from .serializers import (
-    CompletedTaskSerializer,
     SourceSerializer,
+    TaskMetadataSerializer,
     TaskSerializer,
 )
 from .utils import TaskPagination, process_query_params
@@ -35,7 +35,7 @@ class GetCompletedTaskView(ListAPIView):
     """
 
     permission_classes = (IsAuthenticated, IsOrgAdmin)
-    serializer_class = CompletedTaskSerializer
+    serializer_class = TaskMetadataSerializer
     pagination_class = TaskPagination
 
     def get_queryset(self, *args, **kwargs):

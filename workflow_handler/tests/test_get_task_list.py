@@ -88,7 +88,7 @@ class TestInternalTaskList(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["tasks"]), 50, response.data)
         self.assertEqual(response.data["count"], self.completed_tasks, response.data)
-        self.assertFalse("layout" in response.data["tasks"][0]["data"][0])
+        assert response.data["tasks"][0]["data"] is None
         self.assertGreater(
             response.data["tasks"][0]["completed_at"],
             response.data["tasks"][1]["completed_at"],

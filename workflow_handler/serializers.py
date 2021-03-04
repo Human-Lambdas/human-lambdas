@@ -330,12 +330,12 @@ class TaskSerializer(serializers.ModelSerializer):
         return instance.get_formatted_task()
 
 
-class CompletedTaskSerializer(TaskSerializer):
-    def to_representation(self, instance):
-        return instance.get_formatted_task()
+class TaskMetadataSerializer(TaskSerializer):
+    def to_representation(self, instance: Task):
+        return instance.get_formatted_task(include_data=False)
 
 
-class PendingTaskSerializer(TaskSerializer):
+class PendingTaskSerializer(TaskMetadataSerializer):
     def to_representation(self, instance):
         return instance.get_updated_status()
 

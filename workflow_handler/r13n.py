@@ -33,7 +33,7 @@ class Region(Enum):
                 client = storage.Client()
                 obj.bucket = client.get_bucket(bucket_name)
         except:
-            logger.warn(f"Failed!")  # TODO remove when dev env sorted.
+            logger.warn(f"Failed to connect to regional storage!")
         return obj
 
     AU = "au-data-stg"
