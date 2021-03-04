@@ -74,7 +74,9 @@ class CreateTaskView(CreateAPIView):
         )
         return Task.objects.filter(
             Q(workflow__in=workflows)
-            & Q(workflow__id=self.kwargs.get("queue_id", self.kwargs["workflow_id"]))
+            & Q(
+                workflow__id=self.kwargs.get("queue_id", self.kwargs.get("workflow_id"))
+            )
         )
 
     def post(self, request, *args, **kwargs):
@@ -98,7 +100,7 @@ class CreateTaskView(CreateAPIView):
 
     def preprocess_data(self):
         workflow = get_object_or_404(
-            Workflow, pk=self.kwargs.get("queue_id", self.kwargs["workflow_id"])
+            Workflow, pk=self.kwargs.get("queue_id", self.kwargs.get("workflow_id"))
         )
         formatted_data = transform_ext2int(workflow.data, self.request.data["data"])
         #     except KeyError:
