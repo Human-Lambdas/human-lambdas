@@ -51,6 +51,15 @@ python manage.py createsuperuser # use email: a@a.com pass: a
 
 ### Storage Buckets
 
+Regional data is stored in buckets, managed by terraform.
+
+#### Terraform
+
+```shell
+terraform login
+```
+
+
 <!-- ```bash
 docker run -d --name fake-gcs-server -p 4443:4443 fsouza/fake-gcs-server
 ``` -->
