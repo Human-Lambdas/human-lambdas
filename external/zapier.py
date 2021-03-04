@@ -193,7 +193,7 @@ class ZapierCreateTask(CreateTaskView):
             & Q(pk=self.kwargs["workflow_id"])
             & Q(disabled=False)
         )
-        return Task.objects.filter(workflows=workflow)
+        return Task.objects.defer("data").filter(workflows=workflow)
 
     def perform_create(self, serializer):
         serializer.save(source_name="zapier")
@@ -264,9 +264,11 @@ class GetZapierTaskSampleData(APIView):
             & Q(pk=self.request.query_params["workflow_id"])
             & Q(disabled=False)
         )
-        return Task.objects.filter(
-            workflow=workflows.first(), status="completed"
-        ).order_by("-completed_at")
+        return (
+            Task.objects.defer("data")
+            .filter(workflow=workflows.first(), status="completed")
+            .order_by("-completed_at")
+        )
 
     def get_workflow(self):
         user = self.request.user

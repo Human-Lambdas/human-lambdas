@@ -1,6 +1,7 @@
 import ast
 import copy
 import csv
+from typing import Optional
 
 from django.db.models import F
 from django.http import HttpResponse
@@ -115,13 +116,20 @@ def extract_value(w_data, row, title_row):
         return extract_default(data_item, row, title_row)
 
 
-def process_csv(csv_file, workflow, source, user, filename):
+def process_csv(
+    csv_file, workflow, source, user, filename, region: Optional[str] = None
+):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
     validate_keys(title_row, workflow)
     for row in dataset:
         data = [extract_value(w_input, row, title_row) for w_input in workflow.data]
-        task = Task(data=data_validation(data), workflow=workflow, source=source)
+        task = Task(
+            data=data_validation(data),
+            workflow=workflow,
+            source=source,
+            region=None if region in ["EU", None] else region,
+        )
         task.save()
         TaskActivity(
             task=task,

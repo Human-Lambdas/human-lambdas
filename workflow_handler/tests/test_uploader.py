@@ -3,6 +3,7 @@ import logging
 import os
 from io import StringIO
 
+import pytest
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -235,6 +236,7 @@ class TestCSV2Task(TestCase):
         # Check each workflow key appears once in each task
         tasks = Task.objects.all()
         for task in tasks:
+            assert task.region is None
             for input_item in task.inputs:
                 self.assertEqual(1, title_row.count(input_item["id"]))
 
@@ -434,3 +436,60 @@ class TestUploadList(APITestCase):
         for task in Task.objects.filter(workflow__pk=workflow_id).all():
             list_input = [tinput for tinput in task.data if tinput["id"] == "Alpha"][0]
             self.assertIsInstance(list_input["list"]["value"], list)
+
+    def test_when_eu_region_selected_then_no_region_on_data(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        workflow_data = {
+            "name": "uploader",
+            "data": [
+                ALPHA,
+                BETA,
+                GAMMA,
+            ],
+        }
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        workflow_id = Workflow.objects.get(name="uploader").id
+        with open(self.file_path, encoding="ISO-8859-1") as f:
+            data = {"file": f}
+            response = self.client.post(
+                f"/v1/orgs/{self.org_id}/workflows/{workflow_id}/upload?region=EU",
+                data=data,
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        task = Task.objects.filter(workflow__pk=workflow_id).first()
+        self.assertIn(task.source.name, self.file_path)
+        assert task.region is None
+
+    @pytest.mark.bucket
+    def test_when_non_eu_region_selected_then_confirmed_on_data(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        workflow_data = {
+            "name": "uploader",
+            "data": [
+                ALPHA,
+                BETA,
+                GAMMA,
+            ],
+        }
+        _ = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        workflow_id = Workflow.objects.get(name="uploader").id
+        with open(self.file_path, encoding="ISO-8859-1") as f:
+            data = {"file": f}
+            response = self.client.post(
+                f"/v1/orgs/{self.org_id}/workflows/{workflow_id}/upload?region=AU",
+                data=data,
+            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        task = Task.objects.filter(workflow__pk=workflow_id).first()
+        self.assertIn(task.source.name, self.file_path)
+        assert task.region == "AU"

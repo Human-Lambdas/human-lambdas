@@ -222,6 +222,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "workflow_id",
             "n_comments",
             "correct",
+            "region",
         ]
 
     def create(self, validated_data):
@@ -242,8 +243,13 @@ class TaskSerializer(serializers.ModelSerializer):
             workflow=workflow,
         )
         source.save()
-        task = Task(data=data, workflow=workflow, source=source)
-        # store(task)
+        region = validated_data.get("region")
+        task = Task(
+            data=data,
+            workflow=workflow,
+            source=source,
+            region=None if region in ["EU", None] else region,
+        )
         task.save()
         TaskActivity(
             task=task,
@@ -290,7 +296,6 @@ class TaskSerializer(serializers.ModelSerializer):
                     workflow.save()
             else:
                 instance.save()
-                # store(instance)
                 TaskActivity(task=instance, action="saved", created_by=user).save()
             event_name = "Completed" if validated_data["submit_task"] else "Saved"
             analytics.track(

@@ -47,7 +47,8 @@ class GetCompletedTaskView(ListAPIView):
             & Q(organization__pk=self.kwargs["org_id"])
         )
         return (
-            Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
+            Task.objects.defer("data")
+            .filter(Q(workflow__in=workflows) & Q(status="completed"))
             .filter(*args, **kwargs)
             .order_by("-completed_at")
         )
@@ -77,7 +78,8 @@ class GetCompletedTasksCSVView(APIView):
             & Q(organization__pk=self.kwargs["org_id"])
         )
         return (
-            Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
+            Task.objects.defer("data")
+            .filter(Q(workflow__in=workflows) & Q(status="completed"))
             .filter(*args, **kwargs)
             .order_by("completed_at")
         )
@@ -132,7 +134,8 @@ class AuditsGetTask(RetrieveUpdateDestroyAPIView):
         )
         filters = process_query_params(self.request.query_params)
         return (
-            Task.objects.filter(Q(workflow__in=workflows) & Q(status="completed"))
+            Task.objects.defer("data")
+            .filter(Q(workflow__in=workflows) & Q(status="completed"))
             .filter(**filters)
             .order_by("-completed_at")
         )
@@ -159,7 +162,7 @@ class AuditsGetTask(RetrieveUpdateDestroyAPIView):
         )
 
     def put(self, request, *args, **kwargs):
-        task = Task.objects.filter(id=kwargs["task_id"]).first()
+        task = Task.objects.defer("data").filter(id=kwargs["task_id"]).first()
         if not task or task.status != "completed":
             status = 400
             return Response(

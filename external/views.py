@@ -45,7 +45,8 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
             },
         )
         return (
-            Task.objects.filter(Q(workflow=workflow) & Q(status="completed"))
+            Task.objects.defer("data")
+            .filter(Q(workflow=workflow) & Q(status="completed"))
             .filter(*args, **kwargs)
             .order_by("-completed_at")
         )
@@ -72,7 +73,7 @@ class CreateTaskView(CreateAPIView):
             Q(organization__pk=self.request.auth.organization_id)
             & Q(organization__pk=self.kwargs["org_id"] & Q(disabled=False))
         )
-        return Task.objects.filter(
+        return Task.objects.defer("data").filter(
             Q(workflow__in=workflows)
             & Q(
                 workflow__id=self.kwargs.get("queue_id", self.kwargs.get("workflow_id"))
@@ -89,7 +90,7 @@ class CreateTaskView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         formatted_data, workflow = self.preprocess_data()
-        serializer = self.get_serializer(data={"data": formatted_data})
+        serializer = self.get_serializer(data={**request.data, "data": formatted_data})
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         send_notification(workflow)

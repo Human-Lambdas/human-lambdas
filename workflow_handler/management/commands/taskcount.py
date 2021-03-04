@@ -11,7 +11,8 @@ class Command(BaseCommand):
         workflows = Workflow.objects.all()
         for workflow in workflows:
             workflow.n_tasks = (
-                Task.objects.filter(workflow=workflow)
+                Task.objects.defer("data")
+                .filter(workflow=workflow)
                 .filter(~Q(status="completed"))
                 .count()
             )

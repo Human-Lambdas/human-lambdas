@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from rest_hooks.models import AbstractHook
@@ -5,6 +7,8 @@ from rest_hooks.signals import hook_event
 
 from data_handler.data_transformation import transform_int2ext
 from user_handler.models import Notification, Organization, User
+from workflow_handler import r13n
+from workflow_handler.r13n import Region
 
 STATUS_MAPPING = {"assigned": "in_progress", "pending": "new"}
 
@@ -48,9 +52,43 @@ class Task(models.Model):
     source = models.ForeignKey(Source, on_delete=models.CASCADE, null=True)
     data = JSONField(blank=True, default=list)
     correct = models.BooleanField(null=True)
+    region = models.CharField(max_length=128, null=True)
 
     def __str__(self):
         return "{0}_task_{1}".format(self.workflow.name, self.pk)
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        task = super(Task, cls).from_db(db, field_names, values)
+
+        if "data" in field_names and task.region:
+            region = Region[task.region]
+            task.data = r13n.retrieve(task.pk, region)
+
+        return task
+
+    def save(
+        self,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        if self.region is None or "data" in self.get_deferred_fields():
+            super(Task, self).save()
+            return
+
+        region = Region[self.region]
+
+        # Save mutated task in DB *without* region-sensitive data. Beware: this is a hack which protects data sovereignty
+        data: Any = self.data
+        self.data = {}
+        try:
+            super(Task, self).save()
+            r13n.store(self.pk, region, data)
+        finally:
+            # restore regional data on task
+            self.data = data
 
     def get_status(self):
         return STATUS_MAPPING.get(self.status, self.status)
@@ -72,6 +110,7 @@ class Task(models.Model):
             "data": self.data,
             "source": self.source.pk if self.source else None,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
+            "region": self.region,
         }
 
     def get_formatted_task(self):
@@ -101,6 +140,7 @@ class Task(models.Model):
             "source_id": source_id,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
             "correct": self.correct,
+            "region": self.region,
         }
 
     def get_simple_formatted_task(self):
@@ -122,6 +162,7 @@ class Task(models.Model):
             "queue_id": self.workflow.pk,
             "data": transform_int2ext(self.data),
             "source": source_name,
+            "region": self.region,
         }
 
     def get_formatted_task_external(self):

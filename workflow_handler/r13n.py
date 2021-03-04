@@ -1,43 +1,57 @@
+import json
 import logging
-from typing import Any, Dict
+import time
+from contextlib import contextmanager
+from enum import Enum
+from typing import Any, Dict, Optional, Union
 
-from django.utils import timezone
+from google.api_core.exceptions import NotFound
 from google.cloud import storage
 
-from workflow_handler.models import Task
-
-logger = logging.getLogger(__file__)
-
-buckets = ["us-data-stg", "eu-data-stg", "au-data-stg"]
+logger = logging.getLogger(__name__)
 
 
-def store(task: Task) -> None:
-    client = storage.Client()
-
-    for b in buckets:
-        logger.warning(f"{timezone.now()} get_bucket")
-        bucket = client.get_bucket(b)
-        logger.warning(f"{timezone.now()} done")
-
-        logger.warning(f"{timezone.now()} store blob")
-        blob = bucket.blob("test.txt")
-        logger.warning(f"{timezone.now()} upload_from_string")
-        blob.upload_from_string(f"written {timezone.now()}")
-        logger.warning(f"{timezone.now()} done {b}")
-    return None
+@contextmanager
+def timer(label: Optional[str]):
+    ss = time.monotonic()
+    try:
+        yield
+    finally:
+        ee = time.monotonic()
+        duration = ee - ss
+        logger.info(f"{label}: {round(duration * 1000)}ms")
 
 
-def retrieve(task: Task) -> Dict[Any, Any]:
-    client = storage.Client()
+class Region(Enum):
+    bucket: storage.Bucket
 
-    for b in buckets:
-        logger.warning(f"{timezone.now()} get_bucket")
-        bucket = client.get_bucket(b)
-        logger.warning(f"{timezone.now()} done")
+    def __new__(cls, bucket_name: str):
 
-        logger.warning(f"{timezone.now()} retrieve blob")
-        blob = bucket.blob("test.txt")
-        logger.warning(f"{timezone.now()} download_as_text")
-        logger.warning(f"{timezone.now()} text: {blob.download_as_text()}")
-        logger.warning(f"{timezone.now()} done {b}")
-    return {}
+        obj = object.__new__(cls)
+        try:
+            with timer(f"Connecting to cloud storage bucket {bucket_name}"):
+                client = storage.Client()
+                obj.bucket = client.get_bucket(bucket_name)
+        except:
+            logger.warn(f"Failed!")  # TODO remove when dev env sorted.
+        return obj
+
+    AU = "au-data-stg"
+    US = "us-data-stg"
+
+
+def store(pk: int, region: Region, data: Union[None, Dict[Any, Any]]) -> None:
+    with timer(f"storing task id: {pk} in {region.name}"):
+        blob = region.bucket.blob(f"{pk}")
+        blob.upload_from_string(json.dumps(data))
+
+
+def retrieve(pk: int, region: Region) -> Union[None, Dict[Any, Any]]:
+    with timer(f"retrieving task id: {pk} from {region.name}"):
+        blob = region.bucket.blob(f"{pk}")
+        try:
+            text = blob.download_as_text()
+            return json.loads(text)
+        except NotFound:
+            logger.warning(f"Task {pk} not found in cloud bucket {region.bucket}.")
+            return None

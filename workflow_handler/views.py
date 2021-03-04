@@ -264,8 +264,6 @@ class FileUploadView(APIView):
 
     @swagger_auto_schema(query_serializer=FileUploadViewQuerySerializer)
     def post(self, request, *args, **kwargs):
-        # print(request.query_params.get("region", "EU"))
-
         file_obj = request.data["file"]
         workflow = get_object_or_404(self.get_queryset())
         content = decode_csv(file_obj)
@@ -279,6 +277,7 @@ class FileUploadView(APIView):
                 source=source,
                 user=request.user,
                 filename=filename,
+                region=request.query_params.get("region", None),
             )
         except Exception as exception:
             return Response(
@@ -306,9 +305,11 @@ class ListTaskView(ListAPIView):
             & Q(disabled=False)
             & Q(organization__pk=self.kwargs["org_id"])
         )
-        return Task.objects.filter(
-            Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
-        ).order_by("-created_at")
+        return (
+            Task.objects.defer("data")
+            .filter(Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"]))
+            .order_by("-created_at")
+        )
 
     def list(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
@@ -330,9 +331,11 @@ class ListNonCompleteTaskView(ListTaskView):
             & Q(pk=self.kwargs["workflow_id"])
             & Q(disabled=False)
         )
-        return Task.objects.filter(
-            Q(workflow=workflow.first()) & ~Q(status="completed")
-        ).order_by("created_at")
+        return (
+            Task.objects.defer("data")
+            .filter(Q(workflow=workflow.first()) & ~Q(status="completed"))
+            .order_by("created_at")
+        )
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -361,7 +364,7 @@ class RUDTaskView(RetrieveUpdateAPIView):
             & Q(organization__pk=self.kwargs["org_id"])
             & Q(disabled=False)
         )
-        return Task.objects.filter(
+        return Task.objects.defer("data").filter(
             Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
         )
 
@@ -431,9 +434,11 @@ class NextTaskView(APIView):
             & Q(organization__pk=self.kwargs["org_id"])
             & Q(disabled=False)
         )
-        return Task.objects.filter(
-            Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
-        ).order_by("created_at")
+        return (
+            Task.objects.defer("data")
+            .filter(Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"]))
+            .order_by("created_at")
+        )
 
     def get(self, request, *args, **kwargs):
         workflow = Workflow.objects.get(id=kwargs["workflow_id"])
@@ -492,7 +497,7 @@ class AssignTaskView(APIView):
             & Q(organization__pk=self.kwargs["org_id"])
             & Q(disabled=False)
         )
-        return Task.objects.filter(
+        return Task.objects.defer("data").filter(
             Q(workflow__in=workflows)
             & Q(workflow=self.kwargs["workflow_id"])
             & Q(pk=self.kwargs["task_id"])
@@ -558,7 +563,7 @@ class CreateTaskFormView(CreateAPIView):
 
     def get_queryset(self):
         workflows = self.workflow_queryset()
-        return Task.objects.filter(
+        return Task.objects.defer("data").filter(
             Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
         )
 
