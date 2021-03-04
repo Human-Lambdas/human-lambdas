@@ -81,10 +81,10 @@ class TestCompletedTasksToCSV(APITestCase):
     def test_list_completed_task_internal_404(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         data = {
-            "workflow_id": self.workflow_id,
+            "queue_id": self.workflow_id,
         }
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(self.org_id),
+            "/v1/orgs/{}/queues/tasks/completed-tasks-csv".format(self.org_id),
             data=data,
             format="json",
         )
@@ -94,7 +94,7 @@ class TestCompletedTasksToCSV(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         for i in range(self.total_rows):
             response = self.client.get(
-                "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                "/v1/orgs/{0}/queues/{1}/tasks/next".format(
                     self.org_id, self.workflow_id
                 ),
                 format="json",
@@ -115,17 +115,17 @@ class TestCompletedTasksToCSV(APITestCase):
                         idata["single_selection"]["value"] = "SO2"
             response_data = {"data": update_data, "assigned_to": self.user_id}
             _ = self.client.patch(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                "/v1/orgs/{0}/queues/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task["id"]
                 ),
                 data=response_data,
                 format="json",
             )
         data = {
-            "workflow_id": self.workflow_id,
+            "queue_id": self.workflow_id,
         }
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(self.org_id),
+            "/v1/orgs/{}/queues/tasks/completed-tasks-csv".format(self.org_id),
             data=data,
             format="json",
         )
@@ -145,7 +145,7 @@ class TestCompletedTasksToCSV(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         for i in range(self.total_rows - 1):
             response = self.client.get(
-                "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                "/v1/orgs/{0}/queues/{1}/tasks/next".format(
                     self.org_id, self.workflow_id
                 ),
                 format="json",
@@ -167,7 +167,7 @@ class TestCompletedTasksToCSV(APITestCase):
             response_data = {"data": update_data, "assigned_to": self.user_id}
 
             response = self.client.patch(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                "/v1/orgs/{0}/queues/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task["id"]
                 ),
                 data=response_data,
@@ -188,16 +188,14 @@ class TestCompletedTasksToCSV(APITestCase):
         )
 
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id),
+            "/v1/orgs/{0}/queues/{1}".format(self.org_id, self.workflow_id),
             self.workflow_data,
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
-                self.org_id, self.workflow_id
-            ),
+            "/v1/orgs/{0}/queues/{1}/tasks/next".format(self.org_id, self.workflow_id),
             format="json",
         )
 
@@ -220,10 +218,10 @@ class TestCompletedTasksToCSV(APITestCase):
             format="json",
         )
         data = {
-            "workflow_id": self.workflow_id,
+            "queue_id": self.workflow_id,
         }
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(self.org_id),
+            "/v1/orgs/{}/queues/tasks/completed-tasks-csv".format(self.org_id),
             data=data,
             format="json",
         )
@@ -243,7 +241,7 @@ class TestCompletedTasksToCSV(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         for i in range(self.total_rows - 1):
             response = self.client.get(
-                "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                "/v1/orgs/{0}/queues/{1}/tasks/next".format(
                     self.org_id, self.workflow_id
                 ),
                 format="json",
@@ -264,7 +262,7 @@ class TestCompletedTasksToCSV(APITestCase):
                         idata["single_selection"]["value"] = "SO2"
             response_data = {"data": update_data, "assigned_to": self.user_id}
             response = self.client.patch(
-                "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+                "/v1/orgs/{0}/queues/{1}/tasks/{2}".format(
                     self.org_id, self.workflow_id, task["id"]
                 ),
                 data=response_data,
@@ -278,16 +276,14 @@ class TestCompletedTasksToCSV(APITestCase):
         ]
 
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, self.workflow_id),
+            "/v1/orgs/{0}/queues/{1}".format(self.org_id, self.workflow_id),
             self.workflow_data,
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         response = self.client.get(
-            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
-                self.org_id, self.workflow_id
-            ),
+            "/v1/orgs/{0}/queues/{1}/tasks/next".format(self.org_id, self.workflow_id),
             format="json",
         )
 
@@ -299,7 +295,7 @@ class TestCompletedTasksToCSV(APITestCase):
                 idata["single_selection"]["value"] = "bar2"
         response_data = {"data": update_data, "assigned_to": self.user_id}
         response = self.client.patch(
-            "/v1/orgs/{0}/workflows/{1}/tasks/{2}".format(
+            "/v1/orgs/{0}/queues/{1}/tasks/{2}".format(
                 self.org_id, self.workflow_id, task["id"]
             ),
             data=response_data,
@@ -307,10 +303,10 @@ class TestCompletedTasksToCSV(APITestCase):
         )
 
         data = {
-            "workflow_id": self.workflow_id,
+            "queue_id": self.workflow_id,
         }
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(self.org_id),
+            "/v1/orgs/{}/queues/tasks/completed-tasks-csv".format(self.org_id),
             data=data,
             format="json",
         )
@@ -328,6 +324,6 @@ class TestCompletedTasksToCSV(APITestCase):
 
     def test_no_workflow_id(self):
         response = self.client.get(
-            "/v1/orgs/{}/workflows/tasks/completed-tasks-csv".format(self.org_id)
+            "/v1/orgs/{}/queues/tasks/completed-tasks-csv".format(self.org_id)
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

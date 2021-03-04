@@ -106,7 +106,7 @@ class Task(models.Model):
             "created_at": self.created_at,
             "assigned_at": self.assigned_at,
             "assigned_to": self.assigned_to.name if self.assigned_to else None,
-            "workflow": self.workflow.pk,
+            "queue": self.workflow.pk,
             "data": self.data,
             "source": self.source.pk if self.source else None,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
@@ -115,10 +115,11 @@ class Task(models.Model):
 
     def get_formatted_task(self):
         if self.assigned_to:
+            worker_id = self.assigned_to.pk
             worker_name = self.assigned_to.name
             worker_email = self.assigned_to.email
         else:
-            worker_name, worker_email = None, None
+            worker_id, worker_name, worker_email = None, None, None
         if self.source:
             source_name, source_id = self.source.name, self.source.pk
         else:
@@ -126,12 +127,14 @@ class Task(models.Model):
         return {
             "id": self.pk,
             "status": self.get_status(),
+            "assigned_at": self.assigned_at,
+            "assigned_to": worker_id,
             "completed_at": self.completed_at,
             "created_at": self.created_at,
             "completed_by": worker_name,
             "completed_by_email": worker_email,
-            "workflow": self.workflow.name,
-            "workflow_id": self.workflow.pk,
+            "queue": self.workflow.name,
+            "queue_id": self.workflow.pk,
             "data": self.data,
             "source": source_name,
             "source_id": source_id,
@@ -155,8 +158,8 @@ class Task(models.Model):
             "completed_at": self.completed_at,
             "created_at": self.created_at,
             "completed_by": worker_email,
-            "workflow": self.workflow.name,
-            "workflow_id": self.workflow.pk,
+            "queue": self.workflow.name,
+            "queue_id": self.workflow.pk,
             "data": transform_int2ext(self.data),
             "source": source_name,
             "region": self.region,

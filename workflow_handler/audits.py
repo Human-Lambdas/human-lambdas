@@ -25,7 +25,7 @@ from .utils import TaskPagination, process_query_params
 def make_task_filter_url(org_id, task_id, filters):
     if task_id < 0:
         return None
-    url = f"/workflows/tasks/{task_id}/audit?{urlencode(filters)}"
+    url = f"/queues/tasks/{task_id}/audit?{urlencode(filters)}"
     return url
 
 
@@ -85,11 +85,11 @@ class GetCompletedTasksCSVView(APIView):
         )
 
     def get(self, request, *args, **kwargs):
-        if "workflow_id" not in request.query_params:
+        if "queue_id" not in request.query_params:
             return Response(
                 {
                     "status_code": 400,
-                    "errors": [{"message": "Need to set workflow_id"}],
+                    "errors": [{"message": "Need to set queue_id"}],
                 },
                 status=400,
             )
@@ -98,7 +98,7 @@ class GetCompletedTasksCSVView(APIView):
         analytics.track(
             request.user.pk,
             "Download CSV tasks",
-            {"workflow_id": request.query_params["workflow_id"]},
+            {"workflow_id": request.query_params["queue_id"]},
         )
         return task_list_to_csv_response(tasks)
 

@@ -37,8 +37,8 @@ class TestNotifications(APITestCase):
             "/v1/users/notifications",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["workflow_notifications"]), 1)
-        self.assertTrue(response.data["workflow_notifications"][0]["enabled"])
+        self.assertEqual(len(response.data["queue_notifications"]), 1)
+        self.assertTrue(response.data["queue_notifications"][0]["enabled"])
 
     def test_notification_update(self):
         response = self.client.patch("/v1/users/notifications", data={"enabled": False})
@@ -49,14 +49,14 @@ class TestNotifications(APITestCase):
         response = self.client.patch(
             "/v1/users/notifications",
             data={
-                "workflow_notifications": [
-                    {"workflow_id": self.workflow_id, "enabled": False}
+                "queue_notifications": [
+                    {"queue_id": self.workflow_id, "enabled": False}
                 ]
             },
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse(response.data["workflow_notifications"][0]["enabled"])
+        self.assertFalse(response.data["queue_notifications"][0]["enabled"])
 
     def test_send_notification(self):
         workflow = Workflow.objects.get(pk=self.workflow_id)
