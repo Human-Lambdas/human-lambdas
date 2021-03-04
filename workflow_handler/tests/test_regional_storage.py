@@ -7,7 +7,7 @@ DATA = {"BL": 42}
 PK = 1
 
 
-@pytest.mark.xfail
+@pytest.mark.bucket
 class TestRegionalStorage:
     def test_when_stored_then_can_be_fetched(self):
         store(PK, Region.AU, DATA)

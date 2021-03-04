@@ -465,7 +465,7 @@ class TestUploadList(APITestCase):
         self.assertIn(task.source.name, self.file_path)
         assert task.region is None
 
-    @pytest.mark.xfail
+    @pytest.mark.bucket
     def test_when_non_eu_region_selected_then_confirmed_on_data(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {

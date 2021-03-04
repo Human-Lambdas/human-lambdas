@@ -31,10 +31,13 @@ jobs:
     - uses: pre-commit/action@v2.0.0
       with:
         extra_args: --verbose --all-files
-    - run: |
+    - name: pytest
+      run: |
         set -e -x
         python manage.py migrate
-        pytest -n=auto
+        pytest \
+          -n=auto \
+          -m "not bucket" \
       env:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: "test"

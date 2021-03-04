@@ -238,11 +238,12 @@ class TaskSerializer(serializers.ModelSerializer):
             workflow=workflow,
         )
         source.save()
+        region = validated_data.get("region")
         task = Task(
             data=data,
             workflow=workflow,
             source=source,
-            region=validated_data.get("region"),
+            region=None if region in ["EU", None] else region,
         )
         task.save()
         TaskActivity(

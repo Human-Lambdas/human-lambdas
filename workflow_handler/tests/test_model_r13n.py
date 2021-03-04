@@ -144,7 +144,7 @@ class TestR13n(TestCase):
 
             assert save.call_count == 1
 
-    @pytest.mark.xfail
+    @pytest.mark.bucket
     def test_when_data_not_fetched_then_no_regional_update(self):
         region = Region.AU
 

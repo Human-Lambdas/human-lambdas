@@ -1,8 +1,10 @@
+import pytest
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Task
+from workflow_handler.r13n import Region
 from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
 
 
@@ -244,3 +246,38 @@ class TestFormSequenceTaskCreation(APITestCase):
         task = Task.objects.get(id=response.data["id"])
         self.assertIsNotNone(task)
         self.assertIsNotNone(task.data[0]["form_sequence"].get("data"))
+
+    @pytest.mark.bucket
+    def test_create_au_task(self):
+        region = Region.AU.name
+        task_data = {
+            "data": {"the_formz": {"hello": "word", "numbah": 2}},
+            "region": region,
+        }
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.post(
+            "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
+            task_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        task = Task.objects.get(id=response.data["id"])
+        self.assertIsNotNone(task)
+        assert task.region == region
+
+    def test_create_eu_task(self):
+        region = "EU"
+        task_data = {
+            "data": {"the_formz": {"hello": "word", "numbah": 2}},
+            "region": region,
+        }
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.post(
+            "/orgs/{}/workflows/{}/tasks/create".format(self.org_id, self.workflow_id),
+            task_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        task = Task.objects.get(id=response.data["id"])
+        self.assertIsNotNone(task)
+        assert task.region is None

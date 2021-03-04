@@ -8,7 +8,6 @@ from django.http import HttpResponse
 
 from user_handler.notifications import send_notification
 from workflow_handler.models import Task, TaskActivity
-from workflow_handler.r13n import Region
 
 from .data_transformation import ner_ext2int, ner_int2ext
 from .data_validation import data_validation
@@ -118,7 +117,7 @@ def extract_value(w_data, row, title_row):
 
 
 def process_csv(
-    csv_file, workflow, source, user, filename, region: Optional[Region] = None
+    csv_file, workflow, source, user, filename, region: Optional[str] = None
 ):
     dataset = csv.reader(csv_file)
     title_row = next(dataset)
@@ -129,7 +128,7 @@ def process_csv(
             data=data_validation(data),
             workflow=workflow,
             source=source,
-            region=region and region.name,
+            region=None if region in ["EU", None] else region,
         )
         task.save()
         TaskActivity(
