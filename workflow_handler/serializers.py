@@ -230,7 +230,12 @@ class TaskSerializer(serializers.ModelSerializer):
         if not source_name:
             raise serializers.ValidationError("No source name given!")
         data = validated_data["data"]
-        workflow = Workflow.objects.get(id=self.context["view"].kwargs["workflow_id"])
+        workflow_id = (
+            self.context["view"].kwargs["queue_id"]
+            if "queue_id" in self.context["view"].kwargs
+            else self.context["view"].kwargs["workflow_id"]
+        )
+        workflow = Workflow.objects.get(id=workflow_id)
         source = Source(
             name=source_name,
             created_by=self.context["request"].user,
