@@ -318,7 +318,7 @@ class ListTaskView(ListAPIView):
         return Response(serializer.data)
 
 
-class ListNonCompleteTaskView(ListTaskView):  #
+class ListNonCompleteTaskView(ListTaskView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PendingTaskSerializer
     pagination_class = TaskPagination
