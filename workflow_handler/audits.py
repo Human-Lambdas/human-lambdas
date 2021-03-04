@@ -29,7 +29,7 @@ def make_task_filter_url(org_id, task_id, filters):
     return url
 
 
-class GetCompletedTaskView(ListAPIView):  #
+class GetCompletedTaskView(ListAPIView):
     """
     API View for getting all the Tasks
     """
