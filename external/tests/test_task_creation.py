@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Task
-from workflow_handler.r13n import Region
+from workflow_handler.region import Region
 from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
 
 

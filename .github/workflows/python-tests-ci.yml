@@ -23,6 +23,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2 # for codecov
     - uses: actions/setup-python@v2
       with:
         python-version: 3.8
@@ -31,13 +33,29 @@ jobs:
     - uses: pre-commit/action@v2.0.0
       with:
         extra_args: --verbose --all-files
+
+    - uses: google-github-actions/setup-gcloud@v0.2.1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
     - name: pytest
       run: |
         set -e -x
         python manage.py migrate
         pytest \
           -n=auto \
-          -m "not bucket" \
+          --cov-report=xml \
+          --cov=data_handler \
+          --cov=external \
+          --cov=hl_rest_api \
+          --cov=metrics \
+          --cov=oi-relayer \
+          --cov=organization_handler \
+          --cov=templates_handler \
+          --cov=user_handler \
+          --cov=v1 \
+          --cov=workflow_handler \
       env:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: "test"
@@ -58,3 +76,7 @@ jobs:
         API_URL: "http://localhost:8000"
         HL_CLIENT_API_KEY: ${{ secrets.HL_CLIENT_API_KEY }}
         HL_ORG_ID: 61
+    - uses: codecov/codecov-action@v1
+      with:
+        file: coverage.xml
+        token: ${{ secrets.CODECOV_TOKEN }}

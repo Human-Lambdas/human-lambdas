@@ -1,6 +1,7 @@
 import logging
 import time
-from typing import Any, Callable, Collection, Dict
+from contextlib import contextmanager
+from typing import Any, Callable, Collection, Dict, Optional
 
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
@@ -53,3 +54,14 @@ class LatencyMiddleware(MiddlewareMixin):
 
 def latency_str(latency: float):
     return f"{round(latency * 1000, 3)} ms"
+
+
+@contextmanager
+def timer(label: Optional[str]):
+    ss = time.monotonic()
+    try:
+        yield
+    finally:
+        ee = time.monotonic()
+        duration = ee - ss
+        logger.info(f"{label}: {round(duration * 1000)}ms")

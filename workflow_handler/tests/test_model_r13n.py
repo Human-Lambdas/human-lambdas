@@ -6,7 +6,7 @@ from parameterized import parameterized
 
 from user_handler.models import Organization, User
 from workflow_handler.models import Task, Workflow
-from workflow_handler.r13n import Region
+from workflow_handler.region import Region
 
 DB_DATA = {"foo": 2}
 BUCKET_DATA = {"blah": 3}
@@ -41,8 +41,8 @@ class TestR13n(TestCase):
             region=region.name,
         )
 
-        with patch("workflow_handler.r13n.retrieve") as retrieve, patch(
-            "workflow_handler.r13n.store"
+        with patch("workflow_handler.regional_storage.retrieve") as retrieve, patch(
+            "workflow_handler.regional_storage.store"
         ) as store:
             task.save()
 
@@ -67,8 +67,8 @@ class TestR13n(TestCase):
             region=Region.AU.name,
         )
 
-        with patch("workflow_handler.r13n.retrieve") as retrieve, patch(
-            "workflow_handler.r13n.store"
+        with patch("workflow_handler.regional_storage.retrieve") as retrieve, patch(
+            "workflow_handler.regional_storage.store"
         ) as store:
             task.save()
 
@@ -89,7 +89,7 @@ class TestR13n(TestCase):
         )
         task.save()
 
-        with patch("workflow_handler.r13n.retrieve") as retrieve:
+        with patch("workflow_handler.regional_storage.retrieve") as retrieve:
             retrieve.return_value = BUCKET_DATA
             t = Task.objects.get(pk=TASK_PK)
 
@@ -108,7 +108,7 @@ class TestR13n(TestCase):
             data=DB_DATA,
             region=region,
         )
-        with patch("workflow_handler.r13n.store") as store, patch(
+        with patch("workflow_handler.regional_storage.store") as store, patch(
             "django.db.models.Model.save", autospec=True
         ) as save:
             task.save()
@@ -128,7 +128,7 @@ class TestR13n(TestCase):
             data=BUCKET_DATA,
             region=region.name,
         )
-        with patch("workflow_handler.r13n.store") as store, patch(
+        with patch("workflow_handler.regional_storage.store") as store, patch(
             "django.db.models.Model.save", autospec=True
         ) as save:
 
@@ -159,8 +159,8 @@ class TestR13n(TestCase):
 
         task = Task.objects.defer("data").get(pk=TASK_PK)
 
-        with patch("workflow_handler.r13n.store") as store, patch(
-            "workflow_handler.r13n.retrieve"
+        with patch("workflow_handler.regional_storage.store") as store, patch(
+            "workflow_handler.regional_storage.retrieve"
         ) as retrieve:
             task.save()
             assert len(store.mock_calls) == 0

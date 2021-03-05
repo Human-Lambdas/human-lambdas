@@ -1,5 +1,7 @@
 # Human Lambdas REST API
 
+[![codecov](https://codecov.io/gh/Human-Lambdas/hl-rest-api/branch/master/graph/badge.svg?token=J83PNZVUT7)](https://codecov.io/gh/Human-Lambdas/hl-rest-api)
+
 Backend to accessing and utilizing Human Lambdas platform.
 
 ## Pre-reqs
@@ -51,12 +53,17 @@ python manage.py createsuperuser # use email: a@a.com pass: a
 
 ### Storage Buckets
 
-<!-- ```bash
-docker run -d --name fake-gcs-server -p 4443:4443 fsouza/fake-gcs-server
-``` -->
+Regional data is stored in buckets, managed by terraform.
+
+#### Terraform
+
+```shell
+terraform login
+```
 
 #### Initialise google auth
 
+To allow your dev environment to use regional storage buckets:
 ```bash
 gcloud auth application-default login
 ```
@@ -71,6 +78,10 @@ python manage.py runserver
 pytest
 ```
 
+If you have no configured gcloud auth, then tests talking to storage buckets will fail. To ignore them:
+```shell
+pytest -m "no bucket"
+```
 
 ## QA with Swagger
 

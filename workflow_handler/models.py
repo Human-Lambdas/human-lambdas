@@ -7,8 +7,8 @@ from rest_hooks.signals import hook_event
 
 from data_handler.data_transformation import transform_int2ext
 from user_handler.models import Notification, Organization, User
-from workflow_handler import r13n
-from workflow_handler.r13n import Region
+from workflow_handler import regional_storage
+from workflow_handler.region import Region
 
 STATUS_MAPPING = {"assigned": "in_progress", "pending": "new"}
 
@@ -63,7 +63,7 @@ class Task(models.Model):
 
         if "data" in field_names and task.region:
             region = Region[task.region]
-            task.data = r13n.retrieve(task.pk, region)
+            task.data = regional_storage.retrieve(task.pk, region)
 
         return task
 
@@ -85,7 +85,7 @@ class Task(models.Model):
         self.data = {}
         try:
             super(Task, self).save()
-            r13n.store(self.pk, region, data)
+            regional_storage.store(self.pk, region, data)
         finally:
             # restore regional data on task
             self.data = data
@@ -99,7 +99,7 @@ class Task(models.Model):
         )
 
     def get_updated_status(self) -> Dict[Any, Any]:
-        return {
+        task: Dict[Any, Any] = {
             "id": self.pk,
             "status": self.get_status(),
             "completed_at": self.completed_at,
@@ -110,8 +110,12 @@ class Task(models.Model):
             "data": None,
             "source": self.source.pk if self.source else None,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
-            "region": self.region,
         }
+
+        if self.region:
+            task["region"] = self.region
+
+        return task
 
     def get_formatted_task(self, include_data: bool = True) -> Dict[Any, Any]:
         if self.assigned_to:
@@ -124,7 +128,7 @@ class Task(models.Model):
             source_name, source_id = self.source.name, self.source.pk
         else:
             source_name, source_id = None, None
-        return {
+        task: Dict[Any, Any] = {
             "id": self.pk,
             "status": self.get_status(),
             "assigned_at": self.assigned_at,
@@ -140,8 +144,12 @@ class Task(models.Model):
             "source_id": source_id,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
             "correct": self.correct,
-            "region": self.region,
         }
+
+        if self.region:
+            task["region"] = self.region
+
+        return task
 
     def get_simple_formatted_task(self):
         if self.assigned_to:
@@ -152,7 +160,7 @@ class Task(models.Model):
             source_name = self.source.name
         else:
             source_name = None
-        return {
+        task: Dict[Any, Any] = {
             "id": self.pk,
             "status": self.get_status(),
             "completed_at": self.completed_at,
@@ -162,8 +170,12 @@ class Task(models.Model):
             "queue_id": self.workflow.pk,
             "data": transform_int2ext(self.data),
             "source": source_name,
-            "region": self.region,
         }
+
+        if self.region:
+            task["region"] = self.region
+
+        return task
 
     def get_formatted_task_external(self):
         serilized_data = self.get_simple_formatted_task()
