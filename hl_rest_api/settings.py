@@ -192,6 +192,10 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "user_handler.serializers.UserCreateSerializer",
 }
 
+REGIONAL_BUCKET_AU = os.getenv("REGIONAL_BUCKET_AU")
+REGIONAL_BUCKET_US = os.getenv("REGIONAL_BUCKET_US")
+DEFAULT_DEV_BUCKET = "data-local-dev"
+
 TESTING = "test" in sys.argv
 if TESTING:
     LOGGING = {}
