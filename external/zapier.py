@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from external.authentication import TokenAuthentication
-from external.task_formats import process_external_completed_tasks
 from hl_rest_api import analytics
 from user_handler.models import Organization
 from workflow_handler.models import Task, WebHook, Workflow
@@ -282,7 +281,7 @@ class GetZapierTaskSampleData(APIView):
     def get_dict_or_sample(self, queryset):
         if queryset.exists():
             task = queryset.first().get_simple_formatted_task()
-            perform_dict = process_external_completed_tasks(task)["data"]
+            perform_dict = task["data"]
         else:
             workflow = self.get_workflow()
             perform_dict = {
