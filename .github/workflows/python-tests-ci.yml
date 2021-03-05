@@ -45,8 +45,7 @@ jobs:
           -n=auto \
           -m "not bucket" \
           --cov-report=xml \
-          --cov=workflow_handler \ 
-          metrics
+          --cov=workflow_handler \
       env:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: "test"
