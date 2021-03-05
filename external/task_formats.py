@@ -1,3 +1,9 @@
+"""
+    This file has likely become redundant since the release of the format transformations
+    TO-DO: Remove after Zapier is fixed
+"""
+
+
 def process_output_value(output):
     output_value = output.get("value")
     # Special Case: List
