@@ -195,9 +195,6 @@ class WorkflowSerializer(serializers.ModelSerializer):
         return data
 
 
-# from workflow_handler.r13n import store
-
-
 class TaskSerializer(serializers.ModelSerializer):
     workflow = serializers.SerializerMethodField()
     workflow_id = serializers.SerializerMethodField()

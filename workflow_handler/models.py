@@ -7,8 +7,8 @@ from rest_hooks.signals import hook_event
 
 from data_handler.data_transformation import transform_int2ext
 from user_handler.models import Notification, Organization, User
-from workflow_handler import r13n
-from workflow_handler.r13n import Region
+from workflow_handler import regional_storage
+from workflow_handler.region import Region
 
 STATUS_MAPPING = {"assigned": "in_progress", "pending": "new"}
 
@@ -63,7 +63,7 @@ class Task(models.Model):
 
         if "data" in field_names and task.region:
             region = Region[task.region]
-            task.data = r13n.retrieve(task.pk, region)
+            task.data = regional_storage.retrieve(task.pk, region)
 
         return task
 
@@ -85,7 +85,7 @@ class Task(models.Model):
         self.data = {}
         try:
             super(Task, self).save()
-            r13n.store(self.pk, region, data)
+            regional_storage.store(self.pk, region, data)
         finally:
             # restore regional data on task
             self.data = data

@@ -127,8 +127,6 @@ SYNC_STATES = {
     "bounding_boxes": bb_sync,
 }
 
-# from workflow_handler.r13n import retrieve
-
 
 def sync_workflow_task(workflow, task):
     # retrieve(task)  # move to new fn which also fetches task?

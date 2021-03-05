@@ -5,4 +5,6 @@ pytest-dotenv
 pytest-xdist
 pytest-randomly
 pytest-cov
+pytest-env
 parameterized
+callee

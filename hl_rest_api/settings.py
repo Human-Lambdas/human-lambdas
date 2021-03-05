@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import sys
+import uuid
 from datetime import timedelta
 
 import requests
@@ -316,3 +317,13 @@ GOOGLE_OAUTH_CLIENT_ID = (
 
 # AU_DATA_BUCKET = os.environ["AU_DATA_BUCKET"]
 # NA_DATA_BUCKET = os.environ["NA_DATA_BUCKET"]
+
+if os.getenv("PYTEST") == "true":
+    STORAGE_TEST_PREFIX = str(uuid.uuid4())
+else:
+    STORAGE_TEST_PREFIX = None
+
+DEV_BUCKET = "data-local-dev"
+
+REGIONAL_BUCKET_AU = os.getenv("REGIONAL_BUCKET_AU", DEV_BUCKET)
+REGIONAL_BUCKET_US = os.getenv("REGIONAL_BUCKET_US", DEV_BUCKET)
