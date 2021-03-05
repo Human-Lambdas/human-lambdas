@@ -23,6 +23,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2 # for codecov
     - uses: actions/setup-python@v2
       with:
         python-version: 3.8
@@ -43,7 +45,6 @@ jobs:
         python manage.py migrate
         pytest \
           -n=auto \
-          -m "not bucket" \
           --cov-report=xml \
           --cov=workflow_handler \
       env:
