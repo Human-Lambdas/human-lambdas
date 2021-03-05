@@ -61,13 +61,9 @@ Regional data is stored in buckets, managed by terraform.
 terraform login
 ```
 
-
-<!-- ```bash
-docker run -d --name fake-gcs-server -p 4443:4443 fsouza/fake-gcs-server
-``` -->
-
 #### Initialise google auth
 
+To allow your dev environment to use regional storage buckets:
 ```bash
 gcloud auth application-default login
 ```
@@ -82,6 +78,10 @@ python manage.py runserver
 pytest
 ```
 
+If you have no configured gcloud auth, then tests talking to storage buckets will fail. To ignore them:
+```shell
+pytest -m "no bucket"
+```
 
 ## QA with Swagger
 
