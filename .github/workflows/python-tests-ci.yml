@@ -46,6 +46,15 @@ jobs:
         pytest \
           -n=auto \
           --cov-report=xml \
+          --cov=data_handler \
+          --cov=external \
+          --cov=hl_rest_api \
+          --cov=metrics \
+          --cov=oi-relayer \
+          --cov=organization_handler \
+          --cov=templates_handler \
+          --cov=user_handler \
+          --cov=v1 \
           --cov=workflow_handler \
       env:
         POSTGRES_USER: postgres

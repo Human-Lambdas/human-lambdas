@@ -1,5 +1,7 @@
 # Human Lambdas REST API
 
+[![codecov](https://codecov.io/gh/Human-Lambdas/hl-rest-api/branch/master/graph/badge.svg?token=J83PNZVUT7)](https://codecov.io/gh/Human-Lambdas/hl-rest-api)
+
 Backend to accessing and utilizing Human Lambdas platform.
 
 ## Pre-reqs
