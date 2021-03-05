@@ -14,8 +14,6 @@ from workflow_handler.models import Task, WebHook, Workflow
 
 from .views import CreateTaskView
 
-# from external.task_formats import process_external_completed_tasks
-
 ZAPIER_TYPE_MAPPER = {"number": "number", "binary": "boolean"}
 
 
@@ -283,7 +281,6 @@ class GetZapierTaskSampleData(APIView):
     def get_dict_or_sample(self, queryset):
         if queryset.exists():
             task = queryset.first().get_simple_formatted_task()
-            # perform_dict = process_external_completed_tasks(task)["data"]
             perform_dict = task["data"]
         else:
             workflow = self.get_workflow()
