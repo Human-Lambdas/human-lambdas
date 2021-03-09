@@ -1,13 +1,32 @@
 import copy
+import datetime
 
 import cchardet
 from django.utils import timezone
+from django.utils.timezone import make_aware
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from .models import WebHook, Workflow, WorkflowNotification
 
 TEMPLATE_ORG_ID = 40
+
+
+def parse_dates(request):
+    try:
+        start_date = datetime.datetime.fromisoformat(
+            request.query_params.get("start_date")
+        )  # YYYY-MM-DD
+    except:
+        start_date = datetime.datetime(2019, 1, 1)
+    try:
+        end_date = datetime.datetime.fromisoformat(
+            request.query_params.get("end_date")
+        )  # YYYY-MM-DD
+        end_date += datetime.timedelta(days=1, microseconds=-1)
+    except:
+        end_date = datetime.datetime.today()
+    return make_aware(start_date), make_aware(end_date)
 
 
 def find_and_fire_hook(event_name, instance, **kwargs):

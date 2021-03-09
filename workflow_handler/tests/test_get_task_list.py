@@ -70,7 +70,7 @@ class TestInternalTaskList(APITestCase):
         t_delta = timezone.timedelta(0)
         for task in Task.objects.all()[: self.completed_tasks]:
             task.status = "completed"
-            task.completed_at = timezone.now() - t_delta
+            task.completed_at = timezone.now() + t_delta
             t_delta -= timezone.timedelta(minutes=10)
             task.save()
 
