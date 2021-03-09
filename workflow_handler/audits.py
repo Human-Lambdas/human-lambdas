@@ -19,7 +19,7 @@ from .serializers import (
     TaskMetadataSerializer,
     TaskSerializer,
 )
-from .utils import TaskPagination, process_query_params
+from .utils import TaskPagination, parse_dates, process_query_params
 
 
 def make_task_filter_url(org_id, task_id, filters):
@@ -48,7 +48,11 @@ class GetCompletedTaskView(ListAPIView):
         )
         return (
             Task.objects.defer("data")
-            .filter(Q(workflow__in=workflows) & Q(status="completed"))
+            .filter(
+                Q(workflow__in=workflows)
+                & Q(status="completed")
+                & Q(completed_at__range=(parse_dates(self.request)))
+            )
             .filter(*args, **kwargs)
             .order_by("-completed_at")
         )
@@ -79,7 +83,11 @@ class GetCompletedTasksCSVView(APIView):
         )
         return (
             Task.objects.defer("data")
-            .filter(Q(workflow__in=workflows) & Q(status="completed"))
+            .filter(
+                Q(workflow__in=workflows)
+                & Q(status="completed")
+                & Q(completed_at__range=(parse_dates(self.request)))
+            )
             .filter(*args, **kwargs)
             .order_by("completed_at")
         )

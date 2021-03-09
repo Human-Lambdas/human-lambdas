@@ -12,6 +12,7 @@ from user_handler.notifications import send_notification
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.audits import GetCompletedTaskView
 from workflow_handler.models import Task, Workflow
+from workflow_handler.utils import parse_dates
 
 from .serializers import ExternalTaskSerializer
 
@@ -46,7 +47,11 @@ class GetExternalCompletedTaskView(GetCompletedTaskView):
         )
         return (
             Task.objects.defer("data")
-            .filter(Q(workflow=workflow) & Q(status="completed"))
+            .filter(
+                Q(workflow=workflow)
+                & Q(status="completed")
+                & Q(completed_at__range=(parse_dates(self.request)))
+            )
             .filter(*args, **kwargs)
             .order_by("-completed_at")
         )
