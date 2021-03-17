@@ -105,7 +105,7 @@ class CreateWorkflowView(CreateAPIView):
 
 
 class ListWorkflowView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     serializer_class = WorkflowSerializer
     authentication_classes = (TokenAuthentication, JWTAuthentication)
 
@@ -267,7 +267,7 @@ class FileUploadView(APIView):
 
 
 class ListTaskView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -289,7 +289,7 @@ class ListTaskView(ListAPIView):
 
 
 class ListNonCompleteTaskView(ListTaskView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     serializer_class = PendingTaskSerializer
     pagination_class = TaskPagination
 
@@ -320,7 +320,7 @@ class RUDTaskView(RetrieveUpdateAPIView):
     Retrieve and Update for now, will add delete here later
     """
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -448,7 +448,7 @@ class NextTaskView(APIView):
 
 
 class AssignTaskView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
 
     def get_queryset(self):
 
@@ -516,7 +516,7 @@ class AssignTaskView(APIView):
 
 
 class CreateTaskFormView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     serializer_class = TaskSerializer
 
     def get_queryset(self):
