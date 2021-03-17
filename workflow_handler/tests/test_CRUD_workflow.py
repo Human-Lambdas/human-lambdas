@@ -223,23 +223,7 @@ class TestCRUDWorkflow(APITestCase):
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
 
-        workflow_data2 = {
-            "name": "foowf2",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data2 = {"name": "foowf2", "data": WORKFLOW_DATA["data"]}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data2,
@@ -286,46 +270,14 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_list_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data1 = {
-            "name": "foowf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data1 = {"name": "foowf", "data": WORKFLOW_DATA["data"]}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data1,
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        workflow_data2 = {
-            "name": "foowf2",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data2 = {"name": "foowf2", "data": WORKFLOW_DATA["data"]}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data2,
@@ -355,46 +307,14 @@ class TestCRUDWorkflow(APITestCase):
 
     def test_list_workflow2(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data1 = {
-            "name": "foowf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data1 = {"name": "foowf", "data": WORKFLOW_DATA["data"]}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data1,
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        workflow_data2 = {
-            "name": "foowf2",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data2 = {"name": "foowf2", "data": WORKFLOW_DATA["data"]}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data2,

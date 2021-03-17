@@ -17,7 +17,9 @@ class Command(BaseCommand):
             )
             return
 
-        templates_org = Organization(id=TEMPLATE_ORG_ID, name="templates")
+        templates_org, _created = Organization.objects.get_or_create(
+            id=TEMPLATE_ORG_ID, name="templates"
+        )
         templates_org.save()
 
         for email in options["emails"]:
