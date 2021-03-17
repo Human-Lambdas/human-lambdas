@@ -34,3 +34,18 @@ GAMMA = {
     "type": "text",
     "text": {"read_only": True},
 }
+
+SUPER_ADMIN_REGISTRATION_DATA = {
+    "email": "sa@bar.com",
+    "password": "foowordbar",
+    "organization": "staff",
+    "name": "sa",
+}
+
+
+INTERNAL_WORKER_REGISTRATION_DATA = {
+    "email": "iw@bar.com",
+    "password": "foowordbar",
+    "organization": "staff",
+    "name": "sa",
+}

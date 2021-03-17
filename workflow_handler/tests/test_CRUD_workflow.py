@@ -1,35 +1,16 @@
-from typing import Dict
-
-from django.core import management
 from rest_framework import status
-from rest_framework.test import APITestCase
 
 from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Workflow
-from workflow_handler.tests.constants import WORKFLOW_DATA
+from workflow_handler.tests.constants import (
+    SUPER_ADMIN_REGISTRATION_DATA,
+    WORKFLOW_DATA,
+)
+from workflow_handler.tests.util import HLTestCase
 from workflow_handler.utils import TEMPLATE_ORG_ID
 
-super_admin_registration_data = {
-    "email": "sa@bar.com",
-    "password": "foowordbar",
-    "organization": "staff",
-    "name": "sa",
-}
 
-
-class TestCRUDWorkflow(APITestCase):
-    def register(self, registration_data: Dict[str, str]) -> str:
-        _ = self.client.post("/v1/users/register", registration_data)
-        response = self.client.post(
-            "/v1/users/token",
-            {
-                "email": registration_data["email"],
-                "password": registration_data["password"],
-            },
-        )
-        management.call_command("createsuperadmin", registration_data["email"])
-        return response.data["access"]
-
+class TestCRUDWorkflow(HLTestCase):
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
@@ -38,7 +19,9 @@ class TestCRUDWorkflow(APITestCase):
             "name": "foo",
         }
 
-        self.access_token_super_admin = self.register(super_admin_registration_data)
+        self.access_token_super_admin = self.register(
+            SUPER_ADMIN_REGISTRATION_DATA, is_super_admin=True
+        )
 
         _ = self.client.post("/v1/users/register", registration_data)
         response = self.client.post(

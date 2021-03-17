@@ -387,7 +387,7 @@ class SaveTaskView(RUDTaskView):
 
 
 class NextTaskView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     serializer_class = TaskSerializer
 
     def get_queryset(self):
