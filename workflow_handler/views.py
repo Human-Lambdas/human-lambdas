@@ -23,7 +23,6 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from data_handler.csv_utils import process_csv
 from data_handler.data_sync import sync_workflow_task
 from external.authentication import TokenAuthentication
-from user_handler.models import Organization
 from user_handler.permissions import IsAdminOrReadOnly, IsOrgAdmin
 from workflow_handler.utils import is_force
 
@@ -93,12 +92,9 @@ class CreateWorkflowView(CreateAPIView):
     serializer_class = WorkflowSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+
         return Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
-            & Q(disabled=False)
+            Q(organization__pk=self.kwargs["org_id"]) & Q(disabled=False)
         )
 
     def perform_create(self, serializer):
@@ -114,12 +110,9 @@ class ListWorkflowView(ListAPIView):
     authentication_classes = (TokenAuthentication, JWTAuthentication)
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+
         queryset = Workflow.objects.filter(
-            Q(disabled=False)
-            & Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
+            Q(disabled=False) & Q(organization__pk=self.kwargs["org_id"])
         )
         task_status = self.request.query_params.get("task_status")
         if task_status:
@@ -236,12 +229,9 @@ class FileUploadView(APIView):
     parser_classes = [MultiPartParser]
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
-            & Q(disabled=False)
+            Q(organization__pk=self.kwargs["org_id"]) & Q(disabled=False)
         )
         return workflows.filter(pk=self.kwargs["workflow_id"])
 
@@ -281,12 +271,9 @@ class ListTaskView(ListAPIView):
     serializer_class = TaskSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(disabled=False)
-            & Q(organization__pk=self.kwargs["org_id"])
+            Q(disabled=False) & Q(organization__pk=self.kwargs["org_id"])
         )
         return (
             Task.objects.defer("data")
@@ -307,12 +294,9 @@ class ListNonCompleteTaskView(ListTaskView):
     pagination_class = TaskPagination
 
     def get_queryset(self, *args, **kwargs):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+
         workflow = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(pk=self.kwargs["workflow_id"])
-            & Q(disabled=False)
+            Q(pk=self.kwargs["workflow_id"]) & Q(disabled=False)
         )
         return (
             Task.objects.defer("data")
@@ -340,12 +324,9 @@ class RUDTaskView(RetrieveUpdateAPIView):
     serializer_class = TaskSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
-            & Q(disabled=False)
+            Q(organization__pk=self.kwargs["org_id"]) & Q(disabled=False)
         )
         return Task.objects.defer("data").filter(
             Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
@@ -410,12 +391,9 @@ class NextTaskView(APIView):
     serializer_class = TaskSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
-            & Q(disabled=False)
+            Q(organization__pk=self.kwargs["org_id"]) & Q(disabled=False)
         )
         return (
             Task.objects.defer("data")
@@ -473,12 +451,9 @@ class AssignTaskView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
-            & Q(disabled=False)
+            Q(organization__pk=self.kwargs["org_id"]) & Q(disabled=False)
         )
         return Task.objects.defer("data").filter(
             Q(workflow__in=workflows)
@@ -551,12 +526,9 @@ class CreateTaskFormView(CreateAPIView):
         )
 
     def workflow_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
+
         workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
-            & Q(disabled=False)
+            Q(organization__pk=self.kwargs["org_id"]) & Q(disabled=False)
         )
         return workflows
 

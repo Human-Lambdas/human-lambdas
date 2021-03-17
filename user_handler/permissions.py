@@ -27,11 +27,15 @@ class IsAdminOrReadOnly(BasePermission):
     """
 
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-
-        return (
-            Organization.objects.filter(pk__in=[view.kwargs["org_id"], TEMPLATE_ORG_ID])
-            .filter(admin=request.user)
-            .exists()
+        requested_org: str = view.kwargs["org_id"]
+        authoritative_orgs = Organization.objects.filter(
+            pk__in=[requested_org, TEMPLATE_ORG_ID]
         )
+
+        if request.method in SAFE_METHODS:
+            if view.kwargs["org_id"] == TEMPLATE_ORG_ID:
+                return True
+
+            return authoritative_orgs.filter(user=request.user).exists()
+
+        return authoritative_orgs.filter(admin=request.user).exists()

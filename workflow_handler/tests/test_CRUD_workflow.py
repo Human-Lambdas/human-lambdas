@@ -203,6 +203,12 @@ class TestCRUDWorkflow(APITestCase):
         self.client.credentials(
             HTTP_AUTHORIZATION="Bearer " + self.access_token_super_admin
         )
+        get_response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
+            updated_workflow_data,
+            format="json",
+        )
+        assert get_response.status_code == status.HTTP_200_OK
         response = self.client.patch(
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
             updated_workflow_data,
