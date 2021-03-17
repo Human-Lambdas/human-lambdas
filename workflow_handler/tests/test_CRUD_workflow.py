@@ -1,3 +1,6 @@
+from typing import Dict
+
+from django.core import management
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -6,8 +9,27 @@ from workflow_handler.models import Workflow
 from workflow_handler.tests.constants import WORKFLOW_DATA
 from workflow_handler.utils import TEMPLATE_ORG_ID
 
+super_admin_registration_data = {
+    "email": "sa@bar.com",
+    "password": "foowordbar",
+    "organization": "staff",
+    "name": "sa",
+}
+
 
 class TestCRUDWorkflow(APITestCase):
+    def register(self, registration_data: Dict[str, str]) -> str:
+        _ = self.client.post("/v1/users/register", registration_data)
+        response = self.client.post(
+            "/v1/users/token",
+            {
+                "email": registration_data["email"],
+                "password": registration_data["password"],
+            },
+        )
+        management.call_command("createsuperadmin", registration_data["email"])
+        return response.data["access"]
+
     def setUp(self):
         registration_data = {
             "email": "foo@bar.com",
@@ -15,6 +37,9 @@ class TestCRUDWorkflow(APITestCase):
             "organization": "fooInc",
             "name": "foo",
         }
+
+        self.access_token_super_admin = self.register(super_admin_registration_data)
+
         _ = self.client.post("/v1/users/register", registration_data)
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
@@ -158,6 +183,32 @@ class TestCRUDWorkflow(APITestCase):
         workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
         workflow = workflow_obj.first()
         self.assertNotEqual(updated_text, workflow.name)
+
+    def test_update_workflow_super_admin(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+        workflow_data = WORKFLOW_DATA
+        response = self.client.post(
+            "/v1/orgs/{}/workflows/create".format(self.org_id),
+            workflow_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
+        self.assertTrue(workflow_obj.exists())
+        workflow = workflow_obj.first()
+        updated_text = "not so great wf"
+        updated_workflow_data = {
+            "name": updated_text,
+        }
+        self.client.credentials(
+            HTTP_AUTHORIZATION="Bearer " + self.access_token_super_admin
+        )
+        response = self.client.patch(
+            "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
+            updated_workflow_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_update_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)

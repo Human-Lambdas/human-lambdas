@@ -34,7 +34,7 @@ from .serializers import (
     TaskSerializer,
     WorkflowSerializer,
 )
-from .utils import TEMPLATE_ORG_ID, TaskPagination, decode_csv
+from .utils import TaskPagination, decode_csv
 
 
 class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
@@ -169,13 +169,8 @@ class BaseWorkflowView(RetrieveAPIView):
         return context
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(
-            Q(user=user) | Q(id=TEMPLATE_ORG_ID)
-        ).all()
         return Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(organization__pk=self.kwargs["org_id"])
+            Q(organization__pk=self.kwargs["org_id"])
             & Q(disabled=False)
             & Q(pk=self.kwargs["workflow_id"])
         )
@@ -205,27 +200,15 @@ class InternalWorkflowView(UpdateModelMixin, BaseWorkflowView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         instance = self.get_object()
-        if instance.organization.admin.filter(pk=request.user.pk).exists():
-            serializer = self.get_serializer(
-                instance, data=request.data, partial=partial
-            )
-            serializer.is_valid(raise_exception=True)
-            self.perform_update(serializer)
-            if getattr(instance, "_prefetched_objects_cache", None):
-                # If 'prefetch_related' has been applied to a queryset, we need to
-                # forcibly invalidate the prefetch cache on the instance.
-                instance._prefetched_objects_cache = {}
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        if getattr(instance, "_prefetched_objects_cache", None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
 
-            return Response(serializer.data)
-        return Response(
-            {
-                "status_code": 403,
-                "errors": [
-                    {"message": "You do not have permission to change workflow"}
-                ],
-            },
-            status=403,
-        )
+        return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
