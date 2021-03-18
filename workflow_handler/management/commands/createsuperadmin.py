@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from django.core.management.base import BaseCommand, CommandParser
 
 from user_handler.models import Organization, User
-from workflow_handler.utils import TEMPLATE_ORG_ID
+from workflow_handler.utils import STAFF_ORG_ID
 
 
 class Command(BaseCommand):
@@ -18,7 +18,7 @@ class Command(BaseCommand):
             return
 
         templates_org, _created = Organization.objects.get_or_create(
-            id=TEMPLATE_ORG_ID, name="templates"
+            id=STAFF_ORG_ID, name="staff"
         )
         templates_org.save()
 
@@ -28,6 +28,6 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Added super admins {options['emails']} to org {TEMPLATE_ORG_ID}"
+                f"Added super admins {options['emails']} to org {STAFF_ORG_ID}"
             )
         )

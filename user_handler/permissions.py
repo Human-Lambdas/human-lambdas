@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-from workflow_handler.utils import TEMPLATE_ORG_ID
+from workflow_handler.utils import STAFF_ORG_ID, TEMPLATE_ORG_ID
 
 from .models import Organization
 
@@ -29,7 +29,7 @@ class IsAdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         requested_org: str = view.kwargs["org_id"]
         authoritative_orgs = Organization.objects.filter(
-            pk__in=[requested_org, TEMPLATE_ORG_ID]
+            pk__in=[requested_org, STAFF_ORG_ID]
         )
 
         if request.method in SAFE_METHODS:
