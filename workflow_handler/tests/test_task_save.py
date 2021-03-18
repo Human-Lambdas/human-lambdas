@@ -7,7 +7,13 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Task, Workflow
-from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
+from workflow_handler.tests.constants import (
+    ALPHA,
+    BETA,
+    GAMMA,
+    REGISTRATION_DATA,
+    REGISTRATION_DATA_2,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,18 +30,11 @@ class TestTasksSave(APITestCase):
 
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        response = self.client.post("/v1/users/register", registration_data)
+
+        response = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.user_id = response.data["id"]
 
-        registration_data["email"] = "foojr@bar.com"
-        _ = self.client.post("/v1/users/register", registration_data)
-        # registration_data["email"] = "foo@bar.com"
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA_2)
 
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(

@@ -9,18 +9,14 @@ from workflow_handler.models import Source, Task, TaskActivity
 from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
 
 _CURRENT_DIR = os.path.dirname(__file__)
+from workflow_handler.tests.constants import REGISTRATION_DATA
 
 
 class TestTaskAudit(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        response = self.client.post("/v1/users/register", registration_data)
+
+        response = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.user_id = response.data["id"]
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
@@ -356,13 +352,8 @@ class TestTaskAudit(APITestCase):
 class TestEmptyTaskAudit(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}

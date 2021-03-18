@@ -3,31 +3,24 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Workflow
-from workflow_handler.tests.constants import WORKFLOW_DATA
+from workflow_handler.tests.constants import (
+    REGISTRATION_DATA,
+    REGISTRATION_DATA_3,
+    WORKFLOW_DATA,
+)
 
 
 class TestListWorkflow(APITestCase):
     def setUp(self):
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.org_id1 = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token1 = response.data["access"]
 
-        registration_data = {
-            "email": "bar@bar.com",
-            "password": "foowordbar",
-            "organization": "barInc",
-            "name": "bar",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA_3)
         self.org_id2 = Organization.objects.get(user__email="bar@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "bar@bar.com", "password": "foowordbar"}
@@ -85,13 +78,8 @@ class TestListWorkflow(APITestCase):
 
 class TestListNoWorkflow(APITestCase):
     def setUp(self):
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.org_id1 = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}

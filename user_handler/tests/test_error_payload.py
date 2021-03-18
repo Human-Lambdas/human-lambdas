@@ -13,7 +13,7 @@ class TestErrorPayloadStructure(APITestCase):
             "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ"
             ".SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
         )
-        self.invalid_registration_data = {
+        self.invalid_REGISTRATION_DATA = {
             "organization": "barInc",
             "name": "bar",
         }
@@ -34,7 +34,7 @@ class TestErrorPayloadStructure(APITestCase):
     def test_register_user_invalid_data(self):
         response = self.client.post(
             "/v1/users/register",
-            self.invalid_registration_data,
+            self.invalid_REGISTRATION_DATA,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIsInstance(response.data["errors"], list)

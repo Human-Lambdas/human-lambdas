@@ -9,16 +9,13 @@ from workflow_handler.models import Task
 
 _CURRENT_DIR = os.path.dirname(__file__)
 
+from workflow_handler.tests.constants import REGISTRATION_DATA
+
 
 class TestInternalTaskList(APITestCase):
     def setUp(self):
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
