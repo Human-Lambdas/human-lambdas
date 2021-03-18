@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Workflow
+from workflow_handler.tests.constants import WORKFLOW_DATA
 
 
 class TestListWorkflow(APITestCase):
@@ -35,23 +36,7 @@ class TestListWorkflow(APITestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token1)
         self.wf_name1 = "foowf"
-        workflow_data1 = {
-            "name": self.wf_name1,
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data1 = {"name": self.wf_name1, "data": WORKFLOW_DATA["data"]}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id1),
             workflow_data1,
@@ -60,23 +45,7 @@ class TestListWorkflow(APITestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token2)
         self.wf_name2 = "barwf"
-        workflow_data1 = {
-            "name": self.wf_name2,
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data1 = {"name": self.wf_name2, "data": WORKFLOW_DATA["data"]}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id2),
             workflow_data1,

@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission
 
+from workflow_handler.utils import STAFF_ORG_ID, TEMPLATE_ORG_ID
+
 from .models import Organization
 
 
@@ -25,10 +27,15 @@ class IsAdminOrReadOnly(BasePermission):
     """
 
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS or (
-            Organization.objects.filter(pk=view.kwargs["org_id"])
-            .filter(admin=request.user)
-            .exists()
-        ):
-            return True
-        return False
+        requested_org: str = view.kwargs["org_id"]
+        authoritative_orgs = Organization.objects.filter(
+            pk__in=[requested_org, STAFF_ORG_ID]
+        )
+
+        if request.method in SAFE_METHODS:
+            if view.kwargs["org_id"] == TEMPLATE_ORG_ID:
+                return True
+
+            return authoritative_orgs.filter(user=request.user).exists()
+
+        return authoritative_orgs.filter(admin=request.user).exists()
