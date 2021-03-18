@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 
 from django.core import management
 from rest_framework.test import APITestCase
@@ -13,7 +13,7 @@ class HLTestCase(APITestCase):
         registration_data: Dict[str, str],
         is_super_admin: bool = False,
         is_internal_worker: bool = False,
-    ) -> str:
+    ) -> Dict[Any, Any]:
         _ = self.client.post("/v1/users/register", registration_data)
         response = self.client.post(
             "/v1/users/token",
@@ -31,4 +31,5 @@ class HLTestCase(APITestCase):
             user = User.objects.get(email=registration_data["email"])
             templates_org.user.add(user)
 
-        return response.data["access"]
+        assert response.status_code == 200
+        return response.data

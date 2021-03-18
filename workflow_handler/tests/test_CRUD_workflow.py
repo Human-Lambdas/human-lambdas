@@ -3,6 +3,7 @@ from rest_framework import status
 from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Workflow
 from workflow_handler.tests.constants import (
+    REGISTRATION_DATA,
     SUPER_ADMIN_REGISTRATION_DATA,
     WORKFLOW_DATA,
 )
@@ -12,18 +13,12 @@ from workflow_handler.utils import TEMPLATE_ORG_ID
 
 class TestCRUDWorkflow(HLTestCase):
     def setUp(self):
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
 
         self.access_token_super_admin = self.register(
             SUPER_ADMIN_REGISTRATION_DATA, is_super_admin=True
-        )
+        )["access"]
 
-        _ = self.client.post("/v1/users/register", registration_data)
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )

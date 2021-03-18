@@ -9,50 +9,23 @@ from workflow_handler.models import Task
 
 _CURRENT_DIR = os.path.dirname(__file__)
 
+from workflow_handler.tests.constants import REGISTRATION_DATA, WORKFLOW_DATA_2
+
 
 class TestInternalTaskList(APITestCase):
     def setUp(self):
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data = {
-            "name": "uploader",
-            "data": [
-                {
-                    "id": "news",
-                    "name": "news",
-                    "type": "text",
-                    "layout": {},
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "type",
-                    "name": "type",
-                    "type": "text",
-                    "layout": {},
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
+            WORKFLOW_DATA_2,
             format="json",
         )
         self.workflow_id = response.data["id"]

@@ -7,7 +7,11 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Task, TaskActivity, Workflow
-from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
+from workflow_handler.tests.constants import (
+    REGISTRATION_DATA,
+    REGISTRATION_DATA_2,
+    WORKFLOW_DATA_3,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,18 +28,11 @@ class TestTasksActivity(APITestCase):
 
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        response = self.client.post("/v1/users/register", registration_data)
+
+        response = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.user_id = response.data["id"]
 
-        registration_data["email"] = "foojr@bar.com"
-        _ = self.client.post("/v1/users/register", registration_data)
-        # registration_data["email"] = "foo@bar.com"
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA_2)
 
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
@@ -44,28 +41,9 @@ class TestTasksActivity(APITestCase):
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
-        workflow_data = {
-            "name": "uploader",
-            "data": [
-                ALPHA,
-                BETA,
-                GAMMA,
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
-                },
-            ],
-        }
         _ = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
+            WORKFLOW_DATA_3,
             format="json",
         )
         self.workflow_id = Workflow.objects.get(name="uploader").id
