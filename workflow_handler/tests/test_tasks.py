@@ -31,10 +31,10 @@ class TestTasks(HLTestCase):
     def setUp(self):
         self.access_token_super_admin = self.register(
             SUPER_ADMIN_REGISTRATION_DATA, is_super_admin=True
-        )
+        )["access"]
         self.access_token_internal_worker = self.register(
             INTERNAL_WORKER_REGISTRATION_DATA, is_internal_worker=True
-        )
+        )["access"]
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
         registration_data = {
             "email": "foo@bar.com",

@@ -21,7 +21,7 @@ class TestCRUDWorkflow(HLTestCase):
 
         self.access_token_super_admin = self.register(
             SUPER_ADMIN_REGISTRATION_DATA, is_super_admin=True
-        )
+        )["access"]
 
         _ = self.client.post("/v1/users/register", registration_data)
         response = self.client.post(
