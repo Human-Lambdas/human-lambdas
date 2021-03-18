@@ -13,6 +13,7 @@ from workflow_handler.tests.constants import (
     INTERNAL_WORKER_REGISTRATION_DATA,
     REGISTRATION_DATA,
     SUPER_ADMIN_REGISTRATION_DATA,
+    WORKFLOW_DATA_3,
 )
 from workflow_handler.tests.util import HLTestCase
 
@@ -57,28 +58,9 @@ class TestTasks(HLTestCase):
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
-        workflow_data = {
-            "name": "uploader",
-            "data": [
-                ALPHA,
-                BETA,
-                GAMMA,
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
-                },
-            ],
-        }
         _ = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
+            WORKFLOW_DATA_3,
             format="json",
         )
         second_workflow_data = {

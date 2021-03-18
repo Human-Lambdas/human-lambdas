@@ -8,11 +8,9 @@ from rest_framework.test import APITestCase
 from user_handler.models import Organization
 from workflow_handler.models import Task, TaskActivity, Workflow
 from workflow_handler.tests.constants import (
-    ALPHA,
-    BETA,
-    GAMMA,
     REGISTRATION_DATA,
     REGISTRATION_DATA_2,
+    WORKFLOW_DATA_3,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,28 +41,9 @@ class TestTasksActivity(APITestCase):
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
-        workflow_data = {
-            "name": "uploader",
-            "data": [
-                ALPHA,
-                BETA,
-                GAMMA,
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
-                },
-            ],
-        }
         _ = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
+            WORKFLOW_DATA_3,
             format="json",
         )
         self.workflow_id = Workflow.objects.get(name="uploader").id

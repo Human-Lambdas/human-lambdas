@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 from user_handler.models import Organization
 from workflow_handler.models import Task
 from workflow_handler.tests import DATA_PATH
-from workflow_handler.tests.constants import REGISTRATION_DATA
+from workflow_handler.tests.constants import REGISTRATION_DATA, WORKFLOW_DATA_2
 
 
 class TestTaskList(APITestCase):
@@ -27,34 +27,9 @@ class TestTaskList(APITestCase):
         )
         self.token = response.data["token"]
 
-        workflow_data = {
-            "name": "uploader",
-            "data": [
-                {
-                    "id": "news",
-                    "name": "news",
-                    "type": "text",
-                    "layout": {},
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "type",
-                    "name": "type",
-                    "type": "text",
-                    "layout": {},
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
+            WORKFLOW_DATA_2,
             format="json",
         )
         self.workflow_id = response.data["id"]

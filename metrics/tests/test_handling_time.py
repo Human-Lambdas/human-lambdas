@@ -14,6 +14,7 @@ from workflow_handler.tests.constants import (
     BETA,
     GAMMA,
     REGISTRATION_DATA,
+    WORKFLOW_DATA_3,
 )
 
 
@@ -33,28 +34,10 @@ class TestHandlingTime(APITestCase):
             "/v1/users/api-token",
         )
         self.token = response.data["token"]
-        workflow_data = {
-            "name": "uploader",
-            "data": [
-                ALPHA,
-                BETA,
-                GAMMA,
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
-                },
-            ],
-        }
+
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
+            WORKFLOW_DATA_3,
             format="json",
         )
         self.workflow_id = response.data["id"]

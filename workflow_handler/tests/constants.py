@@ -1,5 +1,25 @@
 from typing_extensions import Final
 
+ALPHA: Final = {
+    "id": "Alpha",
+    "name": "alpha",
+    "type": "text",
+    "text": {"read_only": True},
+}
+BETA: Final = {
+    "id": "Beta",
+    "name": "beta",
+    "type": "text",
+    "text": {"read_only": True},
+}
+GAMMA: Final = {
+    "id": "Gamma",
+    "name": "gamma",
+    "type": "text",
+    "text": {"read_only": True},
+}
+
+
 WORKFLOW_DATA: Final = {
     "name": "foowf",
     "data": [
@@ -18,23 +38,50 @@ WORKFLOW_DATA: Final = {
     ],
 }
 
-ALPHA: Final = {
-    "id": "Alpha",
-    "name": "alpha",
-    "type": "text",
-    "text": {"read_only": True},
+WORKFLOW_DATA_2: Final = {
+    "name": "uploader",
+    "data": [
+        {
+            "id": "news",
+            "name": "news",
+            "type": "text",
+            "layout": {},
+            "text": {"read_only": True},
+        },
+        {
+            "id": "type",
+            "name": "type",
+            "type": "text",
+            "layout": {},
+            "text": {"read_only": True},
+        },
+        {
+            "id": "foo",
+            "name": "foo",
+            "type": "single_selection",
+            "single_selection": {"options": ["foo1", "bar1"]},
+        },
+    ],
 }
-BETA: Final = {
-    "id": "Beta",
-    "name": "beta",
-    "type": "text",
-    "text": {"read_only": True},
-}
-GAMMA: Final = {
-    "id": "Gamma",
-    "name": "gamma",
-    "type": "text",
-    "text": {"read_only": True},
+
+WORKFLOW_DATA_3: Final = {
+    "name": "uploader",
+    "data": [
+        ALPHA,
+        BETA,
+        GAMMA,
+        {
+            "id": "foo",
+            "name": "foo",
+            "type": "single_selection",
+            "single_selection": {
+                "options": [
+                    {"id": "foo2", "name": "foo2"},
+                    {"id": "bar2", "name": "bar2"},
+                ],
+            },
+        },
+    ],
 }
 
 SUPER_ADMIN_REGISTRATION_DATA: Final = {
