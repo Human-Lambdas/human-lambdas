@@ -3,7 +3,7 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Workflow
-from workflow_handler.tests.constants import REGISTRATION_DATA
+from workflow_handler.tests.constants import DELTA, REGISTRATION_DATA
 
 
 class TestErrorPayloadStructure(APITestCase):
@@ -24,12 +24,7 @@ class TestErrorPayloadStructure(APITestCase):
         self.complete_workflow_data = {
             "name": "foowf",
             "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                DELTA,
                 {
                     "id": "foo",
                     "name": "foo",
@@ -63,12 +58,7 @@ class TestErrorPayloadStructure(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = {
             "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                DELTA,
                 {
                     "id": "foo",
                     "name": "foo",

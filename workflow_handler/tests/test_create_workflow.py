@@ -3,7 +3,11 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Workflow
-from workflow_handler.tests.constants import REGISTRATION_DATA, WORKFLOW_DATA
+from workflow_handler.tests.constants import (
+    DELTA,
+    REGISTRATION_DATA,
+    WORKFLOW_DATA,
+)
 
 
 class TestCreateWorkflow(APITestCase):
@@ -123,12 +127,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                DELTA,
                 {"id": 1},
             ],
         }
@@ -144,12 +143,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                DELTA,
                 {
                     "id": "foo2",
                     "name": "foo",
@@ -170,12 +164,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                DELTA,
                 {
                     "id": "foo2",
                     "name": "foo",
@@ -196,12 +185,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                DELTA,
                 {"id": "foo2", "name": "foo", "type": "single-class"},
             ],
         }
@@ -217,12 +201,7 @@ class TestCreateWorkflow(APITestCase):
         workflow_data = {
             "name": "foowf",
             "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
+                DELTA,
                 {"id": "foo2", "name": "foo", "type": "binary", "binary": {}},
             ],
         }

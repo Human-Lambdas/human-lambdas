@@ -19,7 +19,12 @@ GAMMA: Final = {
     "text": {"read_only": True},
 }
 
-
+DELTA: Final = {
+    "id": "foo",
+    "name": "foo",
+    "type": "text",
+    "text": {"read_only": True},
+}
 WORKFLOW_DATA: Final = {
     "name": "foowf",
     "data": [
