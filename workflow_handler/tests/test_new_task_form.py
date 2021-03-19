@@ -24,14 +24,14 @@ class TestTaskForm(APITestCase):
                     "name": "news",
                     "type": "text",
                     "layout": {},
-                    "text": {"read_only": True},
+                    "text": {"read_only": True, "value": None},
                 },
                 {
                     "id": "type",
                     "name": "type",
                     "type": "text",
                     "layout": {},
-                    "text": {"read_only": True},
+                    "text": {"read_only": True, "value": None},
                 },
                 {
                     "id": "foo",

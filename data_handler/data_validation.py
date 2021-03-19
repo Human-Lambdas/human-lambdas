@@ -41,7 +41,7 @@ def convert_string(input_value):
 # Enforce string
 def default_data_validation(data, is_workflow):
     default_value = data[data["type"]].get("value")
-    if not isinstance(default_value, str):
+    if not isinstance(default_value, (str, type(None))):
         raise DataValidationError(f"Data item with id {data['id']} must be a string")
     data[data["type"]]["value"] = default_value
 
