@@ -3,8 +3,10 @@ from rest_framework import status
 from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Workflow
 from workflow_handler.tests.constants import (
+    GUIDELINES_URL,
     REGISTRATION_DATA,
     SUPER_ADMIN_REGISTRATION_DATA,
+    TASK_DESCRIPTION,
     WORKFLOW_DATA,
 )
 from workflow_handler.tests.util import HLTestCase
@@ -38,6 +40,7 @@ class TestCRUDWorkflow(HLTestCase):
             "/v1/users/token", {"email": "worker@bar.com", "password": "foowordbar"}
         )
         self.access_token_worker = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
     def test_create_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
@@ -162,6 +165,66 @@ class TestCRUDWorkflow(HLTestCase):
         workflow = workflow_obj.first()
         self.assertNotEqual(updated_text, workflow.name)
 
+    def test_when_running_workflow_then_there_must_be_description(self):
+        workflow_data_no_desc = {**WORKFLOW_DATA}
+
+        workflow_id = self.create_workflow(self.org_id, workflow_data_no_desc)["id"]
+        assert Workflow.objects.get(pk=workflow_id).is_running == False
+
+        running_workflow_data_no_desc = {
+            **workflow_data_no_desc,
+            "is_running": True,
+        }
+
+        response = self.client.patch(
+            f"/v1/orgs/{self.org_id}/workflows/{workflow_id}",
+            running_workflow_data_no_desc,
+            format="json",
+        )
+        self.assertEqual(
+            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
+        )
+        assert Workflow.objects.get(pk=workflow_id).is_running == False
+        assert Workflow.objects.get(pk=workflow_id).task_description is None
+
+        running_workflow_data = {
+            **workflow_data_no_desc,
+            "is_running": True,
+            "task_description": TASK_DESCRIPTION,
+        }
+        response = self.client.patch(
+            f"/v1/orgs/{self.org_id}/workflows/{workflow_id}",
+            running_workflow_data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        wf = Workflow.objects.get(pk=workflow_id)
+        assert wf.is_running == True
+        assert wf.task_description == TASK_DESCRIPTION
+
+    def test_when_creating_workflow_then_running_data_is_collected(self):
+        workflow_data_running_no_desc = {**WORKFLOW_DATA, "is_running": True}
+
+        response = self.client.post(
+            f"/v1/orgs/{self.org_id}/workflows/create",
+            workflow_data_running_no_desc,
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code, status.HTTP_400_BAD_REQUEST, response.data
+        )
+
+        workflow_data_running = {
+            **workflow_data_running_no_desc,
+            "task_description": TASK_DESCRIPTION,
+            "guidelines_url": GUIDELINES_URL,
+        }
+        workflow_id = self.create_workflow(self.org_id, workflow_data_running)["id"]
+        wf = Workflow.objects.get(pk=workflow_id)
+        assert wf.is_running == True
+        assert wf.task_description == TASK_DESCRIPTION
+
     def test_update_workflow_super_admin(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = WORKFLOW_DATA
@@ -254,14 +317,14 @@ class TestCRUDWorkflow(HLTestCase):
 
     def test_list_workflow(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data1 = {"name": "foowf", "data": WORKFLOW_DATA["data"]}
+        workflow_data1 = {**WORKFLOW_DATA, "name": "foowf"}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data1,
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        workflow_data2 = {"name": "foowf2", "data": WORKFLOW_DATA["data"]}
+        workflow_data2 = {**WORKFLOW_DATA, "name": "foowf2"}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data2,
@@ -269,8 +332,7 @@ class TestCRUDWorkflow(HLTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         response = self.client.get("/v1/orgs/{}/workflows".format(self.org_id))
-        result_1 = response.data[0]
-        result_2 = response.data[1]
+        result_1, result_2 = sorted(response.data, key=lambda dd: dd["name"])
         self.assertTrue(result_1.pop("id"))
         self.assertTrue(result_2.pop("id"))
         self.assertEqual(result_1.pop("n_tasks"), 0)
@@ -282,23 +344,20 @@ class TestCRUDWorkflow(HLTestCase):
 
         del workflow_data1["data"]
         del workflow_data2["data"]
-        try:
-            self.assertEqual(workflow_data2, response.data[0], response.data)
-            self.assertEqual(workflow_data1, response.data[1], response.data)
-        except AssertionError:
-            self.assertEqual(workflow_data2, response.data[1], response.data)
-            self.assertEqual(workflow_data1, response.data[0], response.data)
+
+        self.assertEqual(workflow_data1, result_1, response.data)
+        self.assertEqual(workflow_data2, result_2, response.data)
 
     def test_list_workflow2(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
-        workflow_data1 = {"name": "foowf", "data": WORKFLOW_DATA["data"]}
+        workflow_data1 = {**WORKFLOW_DATA, "name": "foowf"}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data1,
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        workflow_data2 = {"name": "foowf2", "data": WORKFLOW_DATA["data"]}
+        workflow_data2 = {**WORKFLOW_DATA, "name": "foowf2"}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
             workflow_data2,

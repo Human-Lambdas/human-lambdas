@@ -27,6 +27,9 @@ DELTA: Final = {
 }
 WORKFLOW_DATA: Final = {
     "name": "foowf",
+    "is_running": False,
+    "task_description": None,
+    "guidelines_url": None,
     "data": [
         {
             "id": "foo",
@@ -122,3 +125,6 @@ INTERNAL_WORKER_REGISTRATION_DATA: Final = {
     "organization": "staff",
     "name": "sa",
 }
+
+TASK_DESCRIPTION = "lkjh"
+GUIDELINES_URL = "https://asdf.asdf"
