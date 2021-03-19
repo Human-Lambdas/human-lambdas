@@ -21,6 +21,16 @@
             "program": "manage.py",
             "args": ["runserver"],
             "console": "integratedTerminal",
+        },
+        {
+            "name": "debug createsuperadmin",
+            "type": "python",
+            "justMyCode": false,
+            "request": "launch",
+            "django": true,
+            "program": "manage.py",
+            "args": ["createsuperadmin", "a@a.com"],
+            "console": "integratedTerminal",
         }
     ]
 }

@@ -6,7 +6,12 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
-from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
+from workflow_handler.tests.constants import (
+    ALPHA,
+    BETA,
+    GAMMA,
+    REGISTRATION_DATA,
+)
 
 from . import DATA_PATH
 
@@ -17,13 +22,8 @@ class TestCompletedTasksToCSV(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(DATA_PATH, "test.csv")
         self.total_rows = 3
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        response = self.client.post("/v1/users/register", registration_data)
+
+        response = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.user_id = response.data["id"]
 
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk

@@ -23,6 +23,9 @@ class Workflow(models.Model):
     disabled = models.BooleanField(default=False)
     n_tasks = models.IntegerField(default=0)
     data = JSONField(blank=True, default=list)
+    is_running = models.BooleanField(default=False)
+    task_description = models.TextField(null=True)
+    guidelines_url = models.TextField(null=True)
 
     def __str__(self):
         return self.name

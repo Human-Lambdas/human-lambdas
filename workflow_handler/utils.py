@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from .models import WebHook, Workflow, WorkflowNotification
 
 TEMPLATE_ORG_ID = 40
+STAFF_ORG_ID = 10e8
 
 
 def parse_dates(request):

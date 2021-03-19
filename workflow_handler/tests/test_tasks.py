@@ -3,18 +3,26 @@ import logging
 import os
 
 from rest_framework import status
-from rest_framework.test import APITestCase
 
 from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Task, Workflow
-from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
+from workflow_handler.tests.constants import (
+    ALPHA,
+    BETA,
+    GAMMA,
+    INTERNAL_WORKER_REGISTRATION_DATA,
+    REGISTRATION_DATA,
+    SUPER_ADMIN_REGISTRATION_DATA,
+    WORKFLOW_DATA_3,
+)
+from workflow_handler.tests.util import HLTestCase
 
 logger = logging.getLogger(__name__)
 
 _CURRENT_DIR = os.path.dirname(__file__)
 
 
-class TestTasks(APITestCase):
+class TestTasks(HLTestCase):
     def setUserClient(self, email):
         response = self.client.post(
             "/v1/users/token", {"email": email, "password": "foowordbar"}
@@ -23,14 +31,15 @@ class TestTasks(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
     def setUp(self):
+        self.access_token_super_admin = self.register(
+            SUPER_ADMIN_REGISTRATION_DATA, is_super_admin=True
+        )["access"]
+        self.access_token_internal_worker = self.register(
+            INTERNAL_WORKER_REGISTRATION_DATA, is_internal_worker=True
+        )["access"]
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        response = self.client.post("/v1/users/register", registration_data)
+
+        response = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.user_id = response.data["id"]
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
 
@@ -43,40 +52,15 @@ class TestTasks(APITestCase):
         user.save()
         org.add_admin(user)
 
-        # registration_data["email"] =
-        # _ = self.client.post("/v1/users/register", registration_data)
-
-        # registration_data["email"] = "foo@bar.com"
-
-        # self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
-        workflow_data = {
-            "name": "uploader",
-            "data": [
-                ALPHA,
-                BETA,
-                GAMMA,
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
-                },
-            ],
-        }
         _ = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
+            WORKFLOW_DATA_3,
             format="json",
         )
         second_workflow_data = {
@@ -222,6 +206,34 @@ class TestTasks(APITestCase):
             self.assertEqual("completed", Task.objects.get(id=task.id).status)
 
     def test_next_task(self):
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual("in_progress", response.data["status"], response.content)
+        task = Task.objects.get(id=response.data["id"])
+        self.assertEqual(task.status, "in_progress")
+
+    def test_next_task_super_admin(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION="Bearer " + self.access_token_super_admin
+        )
+        response = self.client.get(
+            "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
+                self.org_id, self.workflow_id
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual("in_progress", response.data["status"], response.content)
+        task = Task.objects.get(id=response.data["id"])
+        self.assertEqual(task.status, "in_progress")
+
+    def test_next_task_internal_worker(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION="Bearer " + self.access_token_internal_worker
+        )
         response = self.client.get(
             "/v1/orgs/{0}/workflows/{1}/tasks/next".format(
                 self.org_id, self.workflow_id

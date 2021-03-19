@@ -218,3 +218,5 @@ templates.json
 *cloudbuild.yaml
 .gcloudignore
 _whaler
+
+.deeptest

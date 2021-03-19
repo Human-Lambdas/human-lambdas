@@ -3,30 +3,24 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Workflow
+from workflow_handler.tests.constants import (
+    REGISTRATION_DATA,
+    REGISTRATION_DATA_3,
+    WORKFLOW_DATA,
+)
 
 
 class TestListWorkflow(APITestCase):
     def setUp(self):
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.org_id1 = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
         self.access_token1 = response.data["access"]
 
-        registration_data = {
-            "email": "bar@bar.com",
-            "password": "foowordbar",
-            "organization": "barInc",
-            "name": "bar",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA_3)
         self.org_id2 = Organization.objects.get(user__email="bar@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "bar@bar.com", "password": "foowordbar"}
@@ -35,23 +29,7 @@ class TestListWorkflow(APITestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token1)
         self.wf_name1 = "foowf"
-        workflow_data1 = {
-            "name": self.wf_name1,
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data1 = {"name": self.wf_name1, "data": WORKFLOW_DATA["data"]}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id1),
             workflow_data1,
@@ -60,23 +38,7 @@ class TestListWorkflow(APITestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token2)
         self.wf_name2 = "barwf"
-        workflow_data1 = {
-            "name": self.wf_name2,
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
-        }
+        workflow_data1 = {"name": self.wf_name2, "data": WORKFLOW_DATA["data"]}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id2),
             workflow_data1,
@@ -116,13 +78,8 @@ class TestListWorkflow(APITestCase):
 
 class TestListNoWorkflow(APITestCase):
     def setUp(self):
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.org_id1 = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}

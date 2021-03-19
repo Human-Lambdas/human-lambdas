@@ -11,7 +11,12 @@ from rest_framework.test import APITestCase
 from data_handler.csv_utils import process_csv, validate_keys
 from user_handler.models import Organization, User
 from workflow_handler.models import Task, Workflow
-from workflow_handler.tests.constants import ALPHA, BETA, GAMMA
+from workflow_handler.tests.constants import (
+    ALPHA,
+    BETA,
+    GAMMA,
+    REGISTRATION_DATA,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +27,8 @@ class TestUpload(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
         self.larger_file_path = os.path.join(_CURRENT_DIR, "data", "dataset.csv")
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
@@ -245,13 +245,8 @@ class TestUploadExtremes(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "data_space.csv")
         self.feedback_file_path = os.path.join(_CURRENT_DIR, "data", "feedback.csv")
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
@@ -373,13 +368,8 @@ class TestUploadExtremes(APITestCase):
 class TestUploadList(APITestCase):
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "list_data.csv")
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        _ = self.client.post("/v1/users/register", registration_data)
+
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}

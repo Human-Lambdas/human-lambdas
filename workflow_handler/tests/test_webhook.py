@@ -6,7 +6,15 @@ from rest_framework.test import APITestCase
 
 from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Task, WebHook, Workflow
-from workflow_handler.tests.constants import ALPHA, BETA, GAMMA, WORKFLOW_DATA
+from workflow_handler.tests.constants import (
+    ALPHA,
+    BETA,
+    GAMMA,
+    REGISTRATION_DATA,
+    REGISTRATION_DATA_2,
+    WORKFLOW_DATA,
+    WORKFLOW_DATA_3,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -42,20 +50,7 @@ class TestWebhook(APITestCase):
         self.hook_url = "http://some.url.com"
         self.workflow_data = {
             "name": "foowf",
-            "data": [
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {"options": ["foo1", "bar1"]},
-                },
-            ],
+            "data": WORKFLOW_DATA["data"],
             "webhook": {"target": self.hook_url},
         }
         response = self.client.post(
@@ -178,18 +173,11 @@ class TestWebhookTasks(APITestCase):
 
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
-        registration_data = {
-            "email": "foo@bar.com",
-            "password": "foowordbar",
-            "organization": "fooInc",
-            "name": "foo",
-        }
-        response = self.client.post("/v1/users/register", registration_data)
+
+        response = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.user_id = response.data["id"]
 
-        registration_data["email"] = "foojr@bar.com"
-        _ = self.client.post("/v1/users/register", registration_data)
-        # registration_data["email"] = "foo@bar.com"
+        _ = self.client.post("/v1/users/register", REGISTRATION_DATA_2)
 
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
         response = self.client.post(
@@ -199,24 +187,10 @@ class TestWebhookTasks(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
         workflow_data = {
-            "name": "uploader",
-            "data": [
-                ALPHA,
-                BETA,
-                GAMMA,
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
-                },
-            ],
-            "webhook": {"target": "https://en9sk43hft479.x.pipedream.net"},
+            **WORKFLOW_DATA_3,
+            **{
+                "webhook": {"target": "https://en9sk43hft479.x.pipedream.net"},
+            },
         }
         _ = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),

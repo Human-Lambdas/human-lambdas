@@ -95,7 +95,7 @@ class TestOrganizations(APITestCase):
         access_token = response.data["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + access_token)
         response = self.client.get("/v1/orgs/%s" % self.org_id)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_organization_data_deletion(self):
         organization = Organization.objects.all()

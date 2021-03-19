@@ -20,6 +20,8 @@ COPY . /code/
 
 RUN dev_tools/get-templates > templates.json
 
-EXPOSE 8000
+RUN python manage.py createsuperadmin bernat@humanlambdas.com alex@treebeard.io
 RUN python manage.py migrate
+
+EXPOSE 8000
 CMD gunicorn hl_rest_api.wsgi -b 0.0.0.0:8000 -w 1 -t 1 --timeout 0 --preload
