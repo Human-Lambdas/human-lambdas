@@ -32,6 +32,13 @@ def clean_form_sequence(data):
                 form_data[form_data["type"]]["value"] = None
 
 
+def _validate_automation(instance: Workflow):
+    if instance.is_running and instance.task_description is None:
+        raise serializers.ValidationError(
+            "You must have a task description to automate your queue"
+        )
+
+
 class HookSerializer(serializers.ModelSerializer):
     def validate_event(self, event):
         if event not in settings.HOOK_EVENTS:
@@ -77,6 +84,9 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "webhook",
             "active_users",
             "data",
+            "is_running",
+            "task_description",
+            "guidelines_url",
         ]
         extra_kwargs = {
             "disabled": {"write_only": True},
@@ -113,7 +123,11 @@ class WorkflowSerializer(serializers.ModelSerializer):
             organization=organization,
             created_by=user,
             data=data,
+            is_running=validated_data.get("is_running", False),
+            guidelines_url=validated_data.get("guidelines_url"),
+            task_description=validated_data.get("task_description"),
         )
+        _validate_automation(workflow)
         workflow.save()
         analytics.track(
             user.pk, "Created Workflow", {"name": wf_name, "workflow_id": workflow.pk}
@@ -155,6 +169,21 @@ class WorkflowSerializer(serializers.ModelSerializer):
             ).all():
                 wnotification.enabled = False
                 wnotification.save()
+
+        if "is_running" in validated_data:
+            instance.is_running = validated_data["is_running"]
+
+        if "guidelines_url" in validated_data:
+            instance.guidelines_url = validated_data["guidelines_url"]
+            if not instance.guidelines_url is None and not is_valid_url(
+                instance.guidelines_url
+            ):
+                raise serializers.ValidationError("guidelines URL is invalid")
+
+        if "task_description" in validated_data:
+            instance.task_description = validated_data["task_description"]
+
+        _validate_automation(instance)
         instance.save()
         event_name = "Deleted" if disabled else "Updated"
         analytics.track(

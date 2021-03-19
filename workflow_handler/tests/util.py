@@ -1,6 +1,7 @@
 from typing import Any, Dict
 
 from django.core import management
+from rest_framework import status
 from rest_framework.test import APITestCase
 
 from user_handler.models import Organization, User
@@ -32,4 +33,14 @@ class HLTestCase(APITestCase):
             templates_org.user.add(user)
 
         assert response.status_code == 200
+        return response.data
+
+    def create_workflow(self, org_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
+        response = self.client.post(
+            f"/v1/orgs/{self.org_id}/workflows/create",
+            data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         return response.data
