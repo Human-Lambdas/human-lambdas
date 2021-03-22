@@ -33,7 +33,7 @@ from .serializers import (
     TaskSerializer,
     WorkflowSerializer,
 )
-from .utils import TaskPagination, decode_csv
+from .utils import STAFF_ORG_ID, TaskPagination, decode_csv
 
 
 class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
@@ -110,10 +110,13 @@ class ListWorkflowView(ListAPIView):
     authentication_classes = (TokenAuthentication, JWTAuthentication)
 
     def get_queryset(self):
+        queryset = Workflow.objects.filter(Q(disabled=False))
 
-        queryset = Workflow.objects.filter(
-            Q(disabled=False) & Q(organization__pk=self.kwargs["org_id"])
-        )
+        if self.kwargs["org_id"] == STAFF_ORG_ID:
+            queryset = queryset.filter(Q(is_running=True))
+        else:
+            queryset = queryset.filter(Q(organization__pk=self.kwargs["org_id"]))
+
         task_status = self.request.query_params.get("task_status")
         if task_status:
             queryset = queryset.filter(task__status=task_status).distinct()
@@ -122,8 +125,11 @@ class ListWorkflowView(ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
+
         for d in serializer.data:
             del d["data"]
+            if self.kwargs["org_id"] != STAFF_ORG_ID:
+                del d["org_id"]
         return Response(serializer.data)
 
 

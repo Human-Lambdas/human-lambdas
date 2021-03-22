@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from django.core import management
 from rest_framework import status
@@ -9,6 +9,8 @@ from workflow_handler.utils import STAFF_ORG_ID
 
 
 class HLTestCase(APITestCase):
+    org_id: Optional[str]
+
     def register(
         self,
         registration_data: Dict[str, str],
@@ -35,12 +37,27 @@ class HLTestCase(APITestCase):
         assert response.status_code == 200
         return response.data
 
-    def create_workflow(self, org_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
+    def create_workflow(
+        self, data: Dict[str, Any], org_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         response = self.client.post(
-            f"/v1/orgs/{self.org_id}/workflows/create",
+            f"/v1/orgs/{org_id or self.org_id}/workflows/create",
             data,
             format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         return response.data
+
+    def list_workflows(self, org_id: Optional[str] = None) -> Dict[str, Any]:
+        response = self.client.get(
+            f"/v1/orgs/{org_id or self.org_id}/workflows",
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        return response.data
+
+    def set_user(self, access_token: str, org_id: Optional[str] = None):
+        self.org_id = org_id
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
