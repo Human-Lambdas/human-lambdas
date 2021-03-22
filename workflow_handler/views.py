@@ -110,12 +110,12 @@ class ListWorkflowView(ListAPIView):
     authentication_classes = (TokenAuthentication, JWTAuthentication)
 
     def get_queryset(self):
+        queryset = Workflow.objects.filter(Q(disabled=False))
+
         if self.kwargs["org_id"] == STAFF_ORG_ID:
-            queryset = Workflow.objects.filter(Q(disabled=False) & Q(is_running=True))
+            queryset = queryset.filter(Q(is_running=True))
         else:
-            queryset = Workflow.objects.filter(
-                Q(disabled=False) & Q(organization__pk=self.kwargs["org_id"])
-            )
+            queryset = queryset.filter(Q(organization__pk=self.kwargs["org_id"]))
 
         task_status = self.request.query_params.get("task_status")
         if task_status:
