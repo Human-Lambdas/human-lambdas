@@ -4,13 +4,14 @@ from user_handler.models import Notification, Organization, User
 from workflow_handler.models import Workflow
 from workflow_handler.tests.constants import (
     GUIDELINES_URL,
+    INTERNAL_WORKER_REGISTRATION_DATA,
     REGISTRATION_DATA,
     SUPER_ADMIN_REGISTRATION_DATA,
     TASK_DESCRIPTION,
     WORKFLOW_DATA,
 )
 from workflow_handler.tests.util import HLTestCase
-from workflow_handler.utils import TEMPLATE_ORG_ID
+from workflow_handler.utils import STAFF_ORG_ID, TEMPLATE_ORG_ID
 
 
 class TestCRUDWorkflow(HLTestCase):
@@ -19,12 +20,16 @@ class TestCRUDWorkflow(HLTestCase):
         self.access_token_super_admin = self.register(
             SUPER_ADMIN_REGISTRATION_DATA, is_super_admin=True
         )["access"]
+        self.access_token_internal_worker = self.register(
+            INTERNAL_WORKER_REGISTRATION_DATA, is_internal_worker=True
+        )["access"]
 
         _ = self.client.post("/v1/users/register", REGISTRATION_DATA)
         response = self.client.post(
             "/v1/users/token", {"email": "foo@bar.com", "password": "foowordbar"}
         )
-        self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
+        self.user_org_id = Organization.objects.get(user__email="foo@bar.com").pk
+        self.org_id = self.user_org_id
         self.access_token = response.data["access"]
 
         # perhaps need an internal endpoint to make user as a worker of an org
@@ -168,7 +173,9 @@ class TestCRUDWorkflow(HLTestCase):
     def test_when_running_workflow_then_there_must_be_description(self):
         workflow_data_no_desc = {**WORKFLOW_DATA}
 
-        workflow_id = self.create_workflow(self.org_id, workflow_data_no_desc)["id"]
+        workflow_id = self.create_workflow(workflow_data_no_desc, org_id=self.org_id)[
+            "id"
+        ]
         assert Workflow.objects.get(pk=workflow_id).is_running == False
 
         running_workflow_data_no_desc = {
@@ -220,20 +227,32 @@ class TestCRUDWorkflow(HLTestCase):
             "task_description": TASK_DESCRIPTION,
             "guidelines_url": GUIDELINES_URL,
         }
-        workflow_id = self.create_workflow(self.org_id, workflow_data_running)["id"]
+        workflow_id = self.create_workflow(workflow_data_running, org_id=self.org_id)[
+            "id"
+        ]
         wf = Workflow.objects.get(pk=workflow_id)
         assert wf.is_running == True
         assert wf.task_description == TASK_DESCRIPTION
 
+    def test_when_staff_worker_lists_workflows_then_all_running_returned(self):
+        self.set_user(self.access_token, org_id=str(self.org_id))
+        workflow_data = {
+            **WORKFLOW_DATA,
+            "is_running": True,
+            "task_description": TASK_DESCRIPTION,
+        }
+        self.create_workflow(workflow_data)
+
+        self.set_user(self.access_token_internal_worker, org_id=STAFF_ORG_ID)
+
+        data = self.list_workflows(org_id=self.org_id)
+        assert data[0]["org_id"] == self.user_org_id
+
     def test_update_workflow_super_admin(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
         workflow_data = WORKFLOW_DATA
-        response = self.client.post(
-            "/v1/orgs/{}/workflows/create".format(self.org_id),
-            workflow_data,
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.create_workflow(workflow_data, org_id=self.org_id)
+
         workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()

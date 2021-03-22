@@ -20,7 +20,7 @@ from .models import (
     Workflow,
     WorkflowNotification,
 )
-from .utils import get_session_duration_seconds
+from .utils import STAFF_ORG_ID, get_session_duration_seconds
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +72,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
     active_users = serializers.SerializerMethodField(
         "get_active_users", allow_null=True
     )
+    org_id = serializers.SerializerMethodField("get_org_id", read_only=True)
 
     class Meta:
         model = Workflow
@@ -83,6 +84,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "created_at",
             "webhook",
             "active_users",
+            "org_id",
             "data",
             "is_running",
             "task_description",
@@ -96,6 +98,15 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "active_users": {"read_only": True},
             "webhook": {"write_only": True},
         }
+
+    def get_org_id(self, instance):
+        if (
+            "view" in self.context
+            and self.context["view"].kwargs["org_id"] == STAFF_ORG_ID
+        ):
+            return instance.organization_id
+
+        return None
 
     def get_active_users(self, instance):
         return list(
