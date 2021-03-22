@@ -20,7 +20,7 @@ from .models import (
     Workflow,
     WorkflowNotification,
 )
-from .utils import STAFF_ORG_ID, get_session_duration_seconds
+from .utils import get_session_duration_seconds
 
 logger = logging.getLogger(__name__)
 
@@ -100,13 +100,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
         }
 
     def get_org_id(self, instance):
-        if (
-            "view" in self.context
-            and self.context["view"].kwargs["org_id"] == STAFF_ORG_ID
-        ):
-            return instance.organization_id
-
-        return None
+        return instance.organization_id
 
     def get_active_users(self, instance):
         return list(
