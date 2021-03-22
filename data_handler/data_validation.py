@@ -93,6 +93,15 @@ def validate_multiple_selection(data, is_workflow):
     validate_selection(data, is_workflow)
 
 
+def validate_binary(data, is_workflow):
+    type_data = data.get("binary", {})
+    binary_value = type_data.get("value")
+    if isinstance(binary_value, str):
+        binary_value = convert_string(binary_value)
+    if not isinstance(binary_value, (bool, type(None))):
+        raise DataValidationError(f"Invalid value for binary id {data['id']}")
+
+
 def validate_email(data, is_workflow):
     email = data["email"]
     for k in ["value", "placeholder"]:
@@ -250,6 +259,7 @@ def validate_bounding_boxes(data, is_workflow):
 VALIDATION_STATES = {
     "single_selection": validate_single_selection,
     "multiple_selection": validate_multiple_selection,
+    "binary": validate_binary,
     "form_sequence": validate_form,
     "list": validate_list,
     "number": validate_number,
