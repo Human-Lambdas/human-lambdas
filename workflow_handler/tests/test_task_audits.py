@@ -4,25 +4,28 @@ import os
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from user_handler.models import Organization
+from user_handler.models import Organization, User
 from workflow_handler.models import Source, Task, TaskActivity
 from workflow_handler.tests.constants import (
     INTERNAL_WORKER_REGISTRATION_DATA,
+    REGISTRATION_DATA,
+    REGISTRATION_DATA_2,
     WORKFLOW_DATA_3,
 )
 from workflow_handler.tests.util import HLTestCase
 from workflow_handler.utils import STAFF_ORG_ID
 
 _CURRENT_DIR = os.path.dirname(__file__)
-from workflow_handler.tests.constants import REGISTRATION_DATA
 
 
 class TestTaskAudit(HLTestCase):
     def setUp(self):
         self.file_path = os.path.join(_CURRENT_DIR, "data", "test.csv")
-        self.access_token_internal_worker = self.register(
+        internal_worker = self.register(
             INTERNAL_WORKER_REGISTRATION_DATA, is_internal_worker=True
-        )["access"]
+        )
+        self.access_token_internal_worker = internal_worker["access"]
+        self.internal_worker_id = internal_worker["id"]
         response = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.user_id = response.data["id"]
         self.org_id = Organization.objects.get(user__email="foo@bar.com").pk
@@ -349,14 +352,27 @@ class TestTaskAudit(HLTestCase):
         assert "org_id" in tasks[0]
 
     def test_when_staff_checks_audit_then_tasks_completed_by_staff_visible(self):
-        0 / 0
+        self.set_user(self.access_token_internal_worker, org_id=str(STAFF_ORG_ID))
 
-        # assert task from non-running queue visible
+        assert self.get_completed_tasks()["tasks"] == []
+        task = Task.objects.first()
+        task.assigned_to = User.objects.get(pk=self.internal_worker_id)
+        task.save()
+
+        tasks = self.get_completed_tasks()["tasks"]
+        assert tasks != []
+        assert "org_id" in tasks[0]
 
     def test_when_user_checks_audit_then_only_their_own_workflow_tasks_visible(self):
-        0 / 0
+        task = Task.objects.first()
+        task.workflow.is_running = True
+        task.workflow.save()
 
-        # assert 1 tasks, no org id
+        assert self.get_completed_tasks()["tasks"] != []
+
+        another_acc = self.register(REGISTRATION_DATA_2)
+        self.set_user(another_acc["access"], another_acc["current_organization_id"])
+        assert self.get_completed_tasks()["tasks"] == []
 
 
 class TestEmptyTaskAudit(APITestCase):
