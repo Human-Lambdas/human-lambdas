@@ -61,3 +61,12 @@ class HLTestCase(APITestCase):
     def set_user(self, access_token: str, org_id: Optional[str] = None):
         self.org_id = org_id
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+
+    def get_completed_tasks(self) -> Dict[str, Any]:
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/tasks/completed".format(
+                self.org_id,
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        return response.data
