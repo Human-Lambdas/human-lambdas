@@ -56,7 +56,6 @@ class GetCompletedTaskView(ListAPIView):
             organizations = Organization.objects.filter(user=user).all()
             owned_workflows = Workflow.objects.filter(
                 Q(organization__in=organizations)
-                & Q(disabled=False)
                 & Q(organization__pk=self.kwargs["org_id"])
             )
             return Q(workflow__in=owned_workflows)
@@ -66,6 +65,7 @@ class GetCompletedTaskView(ListAPIView):
             .filter(
                 get_ownership_filter()
                 & Q(status="completed")
+                & Q(disabled=False)
                 & Q(completed_at__range=(parse_dates(self.request)))
             )
             .filter(*args, **kwargs)
