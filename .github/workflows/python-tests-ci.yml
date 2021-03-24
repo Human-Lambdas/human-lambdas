@@ -43,7 +43,7 @@ jobs:
       run: |
         set -e -x
         python manage.py migrate
-        pytest -n=auto
+        pytest -n=4
       env:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: "test"
