@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from data_handler.csv_utils import task_list_to_csv_response
 from hl_rest_api import analytics
 from user_handler.models import Organization
-from user_handler.permissions import IsOrgAdmin
+from user_handler.permissions import IsInternalWorker, IsOrgAdmin
 
 from .models import Source, Task, TaskActivity, Workflow
 from .serializers import (
@@ -19,7 +19,12 @@ from .serializers import (
     TaskMetadataSerializer,
     TaskSerializer,
 )
-from .utils import TaskPagination, parse_dates, process_query_params
+from .utils import (
+    STAFF_ORG_ID,
+    TaskPagination,
+    parse_dates,
+    process_query_params,
+)
 
 
 def make_task_filter_url(org_id, task_id, filters):
@@ -34,22 +39,30 @@ class GetCompletedTaskView(ListAPIView):
     API View for getting all the Tasks
     """
 
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    permission_classes = (IsAuthenticated, IsOrgAdmin.__or__(IsInternalWorker))
     serializer_class = TaskMetadataSerializer
     pagination_class = TaskPagination
 
-    def get_queryset(self, *args, **kwargs):
+    def _get_ownership_filter(self):
+        if self.kwargs["org_id"] == STAFF_ORG_ID:
+            running_workflows = Workflow.objects.filter(is_running=True, disabled=False)
+            staff_users = Organization.objects.get(pk=STAFF_ORG_ID).user.all()
+            return Q(workflow__in=running_workflows) | Q(assigned_to__in=staff_users)
+
         user = self.request.user
         organizations = Organization.objects.filter(user=user).all()
-        workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(disabled=False)
-            & Q(organization__pk=self.kwargs["org_id"])
+        owned_workflows = Workflow.objects.filter(
+            organization__in=organizations,
+            disabled=False,
+            organization__pk=self.kwargs["org_id"],
         )
+        return Q(workflow__in=owned_workflows)
+
+    def get_queryset(self, *args, **kwargs):
         return (
             Task.objects.defer("data")
             .filter(
-                Q(workflow__in=workflows)
+                self._get_ownership_filter()
                 & Q(status="completed")
                 & Q(completed_at__range=(parse_dates(self.request)))
             )
@@ -66,6 +79,7 @@ class GetCompletedTaskView(ListAPIView):
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
         serializer = self.serializer_class(queryset.all(), many=True)
+
         return Response(serializer.data)
 
 

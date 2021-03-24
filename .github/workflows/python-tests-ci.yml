@@ -43,19 +43,7 @@ jobs:
       run: |
         set -e -x
         python manage.py migrate
-        pytest \
-          -n=auto \
-          --cov-report=xml \
-          --cov=data_handler \
-          --cov=external \
-          --cov=hl_rest_api \
-          --cov=metrics \
-          --cov=oi-relayer \
-          --cov=organization_handler \
-          --cov=templates_handler \
-          --cov=user_handler \
-          --cov=v1 \
-          --cov=workflow_handler \
+        pytest -n=4
       env:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: "test"
@@ -76,7 +64,4 @@ jobs:
         API_URL: "http://localhost:8000"
         HL_CLIENT_API_KEY: ${{ secrets.HL_CLIENT_API_KEY }}
         HL_ORG_ID: 61
-    - uses: codecov/codecov-action@v1
-      with:
-        file: coverage.xml
-        token: ${{ secrets.CODECOV_TOKEN }}
+

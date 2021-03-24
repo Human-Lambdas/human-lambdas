@@ -147,6 +147,7 @@ class Task(models.Model):
             "source_id": source_id,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
             "correct": self.correct,
+            "org_id": self.workflow.organization_id,
         }
 
         if self.region:

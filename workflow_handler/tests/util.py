@@ -17,8 +17,8 @@ class HLTestCase(APITestCase):
         is_super_admin: bool = False,
         is_internal_worker: bool = False,
     ) -> Dict[Any, Any]:
-        _ = self.client.post("/v1/users/register", registration_data)
-        response = self.client.post(
+        reg_response = self.client.post("/v1/users/register", registration_data)
+        token_response = self.client.post(
             "/v1/users/token",
             {
                 "email": registration_data["email"],
@@ -34,8 +34,8 @@ class HLTestCase(APITestCase):
             user = User.objects.get(email=registration_data["email"])
             templates_org.user.add(user)
 
-        assert response.status_code == 200
-        return response.data
+        assert token_response.status_code == 200
+        return {**token_response.data, **reg_response.data}
 
     def create_workflow(
         self, data: Dict[str, Any], org_id: Optional[str] = None
@@ -61,3 +61,12 @@ class HLTestCase(APITestCase):
     def set_user(self, access_token: str, org_id: Optional[str] = None):
         self.org_id = org_id
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+
+    def get_completed_tasks(self) -> Dict[str, Any]:
+        response = self.client.get(
+            "/v1/orgs/{}/workflows/tasks/completed".format(
+                self.org_id,
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        return response.data

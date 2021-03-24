@@ -5,6 +5,15 @@ from workflow_handler.utils import STAFF_ORG_ID, TEMPLATE_ORG_ID
 from .models import Organization
 
 
+class IsInternalWorker(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            Organization.objects.filter(pk=STAFF_ORG_ID)
+            .filter(user=request.user)
+            .exists()
+        )
+
+
 class IsOrgAdmin(BasePermission):
     """
     Allows access only to admin users of the organization.
