@@ -43,30 +43,26 @@ class GetCompletedTaskView(ListAPIView):
     serializer_class = TaskMetadataSerializer
     pagination_class = TaskPagination
 
+    def _get_ownership_filter(self):
+        if self.kwargs["org_id"] == STAFF_ORG_ID:
+            running_workflows = Workflow.objects.filter(is_running=True, disabled=False)
+            staff_users = Organization.objects.get(pk=STAFF_ORG_ID).user.all()
+            return Q(workflow__in=running_workflows) | Q(assigned_to__in=staff_users)
+
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        owned_workflows = Workflow.objects.filter(
+            organization__in=organizations,
+            disabled=False,
+            organization__pk=self.kwargs["org_id"],
+        )
+        return Q(workflow__in=owned_workflows)
+
     def get_queryset(self, *args, **kwargs):
-        def get_ownership_filter():
-            if self.kwargs["org_id"] == STAFF_ORG_ID:
-                running_workflows = Workflow.objects.filter(
-                    is_running=True, disabled=False
-                )
-                staff_users = Organization.objects.get(pk=STAFF_ORG_ID).user.all()
-                return Q(workflow__in=running_workflows) | Q(
-                    assigned_to__in=staff_users
-                )
-
-            user = self.request.user
-            organizations = Organization.objects.filter(user=user).all()
-            owned_workflows = Workflow.objects.filter(
-                organization__in=organizations,
-                disabled=False,
-                organization__pk=self.kwargs["org_id"],
-            )
-            return Q(workflow__in=owned_workflows)
-
         return (
             Task.objects.defer("data")
             .filter(
-                get_ownership_filter()
+                self._get_ownership_filter()
                 & Q(status="completed")
                 & Q(completed_at__range=(parse_dates(self.request)))
             )
