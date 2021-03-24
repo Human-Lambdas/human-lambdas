@@ -46,18 +46,20 @@ class GetCompletedTaskView(ListAPIView):
     def get_queryset(self, *args, **kwargs):
         def get_ownership_filter():
             if self.kwargs["org_id"] == STAFF_ORG_ID:
-                running_workflows = Workflow.objects.filter(is_running=True)
+                running_workflows = Workflow.objects.filter(
+                    is_running=True, disabled=False
+                )
                 staff_users = Organization.objects.get(pk=STAFF_ORG_ID).user.all()
                 return Q(workflow__in=running_workflows) | Q(
                     assigned_to__in=staff_users
-                ) & Q(disabled=False)
+                )
 
             user = self.request.user
             organizations = Organization.objects.filter(user=user).all()
             owned_workflows = Workflow.objects.filter(
-                Q(organization__in=organizations)
-                & Q(disabled=False)
-                & Q(organization__pk=self.kwargs["org_id"])
+                organization__in=organizations,
+                disabled=False,
+                organization__pk=self.kwargs["org_id"],
             )
             return Q(workflow__in=owned_workflows)
 
