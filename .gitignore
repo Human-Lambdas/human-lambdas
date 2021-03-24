@@ -219,4 +219,4 @@ templates.json
 .gcloudignore
 _whaler
 
-.deeptest
+.deepcov
