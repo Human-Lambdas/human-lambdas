@@ -17,10 +17,10 @@ class Command(BaseCommand):
             )
             return
 
-        templates_org, _created = Organization.objects.get_or_create(
-            id=STAFF_ORG_ID, name="staff"
-        )
-        templates_org.save()
+        if not Organization.objects.filter(pk=STAFF_ORG_ID).exists():
+            Organization(id=STAFF_ORG_ID, name="staff").save()
+
+        templates_org = Organization.objects.get(pk=STAFF_ORG_ID)
 
         for email in options["emails"]:
             user = User.objects.get(email=email)
