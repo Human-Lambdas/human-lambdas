@@ -331,9 +331,12 @@ class RUDTaskView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
 
-        workflows = Workflow.objects.filter(
-            Q(organization__pk=self.kwargs["org_id"]) & Q(disabled=False)
-        )
+        if self.kwargs["org_id"] == STAFF_ORG_ID:
+            queryset = Q(disabled=False)
+        else:
+            queryset = Q(organization__pk=self.kwargs["org_id"]) & Q(disabled=False)
+
+        workflows = Workflow.objects.filter(queryset)
         return Task.objects.defer("data").filter(
             Q(workflow__in=workflows) & Q(workflow=self.kwargs["workflow_id"])
         )
