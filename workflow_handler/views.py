@@ -168,11 +168,16 @@ class BaseWorkflowView(RetrieveAPIView):
         return context
 
     def get_queryset(self):
-        return Workflow.objects.filter(
-            Q(organization__pk=self.kwargs["org_id"])
-            & Q(disabled=False)
-            & Q(pk=self.kwargs["workflow_id"])
-        )
+        if self.kwargs["org_id"] == STAFF_ORG_ID:
+            queryset = Q(disabled=False) & Q(pk=self.kwargs["workflow_id"])
+        else:
+            queryset = (
+                Q(organization__pk=self.kwargs["org_id"])
+                & Q(disabled=False)
+                & Q(pk=self.kwargs["workflow_id"])
+            )
+
+        return Workflow.objects.filter(queryset)
 
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["workflow_id"])
