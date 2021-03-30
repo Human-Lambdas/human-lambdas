@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import Organization, Task, TaskActivity, Workflow
 from .serializers import TaskSerializer
-from .utils import get_session_duration_seconds
+from .utils import STAFF_ORG_ID, get_session_duration_seconds
 
 
 class ActivitySerializer(serializers.ModelSerializer):
@@ -27,6 +27,9 @@ class ActivitySerializer(serializers.ModelSerializer):
 
 
 def get_task(user, org_id, workflow_id, task_id):
+    if org_id == STAFF_ORG_ID:
+        return Task.objects.defer("data").filter(pk=task_id).first()
+
     organizations = Organization.objects.filter(user=user).all()
     workflows = Workflow.objects.filter(
         Q(organization__in=organizations) & Q(organization__pk=org_id)
