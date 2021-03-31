@@ -47,4 +47,7 @@ class IsAdminOrReadOnly(BasePermission):
 
             return authoritative_orgs.filter(user=request.user).exists()
 
-        return authoritative_orgs.filter(admin=request.user).exists()
+        # HOTFIX
+        # Relax restriction into any role for the time being while we re-evaluate
+        # return authoritative_orgs.filter(admin=request.user).exists()
+        return authoritative_orgs.filter(user=request.user).exists()
