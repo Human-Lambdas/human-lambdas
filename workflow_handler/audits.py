@@ -147,13 +147,19 @@ class AuditsGetTask(RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        organizations = Organization.objects.filter(user=user).all()
-        workflows = Workflow.objects.filter(
-            Q(organization__in=organizations)
-            & Q(disabled=False)
-            & Q(organization__pk=self.kwargs["org_id"])
-        )
+        if self.kwargs["org_id"] == STAFF_ORG_ID:
+            queryset = Q(disabled=False)
+        else:
+            user = self.request.user
+            organizations = Organization.objects.filter(user=user).all()
+            queryset = (
+                Q(organization__in=organizations)
+                & Q(disabled=False)
+                & Q(organization__pk=self.kwargs["org_id"])
+            )
+
+        workflows = Workflow.objects.filter(queryset)
+
         filters = process_query_params(self.request.query_params)
         return (
             Task.objects.defer("data")
