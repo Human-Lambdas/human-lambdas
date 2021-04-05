@@ -3,7 +3,6 @@ import logging
 import os
 
 from rest_framework import status
-from rest_framework.test import APITestCase
 
 from user_handler.models import Organization
 from workflow_handler.models import Task, Workflow
@@ -12,13 +11,15 @@ from workflow_handler.tests.constants import (
     REGISTRATION_DATA_2,
     WORKFLOW_DATA_3,
 )
+from workflow_handler.tests.util import HLTestCase
+from workflow_handler.utils import STAFF_ORG_ID
 
 logger = logging.getLogger(__name__)
 
 _CURRENT_DIR = os.path.dirname(__file__)
 
 
-class TestTasksSave(APITestCase):
+class TestTasksSave(HLTestCase):
     def setUserClient(self, email):
         response = self.client.post(
             "/v1/users/token", {"email": email, "password": "foowordbar"}
@@ -99,3 +100,14 @@ class TestTasksSave(APITestCase):
             )
             self.assertEqual("in_progress", response.data["status"])
             self.assertEqual(data, response.data["data"])
+
+    def test_when_worker_tries_to_save_task_in_admin_org_then_error(self):
+        workflow = Workflow.objects.get(id=self.workflow_id)
+        task = Task.objects.filter(workflow=workflow).first()
+        response = self.client.patch(
+            f"/v1/orgs/{STAFF_ORG_ID}/workflows/{self.workflow_id}/tasks/{task.id}/save",
+            data=task.data,
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
