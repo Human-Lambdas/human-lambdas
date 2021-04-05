@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from user_handler.models import Invitation, Organization, User
-from user_handler.permissions import IsAdminOrReadOnly
+from user_handler.permissions import IsAuthorized
 from user_handler.serializers import UserSerializer
 
 from .serializers import OrganizationSerializer
@@ -142,7 +142,7 @@ class ListOrgUsersView(ListAPIView):
 
 
 class GetOrganizationView(RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
+    permission_classes = (IsAuthenticated, IsAuthorized)
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
 

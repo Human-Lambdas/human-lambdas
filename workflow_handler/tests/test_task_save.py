@@ -101,12 +101,28 @@ class TestTasksSave(HLTestCase):
             self.assertEqual("in_progress", response.data["status"])
             self.assertEqual(data, response.data["data"])
 
+    def test_when_worker_tries_to_save_task_then_passes_auth(self):
+        workflow = Workflow.objects.get(id=self.workflow_id)
+        task = Task.objects.filter(workflow=workflow).first()
+        org = Organization.objects.get(id=self.org_id)
+        org.admin.set([])
+        org.save()
+        response = self.client.patch(
+            f"/v1/orgs/{self.org_id}/workflows/{self.workflow_id}/tasks/{task.id}/save",
+            data=task.data[0],
+            format="json",
+        )
+
+        assert (
+            response.status_code == status.HTTP_400_BAD_REQUEST
+        )  # complains not assigned == good
+
     def test_when_worker_tries_to_save_task_in_admin_org_then_error(self):
         workflow = Workflow.objects.get(id=self.workflow_id)
         task = Task.objects.filter(workflow=workflow).first()
         response = self.client.patch(
             f"/v1/orgs/{STAFF_ORG_ID}/workflows/{self.workflow_id}/tasks/{task.id}/save",
-            data=task.data,
+            data=task.data[0],
             format="json",
         )
 
