@@ -10,6 +10,7 @@ from workflow_handler.tests.constants import (
     INTERNAL_WORKER_REGISTRATION_DATA,
     REGISTRATION_DATA,
     REGISTRATION_DATA_2,
+    SUPER_ADMIN_REGISTRATION_DATA,
     WORKFLOW_DATA_3,
 )
 from workflow_handler.tests.util import HLTestCase
@@ -25,6 +26,8 @@ class TestTaskAudit(HLTestCase):
             INTERNAL_WORKER_REGISTRATION_DATA, is_internal_worker=True
         )
         self.access_token_internal_worker = internal_worker["access"]
+        super_admin = self.register(SUPER_ADMIN_REGISTRATION_DATA, is_super_admin=True)
+        self.access_token_super_admin = super_admin["access"]
         self.internal_worker_id = internal_worker["id"]
         response = self.client.post("/v1/users/register", REGISTRATION_DATA)
         self.user_id = response.data["id"]
@@ -350,6 +353,23 @@ class TestTaskAudit(HLTestCase):
         tasks = self.get_completed_tasks()["tasks"]
         assert tasks != []
         assert "org_id" in tasks[0]
+
+    def test_when_staff_audits_then_forbidden(self):
+        self.set_user(self.access_token_super_admin, org_id=str(STAFF_ORG_ID))
+
+        task = (
+            Task.objects.filter(workflow__pk=self.workflow_id, source__name="test.csv")
+            .order_by("-completed_at")
+            .first()
+        )
+
+        data = {"correct": False}
+        response = self.client.put(
+            f"/v1/orgs/{STAFF_ORG_ID}/workflows/tasks/{task.id}/audit",
+            data=data,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_when_staff_checks_audit_then_tasks_completed_by_staff_visible(self):
         self.set_user(self.access_token_internal_worker, org_id=str(STAFF_ORG_ID))

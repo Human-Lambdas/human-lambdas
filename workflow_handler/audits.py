@@ -6,6 +6,7 @@ from next_prev import next_in_order, prev_in_order
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 
 from data_handler.csv_utils import task_list_to_csv_response
@@ -190,6 +191,17 @@ class AuditsGetTask(RetrieveUpdateDestroyAPIView):
         )
 
     def put(self, request, *args, **kwargs):
+        if kwargs["org_id"] == STAFF_ORG_ID:
+            return Response(
+                status=HTTP_400_BAD_REQUEST,
+                data={
+                    "status_code": HTTP_400_BAD_REQUEST,
+                    "errors": [
+                        {"message": "Staff members cannot update audit statuses"}
+                    ],
+                },
+            )
+
         task = Task.objects.defer("data").filter(id=kwargs["task_id"]).first()
         if not task or task.status != "completed":
             status = 400
