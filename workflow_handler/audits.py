@@ -144,7 +144,7 @@ class ListSourcesView(ListAPIView):
 
 
 class AuditsGetTask(RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated, IsOrgAdmin)
+    permission_classes = (IsAuthenticated, IsOrgAdmin.__or__(IsInternalWorker))
     serializer_class = TaskSerializer
 
     def get_queryset(self):
