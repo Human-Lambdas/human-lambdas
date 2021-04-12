@@ -2,7 +2,7 @@ import copy
 import logging
 
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import OuterRef, Q, Subquery
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.utils import timezone
 from drf_yasg2.utils import swagger_auto_schema
@@ -113,6 +113,12 @@ class ListWorkflowView(ListAPIView):
         queryset = Workflow.objects.filter(Q(disabled=False))
 
         if self.kwargs["org_id"] == STAFF_ORG_ID:
+            task_age_subq = Task.objects.filter(
+                Q(workflow__id=OuterRef("pk")) & ~Q(status="completed")
+            ).order_by("created_at")
+            queryset = queryset.annotate(
+                oldest_created=Subquery(task_age_subq.values("created_at")[:1])
+            ).order_by("oldest_created")
             queryset = queryset.filter(Q(is_running=True))
         else:
             queryset = queryset.filter(Q(organization__pk=self.kwargs["org_id"]))
