@@ -61,6 +61,18 @@ def create_email_form_block(value):
     return block
 
 
+def create_date_block(value=None, placeholder=None):
+    block = {
+        "_id": "6b4d9cfc-998e-4cfd-8686-56119011e72f",
+        "date": {"value": value, "placeholder": placeholder},
+        "id": "date_id",
+        "layout": LAYOUT,
+        "name": "Date Block Title",
+        "type": "date",
+    }
+    return block
+
+
 def get_url_test():
     tests = []
     for field in ["value", "placeholder"]:
@@ -164,3 +176,34 @@ class TestValidators:
         }
 
         data_validation([block], is_workflow=True)
+
+    def test_when_date_block_empty_workflow_then_pass(self):
+        block = create_date_block()
+        data_validation([block], is_workflow=True)
+
+    def test_when_date_block_empty_task_then_pass(self):
+        block = create_date_block()
+        data_validation([block], is_workflow=False)
+
+    def test_when_date_block_valid_then_pass(self):
+        block = create_date_block(value="2020-01-31", placeholder="2020-01-31")
+        data_validation([block])
+
+    def test_when_date_block_invalid_then_fail(self):
+        block = create_date_block(
+            value="2020/01/31"  # Invalid according to ISO-8601 (YYYY-MM-DD)
+        )
+        try:
+            data_validation([block])
+            assert False
+        except:
+            pass
+
+        block = create_date_block(
+            value="2020-31-01"  # Invalid according to ISO-8601 (YYYY-MM-DD)
+        )
+        try:
+            data_validation([block])
+            assert False
+        except:
+            pass

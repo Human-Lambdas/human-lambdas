@@ -1,4 +1,5 @@
 from ast import literal_eval
+from datetime import datetime
 from typing import Optional
 
 from schema import SchemaError
@@ -256,6 +257,23 @@ def validate_bounding_boxes(data, is_workflow):
             # TO-DO: Enforce 0-1 bounds
 
 
+def validate_date(data, is_workflow):
+    for k in ["value", "placeholder"]:
+        v = data[data["type"]].get(k)
+        if not isinstance(v, (str, type(None))):
+            raise DataValidationError(
+                f"Data item with id {data['id']} is not a valid ISO-8601 string."
+            )
+
+        try:
+            if isinstance(v, type(None)) or len(v) > 0 and datetime.fromisoformat(v):
+                pass
+        except:
+            raise DataValidationError(
+                f"Data item with id {data['id']} is not a valid ISO-8601 string."
+            )
+
+
 VALIDATION_STATES = {
     "single_selection": validate_single_selection,
     "multiple_selection": validate_multiple_selection,
@@ -273,6 +291,7 @@ VALIDATION_STATES = {
     "pdf": validate_pdf,
     "link": validate_link,
     "text_sequence": validate_text_sequence,
+    "date": validate_date,
 }
 
 
