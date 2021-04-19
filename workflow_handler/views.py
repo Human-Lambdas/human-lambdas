@@ -574,6 +574,7 @@ class CreateTaskFormView(CreateAPIView):
                 "named_entity_recognition",
                 "pdf",
                 "bounding_boxes",
+                "date",
             ]:
                 read_data = copy.deepcopy(idata)
                 if "layout" in read_data:

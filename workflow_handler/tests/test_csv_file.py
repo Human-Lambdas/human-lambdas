@@ -11,7 +11,7 @@ from . import DATA_PATH
 
 class TestCSV(APITestCase):
     def setUp(self):
-        self.file_path = os.path.join(DATA_PATH, "file_example_CSV_5000 invalid.csv")
+        self.file_path = os.path.join(DATA_PATH, "data_space.csv")
         self.total_rows = 3
 
         response = self.client.post("/v1/users/register", REGISTRATION_DATA)
@@ -27,63 +27,22 @@ class TestCSV(APITestCase):
             "name": "uploader",
             "data": [
                 {
-                    "id": "<<<",
-                    "name": "<<<",
-                    "type": "number",
-                    "number": {"read_only": True},
-                },
-                {
-                    "id": "First Name",
-                    "name": "First Name",
+                    "id": "car",
+                    "name": "Car",
                     "type": "text",
                     "text": {"read_only": True},
                 },
                 {
-                    "id": "Last Name",
-                    "name": "Last Name",
-                    "type": "text",
-                    "text": {"read_only": True},
+                    "id": "img_1",
+                    "name": "Image 1",
+                    "type": "image",
+                    "image": {"read_only": True},
                 },
                 {
-                    "id": "Gender",
-                    "name": "Gender",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Country",
-                    "name": "Country",
-                    "type": "text",
-                    "text": {"read_only": True},
-                },
-                {
-                    "id": "Age",
-                    "name": "Age",
-                    "type": "number",
-                    "number": {"read_only": True},
-                },
-                {
-                    "id": "Date",
-                    "name": "Date",
-                    "type": "date",
-                    "date": {"read_only": True},
-                },
-                {
-                    "id": "Id",
-                    "name": "Id",
-                    "type": "number",
-                    "number": {"read_only": True},
-                },
-                {
-                    "id": "foo",
-                    "name": "foo",
-                    "type": "single_selection",
-                    "single_selection": {
-                        "options": [
-                            {"id": "foo2", "name": "foo2"},
-                            {"id": "bar2", "name": "bar2"},
-                        ],
-                    },
+                    "id": "img_2",
+                    "name": "Image 2",
+                    "type": "image",
+                    "image": {"read_only": True},
                 },
             ],
         }
