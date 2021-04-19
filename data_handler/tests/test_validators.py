@@ -207,3 +207,12 @@ class TestValidators:
             assert False
         except:
             pass
+
+    def test_when_date_block_has_no_content_then_pass(self):
+        block = {
+            "id": "Date",
+            "name": "Date",
+            "type": "date",
+            "date": {"read_only": True},
+        }
+        data_validation([block])

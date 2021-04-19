@@ -262,7 +262,8 @@ def validate_date(data, is_workflow):
         v = data[data["type"]].get(k)
         if not isinstance(v, (str, type(None))):
             raise DataValidationError(
-                f"Data item with id {data['id']} is not a valid ISO-8601 string."
+                # f"Data item with id {data['id']} is not a valid ISO-8601 string."
+                f"Data: {data}"
             )
 
         try:
@@ -270,7 +271,8 @@ def validate_date(data, is_workflow):
                 pass
         except:
             raise DataValidationError(
-                f"Data item with id {data['id']} is not a valid ISO-8601 string."
+                # f"Data item with id {data['id']} is not a valid ISO-8601 string."
+                f"Data: {data}"
             )
 
 
