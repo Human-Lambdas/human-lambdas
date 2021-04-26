@@ -89,6 +89,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
             "is_running",
             "task_description",
             "guidelines_url",
+            "pinned_block",
         ]
         extra_kwargs = {
             "disabled": {"write_only": True},
