@@ -30,6 +30,7 @@ WORKFLOW_DATA: Final = {
     "is_running": False,
     "task_description": None,
     "guidelines_url": None,
+    "pinned_block": None,
     "data": [
         {
             "id": "foo",
