@@ -365,7 +365,8 @@ class TestCRUDWorkflow(HLTestCase):
 
         del workflow_data1["data"]
         del workflow_data2["data"]
-        del response["data"]
+        del result_1["data"]
+        del result_2["data"]
 
         self.assertEqual(workflow_data1, result_1, response.data)
         self.assertEqual(workflow_data2, result_2, response.data)
