@@ -290,7 +290,7 @@ class TestCRUDWorkflow(HLTestCase):
         workflow_obj = Workflow.objects.filter(name=workflow_data["name"])
         self.assertTrue(workflow_obj.exists())
         workflow = workflow_obj.first()
-
+        assert workflow.pinned_block == None
         workflow_data2 = {"name": "foowf2", "data": WORKFLOW_DATA["data"]}
         response = self.client.post(
             "/v1/orgs/{}/workflows/create".format(self.org_id),
@@ -300,9 +300,8 @@ class TestCRUDWorkflow(HLTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
         updated_text = "not so great wf"
-        updated_workflow_data = {
-            "name": updated_text,
-        }
+        pinned_block_id = "my_block"
+        updated_workflow_data = {"name": updated_text, "pinned_block": pinned_block_id}
 
         response = self.client.patch(
             "/v1/orgs/{0}/workflows/{1}".format(self.org_id, workflow.pk),
@@ -311,6 +310,7 @@ class TestCRUDWorkflow(HLTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(updated_text, response.data["name"])
+        self.assertEqual(pinned_block_id, response.data["pinned_block"])
         workflow_obj = Workflow.objects.filter(name=response.data["name"])
         workflow = workflow_obj.first()
         self.assertEqual(updated_text, workflow.name)
@@ -365,6 +365,8 @@ class TestCRUDWorkflow(HLTestCase):
 
         del workflow_data1["data"]
         del workflow_data2["data"]
+        del result_1["data"]
+        del result_2["data"]
 
         self.assertEqual(workflow_data1, result_1, response.data)
         self.assertEqual(workflow_data2, result_2, response.data)
@@ -408,5 +410,6 @@ class TestCRUDWorkflow(HLTestCase):
         workflow_data1["n_tasks"] = 0
         result_1.pop("active_users")
         del workflow_data1["data"]
+        del result_1["data"]
         self.assertEqual(workflow_data1, result_1, response.data)
         self.assertNotEqual(Workflow.objects.get(pk=workflow.pk).name, workflow.name)

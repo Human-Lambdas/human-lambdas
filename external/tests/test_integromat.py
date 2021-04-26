@@ -60,7 +60,6 @@ class TestIntegromat(APITestCase):
         response = self.client.get(f"/orgs/{self.org_id}/workflows")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-        self.assertNotIn("data", response.data[0])
         self.assertNotIn("disabled", response.data[0])
 
     def test_when_get_workflow_then_returned(self):

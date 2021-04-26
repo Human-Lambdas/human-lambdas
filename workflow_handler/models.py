@@ -26,6 +26,7 @@ class Workflow(models.Model):
     is_running = models.BooleanField(default=False)
     task_description = models.TextField(null=True)
     guidelines_url = models.TextField(null=True)
+    pinned_block = models.TextField(null=True)
 
     def __str__(self):
         return self.name
