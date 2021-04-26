@@ -365,6 +365,7 @@ class TestCRUDWorkflow(HLTestCase):
 
         del workflow_data1["data"]
         del workflow_data2["data"]
+        del response["data"]
 
         self.assertEqual(workflow_data1, result_1, response.data)
         self.assertEqual(workflow_data2, result_2, response.data)
@@ -408,5 +409,6 @@ class TestCRUDWorkflow(HLTestCase):
         workflow_data1["n_tasks"] = 0
         result_1.pop("active_users")
         del workflow_data1["data"]
+        del result_1["data"]
         self.assertEqual(workflow_data1, result_1, response.data)
         self.assertNotEqual(Workflow.objects.get(pk=workflow.pk).name, workflow.name)

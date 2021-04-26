@@ -133,7 +133,6 @@ class ListWorkflowView(ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
 
         for d in serializer.data:
-            del d["data"]
             if self.kwargs["org_id"] != STAFF_ORG_ID:
                 del d["org_id"]
         return Response(serializer.data)
