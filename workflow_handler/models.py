@@ -111,7 +111,7 @@ class Task(models.Model):
             "assigned_at": self.assigned_at,
             "assigned_to": self.assigned_to.name if self.assigned_to else None,
             "queue": self.workflow.pk,
-            "data": None,
+            "data": self.data,
             "source": self.source.pk if self.source else None,
             "n_comments": self.taskactivity_set.filter(action="comment").count(),
         }
