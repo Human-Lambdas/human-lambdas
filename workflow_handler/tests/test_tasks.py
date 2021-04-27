@@ -337,6 +337,7 @@ class TestTasks(HLTestCase):
         self.assertEqual(response.data["count"], 3)
         self.assertEqual(response.data["next"], None)
         for idata in response.data["tasks"]:
+            assert idata["data"] != None
             self.assertEqual(idata["status"], "new")
 
         response = self.client.get(
