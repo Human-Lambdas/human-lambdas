@@ -29,6 +29,10 @@ class BlockFactory(factory.Factory):
     type = "email"
 
 
+def make_block(*args, **kwargs):
+    return factory.build(dict, FACTORY_CLASS=BlockFactory, *args, **kwargs)
+
+
 def create_email_block(value):
     email: Dict[str, Any] = {
         "placeholder": "adf@asdf.co",
@@ -38,7 +42,7 @@ def create_email_block(value):
     if value is not None:
         email["value"] = value
 
-    block = factory.build(dict, FACTORY_CLASS=BlockFactory, email=email, type="email")
+    block = make_block(email=email, type="email")
     return block
 
 
@@ -58,9 +62,7 @@ def create_email_form_block(value):
     if value is not None:
         form_sequence["data"][0]["email"]["value"] = value
 
-    block = factory.build(
-        dict,
-        FACTORY_CLASS=BlockFactory,
+    block = make_block(
         form_sequence=form_sequence,
         type="form_sequence",
     )
@@ -68,9 +70,7 @@ def create_email_form_block(value):
 
 
 def create_date_block(value=None, placeholder=None):
-    block = factory.build(
-        dict,
-        FACTORY_CLASS=BlockFactory,
+    block = make_block(
         date={"value": value, "placeholder": placeholder},
         type="date",
     )
@@ -141,9 +141,7 @@ class TestValidators:
 
     @pytest.mark.parametrize("field, url, type", get_url_test())
     def test_url_validation(self, field, url, type):
-        block = factory.build(
-            dict, FACTORY_CLASS=BlockFactory, **{type: {}, "type": type}
-        )
+        block = make_block(**{type: {}, "type": type})
         block[type][field] = url
 
         if type == "bounding_boxes":
@@ -165,9 +163,7 @@ class TestValidators:
             ],
             "placeholder": "",
         }
-        block = factory.build(
-            dict,
-            FACTORY_CLASS=BlockFactory,
+        block = make_block(
             bounding_boxes=bounding_boxes,
             type="bounding_boxes",
         )
@@ -206,7 +202,5 @@ class TestValidators:
             pass
 
     def test_when_date_block_has_no_content_then_pass(self):
-        block = factory.build(
-            dict, FACTORY_CLASS=BlockFactory, date={"read_only": True}, type="date"
-        )
+        block = make_block(date={"read_only": True}, type="date")
         data_validation([block])
