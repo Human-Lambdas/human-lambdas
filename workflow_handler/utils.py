@@ -57,6 +57,14 @@ def unidecode(text):
         return text.decode(cchardet.detect(text)["encoding"])
 
 
+def process_filter_value(filter_value):
+    if filter_value == "true":
+        return True
+    if filter_value == "false":
+        return False
+    return filter_value
+
+
 def process_query_params(query_params):
     filter_mapper = [
         ("workflow__pk", "queue_id"),
@@ -68,7 +76,7 @@ def process_query_params(query_params):
     for filter_name, param_name in filter_mapper:
         filter_value = query_params.get(param_name)
         if filter_value:
-            filters[filter_name] = filter_value
+            filters[filter_name] = process_filter_value(filter_value)
     return filters
 
 
