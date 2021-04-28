@@ -175,6 +175,7 @@ class Task(models.Model):
             "queue_id": self.workflow.pk,
             "data": transform_int2ext(self.data),
             "source": source_name,
+            "correct": self.correct,
         }
 
         if self.region:
