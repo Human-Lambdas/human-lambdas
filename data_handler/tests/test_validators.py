@@ -1,5 +1,3 @@
-from typing import Any, Dict
-
 import factory
 import pytest
 
@@ -10,6 +8,9 @@ INVALID_URL = "http:/"
 
 
 class BlockFactory(factory.Factory):
+    class Meta:
+        abstract = True
+
     _id = "6c9d6441-5be5-4a15-814c-1c9413e8dd22"
     id = "email_id"
     layout = factory.Dict(
@@ -26,47 +27,43 @@ class BlockFactory(factory.Factory):
         }
     )
     name = "Email Block Title"
+
+
+class EmailBlockFactory(BlockFactory):
+    email = factory.Dict(
+        {
+            "placeholder": "adf@asdf.co",
+            "read_only": False,
+            "use_placeholder": True,
+        }
+    )
     type = "email"
 
 
-def make_block(*args, **kwargs):
-    return factory.build(dict, FACTORY_CLASS=BlockFactory, *args, **kwargs)
-
-
-def create_email_block(value):
-    email: Dict[str, Any] = {
-        "placeholder": "adf@asdf.co",
-        "read_only": False,
-        "use_placeholder": True,
-    }
-    if value is not None:
-        email["value"] = value
-
-    block = make_block(email=email, type="email")
-    return block
-
-
-def create_email_form_block(value):
-    form_sequence = {
-        "data": [
-            {
-                "email": {},
-                "id": "email_id",
-                "name": "Email Question",
-                "type": "email",
-            }
-        ],
-        "history": [],
-        "is_required": True,
-    }
-    if value is not None:
-        form_sequence["data"][0]["email"]["value"] = value
-
-    block = make_block(
-        form_sequence=form_sequence,
-        type="form_sequence",
+class EmailFormBlockFactory(BlockFactory):
+    form_sequence = factory.Dict(
+        {
+            "data": factory.List(
+                [
+                    factory.Dict(
+                        {
+                            "email": factory.Dict({}),
+                            "id": "email_id",
+                            "name": "Email Question",
+                            "type": "email",
+                        }
+                    )
+                ]
+            ),
+            "history": [],
+            "is_required": True,
+        }
     )
-    return block
+    type = "form_sequence"
+
+
+def make_block(*args, FACTORY_CLASS=BlockFactory, **kwargs):
+    return factory.build(dict, FACTORY_CLASS=FACTORY_CLASS, *args, **kwargs)
 
 
 def create_date_block(value=None, placeholder=None):
@@ -96,24 +93,26 @@ def get_url_test():
 
 class TestValidators:
     def test_when_invalid_email_then_fail(self):
+        block = make_block(FACTORY_CLASS=EmailBlockFactory, **{"email__value": "bla"})
         try:
-            data_validation([create_email_block("bla")])
+            data_validation([block])
             assert False
         except DataValidationError:
             pass
 
     def test_when_no_email_then_pass(self):
-        data_validation([create_email_block(None)])
+        block = make_block(FACTORY_CLASS=EmailBlockFactory)
+        data_validation([block])
 
     def test_when_no_placeholder_then_pass(self):
-        block = create_email_block(None)
+        block = make_block(FACTORY_CLASS=EmailBlockFactory)
         del block["email"]["placeholder"]
         block["email"]["use_placeholder"] == False
         data_validation([block])
 
     def test_when_invalid_placeholder_then_fail(self):
         try:
-            block = create_email_block(None)
+            block = make_block(FACTORY_CLASS=EmailBlockFactory)
             block["email"]["placeholder"] = "bla"
             data_validation([block])
             assert False
@@ -121,20 +120,36 @@ class TestValidators:
             pass
 
     def test_when_email_empty_then_pass(self):
-        data_validation([create_email_block("")])
+        block = make_block(FACTORY_CLASS=EmailBlockFactory, **{"email__value": ""})
+        data_validation([block])
 
     def test_when_email_form_then_pass(self):
-        data_validation([create_email_form_block("blah@b.co")])
+        block = make_block(
+            FACTORY_CLASS=EmailFormBlockFactory,
+            form_sequence__data__0__email__value="blah@b.co",
+        )
+        data_validation([block])
 
     def test_when_no_email_form_then_pass(self):
-        data_validation([create_email_form_block(None)])
+        block = make_block(
+            FACTORY_CLASS=EmailFormBlockFactory,
+            form_sequence__data__0__email__value=None,
+        )
+        data_validation([block])
 
     def test_when_empty_email_form_then_pass(self):
-        data_validation([create_email_form_block("")])
+        block = make_block(
+            FACTORY_CLASS=EmailFormBlockFactory, form_sequence__data__0__email__value=""
+        )
+        data_validation([block])
 
     def test_when_invalid_email_form_then_fail(self):
         try:
-            data_validation([create_email_form_block("blah")])
+            block = make_block(
+                FACTORY_CLASS=EmailFormBlockFactory,
+                form_sequence__data__0__email__value="blah",
+            )
+            data_validation([block])
             assert False
         except DataValidationError:
             pass
