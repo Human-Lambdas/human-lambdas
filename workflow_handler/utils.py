@@ -1,10 +1,15 @@
 import copy
 import datetime
+import os
+from typing import Any, Dict
 
 import cchardet
+import requests
+import sentry_sdk
 from django.utils import timezone
 from django.utils.timezone import make_aware
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from .models import WebHook, Workflow, WorkflowNotification
@@ -118,3 +123,23 @@ def is_force(query_params):
     if force:
         return force.lower() == "true"
     return False
+
+
+def notify_staff(data: Dict[str, Any], request: Request):
+    try:
+        email = request.user.email
+        path = request.stream.path
+        status = "running" if data["is_running"] else "paused"
+        text = f"{email} set {data['name']} ({path}) to {status}"
+
+        slack_url = os.getenv("SLACK_WEBHOOK_URL")
+        if slack_url is None:
+            sentry_sdk.capture_exception("No slack url configured!")
+
+        r = requests.post(slack_url, json={"text": text})
+        if r.status_code != 200:
+            return sentry_sdk.capture_message(
+                f"Staff notification failed with status {r.status_code}"
+            )
+    except Exception as ex:
+        sentry_sdk.capture_exception(ex)
