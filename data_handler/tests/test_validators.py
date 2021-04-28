@@ -43,15 +43,17 @@ class TestValidators:
         data_validation([block])
 
     def test_when_no_placeholder_then_pass(self):
-        block = make_block(FACTORY_CLASS=EmailBlockFactory)
-        del block["email"]["placeholder"]
-        block["email"]["use_placeholder"] == False
+        block = make_block(
+            FACTORY_CLASS=EmailBlockFactory,
+            email={"read_only": False, "use_placeholder": False},
+        )
         data_validation([block])
 
     def test_when_invalid_placeholder_then_fail(self):
         try:
-            block = make_block(FACTORY_CLASS=EmailBlockFactory)
-            block["email"]["placeholder"] = "bla"
+            block = make_block(
+                FACTORY_CLASS=EmailBlockFactory, email__placeholder="bla"
+            )
             data_validation([block])
             assert False
         except DataValidationError:
@@ -136,7 +138,7 @@ class TestValidators:
         block = make_block(
             FACTORY_CLASS=DateBlockFactory,
             date__value="2020-01-31",
-            placeholder="2020-01-31",
+            date__placeholder="2020-01-31",
         )
         data_validation([block])
 
