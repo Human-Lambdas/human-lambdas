@@ -1,3 +1,5 @@
+from typing import List, Optional, cast
+
 import pytest
 
 from data_handler.data_validation import DataValidationError, data_validation
@@ -13,9 +15,8 @@ INVALID_URL = "http:/"
 
 
 def get_url_test():
-    tests = []
     for field in ["value", "placeholder"]:
-        for url in [VALID_URL, INVALID_URL, None, ""]:
+        for url in cast(List[Optional[str]], [VALID_URL, INVALID_URL, None, ""]):
             for type in [
                 "embed",
                 "audio",
@@ -25,8 +26,7 @@ def get_url_test():
                 "link",
                 "bounding_boxes",
             ]:
-                tests.append((field, url, type))
-    return tests
+                yield (field, url, type)
 
 
 class TestValidators:
