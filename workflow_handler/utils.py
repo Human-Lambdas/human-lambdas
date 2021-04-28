@@ -62,6 +62,7 @@ def process_query_params(query_params):
         ("workflow__pk", "queue_id"),
         ("assigned_to__pk", "worker_id"),
         ("source__pk", "source_id"),
+        ("correct", "correct"),
     ]
     filters = {}
     for filter_name, param_name in filter_mapper:
