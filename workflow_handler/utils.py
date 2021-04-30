@@ -138,7 +138,7 @@ def notify_staff_run_status(data: Dict[str, Any], request: Request):
     try:
         status = "running" if data["is_running"] else "paused"
         text = f" set {data['name']} to {status}"
-        notify_slack(text)
+        notify_slack(text, request)
     except Exception as ex:
         sentry_sdk.capture_exception(ex)
 
