@@ -20,7 +20,7 @@ from .models import (
     Workflow,
     WorkflowNotification,
 )
-from .utils import get_session_duration_seconds, notify_staff
+from .utils import get_session_duration_seconds, notify_staff_run_status
 
 logger = logging.getLogger(__name__)
 
@@ -193,7 +193,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
         instance.save()
 
         if "is_running" in validated_data:
-            notify_staff(validated_data, self.context["request"])
+            notify_staff_run_status(validated_data, self.context["request"])
 
         event_name = "Deleted" if disabled else "Updated"
         analytics.track(

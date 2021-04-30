@@ -1,8 +1,11 @@
+from typing import Any, List, Tuple
+
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from data_handler.data_transformation import transform_ext2int
@@ -12,7 +15,7 @@ from user_handler.notifications import send_notification
 from user_handler.permissions import IsOrgAdmin
 from workflow_handler.audits import GetCompletedTaskView
 from workflow_handler.models import Task, Workflow
-from workflow_handler.utils import parse_dates
+from workflow_handler.utils import notify_slack, parse_dates
 
 from .serializers import ExternalTaskSerializer
 
@@ -85,7 +88,7 @@ class CreateTaskView(CreateAPIView):
             )
         )
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args, **kwargs):
         if "data" not in self.request.data or not self.request.data["data"]:
             return Response(
                 {"status_code": 400, "errors": [{"message": "No data"}]},
@@ -93,8 +96,12 @@ class CreateTaskView(CreateAPIView):
             )
         return self.create(request, *args, **kwargs)
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request: Request, *args, **kwargs):
         formatted_data, workflow = self.preprocess_data()
+
+        if workflow.is_running:
+            notify_slack(f"API Task created for {workflow.name}", request)
+
         serializer = self.get_serializer(data={**request.data, "data": formatted_data})
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -104,15 +111,12 @@ class CreateTaskView(CreateAPIView):
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
-    def preprocess_data(self):
-        workflow = get_object_or_404(
+    def preprocess_data(self) -> Tuple[List[Any], Workflow]:
+        workflow: Workflow = get_object_or_404(
             Workflow, pk=self.kwargs.get("queue_id", self.kwargs.get("workflow_id"))
         )
         formatted_data = transform_ext2int(workflow.data, self.request.data["data"])
-        #     except KeyError:
-        #         raise serializers.ValidationError(
-        #             "Cannot find data with data id: {}".format(w_data["id"])
-        #         )
+
         return formatted_data, workflow
 
     def perform_create(self, serializer):

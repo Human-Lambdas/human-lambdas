@@ -134,21 +134,27 @@ def is_force(query_params):
     return False
 
 
-def notify_staff(data: Dict[str, Any], request: Request):
+def notify_staff_run_status(data: Dict[str, Any], request: Request):
+    try:
+        status = "running" if data["is_running"] else "paused"
+        text = f" set {data['name']} to {status}"
+        notify_slack(text)
+    except Exception as ex:
+        sentry_sdk.capture_exception(ex)
+
+
+def notify_slack(text: str, request: Request):
     try:
         email = request.user.email
         path = request.stream.path
-        status = "running" if data["is_running"] else "paused"
-        text = f"{email} set {data['name']} ({path}) to {status}"
-
         slack_url = os.getenv("SLACK_WEBHOOK_URL")
         if slack_url is None:
             sentry_sdk.capture_exception("No slack url configured!")
 
-        r = requests.post(slack_url, json={"text": text})
+        r = requests.post(slack_url, json={"text": f"{email} called {path}: {text}"})
         if r.status_code != 200:
             return sentry_sdk.capture_message(
-                f"Staff notification failed with status {r.status_code}"
+                f"Slack notification failed with status {r.status_code}"
             )
     except Exception as ex:
         sentry_sdk.capture_exception(ex)

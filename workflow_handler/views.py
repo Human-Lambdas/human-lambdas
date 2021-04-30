@@ -6,7 +6,7 @@ from django.db.models import OuterRef, Q, Subquery
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.utils import timezone
 from drf_yasg2.utils import swagger_auto_schema
-from rest_framework import serializers
+from rest_framework import request, serializers
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
@@ -33,7 +33,7 @@ from .serializers import (
     TaskSerializer,
     WorkflowSerializer,
 )
-from .utils import STAFF_ORG_ID, TaskPagination, decode_csv
+from .utils import STAFF_ORG_ID, TaskPagination, decode_csv, notify_slack
 
 
 class RUWebhookView(RetrieveUpdateAPIView, CreateModelMixin):
@@ -252,9 +252,9 @@ class FileUploadView(APIView):
         return workflows.filter(pk=self.kwargs["workflow_id"])
 
     @swagger_auto_schema(query_serializer=FileUploadViewQuerySerializer)
-    def post(self, request, *args, **kwargs):
+    def post(self, request: request.Request, *args, **kwargs):
         file_obj = request.data["file"]
-        workflow = get_object_or_404(self.get_queryset())
+        workflow: Workflow = get_object_or_404(self.get_queryset())
         content = decode_csv(file_obj)
         filename = request.data["file"].name
         source = Source(name=filename, workflow=workflow, created_by=request.user)
@@ -273,6 +273,9 @@ class FileUploadView(APIView):
                 {"status_code": 400, "errors": [{"message": str(exception)}]},
                 status=400,
             )
+        if workflow.is_running:
+            notify_slack(f"bulk upload for {workflow.name}", request)
+
         return Response(
             {
                 "status_code": 200,
@@ -581,13 +584,17 @@ class CreateTaskFormView(CreateAPIView):
         return Response({"status_code": 200, "data": result}, status=200)
 
     def post(self, request, *args, **kwargs):
-        workflow = get_object_or_404(
+        workflow: Workflow = get_object_or_404(
             self.workflow_queryset(), pk=self.kwargs["workflow_id"]
         )
         ids = [i["id"] for i in request.data["data"]]
         for idata in workflow.data:
             if idata["id"] not in ids:
                 request.data["data"].append(idata)
+
+        if workflow.is_running:
+            notify_slack(f"Task created via form for {workflow.name}", request)
+
         return self.create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
