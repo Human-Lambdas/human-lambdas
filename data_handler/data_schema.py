@@ -44,6 +44,7 @@ DATA_SCHEMA = Schema(
                 Optional("delete_disabled"): bool,
                 Optional("edit_disabled"): bool,
                 Optional("ordering_disabled"): bool,
+                Optional("allow_edits"): bool,
             },
             Optional("logic_jump"): dict,
         }
