@@ -95,6 +95,12 @@ def form_ext2int(task_data, request_data):
 
 
 def ner_ext2int(task_data, request_data):
+    # Special case: accept string as its value
+    if isinstance(request_data[task_data["id"]], str):
+        task_data[task_data["type"]]["value"] = request_data[task_data["id"]]
+        task_data[task_data["type"]]["entities"] = []
+        return
+    # Normal case: standard NER schema
     if (
         not isinstance(request_data[task_data["id"]], dict)
         or "text" not in request_data[task_data["id"]]
