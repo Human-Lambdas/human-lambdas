@@ -1,0 +1,15 @@
+(window["webpackJsonp"] = window["webpackJsonp"] || []).push([["QueueContainer"],{
+
+/***/ "./src/universal/modules/queue/containers/QueueContainer.tsx":
+/*!*******************************************************************!*\
+  !*** ./src/universal/modules/queue/containers/QueueContainer.tsx ***!
+  \*******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, exports) {
+
+throw new Error("Module build failed (from ./node_modules/@sucrase/webpack-loader/dist/index.js):\nSyntaxError: Error transforming /Users/a/git/Human-Lambdas/hl-web/src/universal/modules/queue/containers/QueueContainer.tsx: Unexpected token, expected \")\" (60:9)\n    at unexpected (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/util.js:83:15)\n    at expect (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/util.js:70:5)\n    at parseParenExpression (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:607:16)\n    at parseIfStatement (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:362:36)\n    at parseStatementContent (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:151:7)\n    at parseStatement (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:109:3)\n    at parseBlockBody (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:504:5)\n    at parseBlock (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:493:3)\n    at parseFunctionBody (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:936:27)\n    at tsParseFunctionBodyAndFinish (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/plugins/typescript.js:1113:33)\n    at parseFunctionBodyAndFinish (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:922:46)\n    at parseFunction (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:596:42)\n    at parseStatementContent (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:205:11)\n    at parseStatement (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:109:3)\n    at parseBlockBody (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:504:5)\n    at parseBlock (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:493:3)");
+
+/***/ })
+
+}]);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJRdWV1ZUNvbnRhaW5lcl80MTMwOWU4YjdjZGYxZDdjNDI5Yy5qcyIsInNvdXJjZVJvb3QiOiIifQ==

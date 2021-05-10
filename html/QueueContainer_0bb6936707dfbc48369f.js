@@ -1,0 +1,15 @@
+(window["webpackJsonp"] = window["webpackJsonp"] || []).push([["QueueContainer"],{
+
+/***/ "./src/universal/modules/queue/containers/QueueContainer.tsx":
+/*!*******************************************************************!*\
+  !*** ./src/universal/modules/queue/containers/QueueContainer.tsx ***!
+  \*******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, exports) {
+
+throw new Error("Module build failed (from ./node_modules/@sucrase/webpack-loader/dist/index.js):\nSyntaxError: Error transforming /Users/a/git/Human-Lambdas/hl-web/src/universal/modules/queue/containers/QueueContainer.tsx: Unexpected token (58:11)\n    at unexpected (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/util.js:83:15)\n    at parseExprAtom (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:580:24)\n    at parseExprSubscripts (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:266:20)\n    at parseMaybeUnary (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:247:20)\n    at parseExprOp (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:220:7)\n    at parseExprOp (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:228:7)\n    at parseExprOps (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:186:3)\n    at parseMaybeConditional (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:154:20)\n    at baseParseMaybeAssign (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:139:20)\n    at tsParseMaybeAssignWithJSX (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/plugins/typescript.js:1381:45)\n    at tsParseMaybeAssign (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/plugins/typescript.js:1373:12)\n    at parseMaybeAssign (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:118:43)\n    at parseExpression (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:101:3)\n    at parseParenExpression (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/expression.js:606:3)\n    at parseIfStatement (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:362:36)\n    at parseStatementContent (/Users/a/git/Human-Lambdas/hl-web/node_modules/sucrase/dist/parser/traverser/statement.js:151:7)");
+
+/***/ })
+
+}]);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJRdWV1ZUNvbnRhaW5lcl8wYmI2OTM2NzA3ZGZiYzQ4MzY5Zi5qcyIsInNvdXJjZVJvb3QiOiIifQ==
