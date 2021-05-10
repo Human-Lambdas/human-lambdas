@@ -49,7 +49,7 @@ docker run human-lambdas:0.1 \
 
 Human-lambdas integrates with Sendgrid to allow you to send invite emails to teammates and reset your password.
 
-Connect your Sendgrid account to your deployment by passing your API key to your Docker containr:
+Connect your Sendgrid account to your deployment by passing your API key to your Docker container:
 
 ```sh
     --env SENDGRID_API_KEY=xxx
