@@ -11,5 +11,8 @@ class MyHandler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    httpd = HTTPServer(("127.0.0.1", 8000), MyHandler)
-    httpd.serve_forever()
+    httpd = HTTPServer(("127.0.0.1", 3000), MyHandler)
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("stopping")
