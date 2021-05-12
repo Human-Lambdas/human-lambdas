@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-from django.contrib.postgres.fields import JSONField
 from django.db import models
 from rest_hooks.models import AbstractHook
 from rest_hooks.signals import hook_event
@@ -8,6 +7,7 @@ from rest_hooks.signals import hook_event
 from data_handler.data_transformation import transform_int2ext
 from user_handler.models import Notification, Organization, User
 from workflow_handler import regional_storage
+from workflow_handler.fields import JSONField
 from workflow_handler.region import Region
 
 STATUS_MAPPING = {"assigned": "in_progress", "pending": "new"}
