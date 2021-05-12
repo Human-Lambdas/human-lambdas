@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -9,6 +11,8 @@ from hl_rest_api import analytics
 
 from .apps import UserHandlerConfig
 from .models import Notification, User
+
+logger = logging.getLogger(__name__)
 
 
 class NotificationSerializer(serializers.ModelSerializer):
@@ -77,6 +81,13 @@ def send_notification(workflow):
         wf_notification.last_notified = timezone.now()
         wf_notification.save()
     if emails:
+        if (
+            settings.SEND_NOTIFICATION_TEMPLATE is None
+            or settings.NOTIFICATION_ASM_GROUPID is None
+        ):
+            logger.warn("Sendgrid not set up, ignoring email trigger")
+            return
+
         template_data = {
             "workflow_name": workflow.name,
             "org_id": workflow.organization.pk,

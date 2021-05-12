@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -12,6 +14,8 @@ from user_handler.permissions import IsOrgAdmin
 from workflow_handler.models import WorkflowNotification
 
 from .apps import UserHandlerConfig
+
+logger = logging.getLogger(__name__)
 
 
 class SendInviteView(APIView):
@@ -80,12 +84,15 @@ class SendInviteView(APIView):
             )
             emails.append(email)
 
-        UserHandlerConfig.emailclient.send_email(
-            to_email=emails,
-            template_id=settings.INVITATION_TEMPLATE,
-            template_data=template_data,
-            group_id=int(settings.ACCOUNT_ASM_GROUPID),
-        )
+        if settings.INVITATION_TEMPLATE is None or settings.ACCOUNT_ASM_GROUPID is None:
+            logger.warn("Sendgrid not set up, ignoring email trigger")
+        else:
+            UserHandlerConfig.emailclient.send_email(
+                to_email=emails,
+                template_id=settings.INVITATION_TEMPLATE,
+                template_data=template_data,
+                group_id=int(settings.ACCOUNT_ASM_GROUPID),
+            )
 
         # sending responses
         if len(invalid_email_list) == 0 and len(already_added_email_list) == 0:
