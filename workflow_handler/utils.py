@@ -1,5 +1,6 @@
 import copy
 import datetime
+import logging
 import os
 from typing import Any, Dict
 
@@ -13,6 +14,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from .models import WebHook, Workflow, WorkflowNotification
+
+logger = logging.getLogger(__name__)
 
 TEMPLATE_ORG_ID = 40
 STAFF_ORG_ID = 1000000000
@@ -135,6 +138,9 @@ def is_force(query_params):
 
 
 def notify_staff_run_status(data: Dict[str, Any], request: Request):
+    if not "SLACK_WEBHOOK_URL" in os.environ:
+        logger.warn("not sending notification, slack not configured")
+        return
     try:
         status = "running" if data["is_running"] else "paused"
         text = f" set {data['name']} to {status}"
@@ -144,6 +150,9 @@ def notify_staff_run_status(data: Dict[str, Any], request: Request):
 
 
 def notify_slack(text: str, request: Request):
+    if not "SLACK_WEBHOOK_URL" in os.environ:
+        logger.warn("not sending notification, slack not configured")
+        return
     try:
         email = request.user.email
         path = request.stream.path
