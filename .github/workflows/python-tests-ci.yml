@@ -43,9 +43,8 @@ jobs:
     - name: pytest
       run: |
         set -e -x
-        poetry shell
-        python manage.py migrate
-        pytest -n=4
+        poetry run python -m human_lambdas.manage migrate
+        poetry run pytest -n=4
       env:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: "test"
