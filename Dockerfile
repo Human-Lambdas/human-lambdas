@@ -23,4 +23,4 @@ RUN python -m human_lambdas.manage createsuperadmin bernat@humanlambdas.com alex
 RUN python -m human_lambdas.manage migrate
 
 EXPOSE 8000
-CMD gunicorn hl_rest_api.wsgi -b 0.0.0.0:8000 -w 1 -t 1 --timeout 0 --preload
+CMD gunicorn human_lambdas.hl_rest_api.wsgi -b 0.0.0.0:8000 -w 1 -t 1 --timeout 0 --preload

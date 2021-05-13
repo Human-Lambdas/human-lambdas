@@ -2,7 +2,7 @@
 name = "human-lambdas"
 version = "0.1.0"
 description = ""
-authors = ["Bernat Fages <bernat@humanlambdas.com>"]
+authors = ["Human Lambdas Ltd. <contact@humanlambdas.com>"]
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
