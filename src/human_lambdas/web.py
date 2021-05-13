@@ -12,9 +12,4 @@ class MyHandler(SimpleHTTPRequestHandler):
         return f"{HTML_DIR}/index.html"
 
 
-if __name__ == "__main__":
-    httpd = HTTPServer(("127.0.0.1", 3000), MyHandler)
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("stopping")
+httpd = HTTPServer(("127.0.0.1", 3000), MyHandler)
