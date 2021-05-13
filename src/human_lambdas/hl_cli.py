@@ -12,10 +12,12 @@ def cli():
 @click.command()
 def up():
     """Starts Human Lambdas"""
-    web = subprocess.Popen(f"{sys.executable} ./web.py", close_fds=True, shell=True)
+    web = subprocess.Popen(
+        f"{sys.executable} -m human_lambdas.web", close_fds=True, shell=True
+    )
     click.echo("Human Lambdas running on http://localhost:3000")
     subprocess.check_output(
-        ". .venv/bin/activate; . ./.env; ./manage.py runserver", shell=True
+        f"{sys.executable} -m human_lambdas.manage runserver", shell=True
     )
     web.kill()
 
