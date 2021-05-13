@@ -206,9 +206,6 @@ venv/*
 # static files
 static/
 
-# src files
-src/
-
 .vscode/settings.json
 .DS_store
 typeshed

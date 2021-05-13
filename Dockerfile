@@ -14,14 +14,13 @@ RUN apt-get update -y \
 
 RUN mkdir /code
 WORKDIR /code
-COPY requirements.txt /code/
-RUN pip install -r requirements.txt
 COPY . /code/
+RUN pip install poetry && poetry build && pip install dist/human_lambdas-0.1.0-py3-none-any.whl
 
 RUN dev_tools/get-templates > templates.json
 
-RUN python manage.py createsuperadmin bernat@humanlambdas.com alex@treebeard.io
-RUN python manage.py migrate
+RUN python -m human_lambdas.manage createsuperadmin bernat@humanlambdas.com alex@treebeard.io || true
+RUN python -m human_lambdas.manage migrate
 
 EXPOSE 8000
 CMD gunicorn hl_rest_api.wsgi -b 0.0.0.0:8000 -w 1 -t 1 --timeout 0 --preload

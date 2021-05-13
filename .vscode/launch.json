@@ -18,7 +18,7 @@
             "justMyCode": false,
             "request": "launch",
             "django": true,
-            "program": "manage.py",
+            "program": "src/human_lambdas/manage.py",
             "args": ["runserver"],
             "console": "integratedTerminal",
         },
