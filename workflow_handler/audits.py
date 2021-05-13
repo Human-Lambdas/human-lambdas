@@ -147,24 +147,30 @@ class AuditsGetTask(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, IsOrgAdmin.__or__(IsInternalWorker))
     serializer_class = TaskSerializer
 
-    def get_queryset(self):
+    def _get_ownership_filter(self):
         if self.kwargs["org_id"] == STAFF_ORG_ID:
-            queryset = Q(disabled=False)
-        else:
-            user = self.request.user
-            organizations = Organization.objects.filter(user=user).all()
-            queryset = (
-                Q(organization__in=organizations)
-                & Q(disabled=False)
-                & Q(organization__pk=self.kwargs["org_id"])
-            )
+            running_workflows = Workflow.objects.filter(is_running=True, disabled=False)
+            staff_users = Organization.objects.get(pk=STAFF_ORG_ID).user.all()
+            return Q(workflow__in=running_workflows) | Q(assigned_to__in=staff_users)
 
-        workflows = Workflow.objects.filter(queryset)
+        user = self.request.user
+        organizations = Organization.objects.filter(user=user).all()
+        owned_workflows = Workflow.objects.filter(
+            organization__in=organizations,
+            disabled=False,
+            organization__pk=self.kwargs["org_id"],
+        )
+        return Q(workflow__in=owned_workflows)
 
+    def get_queryset(self):
         filters = process_query_params(self.request.query_params)
         return (
             Task.objects.defer("data")
-            .filter(Q(workflow__in=workflows) & Q(status="completed"))
+            .filter(
+                self._get_ownership_filter()
+                & Q(status="completed")
+                & Q(completed_at__range=(parse_dates(self.request)))
+            )
             .filter(**filters)
             .order_by("-completed_at")
         )
