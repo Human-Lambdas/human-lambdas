@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "human-lambdas"
+version = "0.1.0"
+description = ""
+authors = ["Bernat Fages <bernat@humanlambdas.com>"]
+license = "Apache-2.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Django = "2.2.13"
+psycopg2 = "2.8.6"
+djangorestframework = "3.12.2"
+PyJWT = "1.7.1"
+djangorestframework-simplejwt = "4.3.0"
+django-cors-headers = "3.6.0"
+drf-chunked-upload = "0.4.2"
+sentry-sdk = "0.19.5"
+schema = "0.7.2"
+gunicorn = "20.0.04"
+sendgrid = "6.4.8"
+analytics-python = "1.2.9"
+cchardet = "0.3.5"
+django-next-prev = "^1.1.0"
+drf-yasg2 = "^1.19.4"
+python-dotenv = "^0.17.1"
+email-validator = "1.1.1"
+requests = "^2.25.1"
+google-auth = "1.24.0"
+typing-extensions = "3.7.4"
+google-cloud-storage = "1.36.0"
+click = "7.1.2"
+django-rest-hooks = {git = "https://github.com/zapier/django-rest-hooks.git", rev = "d21a070b9a099b5e9c755b2afa6b81c9d8b26e7c"}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
