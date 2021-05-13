@@ -206,9 +206,6 @@ venv/*
 # static files
 static/
 
-# src files
-src/
-
 .vscode/settings.json
 .DS_store
 typeshed
@@ -220,3 +217,4 @@ templates.json
 _whaler
 
 .deepcov
+.hl_db

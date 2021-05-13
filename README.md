@@ -1,117 +1,56 @@
-# Human Lambdas REST API
+# Human Lambdas
 
-[![codecov](https://codecov.io/gh/Human-Lambdas/hl-rest-api/branch/master/graph/badge.svg?token=J83PNZVUT7)](https://codecov.io/gh/Human-Lambdas/hl-rest-api)
+TODO MARKETING COPY, QUICKLINKS, etc.
 
-Backend to accessing and utilizing Human Lambdas platform.
+## Getting Started
 
-## Pre-reqs
+We are going to run Human Lambdas on a developer device.
 
-You will need a `.env` file for your dev environment.
+Please ensure you have Python 3 installed on a Mac or Linux environment then run the following.
 
-## Install
-
-```bash
-virtualenv .venv
-. .venv/bin/activate
+```sh
+pip install human-lambdas
 ```
 
-```bash
-pip install -r requirements.txt -r requirements-dev.txt
+```sh
+human-lambdas up
 ```
 
-Problems installing pyscopg2? try [this](https://stackoverflow.com/questions/26288042/error-installing-psycopg2-library-not-found-for-lssl).
+TODO gif
 
+A browser tab should open on port 3000. If not, you can navigate manually by clicking http://localhost:3000/
 
-```
-pre-commit install
-pre-commit run --all-files
-```
+Human Lambdas is now running against a Sqlite database stored in your working directory.
 
-## Start dev environment
+**Next** Try defining your first queue by following this [guide](https://docs.humanlambdas.com/quickstart/creating-a-queue). Note that external integrations require the [hosted version](https://app.humanlambdas.com/), or additional developer setup.
 
-```bash
-. ./.env
-```
+## Deployment with Docker
 
-### DB
-```bash
-docker run \
-  -p 5432:5432 \
-  -e "POSTGRES_USER=$POSTGRES_USER" \
-  -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
-  -e "POSTGRES_DB=$POSTGRES_DB" \
-  postgres:10
-```
-You will also want to create a superuser so that you can access the django admin (`localhost:8000/admin`). The superuser will have full authorization in the API as well.
+You can deploy Human Lambdas to any runtime supporting docker.
 
-```
-python manage.py migrate
-```
-```
-python manage.py createsuperuser # use email: a@a.com pass: a
+```sh
+docker run human-lambdas:0.1
 ```
 
-### Storage Buckets
+Use our official Docker image to try out a deployment.
 
-Regional data is stored in buckets, managed by terraform.
+For persistent storage we recommend pointing your container at an external Postgres instance by setting the following environment variables.
 
-#### Terraform
-
-```shell
-terraform login
+```sh
+docker run human-lambdas:0.1 \
+    --env POSTGRES_HOST=example.eu-west-2.rds.amazonaws.com \
+    --env POSTGRES_PORT=5432 \
+    --env POSTGRES_DB=my_db \
+    --env POSTGRES_USER=my_user \
+    --env POSTGRES_PASSWORD=my_pw \
 ```
 
-#### Initialise google auth
+## Invite your Teammates
 
-To allow your dev environment to use regional storage buckets:
-```bash
-gcloud auth application-default login
-```
+Human-lambdas integrates with Sendgrid to allow you to send invite emails to teammates and reset your password.
 
-### Backend
-```
-python manage.py runserver
-```
-## Unit Test
+Connect your Sendgrid account to your deployment by passing your API key to your Docker container:
 
-```
-pytest
-```
-
-If you have no configured gcloud auth, then tests talking to storage buckets will fail. To ignore them:
-```shell
-pytest -m "no bucket"
-```
-
-## QA with Swagger
-
-Go to http://localhost:8000/swagger/
-
-Click 'authorize' and paste in `bearer {your_token}`. You can find your token in the web inspector when viewing your local instance of the web front end.
-
-## QA with front end
-
-In Django admin set your superuser's organisation ID to `1`
-
-```
-export APP_URL=http://localhost:8000
-yarn install
-yarn dev
-```
-
-then login at http://localhost:3000
-
-## Build Image to test against localhost DB
-
-```bash
-docker build \
-  -t hl \
-  --build-arg SECRET_KEY=$SECRET_KEY \
-  --build-arg POSTGRES_DB=$POSTGRES_DB \
-  --build-arg POSTGRES_HOST=host.docker.internal \
-  --build-arg POSTGRES_USER=$POSTGRES_USER \
-  --build-arg POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
-  --build-arg POSTGRES_PORT=$POSTGRES_PORT \
-  --build-arg WEBFLOW_API_KEY=$WEBFLOW_API_KEY \
-  .
+```sh
+    --env SENDGRID_API_KEY=xxx
 ```
