@@ -35,7 +35,7 @@ DEBUG = False if os.getenv("DEBUG") == "False" else True
 
 
 HOOK_EVENTS = {
-    "task.completed": "human_lambdas.workflow_handler.Task.completed",
+    "task.completed": "workflow_handler.Task.completed",
 }
 HOOK_CUSTOM_MODEL = "workflow_handler.WebHook"
 HOOK_FINDER = "human_lambdas.workflow_handler.utils.find_and_fire_hook"

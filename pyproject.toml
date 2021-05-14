@@ -5,6 +5,9 @@ description = ""
 authors = ["Human Lambdas Ltd. <contact@humanlambdas.com>"]
 license = "Apache-2.0"
 
+[tool.poetry.scripts]
+human-lambdas = 'human_lambdas.hl_cli:cli'
+
 [tool.poetry.dependencies]
 python = "^3.8"
 Django = "2.2.13"

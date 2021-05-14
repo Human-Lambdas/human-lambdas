@@ -18,7 +18,7 @@
             "justMyCode": false,
             "request": "launch",
             "django": true,
-            "program": "src/human_lambdas/manage.py",
+            "module": "human_lambdas.manage",
             "args": ["runserver"],
             "console": "integratedTerminal",
         },
@@ -28,7 +28,7 @@
             "justMyCode": false,
             "request": "launch",
             "django": true,
-            "program": "manage.py",
+            "module": "human_lambdas.manage",
             "args": ["createsuperadmin", "a@a.com"],
             "console": "integratedTerminal",
         }
