@@ -35,23 +35,7 @@ Human Lambdas is now running against a Sqlite database stored in your working di
 ## Deployment with Docker
 
 You can deploy Human Lambdas to any runtime supporting docker.
-
-```sh
-docker run human-lambdas:0.1
-```
-
-Use our official Docker image to try out a deployment.
-
-For persistent storage we recommend pointing your container at an external Postgres instance by setting the following environment variables.
-
-```sh
-docker run human-lambdas:0.1 \
-    --env POSTGRES_HOST=example.eu-west-2.rds.amazonaws.com \
-    --env POSTGRES_PORT=5432 \
-    --env POSTGRES_DB=my_db \
-    --env POSTGRES_USER=my_user \
-    --env POSTGRES_PASSWORD=my_pw \
-```
+TODO
 
 ## Invite your Teammates
 
@@ -62,3 +46,25 @@ Connect your Sendgrid account to your deployment by passing your API key to your
 ```sh
     --env SENDGRID_API_KEY=xxx
 ```
+
+## Development
+
+### Build the Python Package
+
+```sh
+poetry build
+```
+
+### Build a docker image
+
+```sh
+docker build --tag hl .
+```
+
+Start a terminal in a new container
+
+```sh
+docker run -it --rm -p 8000:8000 -p 3000:3000 hl bash
+```
+
+You can now start human lambdas inside the container using the CLI.
