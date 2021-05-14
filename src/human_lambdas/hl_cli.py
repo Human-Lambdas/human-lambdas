@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -28,6 +29,11 @@ def cli():
 @click.command()
 def up():
     """Starts Human Lambdas"""
+    html = Path(__file__).parent / "_html"
+    html.mkdir(exist_ok=True)
+    html_tgz = Path(__file__).parent / "html.zip"
+
+    shutil.unpack_archive(html_tgz, extract_dir=html)
     th = Thread(target=httpd.serve_forever, daemon=True)
     th.start()
     click.echo("Human Lambdas web running on http://localhost:3000")
