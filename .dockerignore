@@ -6,3 +6,4 @@ venv
 templates.json
 _whaler
 typeshed
+.hl_db
