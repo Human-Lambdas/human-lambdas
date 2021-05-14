@@ -9,8 +9,8 @@ ENV PYTHONUNBUFFERED 1
 # ARG POSTGRES_PORT
 # ARG WEBFLOW_API_KEY
 
-RUN apt-get update -y \
-  && apt-get install jq -y
+# RUN apt-get update -y \
+#   && apt-get install jq -y
 
 RUN mkdir /code
 WORKDIR /code
@@ -20,7 +20,7 @@ RUN pip install poetry && poetry config virtualenvs.create false
 RUN poetry install
 
 COPY . /code/
-RUN poetry build && pip install dist/human_lambdas-0.1.0-py3-none-any.whl
+RUN poetry build && pip install dist/human_lambdas-$(poetry version -s )-py3-none-any.whl
 
 # RUN dev_tools/get-templates > templates.json # move to runtime
 
