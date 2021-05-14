@@ -12,6 +12,14 @@ Please ensure you have Python 3 installed on a Mac or Linux environment then run
 pip install human-lambdas
 ```
 
+Now initialize a sqlite database in your current directory
+
+```sh
+human-lambdas initdb
+```
+
+Start the frontend and backend servers
+
 ```sh
 human-lambdas up
 ```

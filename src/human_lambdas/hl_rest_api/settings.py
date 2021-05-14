@@ -100,6 +100,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "human_lambdas.hl_rest_api.wsgi.application"
 
 if "POSTGRES_DB" in os.environ:
+    print("Running against Postgres")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql_psycopg2",
