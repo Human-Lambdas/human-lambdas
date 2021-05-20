@@ -12,7 +12,7 @@ Human Lambdas is an open source Human in the Loop platform for anyone to run the
 
 ![HL](https://user-images.githubusercontent.com/565238/119013488-f2818080-b98e-11eb-8387-28b685ed0bfb.gif)
 
-It is designed to provide an all-in-one solution to build, operate and monitor Human in the Loop processes. Its highly flexible, composable and user-friendly UI is designed to enable anyone to easily support all sorts of bespoke manual tasks. Some examples are: data annotation, data cleaning, quality assurance, data extraction, sales research, content moderation, customer operations...
+It is designed to provide an **all-in-one solution to build, operate and monitor Human in the Loop processes**. Its highly flexible, composable and user-friendly UI is designed to enable anyone to easily support all sorts of bespoke manual tasks. Some examples are: data annotation, data cleaning, quality assurance, data extraction, sales research, content moderation, customer operations...
 
 ![marketplace](https://user-images.githubusercontent.com/565238/119009286-e267a200-b98a-11eb-89fd-c7c40c00116c.gif)
 
