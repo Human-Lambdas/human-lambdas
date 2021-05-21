@@ -1,6 +1,28 @@
+<p align="center">
+<img width="470" alt="logo" src="https://user-images.githubusercontent.com/565238/119004910-e0034900-b986-11eb-83ec-4e0082b4303b.png">
+</p>
+    
+---
+
 # Human Lambdas
 
-TODO MARKETING COPY, QUICKLINKS, etc.
+Human Lambdas is an open source Human in the Loop platform for anyone to run their own private Mechanical Turk.
+
+## How it works
+
+![HL](https://user-images.githubusercontent.com/565238/119013488-f2818080-b98e-11eb-8387-28b685ed0bfb.gif)
+
+It is designed to provide an **all-in-one solution to build, operate and monitor Human in the Loop processes**. Its highly flexible, composable and user-friendly UI is designed to enable anyone to easily support all sorts of bespoke manual tasks. Some examples are: data annotation, data cleaning, quality assurance, data extraction, sales research, content moderation, customer operations...
+
+![marketplace](https://user-images.githubusercontent.com/565238/119009286-e267a200-b98a-11eb-89fd-c7c40c00116c.gif)
+
+### Learn more
+
+- [Hosted App](https://app.humanlambdas.com/)
+- [Sample Use Cases](https://www.humanlambdas.com/use-cases)
+- [Documentation](https://docs.humanlambdas.com/)
+- [Manual](https://docs.humanlambdas.com/manual/introduction)
+- [API](https://docs.humanlambdas.com/api/introduction)
 
 ## Getting Started
 
