@@ -18,8 +18,9 @@ It is designed to provide an **all-in-one solution to build, operate and monitor
 
 ### Learn more
 
-- [Documentation](https://docs.humanlambdas.com/)
+- [Hosted App](https://app.humanlambdas.com/)
 - [Sample Use Cases](https://www.humanlambdas.com/use-cases)
+- [Documentation](https://docs.humanlambdas.com/)
 - [Manual](https://docs.humanlambdas.com/manual/introduction)
 - [API](https://docs.humanlambdas.com/api/introduction)
 
