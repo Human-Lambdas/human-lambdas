@@ -3,7 +3,7 @@
 venv
 .venv
 .vscode
-templates.json
 _whaler
 typeshed
 .hl_db
+.env

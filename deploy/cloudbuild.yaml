@@ -1,0 +1,76 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        export WEBFLOW_API_KEY='$_WEBFLOW_API_KEY'
+        apt-get update -y && apt-get install jq -y && dev_tools/get-templates > templates.json
+    id: GetTemplates
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - '-t'
+      - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - .
+      - '-f'
+      - Dockerfile
+    id: Build
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+    id: Push
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - run
+      - --env=POSTGRES_HOST=$_POSTGRES_HOST
+      - --env=POSTGRES_PORT=$_POSTGRES_PORT
+      - --env=POSTGRES_DB=$_POSTGRES_DB
+      - --env=POSTGRES_USER=$_POSTGRES_USER
+      - --env=POSTGRES_PASSWORD=$_POSTGRES_PASSWORD
+      - --env=SECRET_KEY=$_SECRET_KEY
+      - --entrypoint=bash
+      - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - -c
+      - 'hl initdb && (python -m human_lambdas.manage createsuperadmin $_SUPER_ADMINS || true)'
+    id: InitDB
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    args:
+      - run
+      - services
+      - update
+      - $_SERVICE_NAME
+      - '--platform=managed'
+      - '--image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - '--command=human-lambdas'
+      - '--args=up'
+      - >-
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID,$_LABELS
+      - '--region=$_DEPLOY_REGION'
+      - '--quiet'
+    id: Deploy
+    entrypoint: gcloud
+images:
+  - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+options:
+  substitutionOption: ALLOW_LOOSE
+substitutions:
+  _LABELS: ''
+  _TRIGGER_ID: ''
+  _PLATFORM: ''
+  _SERVICE_NAME: ''
+  _DEPLOY_REGION: ''
+  _GCR_HOSTNAME: ''
+  _WEBFLOW_API_KEY: ''
+  _POSTGRES_HOST: ''
+  _POSTGRES_PORT: ''
+  _POSTGRES_DB: ''
+  _POSTGRES_USER: ''
+  _POSTGRES_PASSWORD: ''
+  _SECRET_KEY: ''
+  _SUPER_ADMINS: ''
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  

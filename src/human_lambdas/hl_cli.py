@@ -7,23 +7,21 @@ from subprocess import PIPE
 from threading import Thread
 
 import click
-from django.core.management.utils import get_random_secret_key
 
 from human_lambdas.web import httpd
-
-if not "SECRET_KEY" in os.environ:
-    click.echo(
-        click.style(
-            "No SECRET_KEY present, using ephemeral key. Session/password reset tokens won't work",
-            fg="yellow",
-        )
-    )
-    os.environ["SECRET_KEY"] = get_random_secret_key()
 
 
 @click.group()
 def cli():
-    pass
+    if "POSTGRES_DB" in os.environ:
+        click.echo(
+            click.style(
+                "POSTGRES_DB is set, will try to run against remote DB",
+                fg="yellow",
+            )
+        )
+    else:
+        click.echo("Running against local sqlite")
 
 
 @click.command()
