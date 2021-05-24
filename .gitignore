@@ -203,8 +203,6 @@ venv/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
-# static files
-static/
 
 .vscode/settings.json
 .DS_store
