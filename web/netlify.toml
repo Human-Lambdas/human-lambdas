@@ -1,0 +1,8 @@
+[dev]
+  port = 3000
+  autoLaunch = true
+
+[[redirects]]
+  from = "/*"
+  to = "/"
+  status = 200

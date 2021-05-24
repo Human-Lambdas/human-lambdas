@@ -1,0 +1,20 @@
+.react-grid-item.react-grid-placeholder {
+  background-color: #6648ee;
+  opacity: 0.15;
+  z-index: 10;
+}
+
+.react-draggable-dragging, .react-draggable.resizing {
+  z-index: 100 !important;
+}
+
+.react-grid-item:hover > .react-resizable-handle {
+  opacity: 1;
+}
+
+.react-grid-item.cssTransforms {
+  transition-property: none;
+}
+.animated .react-grid-item.cssTransforms {
+  transition-property: transform;
+}

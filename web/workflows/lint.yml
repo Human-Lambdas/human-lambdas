@@ -1,0 +1,22 @@
+on:
+  pull_request:    
+    branches:
+    - master
+    - develop
+defaults:
+  run:
+    working-directory: web
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v2
+      with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+    - run: yarn
+    - run: yarn lint
+    - run: . envs/.env.dev && yarn run build
+
