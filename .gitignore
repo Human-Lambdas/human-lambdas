@@ -218,3 +218,4 @@ _whaler
 .hl_db
 src/human_lambdas/html
 deploy/localsubstitutions.*yaml
+*tgz
