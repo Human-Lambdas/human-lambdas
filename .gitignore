@@ -212,9 +212,11 @@ typeshed
 
 templates.json
 
-*cloudbuild.yaml
+/*cloudbuild.yaml
 .gcloudignore
 _whaler
 
 .deepcov
 .hl_db
+src/human_lambdas/html
+deploy/localsubstitutions.*yaml

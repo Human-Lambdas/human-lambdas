@@ -100,6 +100,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "human_lambdas.hl_rest_api.wsgi.application"
 
 if "POSTGRES_DB" in os.environ:
+    print("Running against Postgres")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql_psycopg2",
@@ -281,8 +282,8 @@ if not DEBUG:
             send_default_pii=True,
         )
 
-FRONT_END_BASE_URL = os.getenv("APP_URL")
-API_URL = os.getenv("API_URL")
+FRONT_END_BASE_URL = os.getenv("APP_URL", "http://localhost:3000/")
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 LOCAL_IP = None
 try:

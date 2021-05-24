@@ -12,4 +12,4 @@ class MyHandler(SimpleHTTPRequestHandler):
         return f"{HTML_DIR}/index.html"
 
 
-httpd = HTTPServer(("127.0.0.1", 3000), MyHandler)
+httpd = HTTPServer(("0.0.0.0", 3000), MyHandler)
