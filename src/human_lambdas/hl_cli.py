@@ -4,11 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 from subprocess import PIPE
-from threading import Thread
 
 import click
-
-from human_lambdas.web import httpd
 
 
 @click.group()
@@ -32,9 +29,7 @@ def up():
     html_tgz = Path(__file__).parent / "frontend.tgz"
 
     shutil.unpack_archive(html_tgz, extract_dir=html)
-    th = Thread(target=httpd.serve_forever, daemon=True)
-    th.start()
-    click.echo("Human Lambdas web running on http://localhost:3000")
+    click.echo("Human Lambdas web running on http://localhost:8000")
     gunicorn = Path(sys.executable).parent / "gunicorn"
     cmd = f"{gunicorn.as_posix()} human_lambdas.hl_rest_api.wsgi -b 0.0.0.0:8000 -w 1 -t 1 --timeout 0 --preload"
     click.echo(f"Running {cmd}")

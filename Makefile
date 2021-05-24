@@ -3,4 +3,4 @@ pkg:
 	. envs/.env.oss && \
 	yarn && \
 	yarn build && \
-	tar -cvzf ../src/human_lambdas/frontend.zip ./build
+	tar -cvzf ../src/human_lambdas/frontend.tgz ./build

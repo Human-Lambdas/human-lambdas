@@ -34,6 +34,7 @@ typing-extensions = "3.7.4"
 google-cloud-storage = "1.36.0"
 click = "7.1.2"
 django-rest-hooks = {git = "https://github.com/zapier/django-rest-hooks.git", rev = "d21a070b9a099b5e9c755b2afa6b81c9d8b26e7c"}
+whitenoise = "^5.2.0"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.12.1"
