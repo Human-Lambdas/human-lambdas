@@ -29,7 +29,7 @@ def up():
     """Starts Human Lambdas"""
     html = Path(__file__).parent / "html"
     html.mkdir(exist_ok=True)
-    html_tgz = Path(__file__).parent / "frontend.zip"
+    html_tgz = Path(__file__).parent / "frontend.tgz"
 
     shutil.unpack_archive(html_tgz, extract_dir=html)
     th = Thread(target=httpd.serve_forever, daemon=True)

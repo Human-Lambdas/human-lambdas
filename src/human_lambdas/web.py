@@ -1,7 +1,7 @@
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
-HTML_DIR = Path(__file__).parent / "html"
+HTML_DIR = Path(__file__).parent / "html" / "build"
 
 
 class MyHandler(SimpleHTTPRequestHandler):
