@@ -70,6 +70,7 @@ HL_ORG_ID = os.getenv("HL_ORG_ID")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "human_lambdas.middleware.RewriteMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
