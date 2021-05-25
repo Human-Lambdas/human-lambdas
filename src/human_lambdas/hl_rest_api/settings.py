@@ -70,6 +70,8 @@ HL_ORG_ID = os.getenv("HL_ORG_ID")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "human_lambdas.middleware.RewriteMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -113,10 +115,12 @@ if "POSTGRES_DB" in os.environ:
     }
 else:
     print("No POSTGRES_DB given, using sqlite")
+    db_path = Path.cwd() / ".human_lambdas"
+    db_path.mkdir(parents=True, exist_ok=True)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": (Path.cwd() / ".hl_db").as_posix(),
+            "NAME": (db_path / "db").as_posix(),
         },
     }
 
@@ -151,8 +155,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/"
+STATIC_ROOT = os.path.join(BASE_DIR, "html", "build")
+WHITENOISE_INDEX_FILE = True
 
 AUTH_USER_MODEL = "user_handler.User"
 

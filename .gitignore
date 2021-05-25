@@ -203,8 +203,6 @@ venv/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
-# static files
-static/
 
 .vscode/settings.json
 .DS_store
@@ -217,6 +215,7 @@ templates.json
 _whaler
 
 .deepcov
-.hl_db
+.human_lambdas
 src/human_lambdas/html
 deploy/localsubstitutions.*yaml
+*tgz

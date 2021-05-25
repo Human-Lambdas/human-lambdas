@@ -44,14 +44,19 @@ class SendForgottenPasswordView(APIView):
         password_link = "{0}forgot/{1}".format(settings.FRONT_END_BASE_URL, token)
         template_data = {"url": password_link}
 
-        UserHandlerConfig.emailclient.send_email(
-            to_email=request.data["email"],
-            template_id=settings.FORGOTTEN_PASSWORD_TEMPLATE,
-            template_data=template_data,
-            group_id=int(settings.ACCOUNT_ASM_GROUPID),
+        logger.info(
+            f"password reset link for {request.data['email']} is: {password_link}"
         )
+
+        if settings.ACCOUNT_ASM_GROUPID:
+            UserHandlerConfig.emailclient.send_email(
+                to_email=request.data["email"],
+                template_id=settings.FORGOTTEN_PASSWORD_TEMPLATE,
+                template_data=template_data,
+                group_id=int(settings.ACCOUNT_ASM_GROUPID),
+            )
         return Response(
-            {"status_code": 200, "message": "We have sent an email to this address"},
+            {"status_code": 200, "message": "Password Recovery Link Created"},
             status=200,
         )
 

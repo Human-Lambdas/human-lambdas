@@ -83,10 +83,9 @@ poetry build
 docker build --tag hl .
 ```
 
-Start a terminal in a new container
+Start HL in a temporary container
 
 ```sh
-docker run -it --rm -p 8000:8000 -p 3000:3000 hl bash
+docker run -it --rm --entrypoint bash -p 8000:8000 hl -c 'hl initdb && hl up'
 ```
 
-You can now start human lambdas inside the container using the CLI.

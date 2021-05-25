@@ -19,7 +19,7 @@
             "request": "launch",
             "django": true,
             "module": "human_lambdas.manage",
-            "args": ["runserver"],
+            "args": ["runserver", "--nostatic"],
             "console": "integratedTerminal",
         },
         {

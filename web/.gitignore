@@ -1,0 +1,12 @@
+*.env
+*.log
+*.lock
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+.elasticbeanstalk/*
+.DS_Store
+build/
+package-lock.json
+yarn.lock
+node_modules/
+webpack/dll/
