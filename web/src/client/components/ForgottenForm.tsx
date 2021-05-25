@@ -98,7 +98,7 @@ const ForgottenForm = (props: IProps) => {
             </FieldBlock>
             <FieldBlock>
               <FlatButton type='submit' disabled={isSubmitting || !isValid}>
-                Send recovery email
+                {__OSS__ ? "Create recovery link in server log": "Send recovery email"}
               </FlatButton>
             </FieldBlock>
             <LinkButton onClick={() => history.push('/')}>Already have an account?</LinkButton>

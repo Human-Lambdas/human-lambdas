@@ -143,7 +143,7 @@ const PublicSignUpPage = (props) => {
       >
         {({touched, isSubmitting, isValid, values, errors, handleBlur, handleChange, dirty}) => (
           <LoginContainer tagLine={'Create an account'}>
-            <GoogleAuthButton label="Sign up with Google" />
+            {!__OSS__ && <GoogleAuthButton label="Sign up with Google" />}
             <FieldBlock>
               <InputField
                 label='Name'
@@ -190,7 +190,7 @@ const PublicSignUpPage = (props) => {
                 Log in
               </Link>
             </SubLine>
-            <SubSubLine>
+            {!__OSS__ && <SubSubLine>
               By clicking Sign Up, you agree to the Human Lambdas{' '}
               <SmallLink target={'_blank'} href={'https://humanlambdas.com/legal/terms-of-service'}>
                 Terms Of Service
@@ -200,7 +200,7 @@ const PublicSignUpPage = (props) => {
                 Privacy Policy
               </SmallLink>{' '}
               and to receiving occasional emails relating to your account
-            </SubSubLine>
+            </SubSubLine>}
           </LoginContainer>
         )}
       </Formik>

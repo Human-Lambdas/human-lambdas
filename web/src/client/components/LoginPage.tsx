@@ -148,7 +148,7 @@ const LoginPage = (props: Props) => {
       >
         {({touched, isSubmitting, isValid, values, errors, handleBlur, handleChange, dirty}) => (
           <LoginContainer tagLine={'Log in to Human Lambdas'}>
-            <GoogleAuthButton label='Log in with Google' />
+            {!__OSS__ && <GoogleAuthButton label='Log in with Google' />}
             <FieldBlock>
               <InputField
                 label='Email'

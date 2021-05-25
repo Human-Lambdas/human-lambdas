@@ -110,9 +110,9 @@ const Sidebar = (props: Props) => {
                   <NavItem to={`/settings/password`} activeClassName={css(activeLinkStyles)}>
                     Password
                   </NavItem>
-                  <NavItem to={`/settings/notifications`} activeClassName={css(activeLinkStyles)}>
+                  {!__OSS__ && <NavItem to={`/settings/notifications`} activeClassName={css(activeLinkStyles)}>
                     Notifications
-                  </NavItem>
+                  </NavItem>}
                   {isAdmin && (
                     <>
                       <NavSection>Organization</NavSection>

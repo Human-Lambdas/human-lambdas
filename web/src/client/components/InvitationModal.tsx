@@ -68,7 +68,7 @@ const InvitationModal = ({closePortal, handleUsersInvite}: InvitationProps) => {
         {({isSubmitting, isValid, values, handleChange, handleBlur}) => (
           <FormContent>
             <MainTitle>Invite workers to team</MainTitle>
-            <SubTitle>Send invites by email:</SubTitle>
+            <SubTitle>{__OSS__ ? "Create Invite Link in the Server Logs:" : "Send invites by email:"}</SubTitle>
             <TextArea
               placeholder='mike@humanlambdas.com, jeff@humanlambdas.com, sarah@humanlambdas.com, alice@humanlambdas.com'
               name='emails'
@@ -82,7 +82,7 @@ const InvitationModal = ({closePortal, handleUsersInvite}: InvitationProps) => {
                 Cancel
               </SecondaryButton>
               <FlatButton type='submit' disabled={isSubmitting || !isValid}>
-                Send Invitation
+              {__OSS__ ? "Create Invite Link" : "Send Invitation"}
               </FlatButton>
             </SubmissionSection>
           </FormContent>

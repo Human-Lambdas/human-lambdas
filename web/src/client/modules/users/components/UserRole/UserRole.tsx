@@ -138,7 +138,7 @@ const UserRole = (props: Props) => {
         <ListItem>{user.email && <Label>{user.email}</Label>}</ListItem>
         <ListItem align={'center'}>
           <Row>
-            {user.pending && (
+            {user.pending && !__OSS__ && (
               <Actions
                 type='button'
                 color={PALETTE.PRIMARY_GREEN_DARK}

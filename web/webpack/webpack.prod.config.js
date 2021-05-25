@@ -67,6 +67,7 @@ const plugins = [
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
     'process.env.NODE_ENV': JSON.stringify('production'),
     __APP_URL__: APP_URL,
+    __OSS__: JSON.stringify(process.env.OSS || false),
     'process.env.SENTRY_DSN': JSON.stringify(process.env.SENTRY_DSN),
     'process.env.SEGMENT_KEY': JSON.stringify(process.env.SEGMENT_KEY)
   }),

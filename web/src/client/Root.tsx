@@ -24,6 +24,7 @@ const Root = (props: Props) => {
     togglePortal()
   }, [])
 
+  console.log(__OSS__)
   return (
     <NetworkerProvider>
       <Provider store={store}>

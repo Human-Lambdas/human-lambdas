@@ -64,6 +64,7 @@ const plugins = [
     __PRODUCTION__: false,
     __CLIENT__: true,
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+    __OSS__: JSON.stringify(process.env.OSS || false),
     'process.env.NODE_ENV': JSON.stringify('false'),
     __APP_URL__: APP_URL,
     'process.env.SENTRY_DSN': JSON.stringify(process.env.SENTRY_DSN),

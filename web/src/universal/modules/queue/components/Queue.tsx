@@ -478,10 +478,10 @@ const Queue = (props: Props) => {
               New Task
             </MenuButtonSecondary>
           )}
-          {(!user?.is_admin || isStaff) && queue.n_tasks > 0 ? (
+          {(__OSS__ || !user?.is_admin || isStaff) && queue.n_tasks > 0 ? (
             <PlayButton onClick={startNextTask}>Play</PlayButton>
           ) : null}
-          {user?.is_admin && !isStaff && (
+          {!__OSS__ && user?.is_admin && !isStaff && (
             <PlayButton onClick={handleRunOrPause}>{isRunning ? 'Pause' : 'Run'}</PlayButton>
           )}
         </Buttons>

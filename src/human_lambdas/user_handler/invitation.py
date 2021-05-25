@@ -90,6 +90,8 @@ class SendInviteView(APIView):
                     "url": invite_link,
                 }
             )
+
+            logger.info(f"Invite link for {email} is {invite_link}")
             emails.append(email)
 
         if settings.INVITATION_TEMPLATE is None or settings.ACCOUNT_ASM_GROUPID is None:

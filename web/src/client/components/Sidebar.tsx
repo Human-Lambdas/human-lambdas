@@ -211,10 +211,10 @@ const Sidebar = (props: Props) => {
                           <AuditsSVG />
                           <Label>Audits</Label>
                         </NavItem>
-                        <NavItem to={`/metrics`} activeClassName={css(activeLinkStyles)}>
+                        {!__OSS__ && <NavItem to={`/metrics`} activeClassName={css(activeLinkStyles)}>
                           <MetricsIcon />
                           <Label>Metrics</Label>
-                        </NavItem>
+                        </NavItem>}
                         {isMetricRoute && (
                           <>
                             <NavSubItem

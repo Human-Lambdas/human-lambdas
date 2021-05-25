@@ -54,9 +54,9 @@ const AddTasksSwitcher = (props: Props) => {
         <MenuItem onClick={() => setApiView('sources/csv')} active={apiView === 'sources/csv'}>
           CSV
         </MenuItem>
-        <MenuItem onClick={() => setApiView('sources/zapier')} active={apiView === 'sources/zapier'}>
+        {!__OSS__ && <MenuItem onClick={() => setApiView('sources/zapier')} active={apiView === 'sources/zapier'}>
           Zapier
-        </MenuItem>
+        </MenuItem>}
       </Section>
       <Section>
         <MenuHeader>Destinations</MenuHeader>
@@ -78,12 +78,12 @@ const AddTasksSwitcher = (props: Props) => {
         >
           CSV
         </MenuItem>
-        <MenuItem
+        {!__OSS__ && <MenuItem
           onClick={() => setApiView('destinations/zapier')}
           active={apiView === 'destinations/zapier'}
         >
           Zapier
-        </MenuItem>
+        </MenuItem>}
       </Section>
     </Container>
   )

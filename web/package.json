@@ -12,6 +12,7 @@
     "watch": "yarn webpack --config webpack/webpack.dev.config.js --watch",
     "dev": "yarn run serve & . envs/.env.dev; yarn run watch",
     "local": "yarn run serve & . envs/.env.local; yarn run watch",
+    "oss": "yarn run serve & . envs/.env.oss; yarn run watch",
     "stg": ". envs/.env.stg; yarn run build",
     "prod": ". envs/.env.prod; yarn run build",
     "serve": "netlify dev --dir build",
