@@ -115,10 +115,12 @@ if "POSTGRES_DB" in os.environ:
     }
 else:
     print("No POSTGRES_DB given, using sqlite")
+    db_path = Path.cwd() / ".human_lambdas"
+    db_path.mkdir(parents=True, exist_ok=True)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": (Path.cwd() / ".hl_db").as_posix(),
+            "NAME": (db_path / "db").as_posix(),
         },
     }
 

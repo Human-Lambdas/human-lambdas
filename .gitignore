@@ -215,7 +215,7 @@ templates.json
 _whaler
 
 .deepcov
-.hl_db
+.human_lambdas
 src/human_lambdas/html
 deploy/localsubstitutions.*yaml
 *tgz

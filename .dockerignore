@@ -5,5 +5,5 @@ venv
 .vscode
 _whaler
 typeshed
-.hl_db
+.human_lambdas
 .env
