@@ -19,5 +19,5 @@ jobs:
           author_name: github-actions
           author_email: 41898282+github-actions[bot]@users.noreply.github.com
           add: pyproject.toml
-          branch: main
+          branch: master
           message: Published new version
