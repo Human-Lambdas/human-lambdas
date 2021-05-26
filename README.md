@@ -34,13 +34,13 @@ Please ensure you have Python 3 installed on a Mac or Linux environment then run
 pip install human-lambdas
 ```
 
-Now initialize a sqlite database in a local `.human_lambdas`
+Now initialize a sqlite database in a local `.human_lambdas` directory.
 
 ```sh
 human-lambdas initdb
 ```
 
-Start the frontend and backend servers
+Start the server
 
 ```sh
 human-lambdas up
@@ -48,7 +48,7 @@ human-lambdas up
 
 Human Lambdas is now running against a Sqlite database stored in your working directory.
 
-**Next** Try defining your first queue by following this [guide](https://docs.humanlambdas.com/quickstart/creating-a-queue). Note that external integrations require the [hosted version](https://app.humanlambdas.com/), or additional developer setup.
+**Next** Try defining your first queue by following this [guide](https://docs.humanlambdas.com/quickstart/creating-a-queue). Note that external integrations require our [hosted deployment](https://humanlambdas.com/), or additional developer setup.
 
 ## Use Postgres for Your Database
 
