@@ -62,6 +62,8 @@ export POSTGRES_DB=hlambda
 export POSTGRES_PASSWORD=some_password
 ```
 
+Start Postgres in a local docker container
+
 ```sh
 docker run \
   -p 5432:5432 \
