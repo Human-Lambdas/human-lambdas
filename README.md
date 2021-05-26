@@ -34,50 +34,72 @@ Please ensure you have Python 3 installed on a Mac or Linux environment then run
 pip install human-lambdas
 ```
 
-Now initialize a sqlite database in your current directory
+Now initialize a sqlite database in a local `.human_lambdas` directory.
 
 ```sh
 human-lambdas initdb
 ```
 
-Start the frontend and backend servers
+Start the server
 
 ```sh
 human-lambdas up
 ```
 
-TODO gif
-
-A browser tab should open on port 3000. If not, you can navigate manually by clicking http://localhost:3000/
-
 Human Lambdas is now running against a Sqlite database stored in your working directory.
 
-**Next** Try defining your first queue by following this [guide](https://docs.humanlambdas.com/quickstart/creating-a-queue). Note that external integrations require the [hosted version](https://app.humanlambdas.com/), or additional developer setup.
+**Next** Try defining your first queue by following this [guide](https://docs.humanlambdas.com/quickstart/creating-a-queue). Note that external integrations require our [hosted deployment](https://humanlambdas.com/), or additional developer setup.
 
-## Deployment with Docker
+## Use Postgres for Your Database
 
-You can deploy Human Lambdas to any runtime supporting docker.
-TODO
-
-## Invite your Teammates
-
-Human-lambdas integrates with Sendgrid to allow you to send invite emails to teammates and reset your password.
-
-Connect your Sendgrid account to your deployment by passing your API key to your Docker container:
+Define the following variables so both Docker and your Human Lambdas application can read them:
 
 ```sh
-    --env SENDGRID_API_KEY=xxx
+export POSTGRES_HOST=localhost
+export POSTGRES_PORT=5432
+export POSTGRES_USER=hlambda
+export POSTGRES_DB=hlambda
+export POSTGRES_PASSWORD=some_password
 ```
+
+Start Postgres in a local docker container
+
+```sh
+docker run \
+  -p 5432:5432 \
+  -e "POSTGRES_USER=$POSTGRES_USER" \
+  -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
+  -e "POSTGRES_DB=$POSTGRES_DB" \
+  postgres:10
+```
+
+Remember to run `hl initdb` before starting your server.
 
 ## Development
 
-### Build the Python Package
+Install:
 
 ```sh
-poetry build
+pip install poetry # poetry is the python package manager for the repo
+
+poetry install # will install project in a virtualenv
+
+pre-commit install # setup linters etc.
 ```
 
-### Build a docker image
+Run Python tests:
+
+```sh
+pytest -n=auto # Note: Some tests will fail if you don't run against Postgres
+```
+
+Build frontend and Python package
+
+```sh
+make
+```
+
+Build Docker image
 
 ```sh
 docker build --tag hl .
@@ -88,4 +110,3 @@ Start HL in a temporary container
 ```sh
 docker run -it --rm --entrypoint bash -p 8000:8000 hl -c 'hl initdb && hl up'
 ```
-

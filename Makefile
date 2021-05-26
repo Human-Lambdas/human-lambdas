@@ -1,4 +1,8 @@
-pkg:
+buildpy: buildweb
+	poetry install
+	poetry build
+	
+buildweb:
 	cd web && \
 	. envs/.env.oss && \
 	yarn && \

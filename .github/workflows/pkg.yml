@@ -1,0 +1,23 @@
+on:
+  release:
+    types: [published]
+jobs:
+  pkg:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+    - run: pip install poetry
+    - run: poetry version ${GITHUB_REF:10}
+    - run: make
+    - uses: actions/upload-artifact@v2
+      with:
+        name: package
+        path: dist/* 
+    - uses: EndBug/add-and-commit@v7.0.0
+      with:
+          author_name: github-actions
+          author_email: 41898282+github-actions[bot]@users.noreply.github.com
+          add: pyproject.toml
+          branch: master
+          message: Published new version

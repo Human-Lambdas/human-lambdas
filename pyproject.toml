@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "human-lambdas"
-version = "0.1.0"
+version = "1.0.40"
 description = ""
 authors = ["Human Lambdas Ltd. <contact@humanlambdas.com>"]
 license = "Apache-2.0"

@@ -4,7 +4,6 @@ on:
   pull_request:    
     branches:
     - master
-    - develop
 
 jobs:
   tests:
@@ -65,4 +64,5 @@ jobs:
         API_URL: "http://localhost:8000"
         HL_CLIENT_API_KEY: ${{ secrets.HL_CLIENT_API_KEY }}
         HL_ORG_ID: 61
+    - run: make
 
