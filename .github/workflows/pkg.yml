@@ -6,6 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.ADMIN_TOKEN }}
     - uses: actions/setup-python@v2
     - run: pip install poetry
     - run: poetry version ${GITHUB_REF:10}
