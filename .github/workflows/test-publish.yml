@@ -12,8 +12,14 @@ jobs:
           build_version="$(poetry version -s).dev$(date +%s)"
           poetry version $build_version
       - run: make
-      - name: Publish distribution to Test PyPI
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          password: ${{ secrets.TEST_PYPI_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+      - run: |
+          cat > ~/.pypirc <<- EOM
+          [pypi]
+          username = __token__
+          password = ${{ secrets.PYPI_TOKEN }}
+          
+          [testpypi]
+          username = __token__
+          password = ${{ secrets.TEST_PYPI_TOKEN }}
+          EOM
+      - run: twine upload --repository testpypi dist/*
