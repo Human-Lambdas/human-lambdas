@@ -13,5 +13,4 @@ COPY . /code/
 RUN poetry install
 
 EXPOSE 8000
-EXPOSE 3000
 ENTRYPOINT [ "human-lambdas" ]
