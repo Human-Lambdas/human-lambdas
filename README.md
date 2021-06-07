@@ -87,9 +87,11 @@ docker run \
   -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
   -e "POSTGRES_DB=$POSTGRES_DB" \
   --entrypoint=bash \
-  hl:latest \
+  human-lambdas:latest \
   -c 'hl initdb && hl up'
 ```
+
+Human Lambdas is now available on localhost:8000.
 
 This approach lets you use Human Lambdas in stateless environments such as Google Cloud Run as long as
 
