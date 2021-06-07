@@ -17,9 +17,9 @@ jobs:
           [pypi]
           username = __token__
           password = ${{ secrets.PYPI_TOKEN }}
-          
+
           [testpypi]
           username = __token__
           password = ${{ secrets.TEST_PYPI_TOKEN }}
           EOM
-      - run: twine upload --repository testpypi dist/*
+      - run: poetry run twine upload --repository testpypi dist/*
