@@ -87,7 +87,7 @@ docker run \
   -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
   -e "POSTGRES_DB=$POSTGRES_DB" \
   --entrypoint=bash \
-  human-lambdas:latest \
+  hlambdas/human-lambdas:latest \
   -c 'hl initdb && hl up'
 ```
 
