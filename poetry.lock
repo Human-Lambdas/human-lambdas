@@ -247,23 +247,16 @@ python-versions = "*"
 Django = ">=1.8"
 
 [[package]]
-name = "django-rest-hooks"
-version = "1.6.0"
+name = "django-rest-hooks-tmp"
+version = "1.6.1"
 description = "A powerful mechanism for sending real time API notifications via a new subscription model."
 category = "main"
 optional = false
 python-versions = "*"
-develop = false
 
 [package.dependencies]
 Django = ">=1.5"
 requests = "*"
-
-[package.source]
-type = "git"
-url = "https://github.com/zapier/django-rest-hooks.git"
-reference = "d21a070b9a099b5e9c755b2afa6b81c9d8b26e7c"
-resolved_reference = "d21a070b9a099b5e9c755b2afa6b81c9d8b26e7c"
 
 [[package]]
 name = "djangorestframework"
@@ -1311,7 +1304,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "7472d65111816441d0ecdf6f9c843a6ae9a0aa1e881c6fd0056b1117f819e9f4"
+content-hash = "0dd8b6596004e780e76a6d009c107bc53394024fbe72a54797174a2ff773540c"
 
 [metadata.files]
 analytics-python = [
@@ -1514,7 +1507,10 @@ django-cors-headers = [
 django-next-prev = [
     {file = "django-next-prev-1.1.0.tar.gz", hash = "sha256:eb79dcde18bb0c75c809224ed8656417fb3e56eb7e7064552772ffb11d203885"},
 ]
-django-rest-hooks = []
+django-rest-hooks-tmp = [
+    {file = "django-rest-hooks-tmp-1.6.1.tar.gz", hash = "sha256:66d97f4729246399b8b53a66f46ce00e98e2fa5e898835aa2f78196cab805f39"},
+    {file = "django_rest_hooks_tmp-1.6.1-py2.py3-none-any.whl", hash = "sha256:c35ceb2d4d693026aabdd485426caec5dce5894002965f46bbe952f618ca382a"},
+]
 djangorestframework = [
     {file = "djangorestframework-3.12.2-py3-none-any.whl", hash = "sha256:0209bafcb7b5010fdfec784034f059d512256424de2a0f084cb82b096d6dd6a7"},
     {file = "djangorestframework-3.12.2.tar.gz", hash = "sha256:0898182b4737a7b584a2c73735d89816343369f259fea932d90dc78e35d8ac33"},
