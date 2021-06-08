@@ -48,6 +48,10 @@ human-lambdas up
 
 Human Lambdas is now running against a Sqlite database stored in your working directory.
 
+Check out the server at http://localhost:8000 .
+
+_Note: It is best to use incognito or clear cookies if you have used it before without setting a Django `SECRET_KEY`_
+
 **Next** Try defining your first queue by following this [guide](https://docs.humanlambdas.com/quickstart/creating-a-queue). Note that external integrations require our [hosted deployment](https://humanlambdas.com/), or additional developer setup.
 
 ## Use Postgres for Your Database
