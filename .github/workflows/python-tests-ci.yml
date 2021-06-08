@@ -31,14 +31,14 @@ jobs:
             python-version: "3.8"
           - os: ubuntu-latest
             python-version: "3.9"
-          - os: macos-latest
-            python-version: "3.6"
-          - os: macos-latest
-            python-version: "3.7"
-          - os: macos-latest
-            python-version: "3.8"
-          - os: macos-latest
-            python-version: "3.9"
+          # - os: macos-latest        # don't seem to work with docker postgres service on GHA
+          #   python-version: "3.6"
+          # - os: macos-latest
+          #   python-version: "3.7"
+          # - os: macos-latest
+          #   python-version: "3.8"
+          # - os: macos-latest
+          #   python-version: "3.9"
 
     runs-on: ${{ matrix.cfg.os }}
     steps:
