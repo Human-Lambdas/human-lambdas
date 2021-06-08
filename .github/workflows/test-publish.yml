@@ -1,0 +1,42 @@
+name: Test Publish to PYPI
+on: [pull_request]
+jobs:
+  pypi:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - run: pip install poetry
+      - name: Set poetry version to dev
+        run: |
+          build_version="$(poetry version -s).dev$(date +%s)"
+          poetry version $build_version
+      - run: |
+          export LDFLAGS='-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib'
+          make
+      - uses: pre-commit/action@v2.0.0
+        with:
+          extra_args: --verbose --all-files
+      - run: |
+          cat > ~/.pypirc <<- EOM
+          [pypi]
+          username = __token__
+          password = ${{ secrets.PYPI_TOKEN }}
+
+          [testpypi]
+          username = __token__
+          password = ${{ secrets.TEST_PYPI_TOKEN }}
+          EOM
+      - run: poetry run twine upload --repository testpypi dist/*
+      - run: |
+          export LDFLAGS='-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib'
+          pip install dist/*whl
+      - run: hl initdb # check package installs and run
+
+  docker:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
+      - run: docker build . -t "hlambdas/human-lambdas:$GITHUB_SHA"
+      - run: docker push "hlambdas/human-lambdas:$GITHUB_SHA"
