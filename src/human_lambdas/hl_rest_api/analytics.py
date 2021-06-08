@@ -6,17 +6,26 @@ from .hl_client import enqueue_signup
 
 def alias(new_id, old_id):
     if not settings.DEBUG:
-        analytics.alias(new_id, old_id)
+        try:
+            analytics.alias(new_id, old_id)
+        except:
+            pass
 
 
 def identify(*args):
     if not settings.DEBUG:
-        analytics.identify(*args)
+        try:
+            analytics.identify(*args)
+        except:
+            pass
 
 
 def track(*args):
     if not settings.DEBUG:
-        analytics.track(*args)
+        try:
+            analytics.track(*args)
+        except:
+            pass
 
 
 def signup_events(user_obj, organization_obj):
