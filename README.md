@@ -18,7 +18,6 @@ It is designed to provide an **all-in-one solution to build, operate and monitor
 
 ### Learn more
 
-- [Hosted App](https://app.humanlambdas.com/)
 - [Sample Use Cases](https://www.humanlambdas.com/use-cases)
 - [Documentation](https://docs.humanlambdas.com/)
 - [Manual](https://docs.humanlambdas.com/manual/introduction)
@@ -48,23 +47,21 @@ human-lambdas up
 
 Human Lambdas is now running against a Sqlite database stored in your working directory.
 
-**Next** Try defining your first queue by following this [guide](https://docs.humanlambdas.com/quickstart/creating-a-queue). Note that external integrations require our [hosted deployment](https://humanlambdas.com/), or additional developer setup.
+**Next** Try defining your first queue by following this [guide](https://docs.humanlambdas.com/quickstart/creating-a-queue).
 
-## Use Postgres for Your Database
+## Run with Docker and Postgres
 
-Define the following variables so both Docker and your Human Lambdas application can read them:
+Human Lambdas requires a database for storing user and task data. When you deploy an instance for your team it is best to use a production-grade database such as Postgres.
+
+You can use a managed Postgres product such as Amazon RDS, or use a Docker container as follows.
+
+When starting your container, pass in authentication details in environment variables.
 
 ```sh
-export POSTGRES_HOST=localhost
-export POSTGRES_PORT=5432
 export POSTGRES_USER=hlambda
 export POSTGRES_DB=hlambda
 export POSTGRES_PASSWORD=some_password
-```
 
-Start Postgres in a local docker container
-
-```sh
 docker run \
   -p 5432:5432 \
   -e "POSTGRES_USER=$POSTGRES_USER" \
@@ -73,40 +70,30 @@ docker run \
   postgres:10
 ```
 
-Remember to run `hl initdb` before starting your server.
-
-## Development
-
-Install:
+Then initialise your database and start the Human Lambdas server in another container:
 
 ```sh
-pip install poetry # poetry is the python package manager for the repo
+export POSTGRES_HOST="host.docker.internal" # Note: This assumes you are trying this out on OS X
+export POSTGRES_PORT=5432
+export POSTGRES_USER=hlambda
+export POSTGRES_DB=hlambda
+export POSTGRES_PASSWORD=some_password
 
-poetry install # will install project in a virtualenv
-
-pre-commit install # setup linters etc.
+docker run \
+  -p 8000:8000 \
+  -e "POSTGRES_HOST=$POSTGRES_HOST" \
+  -e "POSTGRES_PORT=$POSTGRES_PORT" \
+  -e "POSTGRES_USER=$POSTGRES_USER" \
+  -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
+  -e "POSTGRES_DB=$POSTGRES_DB" \
+  --entrypoint=bash \
+  hlambdas/human-lambdas:latest \
+  -c 'hl initdb && hl up'
 ```
 
-Run Python tests:
+Human Lambdas is now available on localhost:8000.
 
-```sh
-pytest -n=auto # Note: Some tests will fail if you don't run against Postgres
-```
+This approach lets you use Human Lambdas in stateless environments such as Google Cloud Run as long as
 
-Build frontend and Python package
-
-```sh
-make
-```
-
-Build Docker image
-
-```sh
-docker build --tag hl .
-```
-
-Start HL in a temporary container
-
-```sh
-docker run -it --rm --entrypoint bash -p 8000:8000 hl -c 'hl initdb && hl up'
-```
+1. You do not run `initdb` on startup, as it is not thread-safe
+2. You set a single `SECRET_KEY` environment variable so that all Django Invite/Session tokens work
