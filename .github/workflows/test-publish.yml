@@ -11,10 +11,9 @@ jobs:
         run: |
           build_version="$(poetry version -s).dev$(date +%s)"
           poetry version $build_version
-      - run: make
-        env: 
-          LDFLAGS: '-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib"'
-
+      - run: |
+          export LDFLAGS='-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib'
+          make
       - run: |
           cat > ~/.pypirc <<- EOM
           [pypi]
