@@ -30,6 +30,7 @@ We are going to run Human Lambdas on a developer device.
 Please ensure you have Python 3 installed on a Mac or Linux environment then run the following.
 
 ```sh
+export LDFLAGS='-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib' # for psycopg2 on OS X
 pip install human-lambdas
 ```
 

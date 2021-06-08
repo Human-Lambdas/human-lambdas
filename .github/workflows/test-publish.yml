@@ -25,7 +25,9 @@ jobs:
           password = ${{ secrets.TEST_PYPI_TOKEN }}
           EOM
       - run: poetry run twine upload --repository testpypi dist/*
-      - run: pip install dist/*whl
+      - run: |
+          export LDFLAGS='-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib'
+          pip install dist/*whl
       - run: hl initdb # check package installs and run
 
   docker:
