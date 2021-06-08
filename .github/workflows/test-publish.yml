@@ -2,7 +2,7 @@ name: Test Publish to PYPI
 on: [pull_request]
 jobs:
   pypi:
-    runs-on: ubuntu-18.04
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -11,7 +11,9 @@ jobs:
         run: |
           build_version="$(poetry version -s).dev$(date +%s)"
           poetry version $build_version
-      - run: make
+      - run: |
+          export LDFLAGS='-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib'
+          make
       - run: |
           cat > ~/.pypirc <<- EOM
           [pypi]
@@ -23,6 +25,10 @@ jobs:
           password = ${{ secrets.TEST_PYPI_TOKEN }}
           EOM
       - run: poetry run twine upload --repository testpypi dist/*
+      - run: |
+          export LDFLAGS='-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib'
+          pip install dist/*whl
+      - run: hl initdb # check package installs and run
 
   docker:
     runs-on: ubuntu-18.04

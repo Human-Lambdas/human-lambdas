@@ -1,8 +1,9 @@
 [tool.poetry]
 name = "human-lambdas"
 version = "1.0.40"
-description = ""
-authors = ["Human Lambdas Ltd. <contact@humanlambdas.com>"]
+description = "Open Source Human in the Loop platform for anyone to run their own private Mechanical Turk."
+homepage = "https://github.com/Human-Lambdas/human-lambdas"
+authors = ["Human Lambdas Ltd. <bernat@humanlambdas.com>"]
 license = "Apache-2.0"
 
 [tool.poetry.scripts]
