@@ -49,7 +49,7 @@ class SendInviteView(APIView):
         organization = Organization.objects.get(pk=kwargs["org_id"])
         template_data = []
         emails = []
-        links = {}
+
         for email in email_set:
             if is_invalid_email(email):
                 invalid_email_list.append(email)
@@ -63,14 +63,6 @@ class SendInviteView(APIView):
                 inv.delete()
 
             token = generate_unique_token(email, kwargs["org_id"])
-            Invitation(
-                email=email,
-                organization=organization,
-                invited_by=request.user,
-                token=token,
-                expires_at=timezone.now()
-                + timezone.timedelta(days=settings.INVITATION_EXPIRATION_WINDOW_DAYS),
-            ).save()
 
             if not User.objects.filter(email=email).exists():
                 invite_link = "{0}invite/{1}".format(settings.FRONT_END_BASE_URL, token)
@@ -92,8 +84,16 @@ class SendInviteView(APIView):
                 }
             )
 
-            logger.info(f"Invite link for {email} is {invite_link}")
-            links[email] = invite_link
+            Invitation(
+                email=email,
+                organization=organization,
+                invited_by=request.user,
+                token=token,
+                invite_link=invite_link,
+                expires_at=timezone.now()
+                + timezone.timedelta(days=settings.INVITATION_EXPIRATION_WINDOW_DAYS),
+            ).save()
+
             emails.append(email)
 
         if settings.INVITATION_TEMPLATE is None or settings.ACCOUNT_ASM_GROUPID is None:
@@ -112,7 +112,6 @@ class SendInviteView(APIView):
                 {
                     "status_code": 200,
                     "message": "all emails were successfully added!",
-                    "links": links,
                 },
                 status=200,
             )
@@ -125,7 +124,6 @@ class SendInviteView(APIView):
             {
                 "status_code": 400,
                 "errors": [{"message": response_text}],
-                "links": links,
             },
             status=400,
         )
