@@ -2,7 +2,7 @@ name: Test Publish to PYPI
 on: [pull_request]
 jobs:
   pypi:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
