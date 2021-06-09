@@ -288,6 +288,10 @@ if not DEBUG:
         )
 
 FRONT_END_BASE_URL = os.getenv("APP_URL", "http://localhost:3000/")
+
+if not FRONT_END_BASE_URL.endswith("/"):
+    FRONT_END_BASE_URL = f"{FRONT_END_BASE_URL}/"
+
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 LOCAL_IP = None

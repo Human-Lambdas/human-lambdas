@@ -1,6 +1,7 @@
 import logging
 from uuid import uuid4
 
+from django.conf import settings
 from django.db.models import Avg, F, Q
 from django.utils import timezone
 from drf_yasg2.utils import swagger_auto_schema
@@ -178,6 +179,9 @@ class OrganizationMetrics(APIView):
 
     @swagger_auto_schema(query_serializer=WorkflowMetricsQuerySerializer)
     def get(self, request, *args, **kwargs):
+        if settings.DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+            return Response(None, status=204)
+
         self.validate_data(request.data)
         data = []
         qtypes = request.query_params.getlist("type")

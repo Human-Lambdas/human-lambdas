@@ -49,6 +49,7 @@ class SendInviteView(APIView):
         organization = Organization.objects.get(pk=kwargs["org_id"])
         template_data = []
         emails = []
+        links = {}
         for email in email_set:
             if is_invalid_email(email):
                 invalid_email_list.append(email)
@@ -92,6 +93,7 @@ class SendInviteView(APIView):
             )
 
             logger.info(f"Invite link for {email} is {invite_link}")
+            links[email] = invite_link
             emails.append(email)
 
         if settings.INVITATION_TEMPLATE is None or settings.ACCOUNT_ASM_GROUPID is None:
@@ -107,7 +109,11 @@ class SendInviteView(APIView):
         # sending responses
         if len(invalid_email_list) == 0 and len(already_added_email_list) == 0:
             return Response(
-                {"status_code": 200, "message": "all emails were successfully added!"},
+                {
+                    "status_code": 200,
+                    "message": "all emails were successfully added!",
+                    "links": links,
+                },
                 status=200,
             )
         response_text = ""
@@ -116,7 +122,12 @@ class SendInviteView(APIView):
         for email in already_added_email_list:
             response_text += "{0} is already a part of the organization. ".format(email)
         return Response(
-            {"status_code": 400, "errors": [{"message": response_text}]}, status=400
+            {
+                "status_code": 400,
+                "errors": [{"message": response_text}],
+                "links": links,
+            },
+            status=400,
         )
 
     def patch(self, request, *args, **kwargs):
