@@ -2,7 +2,7 @@ name: Test Publish to PYPI
 on: [pull_request]
 jobs:
   pypi:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -14,6 +14,9 @@ jobs:
       - run: |
           export LDFLAGS='-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib'
           make
+      - uses: pre-commit/action@v2.0.0
+        with:
+          extra_args: --verbose --all-files
       - run: |
           cat > ~/.pypirc <<- EOM
           [pypi]

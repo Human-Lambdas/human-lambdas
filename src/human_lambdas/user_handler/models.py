@@ -134,6 +134,7 @@ class Invitation(models.Model):
     datetime = models.DateTimeField(auto_now=True)
     expires_at = models.DateTimeField()
     admin = models.BooleanField(default=False)
+    invite_link = models.TextField(null=True)
 
     def __str__(self):
         return "{0}_invite_to_{1}".format(self.email, self.organization)

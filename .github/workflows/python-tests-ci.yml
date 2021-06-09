@@ -55,10 +55,6 @@ jobs:
       - run: sudo apt-get install libpq-dev
       - run: pip install poetry
       - run: poetry install
-      - uses: pre-commit/action@v2.0.0
-        with:
-          extra_args: --verbose --all-files
-
       - uses: google-github-actions/setup-gcloud@v0.2.1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
