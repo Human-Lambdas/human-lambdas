@@ -34,6 +34,7 @@ interface TaskProps {
   onAssign: (userId: number | null, prevUserId: number | null) => void
   onAuditDecision: (correct: boolean) => void
   isLoading: boolean
+  isPosting: boolean
   queues: Array<IQueue>
   setSelectedQueue: (arg: IQueue) => void
 }
@@ -82,6 +83,7 @@ const Task = (props: TaskProps) => {
     isAudits,
     onAuditDecision,
     isLoading,
+    isPosting,
     isStaff,
     queues,
     setSelectedQueue
@@ -98,10 +100,12 @@ const Task = (props: TaskProps) => {
   if (isStaff && isNotAssignedToMe) {
     readOnly = true
   }
-  const [isSubmiting, setSubmiting] = useState<boolean>(false)
+  const [isTaskSubmiting, setSubmiting] = useState<boolean>(false)
   const [isSaving, setSaving] = useState<boolean>(false)
   const [view, setView] = useState(null)
   const [assigneeDetails, setAssigneeDetails] = useState(null)
+  // on-going issue https://github.com/formium/formik/issues/1950
+  const [initialErrors, setInitialErrors] = useState({})
   const {
     location: {pathname, state: locationState}
   } = history || {}
@@ -133,6 +137,17 @@ const Task = (props: TaskProps) => {
     }
   }, [isAudits, task])
 
+  useEffect(() => {
+    return () => {
+      if (history.action === 'POP') {
+        history.replace({
+          pathname: history.location.pathname,
+          state: locationState
+        })
+      }
+    }
+  }, [history])
+
   const resetView = () => setView(null)
   return (
     <>
@@ -147,17 +162,9 @@ const Task = (props: TaskProps) => {
         validateOnMount
         validationSchema={taskSchema}
         innerRef={formRef}
+        initialErrors={initialErrors}
       >
-        {({
-          handleChange,
-          values,
-          setFieldValue,
-          isSubmitting,
-          isValid,
-          errors,
-          handleBlur,
-          validateForm
-        }) => {
+        {({handleChange, values, setFieldValue, isValid, errors, handleBlur, validateForm}) => {
           return (
             <FormContainer>
               {isAudits && isAuditsRequestedFromUrl ? (
@@ -166,7 +173,12 @@ const Task = (props: TaskProps) => {
                     <SecondaryButton
                       key='back'
                       type='button'
-                      onClick={() => history.replace('/audits')}
+                      onClick={() =>
+                        history.replace({
+                          pathname: '/audits',
+                          state: locationState
+                        })
+                      }
                     >
                       Back
                     </SecondaryButton>
@@ -180,7 +192,10 @@ const Task = (props: TaskProps) => {
                         type='button'
                         onClick={() => {
                           setView('previous')
-                          history.replace(previous)
+                          history.replace({
+                            pathname: previous.split('?')[0],
+                            state: locationState
+                          })
                         }}
                       >
                         {isLoadingPrevious && isLoading ? <Spinner /> : `Previous`}
@@ -203,7 +218,10 @@ const Task = (props: TaskProps) => {
                         type='button'
                         onClick={() => {
                           setView('next')
-                          history.replace(next)
+                          history.replace({
+                            pathname: next.split('?')[0],
+                            state: locationState
+                          })
                         }}
                       >
                         {isLoadingNext && isLoading ? <Spinner /> : `Next`}
@@ -221,7 +239,10 @@ const Task = (props: TaskProps) => {
                         if (taskChanged && formRef.current.dirty) {
                           toggleTaskModal()
                         } else {
-                          history.replace(returnUrl)
+                          history.replace({
+                            pathname: returnUrl,
+                            state: locationState
+                          })
                         }
                       }}
                     >
@@ -233,29 +254,31 @@ const Task = (props: TaskProps) => {
                     <ActionBlock>
                       <SecondaryButton
                         hideFocus={true}
-                        disabled={readOnly || isSubmitting}
+                        disabled={readOnly || isSaving}
                         type='button'
                         onClick={async () => {
                           setSaving(true)
                           await onSave(values)
                           setTaskChanged(false)
                           setSaving(false)
-                          validateForm(values)
+                          const preExistingErrors = await validateForm(values)
+                          setInitialErrors(preExistingErrors)
                         }}
                       >
                         {isSaving ? <Spinner /> : `Save`}
                       </SecondaryButton>
                       <PrimaryButton
                         hideFocus={true}
-                        disabled={readOnly || isSubmitting || !isValid}
+                        disabled={readOnly || isTaskSubmiting || !isValid}
                         type='submit'
                         onClick={async (e) => {
                           setSubmiting(true)
                           await onSubmit(e, values, orgId)
                           setSubmiting(false)
+                          setInitialErrors(errors)
                         }}
                       >
-                        {isSubmiting ? <Spinner /> : `Submit`}
+                        {isTaskSubmiting ? <Spinner /> : `Submit`}
                       </PrimaryButton>
                     </ActionBlock>
                   }
@@ -274,6 +297,7 @@ const Task = (props: TaskProps) => {
                         resetView()
                         onDelete(args)
                       }}
+                      isPosting={isPosting}
                       assignedTo={assignedTo}
                       task={task}
                       users={users}
@@ -324,6 +348,7 @@ const Task = (props: TaskProps) => {
                                     setTaskChanged(true)
                                     setFieldValue(field, data)
                                   }}
+                                  isStaff={isStaff}
                                   block={block}
                                   errors={errorsForBlock}
                                   handleChange={(e) => {
@@ -349,14 +374,20 @@ const Task = (props: TaskProps) => {
                         cancelLabel={`Save and Exit`}
                         message={`You have made changes but they haven't been saved.`}
                         onConfirm={() => {
-                          history.replace(returnUrl)
+                          history.replace({
+                            pathname: returnUrl,
+                            state: locationState
+                          })
                         }}
                         onCancel={async () => {
                           setSaving(true)
                           await onSave(values)
                           setTaskChanged(false)
                           setSaving(false)
-                          history.replace(returnUrl)
+                          history.replace({
+                            pathname: returnUrl,
+                            state: locationState
+                          })
                         }}
                       />
                     )}

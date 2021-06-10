@@ -22,11 +22,14 @@ const QueueContainer = (props: Props) => {
   const [loading, setLoading] = useState(false)
   const [format, setFormat] = useState([])
   const [formatLoading, setFormatLoading] = useState(false)
-  const [tasks, setTasks] = useState([] as any)
+  const [tasks, setTasks] = useState(null)
   const [taskLoading, setTaskLoading] = useState(false)
-  const [taskPage, setTaskPage] = useState(1)
+
   const networker = useNetworker()
   const {history} = useRouter() as any
+  const {state} = history.location
+
+  const [taskPage, setTaskPage] = useState(state?.taskPage || 1)
 
   const orgId = props.user.current_organization_id
   const queueId = props.match.params.queueId
@@ -147,31 +150,33 @@ const QueueContainer = (props: Props) => {
 
   let renderComp
 
-  if (loading || taskLoading || formatLoading || queue === undefined) {
+  if (loading || !Array.isArray(tasks) || formatLoading || queue === undefined) {
     renderComp = <LoadingPage />
   } else {
     renderComp = (
-      <Queue
-        queue={queue}
-        user={props.user}
-        orgId={orgId}
-        queueId={queueId}
-        deleteQueue={deleteQueue}
-        flushQueueTasks={flushQueueTasks}
-        startNextTask={startNextTask}
-        format={format}
-        tasks={tasks}
-        isStaff={isStaff}
-        taskPage={taskPage}
-        setTaskPage={setTaskPage}
-        taskLoading={taskLoading}
-        setQueue={setQueue}
-        setSelectedQueue={props.setSelectedQueue}
-      />
+      <>
+        <Queue
+          queue={queue}
+          user={props.user}
+          orgId={orgId}
+          queueId={queueId}
+          deleteQueue={deleteQueue}
+          flushQueueTasks={flushQueueTasks}
+          startNextTask={startNextTask}
+          format={format}
+          tasks={tasks}
+          isStaff={isStaff}
+          taskPage={taskPage}
+          setTaskPage={setTaskPage}
+          taskLoading={taskLoading}
+          setQueue={setQueue}
+          setSelectedQueue={props.setSelectedQueue}
+        />
+      </>
     )
   }
 
-  useDocumentTitle(`Queue | Human Lambdas`)
+  useDocumentTitle(`${queue.name || `Queue`} | Human Lambdas`)
 
   return renderComp
 }

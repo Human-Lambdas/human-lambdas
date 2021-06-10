@@ -15,7 +15,7 @@ const Mark: React.FunctionComponent<MarkProps> = (props) => {
 
   return (
     <mark
-      style={{backgroundColor: color || '#84d2ff', padding: '0 4px'}}
+      style={{backgroundColor: color || '#84d2ff', padding: '0 4px', marginRight: '2px'}}
       data-start={start}
       data-end={end}
       onClick={() => onClick({start, end})}

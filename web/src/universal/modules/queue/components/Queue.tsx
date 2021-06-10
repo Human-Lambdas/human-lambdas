@@ -16,6 +16,7 @@ import dayjs from 'dayjs'
 import useModal from 'client/hooks/useModal'
 import ConfirmationModal from 'client/components/ConfirmationModal'
 import NewTaskMenu from 'universal/components/NewTaskMenu'
+import Loader from 'client/components/Loader'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import {IUser, IQueue} from 'client/types/generic'
 import useNetworker from 'client/hooks/useNetworker'
@@ -58,6 +59,7 @@ interface Props {
   setQueue: (arg: IQueue) => void
   setSelectedQueue: (arg: IQueue) => void
   updateQueue: (arg: IQueue) => void
+  taskLoading: boolean
 }
 
 const Page = styled.div({
@@ -245,7 +247,8 @@ const Queue = (props: Props) => {
     isStaff,
     setQueue,
     setSelectedQueue,
-    updateQueue
+    updateQueue,
+    taskLoading
   } = props
 
   const {is_running: isRunning, pinned_block: pinnedBlock} = queue
@@ -418,13 +421,12 @@ const Queue = (props: Props) => {
     if (data && Array.isArray(data) && !thereAreNonePinnedBlocks && pinnedBlockId) {
       let theValueHasBeenAssigned = false
       data.map((block) => {
-        
         if (block.id === pinnedBlockId) {
           pinnedValue = block[block.type]?.value
           theValueHasBeenAssigned = true
         }
         if (!theValueHasBeenAssigned) {
-          pinnedValue = "-"
+          pinnedValue = '-'
         }
       })
     }
@@ -444,6 +446,73 @@ const Queue = (props: Props) => {
     }
 
     return pinnedTitle
+  }
+
+  const renderTasks = () => {
+    if (tasks?.length < 1 && !taskLoading) {
+      return (
+        <EmptyPage
+          header={'This queue currently has no tasks'}
+          subHeader={"You can upload tasks at this queue's connections page"}
+        />
+      )
+    }
+
+    return (
+      <>
+        {taskLoading ? (
+          <Loader />
+        ) : (
+          tasks.map((task) => {
+            const {id, status, created_at, assigned_to, n_comments, data} = task
+            return (
+              <Task
+                key={id}
+                onClick={() =>
+                  history.push({
+                    pathname: `/queues/${queueId}/tasks/${id}`,
+                    state: {taskPage}
+                  })
+                }
+              >
+                <TableItem>
+                  <ID>
+                    <HeaderItemText>{extractPinnedValue(data, id)}</HeaderItemText>
+                  </ID>
+                </TableItem>
+                <TableItem>
+                  <div>
+                    <StatusTag status={status} />
+                  </div>
+                </TableItem>
+                <TableItem>
+                  {assigned_to && (
+                    <AssignedTo>
+                      <Avatar
+                        initials={assigned_to.charAt(0).toUpperCase()}
+                        color={colorFromString(assigned_to)}
+                      />
+                      <Name>{assigned_to}</Name>
+                    </AssignedTo>
+                  )}
+                </TableItem>
+                <TableItem>
+                  {n_comments > 0 && (
+                    <GrayText>
+                      <div>{n_comments}</div>
+                      <StyledIcon>comment</StyledIcon>
+                    </GrayText>
+                  )}
+                </TableItem>
+                <TableItem>
+                  <GrayText>{dayjs(created_at).fromNow()}</GrayText>
+                </TableItem>
+              </Task>
+            )
+          })
+        )}
+      </>
+    )
   }
 
   return (
@@ -503,55 +572,8 @@ const Queue = (props: Props) => {
         <TableHeaderItem>Created At</TableHeaderItem>
       </TableHeader>
       <TasksContainer>
-        <Tasks>
-          {tasks.length > 0 ? (
-            tasks.map((task) => {
-              const {id, status, created_at, assigned_to, n_comments, data} = task
+        <Tasks>{renderTasks()}</Tasks>
 
-              return (
-                <Task key={id} onClick={() => history.push(`/queues/${queueId}/tasks/${id}`)}>
-                  <TableItem>
-                    <ID>
-                      <HeaderItemText>{extractPinnedValue(data, id)}</HeaderItemText>
-                    </ID>
-                  </TableItem>
-                  <TableItem>
-                    <div>
-                      <StatusTag status={status} />
-                    </div>
-                  </TableItem>
-                  <TableItem>
-                    {assigned_to && (
-                      <AssignedTo>
-                        <Avatar
-                          initials={assigned_to.charAt(0).toUpperCase()}
-                          color={colorFromString(assigned_to)}
-                        />
-                        <Name>{assigned_to}</Name>
-                      </AssignedTo>
-                    )}
-                  </TableItem>
-                  <TableItem>
-                    {n_comments > 0 && (
-                      <GrayText>
-                        <div>{n_comments}</div>
-                        <StyledIcon>comment</StyledIcon>
-                      </GrayText>
-                    )}
-                  </TableItem>
-                  <TableItem>
-                    <GrayText>{dayjs(created_at).fromNow()}</GrayText>
-                  </TableItem>
-                </Task>
-              )
-            })
-          ) : (
-            <EmptyPage
-              header={'This queue currently has no tasks'}
-              subHeader={"You can upload tasks at this queue's connections page"}
-            />
-          )}
-        </Tasks>
         <NavContainer>
           <BackNavIcon onClick={() => setTaskPage(1)}>first_page</BackNavIcon>
           <BackNavIcon
@@ -622,6 +644,7 @@ const Queue = (props: Props) => {
           queue={queue}
           activeBlockName={extractPinnedTitle(queue)}
           menuProps={filterMenuProps}
+          pinnedBlockId={pinnedBlockId}
           setPinnedBlock={setPinnedBlock}
         />
       )}

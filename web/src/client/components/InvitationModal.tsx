@@ -50,7 +50,10 @@ const SubmissionSection = styled.div({
 const InvitationModal = ({closePortal, handleUsersInvite}: InvitationProps) => {
   const onSubmitHandler = useCallback(
     (values, actions) => {
-      handleUsersInvite(values)
+      const data = {
+        emails: values.emails.split(/[\s,]+/).join(',')
+      }
+      handleUsersInvite(data)
       actions.setSubmitting()
       closePortal()
     },
@@ -65,7 +68,7 @@ const InvitationModal = ({closePortal, handleUsersInvite}: InvitationProps) => {
         validationSchema={emailListSchema}
         onSubmit={onSubmitHandler}
       >
-        {({isSubmitting, isValid, values, handleChange, handleBlur}) => (
+        {({isSubmitting, isValid, values, handleChange, handleBlur, errors}) => (
           <FormContent>
             <MainTitle>Invite workers to team</MainTitle>
             <SubTitle>{__OSS__ ? "Create Invite Link in the Server Logs:" : "Send invites by email:"}</SubTitle>

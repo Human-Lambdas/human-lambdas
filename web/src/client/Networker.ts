@@ -122,8 +122,12 @@ class Networker {
     const {exp: accessExp}: any = this.accessObj || {}
     const {exp: refreshExp}: any = this.refreshObj || {}
     const accessTokenExpired = accessExp < Date.now() / 1000
-    const expiredRefreshToken = refreshExp < Date.now() / 1000
+    const expiredRefreshToken =
+      this.refreshToken === null ||
+      this.refreshToken === undefined ||
+      refreshExp < Date.now() / 1000
     let newAccessToken = false
+    let res
 
     if (accessTokenExpired && !expiredRefreshToken && !url.startsWith('/users/token')) {
       await axios(`${__APP_URL__}/${API_VERSION}/users/token/refresh`, {
@@ -133,29 +137,28 @@ class Networker {
         .then((res) => {
           newAccessToken = true
           this.setAccessToken(res.data.access)
+          this.setRefreshToken(res.data.refresh)
         })
         .catch((error) => {
           console.error(`Refresh failed: response data: ${JSON.stringify(error?.response?.data)}`)
           handleBadSession(standardError, this.router?.history)
+          res = invalidSessionResponse
         })
-    } else if (accessTokenExpired && expiredRefreshToken) {
-      if (!url.startsWith('/users/token')) {
-        handleBadSession(standardError, this.router?.history)
-        return invalidSessionResponse
-      }
     } else if (expiredRefreshToken) {
-      if (!url.startsWith('/users/token')) {
+      if (!url.startsWith('/users/token') && !url.startsWith('/users/register') && !url.startsWith('/users/invitation')) {
         handleBadSession(standardError, this.router?.history)
-        return invalidSessionResponse
+        res = invalidSessionResponse
       }
     }
 
     if (
       (!accessTokenExpired && !expiredRefreshToken) ||
       url.startsWith('/users/token') ||
+      url.startsWith('/users/register') ||
+      url.startsWith('/users/invitation') ||
       newAccessToken
     ) {
-      const res = await axios(`${__APP_URL__}/${API_VERSION}${url}`, {
+      res = await axios(`${__APP_URL__}/${API_VERSION}${url}`, {
         method: method || 'GET',
         data,
         params,
@@ -232,10 +235,10 @@ class Networker {
             }
           }
         })
-      this.logErrors(res)
-      this.notifyErrors(res)
-      return res
     }
+    this.logErrors(res)
+    this.notifyErrors(res)
+    return res
   }
 }
 

@@ -4,8 +4,8 @@
 
 ## Prerequisites
 
- - Node v10+
- - yarn
+- Node v10+
+- yarn
 
 ## Setup
 

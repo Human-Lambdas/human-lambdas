@@ -30,6 +30,7 @@ interface BlockComponentProps {
   errors?: any | undefined
   setFieldValue?: any
   onEdit: () => void
+  isStaff?: boolean
 }
 
 const BlockComponent = memo((props: BlockComponentProps) => {
@@ -43,7 +44,8 @@ const BlockComponent = memo((props: BlockComponentProps) => {
     handleChange,
     handleBlur,
     onEdit,
-    errors
+    errors,
+    isStaff
   } = props || {}
   let renderCmp
 
@@ -156,6 +158,7 @@ const BlockComponent = memo((props: BlockComponentProps) => {
         <NamedEntityRecognition
           isAudits={isAudits}
           isEditing={isEditing}
+          isStaff={isStaff}
           index={index}
           block={block}
           onEdit={onEdit}

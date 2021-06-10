@@ -48,6 +48,35 @@ const SmallLink = styled.a({
   fontSize: 12
 })
 
+
+const QuotaInfoWrapper = styled.div({
+  display: 'grid',
+  alignItems: 'top',
+  marginTop: 10,
+  gridGap: 10,
+  backgroundColor: '#fcfbff',
+  padding: 20,
+  borderRadius: 4
+})
+
+const QuotaInfo = styled.span({
+  fontSize: 12,
+  color: '#846cf1',
+  fontWeight: 400
+})
+
+const QuotaInfoBold = styled.a({
+  fontSize: 12,
+  color: '#846cf1',
+  fontWeight: 800
+})
+
+const ContentBlock = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  marginBottom: 10
+})
+
 const PublicSignUpPage = (props) => {
   useDocumentTitle('Sign Up | Human Lambdas')
   const {history} = useRouter() as any
@@ -143,7 +172,22 @@ const PublicSignUpPage = (props) => {
       >
         {({touched, isSubmitting, isValid, values, errors, handleBlur, handleChange, dirty}) => (
           <LoginContainer tagLine={'Create an account'}>
-            {!__OSS__ && <GoogleAuthButton label="Sign up with Google" />}
+            <ContentBlock>
+              <QuotaInfoWrapper>
+                <QuotaInfo>
+                  Please beware that Human Lambdas is shutting down and this service will stop
+                  operating soon. Read{' '}
+                  <QuotaInfoBold
+                    href='https://www.humanlambdas.com/post/closing-down'
+                    target='_blank'
+                  >
+                    full announcement
+                  </QuotaInfoBold>{' '}
+                  for more details.
+                </QuotaInfo>
+              </QuotaInfoWrapper>
+            </ContentBlock>
+            {!__OSS__ && <GoogleAuthButton label='Sign up with Google' />}
             <FieldBlock>
               <InputField
                 label='Name'
@@ -190,17 +234,22 @@ const PublicSignUpPage = (props) => {
                 Log in
               </Link>
             </SubLine>
-            {!__OSS__ && <SubSubLine>
-              By clicking Sign Up, you agree to the Human Lambdas{' '}
-              <SmallLink target={'_blank'} href={'https://humanlambdas.com/legal/terms-of-service'}>
-                Terms Of Service
-              </SmallLink>
-              ,{' '}
-              <SmallLink target='_blank' href='https://humanlambdas.com/legal/privacy-policy'>
-                Privacy Policy
-              </SmallLink>{' '}
-              and to receiving occasional emails relating to your account
-            </SubSubLine>}
+            {!__OSS__ && (
+              <SubSubLine>
+                By clicking Sign Up, you agree to the Human Lambdas{' '}
+                <SmallLink
+                  target={'_blank'}
+                  href={'https://humanlambdas.com/legal/terms-of-service'}
+                >
+                  Terms Of Service
+                </SmallLink>
+                ,{' '}
+                <SmallLink target='_blank' href='https://humanlambdas.com/legal/privacy-policy'>
+                  Privacy Policy
+                </SmallLink>{' '}
+                and to receiving occasional emails relating to your account
+              </SubSubLine>
+            )}
           </LoginContainer>
         )}
       </Formik>

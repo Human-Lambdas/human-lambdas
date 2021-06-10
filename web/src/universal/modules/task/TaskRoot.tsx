@@ -36,6 +36,7 @@ const TaskRoot = (props: TaskRootProps) => {
   const [activityLoading, setActivityLoading] = useState<boolean>(false)
   const [taskNav, setTaskNav] = useState({})
   const [isStaff, setIsStaff] = useState(false)
+  const [isPosting, setIsPosting] = useState(false)
 
   const {
     location: {pathname, state}
@@ -206,6 +207,7 @@ const TaskRoot = (props: TaskRootProps) => {
 
   const onPost = React.useCallback(
     async (comment: string) => {
+      setIsPosting(true)
       const {id: taskId, queue_id: queueId} = task || {}
       if (taskId && queueId) {
         const payload = {
@@ -216,6 +218,7 @@ const TaskRoot = (props: TaskRootProps) => {
         await networker?.httpHandler(url, payload)
         getActivity()
       }
+      setIsPosting(false)
     },
     [task, orgId, queueId]
   )
@@ -288,6 +291,7 @@ const TaskRoot = (props: TaskRootProps) => {
       taskNav={taskNav}
       activity={activity}
       isStaff={isStaff}
+      isPosting={isPosting}
       onAuditDecision={onAuditDecision}
       isLoading={taskLoading || activityLoading}
     />

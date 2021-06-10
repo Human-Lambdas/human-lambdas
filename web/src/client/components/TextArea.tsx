@@ -119,7 +119,6 @@ const BasicTextArea = forwardRef((props: Props, ref: any) => {
         error={String(Boolean(error))}
         cacheMeasurements={cacheMeasurements}
         readOnly={readOnly}
-        scrollable={scrollable}
       />
       {positionErrorBelow && error && <StyledError>{error}</StyledError>}
     </>

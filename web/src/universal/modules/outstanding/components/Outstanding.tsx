@@ -223,35 +223,32 @@ const Outstanding = (props: OutstandingProps) => {
     </Footer>
   )
 
-  const itemList = queues.map(({id, created_at, org_id, n_tasks, name}) => {
-    return (
-      <ColumnContainer
-        key={id}
-        onClick={() =>
-          history.push(`/queues/${id}`)
-        }
-      >
-        <LineItem>{id}</LineItem>
-        <LineItem>{org_id}</LineItem>
-        <LineItem>{name}</LineItem>
-        <LineItem>
-          <AvatarBlock>
-            <Avatar initials={getInitials(name)} color={colorFromString(name)} />
-            <Label>{created_at}</Label>
-          </AvatarBlock>
-        </LineItem>
-        <LineItem
-          style={{
-            display: 'flex',
-            justifySelf: 'center',
-            color: PALETTE.TEXT_GRAY
-          }}
-        >
-          {n_tasks}
-        </LineItem>
-      </ColumnContainer>
-    )
-  })
+  const itemList = queues
+    .filter((queue) => queue.n_tasks > 0)
+    .map(({id, created_at, org_id, n_tasks, name}) => {
+      return (
+        <ColumnContainer key={id} onClick={() => history.push(`/queues/${id}`)}>
+          <LineItem>{id}</LineItem>
+          <LineItem>{org_id}</LineItem>
+          <LineItem>{name}</LineItem>
+          <LineItem>
+            <AvatarBlock>
+              <Avatar initials={getInitials(name)} color={colorFromString(name)} />
+              <Label>{created_at}</Label>
+            </AvatarBlock>
+          </LineItem>
+          <LineItem
+            style={{
+              display: 'flex',
+              justifySelf: 'center',
+              color: PALETTE.TEXT_GRAY
+            }}
+          >
+            {n_tasks}
+          </LineItem>
+        </ColumnContainer>
+      )
+    })
 
   return (
     <>

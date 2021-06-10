@@ -15,8 +15,8 @@ const Container = styled.div({
 })
 
 const StyledFooter = styled.footer({
-  paddingLeft: 35,
-  paddingRight: 35,
+  paddingLeft: 45,
+  paddingRight: 45,
   display: 'grid',
   borderTop: `1px solid ${PALETTE.BORDER_GRAY}`,
   width: '100%',

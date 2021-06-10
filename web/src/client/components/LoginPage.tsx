@@ -57,6 +57,34 @@ export const LinkButton = styled(PlainButton)({
   }
 })
 
+const QuotaInfoWrapper = styled.div({
+  display: 'grid',
+  alignItems: 'top',
+  marginTop: 10,
+  gridGap: 10,
+  backgroundColor: '#fcfbff',
+  padding: 20,
+  borderRadius: 4
+})
+
+const QuotaInfo = styled.span({
+  fontSize: 12,
+  color: '#846cf1',
+  fontWeight: 400
+})
+
+const QuotaInfoBold = styled.a({
+  fontSize: 12,
+  color: '#846cf1',
+  fontWeight: 800
+})
+
+const ContentBlock = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  marginBottom: 10
+})
+
 export const FieldBlock = styled.div({
   marginBottom: 15
 })
@@ -74,14 +102,11 @@ const LoginPage = (props: Props) => {
       const {accessObj = {}} = networker || {}
       const {user_id: userId} = accessObj || {}
       if (userId && accessToken) {
-        const {
-          data: {current_organization_id},
-          errors
-        } = await networker.httpHandler(`/users/${userId}`, {method: 'GET'})
-        if (errors === undefined && current_organization_id) {
+        const {data, errors} = await networker.httpHandler(`/users/${userId}`, {method: 'GET'})
+        if (errors === undefined && data?.current_organization_id) {
           const {data: organizations} = await networker.httpHandler(`/orgs`, {method: 'GET'})
 
-          if (isUserStaff(organizations, current_organization_id)) {
+          if (isUserStaff(organizations, data.current_organization_id)) {
             history.push(`/outstanding-queues`)
           } else {
             history.push(`/queues`)
@@ -148,6 +173,21 @@ const LoginPage = (props: Props) => {
       >
         {({touched, isSubmitting, isValid, values, errors, handleBlur, handleChange, dirty}) => (
           <LoginContainer tagLine={'Log in to Human Lambdas'}>
+            <ContentBlock>
+              <QuotaInfoWrapper>
+                <QuotaInfo>
+                  Please beware that Human Lambdas is shutting down and this service will stop
+                  operating soon. Read{' '}
+                  <QuotaInfoBold
+                    href='https://www.humanlambdas.com/post/closing-down'
+                    target='_blank'
+                  >
+                    full announcement
+                  </QuotaInfoBold>{' '}
+                  for more details.
+                </QuotaInfo>
+              </QuotaInfoWrapper>
+            </ContentBlock>
             {!__OSS__ && <GoogleAuthButton label='Log in with Google' />}
             <FieldBlock>
               <InputField
