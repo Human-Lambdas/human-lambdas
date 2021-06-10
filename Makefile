@@ -1,3 +1,5 @@
+buildimg: buildpy
+	docker build . -t hlambdas/human-lambdas:latest
 buildpy: buildweb
 	poetry install
 	poetry build
