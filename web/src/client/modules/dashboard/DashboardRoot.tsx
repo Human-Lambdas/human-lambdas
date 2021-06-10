@@ -85,7 +85,7 @@ const DashboardRoot = (props: Props) => {
     history.push('/')
   }
 
-  if (!user.id && !organization.name) return null
+  if ((!user.id && !organization.name) || organizations.length === 0) return null
 
   return (
     <Dashboard

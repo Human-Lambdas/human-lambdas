@@ -8,7 +8,8 @@ import {colorByIndex} from 'universal/utils/getColor'
 interface Props {
   options: any
   selectedCategory: any
-  onSelect: () => void
+  onSelect: (category: any) => void
+  onUnselect: () => void
   onHover: () => void
   onClick: () => void
   disabled?: any
@@ -19,7 +20,8 @@ interface Props {
 const ListWrapper = styled.div({
   width: '195px',
   minWidth: '195px',
-  userSelect: 'none'
+  userSelect: 'none',
+  marginTop: '10px'
 })
 
 const List = styled.div({
@@ -91,7 +93,7 @@ const ColorArtifact = styled.span<{color?: string}>(({color}) => ({
 }))
 
 const TaggableListWrapper = (props: Props) => {
-  const {options, text, selectedCategory, onSelect, disabled, objects, onHover, onClick} = props
+  const {options, text, selectedCategory, onSelect, onUnselect, disabled, objects, onHover, onClick} = props
   const getOptionIndex = (id) => {
     let index
     options.map((option, i) => {
@@ -109,9 +111,14 @@ const TaggableListWrapper = (props: Props) => {
           <CategoryButton
             key={optionIndex}
             onClick={() => {
-              if (!disabled) {
-                onSelect({tag: option.id, color: colorByIndex(optionIndex)})
+              if(selectedCategory.tag !== option.id) {
+                if (!disabled) {
+                  onSelect({tag: option.id, color: colorByIndex(optionIndex)})
+                }
+              } else {
+                onUnselect()
               }
+              
             }}
             type='button'
             active={!disabled && selectedCategory.tag === option.id}

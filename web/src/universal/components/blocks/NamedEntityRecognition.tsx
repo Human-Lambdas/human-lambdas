@@ -23,6 +23,7 @@ interface Props {
   index?: number
   onEdit?: () => void
   isAudits?: boolean
+  isStaff?: boolean
 }
 
 const ButtonBlock = styled.div({
@@ -44,13 +45,14 @@ const TextWrapper = styled.div(
   ({highlightColor}) => `
     cursor: auto;
     flex-grow: 1;
-    padding-right: 10px;
     padding-bottom: 10px;
     line-height: 25px;
     margin-left: -10px;
     white-space: pre-wrap;
+    height: 100%;
     & mark {
       padding: 4px !important;
+      // margin: 0 8px !important;
       position: relative;
       cursor: pointer;
       &:hover:after {
@@ -73,7 +75,6 @@ const TextWrapper = styled.div(
     & mark > span {
       display: none;
     }
-
     & span {
 
       &::selection {
@@ -84,7 +85,7 @@ const TextWrapper = styled.div(
 )
 
 const NamedEntityRecognition = memo((props: Props) => {
-  const {block, onDelete, isEditing, onEdit, setFieldValue, index, isAudits} = props
+  const {block, onDelete, isEditing, onEdit, setFieldValue, index, isAudits, isStaff} = props
   const {name} = block
 
   const {allow_edits: allowEdits, placeholder, options, value = '', entities = []} =
@@ -204,7 +205,7 @@ const NamedEntityRecognition = memo((props: Props) => {
 
   return (
     <Content {...props}>
-      <HeaderContainer>
+      <HeaderContainer extendMargin={true}>
         {name && <Label>{name}</Label>}
         <BlockHeader
           onDelete={onDelete}
@@ -215,7 +216,7 @@ const NamedEntityRecognition = memo((props: Props) => {
       </HeaderContainer>
       <BodyContainer
         row={true}
-        style={{display: 'grid', gridTemplateColumns: 'auto 195px', gridGap: 20}}
+        style={{display: 'grid', gridTemplateColumns: 'auto 195px', gridGap: 0, paddingTop: 0}}
       >
         <Wrapper editMode={editMode}>
           {editMode ? (
@@ -228,35 +229,58 @@ const NamedEntityRecognition = memo((props: Props) => {
               scrollable={true}
             />
           ) : (
-            <TextWrapper
-              onMouseDown={(e) => {
-                e.stopPropagation()
-              }}
-              onMouseEnter={() => {
-                setDisableSelection(false)
-              }}
-              onMouseLeave={() => {
-                setDisableSelection(true)
-                window.getSelection().empty()
-              }}
-              style={{userSelect: disableSelection ? 'none' : 'auto'}}
-              highlightColor={selectedCategory.color}
-              ref={boxRef}
-            >
-              <TextAnnotator
-                style={{
-                  paddingLeft: '10px'
-                }}
-                content={renderText}
-                value={formatEntitiesForUIRendering(text)}
-                onChange={handleAnnotate}
-                getSpan={(span) => ({
-                  ...span,
-                  ...selectedCategory
-                })}
-              />
-            </TextWrapper>
+            <>
+              {!selectedCategory ? (
+                <div
+                  style={{
+                    paddingLeft: '10px',
+                    height: '100%',
+                    wordSpacing: '2px',
+                    paddingTop: '10px',
+                    paddingRight: '20px',
+                    lineHeight: '30px'
+                  }}
+                >
+                  {renderText}
+                </div>
+              ) : (
+                <TextWrapper
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                  }}
+                  onMouseEnter={() => {
+                    setDisableSelection(false)
+                  }}
+                  onMouseLeave={() => {
+                    setDisableSelection(true)
+                    window.getSelection().empty()
+                  }}
+                  style={{userSelect: disableSelection ? 'none' : 'auto'}}
+                  highlightColor={selectedCategory.color}
+                  ref={boxRef}
+                >
+                  <TextAnnotator
+                    style={{
+                      paddingLeft: '20px',
+                      height: '100%',
+                      wordSpacing: '2px',
+                      paddingTop: '10px',
+                      paddingRight: '20px',
+                      lineHeight: '30px'
+                    }}
+                    content={renderText}
+                    value={formatEntitiesForUIRendering(text)}
+                    onChange={handleAnnotate}
+                    getSpan={(span) => ({
+                      ...span,
+                      ...selectedCategory
+                    })}
+                  />
+                </TextWrapper>
+              )}
+            </>
           )}
+
           {allowEdits && (
             <ButtonBlock>
               {editMode ? (
@@ -311,6 +335,11 @@ const NamedEntityRecognition = memo((props: Props) => {
           options={options}
           onSelect={(category) => {
             setSelectedCategory(category)
+          }}
+          onUnselect={() => {
+            if (isStaff) {
+              setSelectedCategory(false)
+            }
           }}
           selectedCategory={selectedCategory}
         />

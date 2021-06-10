@@ -1,5 +1,7 @@
 import React, {useEffect, useState, useCallback} from 'react'
 import {connect} from 'react-redux'
+import useDocumentTitle from 'client/hooks/useDocumentTitle'
+import useRouter from 'client/hooks/useRouter'
 import Audits from './components/Audits'
 import useNetworker from 'client/hooks/useNetworker'
 import {IUser} from 'client/types/generic'
@@ -18,13 +20,23 @@ const AuditsRoot = (props: Props) => {
   const {user, users, auditFilters, setUserId, setQueueId} = props || {}
   const [audits, setAudits] = useState([])
   const [queues, setQueues] = useState([])
-  const [offset, setOffset] = useState(0)
+
+  const {history} = useRouter() as any
+  const {state} = history.location
+
+  const [offset, setOffset] = useState(state?.offset || 0)
   const [loading, setLoading] = useState<boolean>(false)
   const {queue_id: queueId, worker_id: userId} = auditFilters
   const networker = useNetworker()
   const orgId = user.current_organization_id
   const {tasks, count} = audits || {}
   const PAGE_LIMIT = 50
+
+  useEffect(() => {
+    if (queueId || userId) {
+      setOffset(0)
+    }
+  }, [userId, queueId])
 
   const onNext = useCallback(() => {
     if (offset < Math.abs(count - PAGE_LIMIT)) {
@@ -65,11 +77,13 @@ const AuditsRoot = (props: Props) => {
     fetchAudits()
   }, [queueId, userId, offset, user])
 
-  if (loading) return <LoadingPage />
+  useDocumentTitle(`Audits | Human Lambdas`)
+
+  if (loading || !Array.isArray(tasks)) return <LoadingPage />
 
   return (
     <Audits
-      tasks={tasks || []}
+      tasks={tasks}
       count={count}
       onNext={onNext}
       onBack={onBack}
@@ -81,6 +95,7 @@ const AuditsRoot = (props: Props) => {
       users={users}
       setUserId={setUserId}
       userId={userId}
+      loading={loading}
     />
   )
 }

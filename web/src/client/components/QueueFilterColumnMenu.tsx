@@ -13,6 +13,7 @@ interface Props {
   queue: IQueue
   menuProps: MenuProps
   activeBlockName: string
+  pinnedBlockId: any
   setPinnedBlock: () => void
 }
 
@@ -43,7 +44,7 @@ const LabelText = styled.span({
 })
 
 const QueueFilterColumnMenu = (props: Props) => {
-  const {menuProps, queue, setPinnedBlock, activeBlockName} = props
+  const {menuProps, queue, setPinnedBlock, activeBlockName, pinnedBlockId} = props
 
   if (!queue || !Array.isArray(queue.data)) {
     return null
@@ -59,7 +60,7 @@ const QueueFilterColumnMenu = (props: Props) => {
             return (
               <MenuItem
                 key={id}
-                isActive={activeBlockName === block.name}
+                isActive={activeBlockName === block.name && pinnedBlockId === block.id}
                 label={
                   <Label>
                     <StyledIcon>{BLOCKS.find((b) => b.type === block.type)?.icon}</StyledIcon>

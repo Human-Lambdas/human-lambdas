@@ -1,6 +1,7 @@
 import React, {lazy, Suspense} from 'react'
 import {Switch, Route} from 'react-router-dom'
 import handleChunkError from 'universal/utils/handleChunkError'
+import useDocumentTitle from 'client/hooks/useDocumentTitle'
 
 const Overview = lazy(() =>
   import(/* webpackChunkName: 'OverviewContainer' */ '../Overview/OverviewContainer')
@@ -19,6 +20,8 @@ const Workers = lazy(() =>
 
 const QueuesRoot = (props) => {
   const {queues, setActive, setActiveUsers, queueIds, users, userIds, user} = props
+  useDocumentTitle(`Metrics | Human Lambdas`)
+
   return (
     <Suspense fallback={' '}>
       <Switch>

@@ -18,6 +18,7 @@ import useNetworker from 'client/hooks/useNetworker'
 import dayjs from 'dayjs'
 import StatusTag from 'universal/components/StatusTag'
 import {STATUS_PALETTE} from 'universal/styles/palette'
+import Spinner from 'client/components/Spinner'
 
 const SIDEBAR_WIDTH = 370
 
@@ -30,6 +31,7 @@ interface SidebarProps {
   activity: any[]
   onPost: (comment: string) => void
   onDelete: (deleteId: number) => void
+  isPosting: boolean
   isStaff: boolean
   queue: IQueue
 }
@@ -269,10 +271,10 @@ const Sidebar = (props: SidebarProps) => {
     isAudits,
     users,
     onAssign,
-    orgId,
     assignedTo,
     activity,
     correct,
+    isPosting,
     isStaff,
     queue
   } = props
@@ -285,7 +287,7 @@ const Sidebar = (props: SidebarProps) => {
     isRunning = queue.is_running
   }
 
-  const {assigned_to, status} = task
+  const {status} = task
   const assignedUser = assignedTo
   const user = users.filter((user) => user.id === assignedUser)[0]
   const [comment, setComment] = useState('')
@@ -423,14 +425,14 @@ const Sidebar = (props: SidebarProps) => {
           />
           <ButtonContainer>
             <PrimaryButton
-              disabled={comment.length === 0}
+              disabled={comment.length === 0 || isPosting}
               onClick={() => {
                 onPost(comment)
                 setComment('')
               }}
               type='button'
             >
-              Send
+              {isPosting ? <Spinner /> : <>Send</>}
             </PrimaryButton>
           </ButtonContainer>
         </ActivityInfo>

@@ -271,7 +271,7 @@ const Audits = (props: AuditsProps) => {
           onClick={() =>
             history.push({
               pathname: `/queues/tasks/${taskId}/audit`,
-              state: {isAudits: true}
+              state: {isAudits: true, offset}
             })
           }
         >
