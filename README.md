@@ -34,7 +34,7 @@ mkdir .human_lambdas # create data directory
 
 docker run \
   -p 8000:8000 \
-  -it \   
+  -it \
   --rm \
   -v $(pwd)/.human_lambdas:/.human_lambdas \
   hlambdas/human-lambdas:v1
