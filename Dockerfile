@@ -1,16 +1,8 @@
-FROM python:3
 
-ENV PYTHONUNBUFFERED 1
+FROM python:3.8
 
-RUN mkdir /code
-WORKDIR /code
-COPY pyproject.toml /code/
-COPY poetry.lock /code/
-RUN pip install poetry && poetry config virtualenvs.create false
-RUN poetry install
-
-COPY . /code/
-RUN poetry install
-
+# requires poetry build before docker build
+COPY dist/human_lambdas*whl human-lambdas-0.0.0-py3-none-any.whl
+RUN pip install human-lambdas-0.0.0-py3-none-any.whl
 EXPOSE 8000
-ENTRYPOINT [ "human-lambdas" ]
+ENTRYPOINT "bash"

@@ -27,14 +27,22 @@ It is designed to provide an **all-in-one solution to build, operate and monitor
 
 We are going to run Human Lambdas on a developer device.
 
-Please ensure you have Python 3 installed on a Mac or Linux environment then run the following.
+Please ensure you have Docker installed.
 
 ```sh
-export LDFLAGS='-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib' # for psycopg2 on OS X
-pip install human-lambdas
+mkdir .human_lambdas # create data directory
+
+docker run \
+  -p 8000:8000 \
+  -it \   
+  --rm \
+  -v $(pwd)/.human_lambdas:/.human_lambdas \
+  hlambdas/human-lambdas:v1
 ```
 
-Now initialize a sqlite database in a local `.human_lambdas` directory.
+A shell should eventually start inside the container.
+
+Now initialize a sqlite database in your .human_lambdas dir
 
 ```sh
 human-lambdas initdb
@@ -86,12 +94,7 @@ export POSTGRES_PASSWORD=some_password
 
 docker run \
   -p 8000:8000 \
-  -e "POSTGRES_HOST=$POSTGRES_HOST" \
-  -e "POSTGRES_PORT=$POSTGRES_PORT" \
-  -e "POSTGRES_USER=$POSTGRES_USER" \
-  -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
-  -e "POSTGRES_DB=$POSTGRES_DB" \
-  --entrypoint=bash \
+  -v $(pwd)/.human_lambdas:/.human_lambdas \
   hlambdas/human-lambdas:latest \
   -c 'hl initdb && hl up'
 ```
@@ -102,3 +105,11 @@ This approach lets you use Human Lambdas in stateless environments such as Googl
 
 1. You do not run `initdb` on startup, as it is not thread-safe
 2. You set a single `SECRET_KEY` environment variable so that all Django Invite/Session tokens work
+
+## Directly install Python Package
+
+Requires Python 3.
+
+```sh
+pip install human-lambdas
+```

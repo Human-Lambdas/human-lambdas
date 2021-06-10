@@ -32,5 +32,4 @@ class TemplatesView(ListAPIView):
             text = pathlib.Path("templates.json").read_text()
             return map(lambda t: Template(**t), json.loads(text))
         except Exception:
-            logger.exception("failed to read templates json")
             return []
