@@ -36,7 +36,12 @@ class SendInviteView(APIView):
 
     def get(self, request, *args, **kwargs):
         invited_users = [
-            {"email": invitation.email, "pending": True, "is_admin": invitation.admin}
+            {
+                "email": invitation.email,
+                "pending": True,
+                "is_admin": invitation.admin,
+                "link": invitation.invite_link,
+            }
             for invitation in self.get_queryset()
         ]
         return Response(

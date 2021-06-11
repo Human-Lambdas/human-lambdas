@@ -49,6 +49,7 @@ class TestInvite(APITestCase):
             invited_by=self.user,
             token=self.token,
             expires_at=aware_expiry_date,
+            invite_link="llll",
         )
         existing_invite.save()
 
@@ -173,6 +174,7 @@ class TestInvite(APITestCase):
             invited_by=self.user,
             token=token,
             expires_at=make_aware(datetime.datetime.now() + datetime.timedelta(30)),
+            invite_link="lkjhlkjh",
         )
         new_user_invite.save()
 
