@@ -49,7 +49,7 @@ class SendInviteView(APIView):
         organization = Organization.objects.get(pk=kwargs["org_id"])
         template_data = []
         emails = []
-
+        links = {}
         for email in email_set:
             if is_invalid_email(email):
                 invalid_email_list.append(email)
@@ -94,6 +94,7 @@ class SendInviteView(APIView):
                 + timezone.timedelta(days=settings.INVITATION_EXPIRATION_WINDOW_DAYS),
             ).save()
 
+            links[email] = invite_link
             emails.append(email)
 
         if settings.INVITATION_TEMPLATE is None or settings.ACCOUNT_ASM_GROUPID is None:
@@ -112,6 +113,7 @@ class SendInviteView(APIView):
                 {
                     "status_code": 200,
                     "message": "all emails were successfully added!",
+                    "links": links,
                 },
                 status=200,
             )
@@ -124,6 +126,7 @@ class SendInviteView(APIView):
             {
                 "status_code": 400,
                 "errors": [{"message": response_text}],
+                "links": links,
             },
             status=400,
         )
