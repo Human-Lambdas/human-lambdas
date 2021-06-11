@@ -37,7 +37,7 @@ docker run \
   -it \
   --rm \
   -v $(pwd)/.human_lambdas:/.human_lambdas \
-  hlambdas/human-lambdas:v1
+  hlambdas/human-lambdas:v1.0
 ```
 
 A shell should eventually start inside the container.
@@ -95,7 +95,7 @@ export POSTGRES_PASSWORD=some_password
 docker run \
   -p 8000:8000 \
   -v $(pwd)/.human_lambdas:/.human_lambdas \
-  hlambdas/human-lambdas:latest \
+  hlambdas/human-lambdas:v1.0 \
   -c 'hl initdb && hl up'
 ```
 
