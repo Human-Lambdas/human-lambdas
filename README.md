@@ -91,8 +91,15 @@ export POSTGRES_PORT=5432
 export POSTGRES_USER=hlambda
 export POSTGRES_DB=hlambda
 export POSTGRES_PASSWORD=some_password
-
 docker run \
+  -it \
+  --rm \
+  -e "POSTGRES_HOST=$POSTGRES_HOST" \
+  -e "POSTGRES_PORT=$POSTGRES_PORT" \
+  -e "POSTGRES_USER=$POSTGRES_USER" \
+  -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
+  -e "POSTGRES_DB=$POSTGRES_DB" \
+  --entrypoint=bash \
   -p 8000:8000 \
   -v $(pwd)/.human_lambdas:/.human_lambdas \
   hlambdas/human-lambdas:v1.0 \
