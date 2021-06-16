@@ -175,7 +175,7 @@ const Queues = (props: Props) => {
                 <div>
                   Create your first queue, or read our{' '}
                   <a
-                    href='https://docs.humanlambdas.com/quickstart/creating-a-queue'
+                    href='https://humanlambdas.gitbook.io/quickstart/creating-a-queue'
                     target='_blank'
                     rel='noreferrer'
                   >

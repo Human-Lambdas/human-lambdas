@@ -85,7 +85,7 @@ const AvatarMenu = (props: Props) => {
         <Menu ariaLabel={'Documentation'} {...menuProps}>
           <MenuItem
             label={<Item icon='library_books' label={'Documentation'} />}
-            onClick={() => window.open('https://docs.humanlambdas.com/', '_blank')}
+            onClick={() => window.open('https://humanlambdas.gitbook.io/', '_blank')}
           />
         </Menu>
       </ActionBlock>
