@@ -1,6 +1,0 @@
-.git/
-.github/
-.eslintrc.js
-node_modules/*
-serviceWorker/*
-static/*
