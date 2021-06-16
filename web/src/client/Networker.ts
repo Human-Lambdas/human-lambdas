@@ -129,7 +129,12 @@ class Networker {
     let newAccessToken = false
     let res
 
-    if (accessTokenExpired && !expiredRefreshToken && !url.startsWith('/users/token')) {
+    if (
+      accessTokenExpired &&
+      !expiredRefreshToken &&
+      !url.startsWith('/users/token') &&
+      !url.startsWith('/users/register')
+    ) {
       await axios(`${__APP_URL__}/${API_VERSION}/users/token/refresh`, {
         method: 'POST',
         data: {refresh: this.refreshToken}
@@ -145,7 +150,11 @@ class Networker {
           res = invalidSessionResponse
         })
     } else if (expiredRefreshToken) {
-      if (!url.startsWith('/users/token') && !url.startsWith('/users/register') && !url.startsWith('/users/invitation')) {
+      if (
+        !url.startsWith('/users/token') &&
+        !url.startsWith('/users/register') &&
+        !url.startsWith('/users/invitation')
+      ) {
         handleBadSession(standardError, this.router?.history)
         res = invalidSessionResponse
       }
@@ -158,15 +167,21 @@ class Networker {
       url.startsWith('/users/invitation') ||
       newAccessToken
     ) {
+      let headers = {}
+
+      if (!url.startsWith('/users/register')) {
+        headers = {
+          Authorization: this.accessToken ? `Bearer ${this.accessToken}` : '',
+          'content-type': contentType || 'application/json'
+        }
+      }
+
       res = await axios(`${__APP_URL__}/${API_VERSION}${url}`, {
         method: method || 'GET',
         data,
         params,
         paramsSerializer,
-        headers: {
-          Authorization: this.accessToken ? `Bearer ${this.accessToken}` : '',
-          'content-type': contentType || 'application/json'
-        },
+        headers,
         onUploadProgress,
         cancelToken: source.token,
         responseType

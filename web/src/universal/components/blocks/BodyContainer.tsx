@@ -12,7 +12,8 @@ const BodyContainer = styled.div(({row}) => ({
   paddingTop: '10px',
   display: 'flex',
   height: '100%',
-  flexDirection: row ? 'row' : 'column'
+  flexDirection: row ? 'row' : 'column',
+  zIndex: 11
 }))
 
 export default ({children, row, style}: Props) => (

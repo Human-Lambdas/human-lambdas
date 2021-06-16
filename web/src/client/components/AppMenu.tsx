@@ -149,7 +149,7 @@ const AppMenu = (props: Props) => {
                 <Text>Documentation</Text>
               </Label>
             }
-            onClick={() => window.open('https://docs.humanlambdas.com/', '_blank')}
+            onClick={() => window.open('https://humanlambdas.gitbook.io/', '_blank')}
           />
         </Menu>
       </ActionBlock>
