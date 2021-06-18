@@ -1,5 +1,3 @@
-import os
-
 from django.db.models import Q
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.utils import timezone
@@ -154,7 +152,6 @@ class GetOrganizationView(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         obj = get_object_or_404(self.get_queryset(), id=self.kwargs["org_id"])
-        obj["metrics"] = True if "POSTGRES_DB" in os.environ else False
         return obj
 
     def destroy(self, request, *args, **kwargs):
