@@ -31,6 +31,7 @@ const Queue = (props: IQueueProps) => {
     user: {orgId}
   } = props || {}
   const [queue, setQueue] = useState<IQueue | {}>({})
+  const [isTemplate, setIsTemplate] = useState(false)
   const networker = useNetworker()
   const dispatch = useDispatch()
   const {history} = useRouter() as any
@@ -56,16 +57,10 @@ const Queue = (props: IQueueProps) => {
 
   React.useEffect(() => {
     async function fetchQueue() {
-      if (state?.templateId && orgId) {
-        const {data, errors}: any = await networker?.httpHandler(
-          `/orgs/40/queues/${state.templateId}`,
-          {
-            method: 'GET'
-          }
-        )
-        if (isEmptyArray(errors)) {
-          setQueue(data)
-        }
+      if (state?.templateData && orgId) {
+          setQueue(state.templateData)
+          setIsTemplate(true)
+        
       }
       if (state?.hasClone) {
         setQueue(state.clonedQueue)
@@ -135,7 +130,7 @@ const Queue = (props: IQueueProps) => {
     [orgId]
   )
 
-  return <QueueBuilder onSubmitHandler={onSubmitHandler} orgId={orgId} queue={queue} />
+  return <QueueBuilder onSubmitHandler={onSubmitHandler} orgId={orgId} queue={queue} isTemplate={isTemplate}/>
 }
 
 export default Queue

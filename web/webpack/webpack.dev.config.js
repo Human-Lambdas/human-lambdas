@@ -73,8 +73,12 @@ const plugins = [
   new CopyWebpackPlugin({
     patterns: [
       {
-          from: 'static/favicon.ico', 
-          to: 'favicon.ico'
+        from: 'static/favicon.ico',
+        to: 'favicon.ico'
+      },
+      {
+        from: 'static/queue template icons/',
+        to: './'
       }
     ]
   })
@@ -110,10 +114,7 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        include: [
-          path.join(__dirname, '../src/client'),
-          path.join(__dirname, '../src/universal')
-        ],
+        include: [path.join(__dirname, '../src/client'), path.join(__dirname, '../src/universal')],
         use: [
           babelLoader,
           {
@@ -126,10 +127,7 @@ module.exports = {
       },
       {
         test: /\.worker\.(js|ts)$/,
-        include: [
-          path.join(__dirname, '../src/client'),
-          path.join(__dirname, '../src/universal')
-        ],
+        include: [path.join(__dirname, '../src/client'), path.join(__dirname, '../src/universal')],
         use: [
           babelLoader,
           {

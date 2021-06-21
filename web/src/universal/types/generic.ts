@@ -82,6 +82,7 @@ export interface ITask {
 
 export interface ITemplate {
   id: number
+  data: any
   name: string
   summary: string
   thumbnail: string

@@ -136,7 +136,7 @@ const SecondaryText = styled.div({
 })
 
 const NewQueue = (props: QueueBuilderProps) => {
-  const {queue, onSubmitHandler, orgId} = props
+  const {queue, onSubmitHandler, orgId, isTemplate} = props
   const [isDragging, setIsDragging] = useState<boolean>(false)
   const {id: queueId} = queue || {}
   const {history} = useRouter() as any
@@ -153,7 +153,7 @@ const NewQueue = (props: QueueBuilderProps) => {
   const formRef = useRef()
 
   const initialValues = queueId ? queue : {name: 'Queue Title', data: []}
-  const cancelUrl = queueId ? `/queues/${queueId}` : `/queues`
+  const cancelUrl = queueId && !isTemplate ? `/queues/${queueId}` : `/queues`
 
   const onDrop = useCallback(
     (
@@ -376,6 +376,7 @@ const NewQueue = (props: QueueBuilderProps) => {
         return (
           <FormContainer>
             <BuilderHeader
+              isTemplate={isTemplate}
               queueId={queueId}
               setQueueHasChanges={setQueueHasChanges}
               queueHasChanges={queueHasChanges}

@@ -14,7 +14,6 @@ import ListTitle from 'components/ListPage/ListTitle'
 interface Props {
   userId: string
   usersList: IUser[]
-  resendUserInvite: (email: string) => void
   changeUserRole: (user: IUser, isAdmin: boolean) => void
   handleUsersInvite: (email: string) => void
   deleteUserOrInvite: (user: IUser) => void
@@ -38,7 +37,6 @@ const Users = (props: Props) => {
     usersList,
     userId,
     handleUsersInvite,
-    resendUserInvite,
     changeUserRole,
     deleteUserOrInvite
   } = props
@@ -66,7 +64,6 @@ const Users = (props: Props) => {
       key={user.email}
       userId={userId}
       user={user}
-      resendUserInvite={resendUserInvite}
       changeUserRole={changeUserRole}
       deleteUserOrInvite={deleteUserOrInvite}
     />

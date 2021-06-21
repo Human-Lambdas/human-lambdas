@@ -161,6 +161,15 @@ const Sidebar = (props: Props) => {
   const {menuPortal, togglePortal, originRef, menuProps} = useMenu(MenuPosition.UPPER_LEFT, {
     isDropdown: true
   })
+
+  // Check if metrics are visible
+  let metricsVisible = false
+  organizations.map((org)=>{
+    if(org.id === current_organization_id) {
+      metricsVisible = org.metrics
+    }
+  })
+
   const {modalPortal, togglePortal: toggleModalPortal, closePortal: closeModalPortal} = useModal({})
   return (
     <StyledRoot>
@@ -211,7 +220,7 @@ const Sidebar = (props: Props) => {
                           <AuditsSVG />
                           <Label>Audits</Label>
                         </NavItem>
-                        {!__OSS__ && <NavItem to={`/metrics`} activeClassName={css(activeLinkStyles)}>
+                        {!__OSS__ && metricsVisible && <NavItem to={`/metrics`} activeClassName={css(activeLinkStyles)}>
                           <MetricsIcon />
                           <Label>Metrics</Label>
                         </NavItem>}
