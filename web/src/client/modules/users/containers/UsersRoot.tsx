@@ -50,28 +50,6 @@ const UsersRoot = (props: Props) => {
     fetchUserList()
   }, [user])
 
-  const resendUserInvite = useCallback(
-    async (email: string) => {
-      if (email) {
-        const {errors} = await networker.httpHandler(`/orgs/${orgId}/invite`, {
-          method: 'POST',
-          data: {emails: email}
-        })
-
-        if (errors) {
-          errors.forEach((error) => dispatch(addFailureNotification(error.message)))
-          console.log(`Error resending invite ${JSON.stringify(errors)}`)
-        } else {
-          dispatch(addSuccessNotification('Invite was re-sent succesfully'))
-        }
-      } else {
-        console.error('Error resending user invite')
-        dispatch(addFailureNotification('Error resending invite!'))
-      }
-    },
-    [usersList]
-  )
-
   const changeUserRole = async (user: IUser, isAdmin: boolean) => {
     const {id: userId, name, email} = user
     if (userId) {
@@ -231,7 +209,6 @@ const UsersRoot = (props: Props) => {
       usersList={usersList}
       user={user}
       userId={userId}
-      resendUserInvite={resendUserInvite}
       handleUsersInvite={handleUsersInvite}
       changeUserRole={changeUserRole}
       deleteUserOrInvite={deleteUserOrInvite}

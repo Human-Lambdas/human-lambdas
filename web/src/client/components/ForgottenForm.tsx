@@ -61,9 +61,6 @@ const ForgottenForm = (props: IProps) => {
       } as AxiosRequestConfig
       const response = await networker.httpHandler('/users/forgotten-password', reqBody)
       if (response.errors) {
-        response.errors.forEach((e) => {
-          dispatch(addFailureNotification(e.message))
-        })
         actions.setSubmitting(false)
       } else {
         dispatch(addSuccessNotification(response.data.message))

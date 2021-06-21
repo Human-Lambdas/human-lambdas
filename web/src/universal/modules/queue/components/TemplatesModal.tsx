@@ -133,6 +133,7 @@ const TemplatesModal = (props: TemplatesModalProps) => {
   const {history} = useRouter() as any
   const emptyTemplate = {
     id: null,
+    data: {},
     name: 'Blank',
     summary: 'Start with an empty canvas and build exactly what you need.',
     thumbnail: null
@@ -140,14 +141,22 @@ const TemplatesModal = (props: TemplatesModalProps) => {
 
   const allTemplates = [emptyTemplate, ...templates]
 
-  const handleClick = useCallback((id, name) => {
+  const handleClick = useCallback((id, data, name) => {
     segmentTrack(`2 - Queue Creation from Template - [QUEUE FUNNEL]`, {
       templateName: name
     })
-    if (!id) return history.push(`/queues/new`)
+    if (!data) return history.push(`/queues/new`)
+    
+    // Set current template
+    let templateData = emptyTemplate
+    templates.map((template) => {
+      if(template.id === id){
+        templateData = template
+      }
+    })
     return history.push({
       pathname: '/queues/new',
-      state: {templateId: id}
+      state: {templateData}
     })
   }, [])
 
@@ -161,9 +170,9 @@ const TemplatesModal = (props: TemplatesModalProps) => {
       </ModalTitle>
       <ModalWrapper>
         <TemplatesArea>
-          {allTemplates.map(({id, name, summary, thumbnail}) => {
+          {allTemplates.map(({id, data, name, summary, thumbnail}) => {
             return (
-              <ItemWrapper key={id} onClick={() => handleClick(id, name)}>
+              <ItemWrapper key={id} onClick={() => handleClick(id, data, name)}>
                 <TemplateItem>
                   <ThumbnailWrapper>
                     {thumbnail ? <StyledThumbnail src={thumbnail} /> : <EmptyThumbnail />}

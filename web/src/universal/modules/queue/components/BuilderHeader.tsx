@@ -36,7 +36,8 @@ const BuilderHeader = (props: BuilderHeaderProps) => {
     error,
     setQueueHasChanges,
     queueHasChanges,
-    toggleConfirmation
+    toggleConfirmation,
+    isTemplate
   } = props
   const {history} = useRouter() as any
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -44,7 +45,7 @@ const BuilderHeader = (props: BuilderHeaderProps) => {
       e.target.blur()
     }
   }
-  const cancelUrl = queueId ? `/queues/${queueId}` : `/queues`
+  const cancelUrl = queueId && !isTemplate ? `/queues/${queueId}` : `/queues`
   return (
     <AppHeader
       leftBarItems={

@@ -7,6 +7,7 @@ import LoadingPage from 'client/components/LoadingPage'
 import {IUserReq} from 'universal/types/generic'
 import {workfllowActions} from 'client/redux/queuesReducers'
 import {usersActions} from 'client/redux/usersReducer'
+import queueTemplates from 'client/utils/queueTemplates'
 
 interface Props {
   user: IUserReq
@@ -20,9 +21,6 @@ const QueuesContainer = (props: Props) => {
   const {current_organization_id: orgId} = user
   const [queues, setQueues] = useState([])
   const [loading, setLoading] = useState(false)
-
-  const [templates, setTemplates] = useState([])
-  const [templatesLoading, setTemplatesLoading] = useState(false)
   const [usersLoading, setUsersLoading] = useState(false)
   const [error, setError] = useState('')
   const networker = useNetworker()
@@ -48,24 +46,6 @@ const QueuesContainer = (props: Props) => {
     setLoading(false)
   }
 
-  async function fetchTemplates() {
-    setTemplatesLoading(true)
-    const payload = {
-      method: 'GET'
-    }
-    const res = await networker?.httpHandler(`/templates`, payload)
-    const {errors, data} = res || {}
-    if (errors) {
-      setError(errors)
-      console.error('Error fetching Templates!', JSON.stringify(errors))
-    } else {
-      if (data) {
-        setTemplates(data)
-      }
-    }
-    setTemplatesLoading(false)
-  }
-
   async function fetchUsers() {
     setUsersLoading(true)
     const payload = {
@@ -89,10 +69,6 @@ const QueuesContainer = (props: Props) => {
   }, [orgId])
 
   useEffect(() => {
-    fetchTemplates()
-  }, [orgId])
-
-  useEffect(() => {
     fetchUsers()
   }, [orgId])
 
@@ -104,8 +80,8 @@ const QueuesContainer = (props: Props) => {
     renderComp = (
       <Queues
         queues={queues}
-        templates={templates}
-        loading={loading || templatesLoading || usersLoading}
+        templates={queueTemplates}
+        loading={loading || usersLoading}
         error={error}
         user={props.user}
       />

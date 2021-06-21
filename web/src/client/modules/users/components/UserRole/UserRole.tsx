@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import styled from '@emotion/styled'
 import {IUser} from 'types/generic'
 import {PALETTE} from 'styles/palette'
@@ -13,11 +13,11 @@ import ConfirmationModal from 'components/ConfirmationModal'
 import PlainButton, {PlainButtonProps} from 'components/PlainButton'
 import MenuButton from 'components/MenuButton'
 import textOverflow from 'universal/styles/helpers/textOverflow'
+import {CopyToClipboard} from 'react-copy-to-clipboard'
 
 interface Props {
   user: IUser
   userId: string
-  resendUserInvite: (email: string) => void
   changeUserRole: (user: IUser, isAdmin: boolean) => void
   deleteUserOrInvite: (user: IUser) => void
 }
@@ -71,6 +71,14 @@ const ListItem = styled.div<{
   }
 }))
 
+const StyledCopyButton = styled.div`
+  cursor: pointer;
+  font-size: 9pt;
+  margin: 0 25px;
+  color: #6648ee;
+  font-weight: 500;
+`
+
 const Row = styled.div({
   display: 'flex',
   alignItems: 'center'
@@ -97,7 +105,8 @@ const UserRole = (props: Props) => {
     isDropdown: true
   })
   const {togglePortal: toggleModalPortal, closePortal: closeModalPortal, modalPortal} = useModal()
-  const {user, userId, changeUserRole, resendUserInvite, deleteUserOrInvite} = props
+  const {user, userId, changeUserRole, deleteUserOrInvite} = props
+  const [copyURLButtonText, setCopyURLButtonText] = useState('Copy Invite URL')
 
   const message = (
     <StyledMsg>
@@ -139,13 +148,14 @@ const UserRole = (props: Props) => {
         <ListItem align={'center'}>
           <Row>
             {user.pending && !__OSS__ && (
-              <Actions
-                type='button'
-                color={PALETTE.PRIMARY_GREEN_DARK}
-                onClick={() => resendUserInvite(user.email)}
+              <CopyToClipboard
+                text={user.link}
+                onCopy={() => {
+                  setCopyURLButtonText('Copied')
+                }}
               >
-                Resend
-              </Actions>
+                <StyledCopyButton>{copyURLButtonText}</StyledCopyButton>
+              </CopyToClipboard>
             )}
           </Row>
         </ListItem>

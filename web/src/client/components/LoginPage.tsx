@@ -57,34 +57,6 @@ export const LinkButton = styled(PlainButton)({
   }
 })
 
-const QuotaInfoWrapper = styled.div({
-  display: 'grid',
-  alignItems: 'top',
-  marginTop: 10,
-  gridGap: 10,
-  backgroundColor: '#fcfbff',
-  padding: 20,
-  borderRadius: 4
-})
-
-const QuotaInfo = styled.span({
-  fontSize: 12,
-  color: '#846cf1',
-  fontWeight: 400
-})
-
-const QuotaInfoBold = styled.a({
-  fontSize: 12,
-  color: '#846cf1',
-  fontWeight: 800
-})
-
-const ContentBlock = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  marginBottom: 10
-})
-
 export const FieldBlock = styled.div({
   marginBottom: 15
 })
@@ -93,7 +65,6 @@ const LoginPage = (props: Props) => {
   useDocumentTitle('Login | Human Lambdas')
   const {history} = useRouter() as any
   const networker = useNetworker()
-  const {dispatch} = props
   const initialEmailValue = props.email ? props.email : ''
 
   useEffect(() => {
@@ -155,8 +126,6 @@ const LoginPage = (props: Props) => {
             history.push(`/queues`)
           }
         }
-      } else {
-        errors.forEach((error) => dispatch(addFailureNotification(error.message)))
       }
     },
     [networker]
@@ -173,21 +142,6 @@ const LoginPage = (props: Props) => {
       >
         {({touched, isSubmitting, isValid, values, errors, handleBlur, handleChange, dirty}) => (
           <LoginContainer tagLine={'Log in to Human Lambdas'}>
-            <ContentBlock>
-              <QuotaInfoWrapper>
-                <QuotaInfo>
-                  Please beware that Human Lambdas is shutting down and this service will stop
-                  operating soon. Read{' '}
-                  <QuotaInfoBold
-                    href='https://www.humanlambdas.com/post/closing-down'
-                    target='_blank'
-                  >
-                    full announcement
-                  </QuotaInfoBold>{' '}
-                  for more details.
-                </QuotaInfo>
-              </QuotaInfoWrapper>
-            </ContentBlock>
             {!__OSS__ && <GoogleAuthButton label='Log in with Google' />}
             <FieldBlock>
               <InputField

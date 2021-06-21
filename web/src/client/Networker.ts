@@ -2,8 +2,6 @@ import jwtDecode from 'jwt-decode'
 import {API_VERSION, APP_TOKEN_KEY, APP_REFRESH_TOKEN_KEY} from '../client/utils/constants'
 import axios, {AxiosRequestConfig} from 'axios'
 import {RouterProps} from 'react-router'
-import {store} from '../client/client'
-import {addFailureNotification} from '../client/modules/notificationSystem/ducks/notificationSystemDuck'
 import handleBadSession from '../client/hooks/handleBadSession'
 
 const {CancelToken} = axios
@@ -79,13 +77,6 @@ class Networker {
     const {errors = []} = response
     if (Array.isArray(errors) && errors.length > 0) {
       console.error(JSON.stringify(errors))
-    }
-  }
-
-  notifyErrors = (response) => {
-    const {errors = []} = response
-    if (Array.isArray(errors) && errors.length > 0) {
-      errors.forEach((error) => store.dispatch(addFailureNotification(error.message)))
     }
   }
 
@@ -252,7 +243,6 @@ class Networker {
         })
     }
     this.logErrors(res)
-    this.notifyErrors(res)
     return res
   }
 }
