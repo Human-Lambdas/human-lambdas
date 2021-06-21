@@ -220,7 +220,7 @@ const Sidebar = (props: Props) => {
                           <AuditsSVG />
                           <Label>Audits</Label>
                         </NavItem>
-                        {!__OSS__ && metricsVisible && <NavItem to={`/metrics`} activeClassName={css(activeLinkStyles)}>
+                        {metricsVisible && <NavItem to={`/metrics`} activeClassName={css(activeLinkStyles)}>
                           <MetricsIcon />
                           <Label>Metrics</Label>
                         </NavItem>}
