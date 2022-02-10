@@ -12,7 +12,7 @@ hl = 'human_lambdas.hl_cli:cli'
 
 [tool.poetry.dependencies]
 python = "^3.8"
-Django = "2.2.13"
+Django = "2.2.27"
 djangorestframework = "3.12.2"
 PyJWT = "1.7.1"
 djangorestframework-simplejwt = "4.3.0"
